@@ -38,8 +38,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError || !order) {
+      console.error("Order insert error:", orderError);
       return NextResponse.json(
-        { error: "Errore creazione ordine" },
+        { error: "Errore creazione ordine", detail: orderError?.message, code: orderError?.code },
         { status: 500 }
       );
     }
