@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email/client";
+import { OrderCancelledEmail } from "@/lib/email/templates/order-cancelled";
+import { PRODUCTS } from "@/lib/constants/packs";
+import React from "react";
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -17,6 +21,14 @@ export async function POST(request: NextRequest) {
   if (!orderId) return NextResponse.json({ error: "orderId mancante" }, { status: 400 });
 
   const admin = createAdminClient();
+
+  // Fetch order before cancelling (need customer info for email)
+  const { data: order } = await admin
+    .from("orders")
+    .select("*, profiles(*)")
+    .eq("id", orderId)
+    .single();
+
   const { error } = await admin
     .from("orders")
     .update({ status: "cancelled", updated_at: new Date().toISOString() })
@@ -29,6 +41,32 @@ export async function POST(request: NextRequest) {
     .from("tickets")
     .update({ is_used: true })
     .eq("order_id", orderId);
+
+  // Send cancellation email
+  if (order) {
+    const customerEmail =
+      (order.profiles as { email?: string } | null)?.email || order.billing_email;
+    if (customerEmail) {
+      const appUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://academylacertosus.vercel.app";
+      const packName =
+        PRODUCTS.find((p) => p.slug === order.pack_id)?.name ||
+        (order.pack_id as string)?.toUpperCase() ||
+        "Prodotto";
+      sendEmail({
+        to: customerEmail,
+        subject: `Ordine annullato — ${packName}`,
+        react: React.createElement(OrderCancelledEmail, {
+          userName:
+            (order.profiles as { full_name?: string } | null)?.full_name ||
+            order.billing_name ||
+            "Cliente",
+          packName,
+          orderId: order.id,
+          appUrl,
+        }),
+      }).catch(console.error);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

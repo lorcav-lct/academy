@@ -5,6 +5,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { encryptPayload } from "@/lib/qr/encrypt";
 import { generateQRCodeBuffer } from "@/lib/qr/generate";
 import { PRODUCTS } from "@/lib/constants/packs";
+import { sendEmail } from "@/lib/email/client";
+import { OrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
+import React from "react";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -111,6 +114,34 @@ export async function POST(request: NextRequest) {
         qr_payload: encrypted,
         qr_image_url: publicUrl,
       });
+    }
+
+    // Send order confirmation email
+    const customerEmail = order.billing_email || session.customer_details?.email;
+    if (customerEmail) {
+      const appUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://academylacertosus.vercel.app";
+      const productName =
+        PRODUCTS.find((p) => p.slug === productSlug)?.name || productSlug || "Pack";
+      const total = new Intl.NumberFormat("it-IT", {
+        style: "currency",
+        currency: "EUR",
+      }).format((session.amount_total || 0) / 100);
+
+      sendEmail({
+        to: customerEmail,
+        subject: `Conferma ordine — ${productName}`,
+        react: React.createElement(OrderConfirmationEmail, {
+          userName:
+            (order.profiles as { full_name?: string } | null)?.full_name ||
+            order.billing_name ||
+            "Cliente",
+          packName: productName,
+          orderTotal: total,
+          orderId: order.id,
+          ticketCount: slugsToTicket.length,
+          appUrl,
+        }),
+      }).catch(console.error);
     }
 
     // Trigger Make.com webhook (async, don't await)
