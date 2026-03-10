@@ -17,7 +17,7 @@ interface Order {
   status: string;
   amount_cents: number;
   created_at: string;
-  packs: { name: string } | null;
+  pack_id: string | null;
 }
 
 export default function AccountPage() {
@@ -41,7 +41,7 @@ export default function AccountPage() {
 
       const { data: ordersData } = await supabase
         .from("orders")
-        .select("id, status, amount_cents, created_at, packs(name)")
+        .select("id, status, amount_cents, created_at, pack_id")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -160,7 +160,7 @@ export default function AccountPage() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">
-                        {order.packs?.name || "Pack"}
+                        {order.pack_id?.toUpperCase() || "Prodotto"}
                       </span>
                       <span className={`text-xs font-bold ${statusColors[order.status]}`}>
                         {statusLabels[order.status]}
