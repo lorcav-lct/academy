@@ -6,6 +6,16 @@ import { createClient } from "@/lib/supabase/client";
 import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 
+async function resumeCheckout(orderId: string): Promise<void> {
+  const res = await fetch("/api/checkout/resume", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId }),
+  });
+  const data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
+
 interface Order {
   id: string;
   status: string;
@@ -38,6 +48,7 @@ export default function AccountOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ticketMap, setTicketMap] = useState<Record<string, TicketRef>>({});
   const [loading, setLoading] = useState(true);
+  const [resuming, setResuming] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -151,14 +162,19 @@ export default function AccountOrdersPage() {
 
                     <div className="flex items-center gap-3">
                       {order.status === "pending" && order.pack_id && (
-                        <Link
-                          href={`/checkout?pack=${order.pack_id}`}
-                          className="border border-academy-orange/30 bg-academy-orange/10 px-4 py-2 text-xs font-bold text-academy-orange transition-all hover:bg-academy-orange/20"
+                        <button
+                          disabled={resuming === order.id}
+                          onClick={async () => {
+                            setResuming(order.id);
+                            await resumeCheckout(order.id);
+                            setResuming(null);
+                          }}
+                          className="border border-academy-orange/30 bg-academy-orange/10 px-4 py-2 text-xs font-bold text-academy-orange transition-all hover:bg-academy-orange/20 disabled:opacity-50"
                         >
-                          Riprendi Pagamento
-                        </Link>
+                          {resuming === order.id ? "..." : "Riprendi Pagamento"}
+                        </button>
                       )}
-                      {ticket && (
+                      {ticket && order.status === "paid" && (
                         <Link
                           href="/account/tickets"
                           className={`border px-4 py-2 text-xs font-bold transition-all ${

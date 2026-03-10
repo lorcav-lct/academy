@@ -31,6 +31,28 @@ export default function AccountPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ticketMap, setTicketMap] = useState<Record<string, TicketRef>>({});
   const [loading, setLoading] = useState(true);
+  const [resuming, setResuming] = useState<string | null>(null);
+
+  // Edit profile state
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
+  const [emailMsg, setEmailMsg] = useState("");
+
+  async function handleResume(orderId: string) {
+    setResuming(orderId);
+    const res = await fetch("/api/checkout/resume", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    setResuming(null);
+  }
 
   useEffect(() => {
     async function load() {
@@ -58,15 +80,16 @@ export default function AccountPage() {
             .eq("user_id", user.id),
         ]);
 
-      if (profileData) {
-        setProfile(profileData);
-      } else {
-        setProfile({
-          full_name: (user.user_metadata?.full_name as string) || "",
-          email: user.email || "",
-          phone: (user.user_metadata?.phone as string) || "",
-        });
-      }
+      const p: Profile = profileData ?? {
+        full_name: (user.user_metadata?.full_name as string) || "",
+        email: user.email || "",
+        phone: (user.user_metadata?.phone as string) || "",
+      };
+      setProfile(p);
+      setEditName(p.full_name);
+      setEditPhone(p.phone || "");
+      setEditEmail(p.email || "");
+
       if (ordersData) setOrders(ordersData as unknown as Order[]);
       if (ticketsData) {
         const map: Record<string, TicketRef> = {};
@@ -79,6 +102,37 @@ export default function AccountPage() {
     }
     load();
   }, []);
+
+  async function handleSaveProfile() {
+    setSaving(true);
+    setSaveMsg("");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from("profiles")
+      .update({ full_name: editName.trim(), phone: editPhone.trim() })
+      .eq("id", user.id);
+
+    setProfile((p) => p ? { ...p, full_name: editName.trim(), phone: editPhone.trim() } : p);
+    setSaveMsg("Salvato.");
+    setSaving(false);
+    setEditing(false);
+    setTimeout(() => setSaveMsg(""), 3000);
+  }
+
+  async function handleEmailChange() {
+    if (!editEmail.trim() || editEmail === profile?.email) return;
+    setEmailMsg("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ email: editEmail.trim() });
+    if (error) {
+      setEmailMsg("Errore: " + error.message);
+    } else {
+      setEmailMsg("Controlla la tua email per confermare il cambio indirizzo.");
+    }
+  }
 
   if (loading) {
     return (
@@ -105,7 +159,7 @@ export default function AccountPage() {
   };
 
   return (
-    <section className="min-h-screen pt-32">
+    <section className="min-h-screen pt-32 pb-16">
       <SectionContainer>
         <div className="mb-12">
           <h1 className="mb-2 text-3xl font-black">
@@ -119,25 +173,100 @@ export default function AccountPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Profile card */}
           <div className="card-squared p-8">
-            <h2 className="mb-4 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
-              Profilo
-            </h2>
-            <div className="space-y-3">
-              <div>
-                <span className="text-xs text-academy-gray-500">Nome</span>
-                <p className="font-semibold">{profile?.full_name}</p>
-              </div>
-              <div>
-                <span className="text-xs text-academy-gray-500">Email</span>
-                <p className="font-semibold">{profile?.email}</p>
-              </div>
-              {profile?.phone && (
-                <div>
-                  <span className="text-xs text-academy-gray-500">Telefono</span>
-                  <p className="font-semibold">{profile.phone}</p>
-                </div>
-              )}
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
+                Profilo
+              </h2>
+              <button
+                onClick={() => { setEditing((v) => !v); setSaveMsg(""); setEmailMsg(""); }}
+                className="text-xs font-semibold text-academy-gray-400 hover:text-academy-orange transition-colors"
+              >
+                {editing ? "Annulla" : "Modifica"}
+              </button>
             </div>
+
+            {!editing ? (
+              <div className="space-y-3">
+                <div>
+                  <span className="text-xs text-academy-gray-500">Nome</span>
+                  <p className="font-semibold">{profile?.full_name}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-academy-gray-500">Email</span>
+                  <p className="font-semibold">{profile?.email}</p>
+                </div>
+                {profile?.phone && (
+                  <div>
+                    <span className="text-xs text-academy-gray-500">Telefono</span>
+                    <p className="font-semibold">{profile.phone}</p>
+                  </div>
+                )}
+                {saveMsg && (
+                  <p className="text-xs text-green-400">{saveMsg}</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Name */}
+                <div>
+                  <label className="mb-1 block text-xs text-academy-gray-500">Nome</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full border border-academy-orange/20 bg-academy-navy/50 px-3 py-2 text-sm text-academy-gray-100 outline-none focus:border-academy-orange/50"
+                  />
+                </div>
+                {/* Phone */}
+                <div>
+                  <label className="mb-1 block text-xs text-academy-gray-500">Telefono</label>
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    className="w-full border border-academy-orange/20 bg-academy-navy/50 px-3 py-2 text-sm text-academy-gray-100 outline-none focus:border-academy-orange/50"
+                    placeholder="+39 333 1234567"
+                  />
+                </div>
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={saving}
+                  className="w-full bg-academy-orange py-2 text-xs font-bold text-academy-dark transition-all hover:brightness-110 disabled:opacity-50"
+                >
+                  {saving ? "Salvataggio..." : "Salva"}
+                </button>
+
+                {/* Email change — separate flow */}
+                <div className="border-t border-white/5 pt-4">
+                  <label className="mb-1 block text-xs text-academy-gray-500">
+                    Nuova Email
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      className="min-w-0 flex-1 border border-academy-orange/20 bg-academy-navy/50 px-3 py-2 text-sm text-academy-gray-100 outline-none focus:border-academy-orange/50"
+                      placeholder={profile?.email}
+                    />
+                    <button
+                      onClick={handleEmailChange}
+                      className="shrink-0 border border-academy-orange/30 px-3 py-2 text-xs font-bold text-academy-orange hover:bg-academy-orange/10"
+                    >
+                      Cambia
+                    </button>
+                  </div>
+                  <p className="mt-1 text-[10px] text-academy-gray-500">
+                    Riceverai una conferma via email.
+                  </p>
+                  {emailMsg && (
+                    <p className={`mt-1 text-xs ${emailMsg.startsWith("Errore") ? "text-red-400" : "text-green-400"}`}>
+                      {emailMsg}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick links */}
@@ -193,12 +322,13 @@ export default function AccountPage() {
                         </p>
                         <div className="mt-2 flex gap-2">
                           {order.status === "pending" && order.pack_id && (
-                            <Link
-                              href={`/checkout?pack=${order.pack_id}`}
-                              className="text-[10px] font-bold tracking-wider text-academy-orange uppercase hover:underline"
+                            <button
+                              disabled={resuming === order.id}
+                              onClick={() => handleResume(order.id)}
+                              className="text-[10px] font-bold tracking-wider text-academy-orange uppercase hover:underline disabled:opacity-50"
                             >
-                              Riprendi Pagamento →
-                            </Link>
+                              {resuming === order.id ? "..." : "Riprendi Pagamento →"}
+                            </button>
                           )}
                           {ticket && order.status === "paid" && (
                             <Link

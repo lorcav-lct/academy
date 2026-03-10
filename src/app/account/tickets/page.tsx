@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
+import QRCode from "qrcode";
 
 interface Ticket {
   id: string;
-  qr_image_url: string;
   is_used: boolean;
   course_id: string | null;
   orders: { status: string } | null;
@@ -15,6 +15,7 @@ interface Ticket {
 
 export default function TicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,11 +28,27 @@ export default function TicketsPage() {
 
       const { data } = await supabase
         .from("tickets")
-        .select("id, qr_image_url, is_used, course_id, orders(status)")
+        .select("id, is_used, course_id, orders(status)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (data) setTickets(data as unknown as Ticket[]);
+      if (data) {
+        const list = data as unknown as Ticket[];
+        setTickets(list);
+
+        // Generate QR codes client-side from ticket UUID
+        const map: Record<string, string> = {};
+        await Promise.all(
+          list.map(async (t) => {
+            map[t.id] = await QRCode.toDataURL(t.id, {
+              width: 200,
+              margin: 1,
+              color: { dark: "#000000", light: "#ffffff" },
+            });
+          })
+        );
+        setQrMap(map);
+      }
       setLoading(false);
     }
     load();
@@ -47,6 +64,9 @@ export default function TicketsPage() {
     );
   }
 
+  // Only show tickets from paid orders
+  const validTickets = tickets.filter((t) => t.orders?.status === "paid");
+
   return (
     <section className="min-h-screen pt-32">
       <SectionContainer>
@@ -59,7 +79,7 @@ export default function TicketsPage() {
           </p>
         </div>
 
-        {tickets.length === 0 ? (
+        {validTickets.length === 0 ? (
           <div className="card-squared p-12 text-center">
             <p className="mb-2 text-lg font-semibold text-academy-gray-300">
               Nessun ticket ancora
@@ -70,7 +90,7 @@ export default function TicketsPage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {tickets.map((ticket) => (
+            {validTickets.map((ticket) => (
               <div
                 key={ticket.id}
                 className={`card-squared overflow-hidden transition-all ${
@@ -91,18 +111,18 @@ export default function TicketsPage() {
                   </span>
                 </div>
 
-                {/* QR Code */}
-                <div className="flex items-center justify-center bg-academy-darker/50 p-8">
-                  {ticket.qr_image_url ? (
+                {/* QR Code — generato lato client dall'UUID del ticket */}
+                <div className="flex items-center justify-center bg-white p-6">
+                  {qrMap[ticket.id] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={ticket.qr_image_url}
+                      src={qrMap[ticket.id]}
                       alt={`QR ${ticket.course_id}`}
                       className="h-auto w-48"
                     />
                   ) : (
-                    <div className="flex h-48 w-48 items-center justify-center bg-academy-navy/50 text-sm text-academy-gray-500">
-                      QR Code
+                    <div className="flex h-48 w-48 items-center justify-center bg-gray-100 text-sm text-gray-400">
+                      ...
                     </div>
                   )}
                 </div>
