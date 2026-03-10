@@ -5,84 +5,69 @@ import { useRef } from "react";
 import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
-import { PACKS } from "@/lib/constants/packs";
+import { PRODUCTS, type AcademyProduct } from "@/lib/constants/packs";
 import { formatPrice } from "@/lib/utils";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
-const featureMatrix = [
-  { label: "Blocco CORPUS", key: "corpus" },
-  { label: "Blocco VIS", key: "vis" },
-  { label: "Blocco VICTOR", key: "victor" },
-  { label: "Sessioni FIPE", key: "fipe" },
-  { label: "Certificazione FipexLacertosus", key: "cert" },
-  { label: "Workshop inclusi", key: "workshops" },
-  { label: "Alloggio", key: "accommodation" },
-  { label: "Trasporti", key: "transport" },
-];
+const TYPE_LABEL: Record<AcademyProduct["type"], string> = {
+  course: "Blocco Formativo",
+  certification: "Certificazione",
+  workshop: "Master",
+};
 
-function getFeatureValue(packSlug: string, featureKey: string): string | boolean {
-  const pack = PACKS.find((p) => p.slug === packSlug)!;
-  switch (featureKey) {
-    case "corpus":
-    case "vis":
-      return true;
-    case "victor":
-      return pack.includesBlocks.includes("VICTOR");
-    case "fipe":
-      return pack.includesFipe;
-    case "cert":
-      return pack.includesCertification;
-    case "workshops":
-      return `${pack.workshopCount} a scelta`;
-    case "accommodation":
-      return pack.includesAccommodation;
-    case "transport":
-      return pack.includesTransport;
-    default:
-      return false;
-  }
-}
+const TYPE_COLOR: Record<AcademyProduct["type"], string> = {
+  course: "#F09226",
+  certification: "#D4AF37",
+  workshop: "#7B8FA1",
+};
 
-function PackCard({ pack, index }: { pack: typeof PACKS[0]; index: number }) {
+function ProductCard({ product, index }: { product: AcademyProduct; index: number }) {
+  const accentColor = TYPE_COLOR[product.type];
+
   return (
     <motion.div
       variants={fadeUp}
       custom={index}
       className={`relative flex flex-col overflow-hidden ${
-        pack.highlighted ? "glow-orange-strong" : ""
+        product.highlighted ? "glow-orange-strong" : ""
       }`}
     >
-      {pack.highlighted && (
+      {product.highlighted && (
         <div className="bg-academy-orange py-1.5 text-center text-xs font-bold tracking-[0.2em] text-academy-dark uppercase">
-          Piu Popolare
+          Consigliato
         </div>
       )}
 
       <div
         className={`flex flex-1 flex-col p-8 ${
-          pack.highlighted
+          product.highlighted
             ? "border-2 border-academy-orange bg-academy-navy/60"
             : "card-squared"
         }`}
       >
-        {/* Pack name with colored accent */}
+        {/* Type badge */}
         <div className="mb-4">
           <div
-            className="mb-3 inline-block h-1 w-12"
-            style={{
-              background: pack.tier === "oro-plus"
-                ? "linear-gradient(90deg, #D4AF37, #F09226)"
-                : pack.color,
-            }}
+            className="mb-3 h-0.5 w-10"
+            style={{ background: accentColor }}
           />
-          <h3 className="text-2xl font-black tracking-tight">{pack.name}</h3>
+          <span
+            className="text-[10px] font-bold tracking-[0.25em] uppercase"
+            style={{ color: accentColor }}
+          >
+            {TYPE_LABEL[product.type]}
+          </span>
         </div>
 
+        {/* Name + subtitle */}
+        <h3 className="mb-1 text-2xl font-black tracking-tight">{product.name}</h3>
+        <p className="mb-4 text-sm text-academy-gray-500">{product.subtitle}</p>
+
         {/* Price */}
-        <div className="mb-4">
-          {pack.priceCents > 0 ? (
+        <div className="mb-6">
+          {product.priceCents > 0 ? (
             <span className="text-3xl font-black text-academy-orange">
-              {formatPrice(pack.priceCents)}
+              {formatPrice(product.priceCents)}
             </span>
           ) : (
             <span className="text-lg font-bold text-academy-gray-400">
@@ -91,15 +76,10 @@ function PackCard({ pack, index }: { pack: typeof PACKS[0]; index: number }) {
           )}
         </div>
 
-        {/* Description */}
-        <p className="mb-6 text-sm leading-relaxed text-academy-gray-400">
-          {pack.description}
-        </p>
-
-        {/* Features */}
+        {/* Includes */}
         <ul className="mb-8 flex-1 space-y-3">
-          {pack.features.map((feature) => (
-            <li key={feature} className="flex items-start gap-2.5 text-sm">
+          {product.includes.map((item) => (
+            <li key={item} className="flex items-start gap-2.5 text-sm">
               <svg
                 viewBox="0 0 16 16"
                 fill="none"
@@ -112,18 +92,19 @@ function PackCard({ pack, index }: { pack: typeof PACKS[0]; index: number }) {
                   strokeLinecap="square"
                 />
               </svg>
-              <span className="text-academy-gray-300">{feature}</span>
+              <span className="text-academy-gray-300">{item}</span>
             </li>
           ))}
         </ul>
 
         {/* CTA */}
         <Button
-          href={`/checkout?pack=${pack.slug}`}
-          variant={pack.highlighted ? "primary" : "secondary"}
+          href={`/checkout?pack=${product.slug}`}
+          variant={product.highlighted ? "primary" : "secondary"}
           className="w-full"
+          disabled={product.priceCents === 0}
         >
-          Scegli {pack.name}
+          {product.priceCents === 0 ? "Prossimamente" : `Acquista ${product.name}`}
         </Button>
       </div>
     </motion.div>
@@ -133,6 +114,9 @@ function PackCard({ pack, index }: { pack: typeof PACKS[0]; index: number }) {
 export function PackComparison() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const courses = PRODUCTS.filter((p) => p.type === "course");
+  const certifications = PRODUCTS.filter((p) => p.type === "certification");
 
   return (
     <>
@@ -151,106 +135,75 @@ export function PackComparison() {
               variants={fadeUp}
               className="mb-4 inline-block text-xs font-semibold tracking-[0.3em] text-academy-orange uppercase"
             >
-              Modi di Partecipazione
+              Formazione Modulare
             </motion.span>
             <motion.h1
               variants={fadeUp}
               className="mb-4 text-4xl font-black tracking-tight sm:text-6xl"
             >
-              Scegli il Tuo <GradientText>Pack</GradientText>
+              Costruisci il Tuo <GradientText>Percorso</GradientText>
             </motion.h1>
             <motion.p
               variants={fadeUp}
               className="mx-auto max-w-2xl text-lg text-academy-gray-400"
             >
-              Quattro formule flessibili per personalizzare la tua esperienza in base alle tue necessita.
+              Ogni blocco si acquista singolarmente. Segui il percorso completo o scegli il modulo che ti serve.
             </motion.p>
           </motion.div>
         </SectionContainer>
       </section>
 
-      {/* Pack cards */}
+      {/* Blocchi formativi */}
       <SectionContainer>
+        <div className="mb-10">
+          <span className="text-xs font-bold tracking-[0.3em] text-academy-orange uppercase">
+            I Tre Blocchi
+          </span>
+          <h2 className="mt-2 text-2xl font-black">Percorso Formativo</h2>
+        </div>
         <motion.div
           ref={ref}
           variants={staggerContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
-          className="grid gap-6 md:grid-cols-2 xl:grid-cols-4"
+          className="grid gap-6 md:grid-cols-3"
         >
-          {PACKS.map((pack, i) => (
-            <PackCard key={pack.slug} pack={pack} index={i} />
+          {courses.map((product, i) => (
+            <ProductCard key={product.slug} product={product} index={i} />
           ))}
         </motion.div>
       </SectionContainer>
 
-      {/* Feature comparison table */}
-      <SectionContainer withReflection>
-        <div className="mb-12 text-center">
-          <h2 className="text-2xl font-black">Confronto Dettagliato</h2>
-        </div>
+      {/* Certificazione */}
+      {certifications.length > 0 && (
+        <SectionContainer withReflection>
+          <div className="mb-10">
+            <span className="text-xs font-bold tracking-[0.3em] text-academy-orange uppercase">
+              Riconoscimento Professionale
+            </span>
+            <h2 className="mt-2 text-2xl font-black">Certificazione</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {certifications.map((product, i) => (
+              <ProductCard key={product.slug} product={product} index={i} />
+            ))}
+          </div>
+        </SectionContainer>
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px]">
-            <thead>
-              <tr className="border-b border-academy-orange/10">
-                <th className="pb-4 pr-4 text-left text-sm font-medium text-academy-gray-500">
-                  Caratteristica
-                </th>
-                {PACKS.map((pack) => (
-                  <th
-                    key={pack.slug}
-                    className="pb-4 text-center text-sm font-bold tracking-wider text-academy-gray-200 uppercase"
-                  >
-                    {pack.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {featureMatrix.map((feature) => (
-                <tr
-                  key={feature.key}
-                  className="border-b border-white/5"
-                >
-                  <td className="py-4 pr-4 text-sm text-academy-gray-400">
-                    {feature.label}
-                  </td>
-                  {PACKS.map((pack) => {
-                    const val = getFeatureValue(pack.slug, feature.key);
-                    return (
-                      <td key={pack.slug} className="py-4 text-center">
-                        {typeof val === "boolean" ? (
-                          val ? (
-                            <span className="inline-flex h-5 w-5 items-center justify-center bg-academy-orange/20">
-                              <svg
-                                viewBox="0 0 16 16"
-                                fill="none"
-                                className="h-3 w-3 text-academy-orange"
-                              >
-                                <path
-                                  d="M13.5 4.5L6 12L2.5 8.5"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                  strokeLinecap="square"
-                                />
-                              </svg>
-                            </span>
-                          ) : (
-                            <span className="text-academy-gray-700">—</span>
-                          )
-                        ) : (
-                          <span className="text-sm font-semibold text-academy-gray-300">
-                            {val}
-                          </span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Master singoli */}
+      <SectionContainer>
+        <div className="card-squared p-8 text-center">
+          <span className="mb-2 inline-block text-xs font-bold tracking-[0.3em] text-academy-orange uppercase">
+            Approfondimento
+          </span>
+          <h2 className="mb-3 text-2xl font-black">Master Specialistici</h2>
+          <p className="mb-6 text-academy-gray-400">
+            Sessioni intensive di un giorno su temi avanzati. Acquistabili singolarmente, aperti a tutti.
+          </p>
+          <Button href="/workshop" variant="secondary">
+            Scopri i Master
+          </Button>
         </div>
       </SectionContainer>
     </>
