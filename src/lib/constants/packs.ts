@@ -26,7 +26,7 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Blocco I — Functional Training",
     type: "course",
     priceCents: 150000,
-    stripePriceId: "",
+    stripePriceId: "price_1T7tseCGgXzYzpRp7P4QCO5G",
     courseSlug: "primal",
     includes: [
       "2 weekend di formazione in presenza",
@@ -43,7 +43,7 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Blocco II — Strength & Conditioning",
     type: "course",
     priceCents: 250000,
-    stripePriceId: "",
+    stripePriceId: "price_1T7txACGgXzYzpRppAoYRDE5",
     courseSlug: "vis",
     includes: [
       "2 weekend di formazione in presenza",
@@ -61,7 +61,7 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Blocco III — Business & Performance",
     type: "course",
     priceCents: 500000,
-    stripePriceId: "",
+    stripePriceId: "price_1T7tz9CGgXzYzpRpHDJ3UpuO",
     courseSlug: "victor",
     includes: [
       "2 weekend di formazione in presenza",
@@ -150,7 +150,7 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Workshop — Allenamento Specifico Rugby",
     type: "workshop",
     priceCents: 50000,
-    stripePriceId: "",
+    stripePriceId: "price_1T7u0LCGgXzYzpRp2XeH0tZ8",
     workshopSlug: "master-rugby",
     includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
     sortOrder: 15,
