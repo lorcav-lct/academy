@@ -45,7 +45,16 @@ export default function AccountPage() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (profileData) setProfile(profileData);
+      if (profileData) {
+        setProfile(profileData);
+      } else {
+        // fallback ai metadati auth se la query DB non restituisce dati
+        setProfile({
+          full_name: (user.user_metadata?.full_name as string) || "",
+          email: user.email || "",
+          phone: (user.user_metadata?.phone as string) || "",
+        });
+      }
       if (ordersData) setOrders(ordersData as unknown as Order[]);
       setLoading(false);
     }
