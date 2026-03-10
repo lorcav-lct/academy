@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         PRODUCTS.find((p) => p.slug === order.pack_id)?.name ||
         (order.pack_id as string)?.toUpperCase() ||
         "Prodotto";
-      sendEmail({
+      await sendEmail({
         to: customerEmail,
         subject: `Ordine annullato — ${packName}`,
         react: React.createElement(OrderCancelledEmail, {

@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         currency: "EUR",
       }).format((session.amount_total || 0) / 100);
 
-      sendEmail({
+      await sendEmail({
         to: customerEmail,
         subject: `Conferma ordine — ${productName}`,
         react: React.createElement(OrderConfirmationEmail, {
