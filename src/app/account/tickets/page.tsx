@@ -109,8 +109,15 @@ export default function TicketsPage() {
 
                 {/* Footer */}
                 <div className="p-4">
-                  <p className="text-xs text-academy-gray-500">
-                    ID: {ticket.id.slice(0, 8)}...
+                  <p className="mb-1 text-[10px] font-semibold tracking-wider text-academy-gray-500 uppercase">
+                    Codice Ticket
+                  </p>
+                  <p
+                    className="cursor-pointer font-mono text-xs text-academy-gray-400 transition-colors hover:text-academy-orange"
+                    onClick={() => navigator.clipboard?.writeText(ticket.id)}
+                    title="Tocca per copiare"
+                  >
+                    {ticket.id}
                   </p>
                 </div>
               </div>

@@ -17,12 +17,12 @@ export default function QRScanner({ onScan }: QRScannerProps) {
   useEffect(() => {
     let stream: MediaStream | null = null;
     let stopped = false;
-    let frameId: number;
+    let timer: ReturnType<typeof setInterval>;
 
     async function start() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
         });
         if (stopped) { stream.getTracks().forEach(t => t.stop()); return; }
 
@@ -33,30 +33,28 @@ export default function QRScanner({ onScan }: QRScannerProps) {
 
         const jsQR = (await import("jsqr")).default;
         const canvas = canvasRef.current!;
-        const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
-        function tick() {
-          if (stopped || video.readyState !== video.HAVE_ENOUGH_DATA) {
-            frameId = requestAnimationFrame(tick);
-            return;
-          }
+        timer = setInterval(() => {
+          if (stopped) { clearInterval(timer); return; }
+          if (video.readyState < video.HAVE_ENOUGH_DATA || video.videoWidth === 0) return;
+
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           ctx.drawImage(video, 0, 0);
+
           const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const code = jsQR(img.data, img.width, img.height, {
-            inversionAttempts: "dontInvert",
+            inversionAttempts: "attemptBoth",
           });
-          if (code) {
+
+          if (code?.data) {
             stopped = true;
+            clearInterval(timer);
             stream?.getTracks().forEach(t => t.stop());
             onScanRef.current(code.data);
-            return;
           }
-          frameId = requestAnimationFrame(tick);
-        }
-
-        frameId = requestAnimationFrame(tick);
+        }, 400);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
         setError(
@@ -70,7 +68,7 @@ export default function QRScanner({ onScan }: QRScannerProps) {
     start();
     return () => {
       stopped = true;
-      cancelAnimationFrame(frameId);
+      clearInterval(timer);
       stream?.getTracks().forEach(t => t.stop());
     };
   }, []);
@@ -80,7 +78,7 @@ export default function QRScanner({ onScan }: QRScannerProps) {
       <div className="card-squared flex h-52 items-center justify-center p-6 text-center">
         <div>
           <p className="mb-2 font-semibold text-red-400">{error}</p>
-          <p className="text-xs text-academy-gray-500">Usa l&apos;inserimento manuale qui sotto</p>
+          <p className="text-xs text-academy-gray-500">Usa il codice manuale qui sotto</p>
         </div>
       </div>
     );
@@ -88,30 +86,25 @@ export default function QRScanner({ onScan }: QRScannerProps) {
 
   return (
     <div className="overflow-hidden card-squared">
-      <div className="relative">
-        <video
-          ref={videoRef}
-          className="w-full"
-          muted
-          playsInline
-          style={{ maxHeight: 320, objectFit: "cover" }}
-        />
+      <div className="relative bg-black">
+        <video ref={videoRef} className="w-full" muted playsInline style={{ maxHeight: 320, objectFit: "cover" }} />
         <canvas ref={canvasRef} className="hidden" />
         {active && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="h-48 w-48 border-2 border-academy-orange/70">
-              <div className="h-1 w-full animate-pulse bg-academy-orange/50" />
+            <div className="relative h-52 w-52">
+              <div className="absolute inset-0 border-2 border-academy-orange/60" />
+              <div className="absolute left-0 right-0 top-0 h-0.5 animate-pulse bg-academy-orange/70" />
             </div>
           </div>
         )}
         {!active && (
-          <div className="absolute inset-0 flex items-center justify-center bg-academy-dark/60">
+          <div className="absolute inset-0 flex items-center justify-center bg-academy-dark/80">
             <p className="text-sm text-academy-gray-400">Avvio fotocamera...</p>
           </div>
         )}
       </div>
       <p className="p-3 text-center text-xs text-academy-gray-500">
-        Inquadra il QR code nel riquadro arancione
+        Centra il QR code nel riquadro
       </p>
     </div>
   );

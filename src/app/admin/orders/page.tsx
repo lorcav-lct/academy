@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client"; // used in load()
 import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 
@@ -53,11 +53,11 @@ export default function OrdersPage() {
   async function cancelOrder(orderId: string) {
     if (!confirm("Annullare questo ordine?")) return;
     setCancelling(orderId);
-    const supabase = createClient();
-    await supabase
-      .from("orders")
-      .update({ status: "cancelled", updated_at: new Date().toISOString() })
-      .eq("id", orderId);
+    await fetch("/api/admin/cancel-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
     await load();
     setCancelling(null);
   }

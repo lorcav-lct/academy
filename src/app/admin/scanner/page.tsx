@@ -144,16 +144,20 @@ export default function ScannerPage() {
 
           {/* Manual input fallback */}
           <div className="card-squared p-6">
-            <h3 className="mb-3 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
-              Inserimento Manuale
+            <h3 className="mb-1 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
+              Verifica Manuale
             </h3>
+            <p className="mb-3 text-xs text-academy-gray-500">
+              Inserisci il <strong className="text-academy-gray-300">Codice Ticket</strong> visibile
+              in fondo alla card ticket dello studente (es: <code className="text-academy-orange">a1b2c3d4-...</code>)
+            </p>
             <div className="flex gap-3">
               <input
                 type="text"
                 value={manualInput}
                 onChange={(e) => setManualInput(e.target.value)}
-                placeholder="Incolla il codice QR..."
-                className="flex-1 border border-academy-orange/20 bg-academy-navy/50 px-4 py-2 text-sm text-academy-gray-100 outline-none focus:border-academy-orange/50"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                className="flex-1 border border-academy-orange/20 bg-academy-navy/50 px-4 py-2 font-mono text-sm text-academy-gray-100 outline-none focus:border-academy-orange/50"
               />
               <Button onClick={handleManualValidation} size="sm">
                 Verifica

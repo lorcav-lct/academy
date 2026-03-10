@@ -26,28 +26,31 @@ export async function POST(request: NextRequest) {
 
     const { qrData, eventId } = await request.json();
     if (!qrData) {
-      return NextResponse.json(
-        { error: "QR code mancante" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Codice mancante" }, { status: 400 });
     }
 
-    // Decrypt QR payload
-    let payload;
-    try {
-      payload = decryptPayload(qrData);
-    } catch {
-      return NextResponse.json(
-        { valid: false, error: "QR code non valido o corrotto" },
-        { status: 200 }
-      );
+    // Accept either a plain ticket UUID or an encrypted QR payload
+    const isUuid = /^[0-9a-f-]{36}$/i.test(qrData.trim());
+    let payload: { ticketId: string; userName: string; courseName: string; eventDate: string; orderId: string } | null = null;
+
+    if (!isUuid) {
+      try {
+        payload = decryptPayload(qrData);
+      } catch {
+        return NextResponse.json(
+          { valid: false, error: "QR code non valido o corrotto" },
+          { status: 200 }
+        );
+      }
     }
+
+    const ticketId = isUuid ? qrData.trim() : payload!.ticketId;
 
     // Verify ticket exists and is not used
     const { data: ticket } = await supabase
       .from("tickets")
-      .select("*, orders(*), courses(*)")
-      .eq("id", payload.ticketId)
+      .select("*, orders(*)")
+      .eq("id", ticketId)
       .single();
 
     if (!ticket) {
@@ -79,8 +82,8 @@ export async function POST(request: NextRequest) {
             valid: false,
             error: "Gia registrato per questo evento",
             ticket: {
-              userName: payload.userName,
-              courseName: payload.courseName,
+              userName: payload?.userName || ticket.user_id,
+              courseName: payload?.courseName || (ticket.course_id as string) || "—",
               checkedInAt: existing,
             },
           },
@@ -100,10 +103,10 @@ export async function POST(request: NextRequest) {
       valid: true,
       ticket: {
         id: ticket.id,
-        userName: payload.userName,
-        courseName: payload.courseName,
-        eventDate: payload.eventDate,
-        orderId: payload.orderId,
+        userName: payload?.userName || ticket.user_id,
+        courseName: payload?.courseName || (ticket.course_id as string) || "—",
+        eventDate: payload?.eventDate || "",
+        orderId: payload?.orderId || ticket.order_id,
       },
     });
   } catch (error) {
