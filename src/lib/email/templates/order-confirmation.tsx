@@ -78,7 +78,7 @@ export function OrderConfirmationEmail({
           {/* CTA */}
           <Section style={{ textAlign: "center", padding: "8px 0 24px" }}>
             <Text style={styles.bodyText}>
-              Tieni d'occhio il tuo account per tutti gli aggiornamenti sul percorso.
+              Tieni d&apos;occhio il tuo account per tutti gli aggiornamenti sul percorso.
             </Text>
             <Button href={`${appUrl}/account`} style={styles.buttonSecondary}>
               Il mio Account
