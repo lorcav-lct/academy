@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
@@ -95,11 +94,10 @@ export default function TicketsPage() {
                 {/* QR Code */}
                 <div className="flex items-center justify-center bg-academy-darker/50 p-8">
                   {ticket.qr_image_url ? (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src={ticket.qr_image_url}
                       alt={`QR ${ticket.course_id}`}
-                      width={200}
-                      height={200}
                       className="h-auto w-48"
                     />
                   ) : (
