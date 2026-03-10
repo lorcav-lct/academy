@@ -12,7 +12,7 @@ interface Order {
   billing_name: string;
   billing_email: string;
   created_at: string;
-  packs: { name: string } | null;
+  pack_id: string | null;
 }
 
 export default function OrdersPage() {
@@ -25,7 +25,7 @@ export default function OrdersPage() {
       const supabase = createClient();
       let query = supabase
         .from("orders")
-        .select("id, status, amount_cents, billing_name, billing_email, created_at, packs(name)")
+        .select("id, status, amount_cents, billing_name, billing_email, created_at, pack_id")
         .order("created_at", { ascending: false });
 
       if (filter !== "all") {
@@ -120,7 +120,7 @@ export default function OrdersPage() {
                       </p>
                     </td>
                     <td className="py-4 text-sm text-academy-gray-300">
-                      {order.packs?.name || "—"}
+                      {order.pack_id?.toUpperCase() || "—"}
                     </td>
                     <td className="py-4">
                       <span

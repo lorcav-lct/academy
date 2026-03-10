@@ -10,7 +10,7 @@ interface Ticket {
   id: string;
   qr_image_url: string;
   is_used: boolean;
-  courses: { title: string; type: string } | null;
+  course_id: string | null;
   orders: { status: string } | null;
 }
 
@@ -28,7 +28,7 @@ export default function TicketsPage() {
 
       const { data } = await supabase
         .from("tickets")
-        .select("id, qr_image_url, is_used, courses(title, type), orders(status)")
+        .select("id, qr_image_url, is_used, course_id, orders(status)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -81,7 +81,7 @@ export default function TicketsPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-white/5 p-4">
                   <h3 className="font-bold text-academy-gray-100">
-                    {ticket.courses?.title || "Corso"}
+                    {ticket.course_id?.toUpperCase() || "Corso"}
                   </h3>
                   <span
                     className={`text-[10px] font-bold tracking-wider uppercase ${
@@ -97,7 +97,7 @@ export default function TicketsPage() {
                   {ticket.qr_image_url ? (
                     <Image
                       src={ticket.qr_image_url}
-                      alt={`QR ${ticket.courses?.title}`}
+                      alt={`QR ${ticket.course_id}`}
                       width={200}
                       height={200}
                       className="h-auto w-48"
