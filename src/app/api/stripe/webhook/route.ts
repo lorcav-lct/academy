@@ -4,6 +4,7 @@ import { getStripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { encryptPayload } from "@/lib/qr/encrypt";
 import { generateQRCodeBuffer } from "@/lib/qr/generate";
+import { PRODUCTS } from "@/lib/constants/packs";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
-    const packId = session.metadata?.pack_id;
-    const workshopIds = JSON.parse(session.metadata?.workshop_ids || "[]");
+    const productSlug = session.metadata?.pack_id;
+    const workshopIds: string[] = JSON.parse(session.metadata?.workshop_ids || "[]");
 
     if (!orderId) {
       return NextResponse.json({ error: "No order_id" }, { status: 400 });
@@ -63,64 +64,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Fetch pack to determine which courses to generate tickets for
-    const { data: pack } = await supabase
-      .from("packs")
-      .select("*")
-      .eq("id", packId)
-      .single();
+    // Determine which products to generate tickets for
+    const slugsToTicket: string[] = [];
+    if (productSlug) slugsToTicket.push(productSlug);
+    workshopIds.forEach((s) => {
+      if (s && !slugsToTicket.includes(s)) slugsToTicket.push(s);
+    });
 
-    if (!pack) {
-      return NextResponse.json({ error: "Pack not found" }, { status: 404 });
-    }
+    // Generate one ticket per product slug
+    for (const slug of slugsToTicket) {
+      const product = PRODUCTS.find((p) => p.slug === slug);
+      const productName = product?.name ?? slug;
+      const ticketId = crypto.randomUUID();
 
-    // Get courses included in the pack
-    const { data: courses } = await supabase
-      .from("courses")
-      .select("*")
-      .or(
-        `block_number.in.(${pack.includes_blocks.join(",")}),id.in.(${workshopIds.join(",")})`
-      );
+      const payload = {
+        ticketId,
+        orderId: order.id,
+        courseId: slug,
+        userId: order.user_id,
+        userName:
+          (order.profiles as { full_name?: string } | null)?.full_name ||
+          order.billing_name ||
+          "",
+        courseName: productName,
+        eventDate: "",
+        issuedAt: new Date().toISOString(),
+      };
 
-    // Generate tickets with QR codes
-    if (courses) {
-      for (const course of courses) {
-        const ticketId = crypto.randomUUID();
+      const encrypted = encryptPayload(payload);
+      const qrBuffer = await generateQRCodeBuffer(encrypted);
 
-        const payload = {
-          ticketId,
-          orderId: order.id,
-          courseId: course.id,
-          userId: order.user_id,
-          userName: order.profiles?.full_name || order.billing_name || "",
-          courseName: course.title,
-          eventDate: "",
-          issuedAt: new Date().toISOString(),
-        };
+      const qrPath = `tickets/${orderId}/${ticketId}.png`;
+      await supabase.storage
+        .from("tickets")
+        .upload(qrPath, qrBuffer, { contentType: "image/png" });
 
-        const encrypted = encryptPayload(payload);
-        const qrBuffer = await generateQRCodeBuffer(encrypted);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("tickets").getPublicUrl(qrPath);
 
-        // Upload QR to Supabase Storage
-        const qrPath = `tickets/${orderId}/${ticketId}.png`;
-        await supabase.storage
-          .from("tickets")
-          .upload(qrPath, qrBuffer, { contentType: "image/png" });
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("tickets").getPublicUrl(qrPath);
-
-        // Create ticket record
-        await supabase.from("tickets").insert({
-          id: ticketId,
-          order_id: orderId,
-          user_id: order.user_id,
-          course_id: course.id,
-          qr_payload: encrypted,
-          qr_image_url: publicUrl,
-        });
-      }
+      await supabase.from("tickets").insert({
+        id: ticketId,
+        order_id: orderId,
+        user_id: order.user_id,
+        course_id: slug,
+        qr_payload: encrypted,
+        qr_image_url: publicUrl,
+      });
     }
 
     // Trigger Make.com webhook (async, don't await)
@@ -131,7 +121,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           event: "payment_completed",
           orderId,
-          packName: pack.name,
+          packName: productSlug,
           customerEmail: order.billing_email,
           customerName: order.billing_name,
           amount: session.amount_total,
