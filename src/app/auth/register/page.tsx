@@ -118,6 +118,7 @@ export default function RegisterPage() {
                 value={formData.phone}
                 onChange={(e) => updateField("phone", e.target.value)}
                 className="w-full border border-academy-orange/20 bg-academy-navy/50 px-4 py-3 text-academy-gray-100 outline-none transition-colors focus:border-academy-orange/50"
+                required
                 placeholder="+39 333 1234567"
               />
             </div>

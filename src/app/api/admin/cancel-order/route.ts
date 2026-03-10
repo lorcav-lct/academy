@@ -23,5 +23,12 @@ export async function POST(request: NextRequest) {
     .eq("id", orderId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Invalidate all tickets belonging to this order
+  await admin
+    .from("tickets")
+    .update({ is_used: true })
+    .eq("order_id", orderId);
+
   return NextResponse.json({ ok: true });
 }

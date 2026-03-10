@@ -20,9 +20,16 @@ interface Order {
   pack_id: string | null;
 }
 
+interface TicketRef {
+  id: string;
+  order_id: string;
+  is_used: boolean;
+}
+
 export default function AccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [ticketMap, setTicketMap] = useState<Record<string, TicketRef>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,22 +40,27 @@ export default function AccountPage() {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("full_name, email, phone")
-        .eq("id", user.id)
-        .single();
-
-      const { data: ordersData } = await supabase
-        .from("orders")
-        .select("id, status, amount_cents, created_at, pack_id")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+      const [{ data: profileData }, { data: ordersData }, { data: ticketsData }] =
+        await Promise.all([
+          supabase
+            .from("profiles")
+            .select("full_name, email, phone")
+            .eq("id", user.id)
+            .single(),
+          supabase
+            .from("orders")
+            .select("id, status, amount_cents, created_at, pack_id")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("tickets")
+            .select("id, order_id, is_used")
+            .eq("user_id", user.id),
+        ]);
 
       if (profileData) {
         setProfile(profileData);
       } else {
-        // fallback ai metadati auth se la query DB non restituisce dati
         setProfile({
           full_name: (user.user_metadata?.full_name as string) || "",
           email: user.email || "",
@@ -56,6 +68,13 @@ export default function AccountPage() {
         });
       }
       if (ordersData) setOrders(ordersData as unknown as Order[]);
+      if (ticketsData) {
+        const map: Record<string, TicketRef> = {};
+        (ticketsData as unknown as TicketRef[]).forEach((t) => {
+          map[t.order_id] = t;
+        });
+        setTicketMap(map);
+      }
       setLoading(false);
     }
     load();
@@ -152,26 +171,57 @@ export default function AccountPage() {
             {orders.length === 0 ? (
               <p className="text-sm text-academy-gray-500">Nessun ordine ancora.</p>
             ) : (
-              <div className="space-y-3">
-                {orders.slice(0, 3).map((order) => (
-                  <div
-                    key={order.id}
-                    className="border border-white/5 bg-academy-navy/20 p-3"
+              <>
+                <div className="space-y-3">
+                  {orders.slice(0, 3).map((order) => {
+                    const ticket = ticketMap[order.id];
+                    return (
+                      <div
+                        key={order.id}
+                        className="border border-white/5 bg-academy-navy/20 p-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold">
+                            {order.pack_id?.toUpperCase() || "Prodotto"}
+                          </span>
+                          <span className={`text-xs font-bold ${statusColors[order.status]}`}>
+                            {statusLabels[order.status]}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-academy-gray-500">
+                          {new Date(order.created_at).toLocaleDateString("it-IT")}
+                        </p>
+                        <div className="mt-2 flex gap-2">
+                          {order.status === "pending" && order.pack_id && (
+                            <Link
+                              href={`/checkout?pack=${order.pack_id}`}
+                              className="text-[10px] font-bold tracking-wider text-academy-orange uppercase hover:underline"
+                            >
+                              Riprendi Pagamento →
+                            </Link>
+                          )}
+                          {ticket && order.status === "paid" && (
+                            <Link
+                              href="/account/tickets"
+                              className="text-[10px] font-bold tracking-wider text-green-400 uppercase hover:underline"
+                            >
+                              Vedi Ticket →
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {orders.length > 0 && (
+                  <Link
+                    href="/account/orders"
+                    className="mt-4 flex items-center justify-end gap-1 text-xs font-semibold text-academy-orange hover:underline"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        {order.pack_id?.toUpperCase() || "Prodotto"}
-                      </span>
-                      <span className={`text-xs font-bold ${statusColors[order.status]}`}>
-                        {statusLabels[order.status]}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-academy-gray-500">
-                      {new Date(order.created_at).toLocaleDateString("it-IT")}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                    Vedi tutti ({orders.length}) →
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>

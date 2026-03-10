@@ -35,13 +35,17 @@ export default function QRScanner({ onScan }: QRScannerProps) {
         const canvas = canvasRef.current!;
         const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
+        // Downscale to max 640px wide so jsQR decodes faster
+        const MAX_W = 640;
+
         timer = setInterval(() => {
           if (stopped) { clearInterval(timer); return; }
           if (video.readyState < video.HAVE_ENOUGH_DATA || video.videoWidth === 0) return;
 
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          ctx.drawImage(video, 0, 0);
+          const scale = video.videoWidth > MAX_W ? MAX_W / video.videoWidth : 1;
+          canvas.width = Math.round(video.videoWidth * scale);
+          canvas.height = Math.round(video.videoHeight * scale);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
           const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const code = jsQR(img.data, img.width, img.height, {
@@ -54,7 +58,7 @@ export default function QRScanner({ onScan }: QRScannerProps) {
             stream?.getTracks().forEach(t => t.stop());
             onScanRef.current(code.data);
           }
-        }, 400);
+        }, 150);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
         setError(
