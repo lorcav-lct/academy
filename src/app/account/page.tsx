@@ -80,10 +80,11 @@ export default function AccountPage() {
             .eq("user_id", user.id),
         ]);
 
-      const p: Profile = profileData ?? {
-        full_name: (user.user_metadata?.full_name as string) || "",
-        email: user.email || "",
-        phone: (user.user_metadata?.phone as string) || "",
+      // Always use auth email as source of truth (profiles.email can be stale after email change)
+      const p: Profile = {
+        full_name: profileData?.full_name || (user.user_metadata?.full_name as string) || "",
+        email: user.email || profileData?.email || "",
+        phone: profileData?.phone || (user.user_metadata?.phone as string) || "",
       };
       setProfile(p);
       setEditName(p.full_name);
