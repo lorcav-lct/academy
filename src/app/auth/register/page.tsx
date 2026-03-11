@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -8,7 +8,7 @@ import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "";
 
@@ -49,7 +49,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Persist pending checkout so account page can redirect after email confirmation
     if (next) {
       localStorage.setItem("pending_checkout", next);
     }
@@ -68,7 +67,8 @@ export default function RegisterPage() {
             </div>
             <h1 className="mb-2 text-2xl font-black">Controlla la tua Email</h1>
             <p className="text-academy-gray-400">
-              Ti abbiamo inviato un link di conferma a <span className="font-semibold text-academy-gray-200">{formData.email}</span>.
+              Ti abbiamo inviato un link di conferma a{" "}
+              <span className="font-semibold text-academy-gray-200">{formData.email}</span>.
               Clicca sul link per completare la registrazione.
             </p>
           </div>
@@ -125,8 +125,8 @@ export default function RegisterPage() {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateField("phone", e.target.value)}
-                className="w-full border border-academy-orange/20 bg-academy-navy/50 px-4 py-3 text-academy-gray-100 outline-none transition-colors focus:border-academy-orange/50"
                 required
+                className="w-full border border-academy-orange/20 bg-academy-navy/50 px-4 py-3 text-academy-gray-100 outline-none transition-colors focus:border-academy-orange/50"
                 placeholder="+39 333 1234567"
               />
             </div>
@@ -145,9 +145,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-red-400">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-400">{error}</p>}
 
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Registrazione in corso..." : "Registrati"}
@@ -166,5 +164,13 @@ export default function RegisterPage() {
         </div>
       </SectionContainer>
     </section>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <RegisterForm />
+    </Suspense>
   );
 }

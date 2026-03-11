@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -8,7 +8,7 @@ import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "";
 
@@ -35,7 +35,6 @@ export default function LoginPage() {
       return;
     }
 
-    // Clear any pending checkout redirect (handled by direct next param on login)
     const pending = localStorage.getItem("pending_checkout");
     const destination = next || pending || "/account";
     if (pending) localStorage.removeItem("pending_checkout");
@@ -84,9 +83,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-red-400">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-400">{error}</p>}
 
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Accesso in corso..." : "Accedi"}
@@ -105,5 +102,13 @@ export default function LoginPage() {
         </div>
       </SectionContainer>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

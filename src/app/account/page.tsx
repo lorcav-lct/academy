@@ -112,7 +112,7 @@ export default function AccountPage() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [router]);
 
   async function handleSaveProfile() {
     setSaving(true);
