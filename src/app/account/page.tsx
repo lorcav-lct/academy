@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SectionContainer } from "@/components/shared/section-container";
@@ -27,6 +28,7 @@ interface TicketRef {
 }
 
 export default function AccountPage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ticketMap, setTicketMap] = useState<Record<string, TicketRef>>({});
@@ -61,6 +63,14 @@ export default function AccountPage() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
+
+      // After email confirmation, redirect to any pending checkout
+      const pendingCheckout = localStorage.getItem("pending_checkout");
+      if (pendingCheckout) {
+        localStorage.removeItem("pending_checkout");
+        router.push(pendingCheckout);
+        return;
+      }
 
       const [{ data: profileData }, { data: ordersData }, { data: ticketsData }] =
         await Promise.all([

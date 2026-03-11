@@ -18,12 +18,12 @@ export function SectionContainer({
     <section
       id={id}
       className={cn(
-        "relative px-4 py-20 sm:px-6 lg:px-8 md:py-28",
+        "relative py-20 md:py-28",
         withReflection && "light-reflection",
         className
       )}
     >
-      <div className="mx-auto max-w-7xl">{children}</div>
+      <div className="mx-auto w-[90%] max-w-[1440px]">{children}</div>
     </section>
   );
 }

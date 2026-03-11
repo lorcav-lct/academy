@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PRODUCTS, type AcademyProduct } from "@/lib/constants/packs";
 import { formatPrice } from "@/lib/utils";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
+import { createClient } from "@/lib/supabase/client";
 
 const TYPE_LABEL: Record<AcademyProduct["type"], string> = {
   course: "Blocco Formativo",
@@ -23,6 +24,18 @@ const TYPE_COLOR: Record<AcademyProduct["type"], string> = {
 
 function ProductCard({ product, index }: { product: AcademyProduct; index: number }) {
   const accentColor = TYPE_COLOR[product.type];
+
+  async function handleBuy() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const dest = `/checkout?pack=${product.slug}`;
+    if (!user) {
+      localStorage.setItem("pending_checkout", dest);
+      window.location.href = `/auth/register?next=${encodeURIComponent(dest)}`;
+      return;
+    }
+    window.location.href = dest;
+  }
 
   return (
     <motion.div
@@ -99,7 +112,7 @@ function ProductCard({ product, index }: { product: AcademyProduct; index: numbe
 
         {/* CTA */}
         <Button
-          href={`/checkout?pack=${product.slug}`}
+          onClick={product.priceCents > 0 ? handleBuy : undefined}
           variant={product.highlighted ? "primary" : "secondary"}
           className="w-full"
           disabled={product.priceCents === 0}

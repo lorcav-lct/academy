@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SectionContainer } from "@/components/shared/section-container";
@@ -9,6 +9,9 @@ import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +35,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/account");
+    // Clear any pending checkout redirect (handled by direct next param on login)
+    const pending = localStorage.getItem("pending_checkout");
+    const destination = next || pending || "/account";
+    if (pending) localStorage.removeItem("pending_checkout");
+    router.push(destination);
     router.refresh();
   }
 
@@ -89,7 +96,7 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-sm text-academy-gray-500">
             Non hai un account?{" "}
             <Link
-              href="/auth/register"
+              href={next ? `/auth/register?next=${encodeURIComponent(next)}` : "/auth/register"}
               className="font-semibold text-academy-orange hover:text-academy-orange-light"
             >
               Registrati

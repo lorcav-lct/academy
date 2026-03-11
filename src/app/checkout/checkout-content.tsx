@@ -6,6 +6,7 @@ import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 import { getPackBySlug } from "@/lib/constants/packs";
+import { createClient } from "@/lib/supabase/client";
 
 export function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -33,6 +34,15 @@ export function CheckoutContent() {
   async function handleCheckout() {
     setLoading(true);
     setError("");
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      const next = `/checkout?pack=${packSlug}`;
+      localStorage.setItem("pending_checkout", next);
+      window.location.href = `/auth/register?next=${encodeURIComponent(next)}`;
+      return;
+    }
 
     try {
       const response = await fetch("/api/checkout/session", {

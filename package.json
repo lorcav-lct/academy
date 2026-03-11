@@ -17,6 +17,7 @@
     "@zxing/library": "^0.21.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.4.0",
+    "gsap": "^3.14.2",
     "html5-qrcode": "^2.3.8",
     "jsqr": "^1.4.0",
     "next": "^15.2.0",

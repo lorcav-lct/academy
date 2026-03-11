@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "";
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -45,6 +49,10 @@ export default function RegisterPage() {
       return;
     }
 
+    // Persist pending checkout so account page can redirect after email confirmation
+    if (next) {
+      localStorage.setItem("pending_checkout", next);
+    }
     setSuccess(true);
   }
 
@@ -149,7 +157,7 @@ export default function RegisterPage() {
           <p className="mt-6 text-center text-sm text-academy-gray-500">
             Hai gia un account?{" "}
             <Link
-              href="/auth/login"
+              href={next ? `/auth/login?next=${encodeURIComponent(next)}` : "/auth/login"}
               className="font-semibold text-academy-orange hover:text-academy-orange-light"
             >
               Accedi
