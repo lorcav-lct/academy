@@ -191,7 +191,7 @@ function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boole
       className="bento-interactive rounded-sm px-5 py-5 flex flex-col justify-between relative overflow-hidden"
       style={{
         ...(mobile
-          ? { flex: "1 1 0%", minHeight: "40vh" }
+          ? { flex: "1 1 0%", minHeight: "25vh" }
           : fill
           ? { flex: "2 1 0%" }
           : { width: "200px", flexShrink: 0 }),
@@ -956,7 +956,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
         <div
           className="rounded-sm p-6 flex flex-col justify-between relative overflow-hidden"
           style={{
-            minHeight: "40vh",
+            minHeight: "25vh",
             background: d ? "rgba(8,6,30,0.9)" : "rgba(252,250,240,0.95)",
             border: `1px solid ${d ? "rgba(212,175,55,0.18)" : "rgba(212,175,55,0.25)"}`,
           }}
