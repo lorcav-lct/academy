@@ -191,7 +191,7 @@ function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boole
       className="bento-interactive rounded-sm px-5 py-5 flex flex-col justify-between relative overflow-hidden"
       style={{
         ...(mobile
-          ? { flex: "1 1 0%" }
+          ? { flex: "1 1 0%", minHeight: "40vh" }
           : fill
           ? { flex: "2 1 0%" }
           : { width: "200px", flexShrink: 0 }),
@@ -313,7 +313,7 @@ function VideoPresentationCell({ mobile, fill, isDark }: { mobile?: boolean; fil
           mobile
             ? {
                 width: "100%",
-                height: "150px",
+                minHeight: "40vh",
                 flexShrink: 0,
                 border: `1px solid ${isDark ? "rgba(240,146,38,0.12)" : "rgba(240,146,38,0.2)"}`,
                 background: isDark ? "rgba(1,0,18,0.92)" : "rgba(245,243,238,0.95)",
@@ -954,30 +954,33 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
 
         {/* ④ CERTIFICAZIONE */}
         <div
-          className="rounded-sm p-4 flex items-center gap-4 relative overflow-hidden"
+          className="rounded-sm p-6 flex flex-col justify-between relative overflow-hidden"
           style={{
+            minHeight: "40vh",
             background: d ? "rgba(8,6,30,0.9)" : "rgba(252,250,240,0.95)",
             border: `1px solid ${d ? "rgba(212,175,55,0.18)" : "rgba(212,175,55,0.25)"}`,
           }}
         >
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(212,175,55,0.15) 0%, transparent 65%)" }} />
-          <div className="relative w-11 h-11 rounded-full border border-academy-gold/30 flex-shrink-0 flex items-center justify-center"
-            style={{ background: "radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%)" }}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
-              <path d="M12 2L3 7v6c0 5.25 3.75 10.18 9 11.25C17.25 23.18 21 18.25 21 13V7L12 2z"
-                stroke="#D4AF37" strokeWidth="1.3" fill="rgba(212,175,55,0.1)" />
-              <path d="M9 12l2 2 4-4" stroke="#D4AF37" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div className="relative flex-1">
-            <div className="text-[0.75rem] font-bold tracking-[0.25em] text-academy-gold/75 uppercase mb-1">Certificazione Ufficiale</div>
-            <div className="flex items-center gap-2">
-              <span className="text-[1rem] font-black text-academy-gold leading-none">FIPE</span>
-              <span className="text-[0.75rem] text-academy-gold/60 tracking-[0.2em]">×</span>
-              <span className="text-[0.75rem] font-black text-academy-gold/90 tracking-[0.12em]">LACERTOSUS</span>
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 20% 30%, rgba(212,175,55,0.15) 0%, transparent 65%)" }} />
+          <div className="relative text-[0.75rem] font-bold tracking-[0.25em] text-academy-gold/75 uppercase">Certificazione Ufficiale</div>
+          <div className="relative flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full border border-academy-gold/30 flex-shrink-0 flex items-center justify-center"
+              style={{ background: "radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%)" }}>
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+                <path d="M12 2L3 7v6c0 5.25 3.75 10.18 9 11.25C17.25 23.18 21 18.25 21 13V7L12 2z"
+                  stroke="#D4AF37" strokeWidth="1.3" fill="rgba(212,175,55,0.1)" />
+                <path d="M9 12l2 2 4-4" stroke="#D4AF37" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-            <div className="text-[0.75rem] font-semibold tracking-[0.15em] text-academy-gold/55 uppercase mt-1">Riconosciuta a livello nazionale</div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[1.6rem] font-black text-academy-gold leading-none">FIPE</span>
+                <span className="text-[0.75rem] text-academy-gold/60 tracking-[0.2em]">×</span>
+                <span className="text-[1rem] font-black text-academy-gold/90 tracking-[0.14em]">LACERTOSUS</span>
+              </div>
+            </div>
           </div>
+          <div className="relative text-[0.75rem] font-semibold tracking-[0.15em] text-academy-gold/55 uppercase">Riconosciuta a livello nazionale</div>
         </div>
 
         {/* ⑤ VIDEO PRESENTAZIONE */}
