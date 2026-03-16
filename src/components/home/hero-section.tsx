@@ -816,7 +816,6 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
               className="group relative z-10 flex items-center gap-2 text-[0.75rem] font-semibold tracking-[0.14em] uppercase hover:text-academy-orange transition-colors duration-200"
               style={{ color: subtitleColor }}
             >
-              <span className="inline-block h-px transition-all duration-300 group-hover:w-5" style={{ width: "14px", background: "currentColor" }} />
               Il Percorso Completo
             </Link>
           </div>
@@ -865,7 +864,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
 
         {/* ① SLIDER */}
         <div
-          className="rounded-sm p-6 relative overflow-hidden"
+          className="rounded-sm p-6 relative overflow-hidden flex flex-col"
           style={{ minHeight: "52vh", background: "rgba(2,0,38,0.75)", border: "1px solid rgba(255,255,255,0.04)" }}
         >
           {slide.bg_image_url && (
@@ -876,7 +875,8 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
               <div className="absolute inset-0" style={{ background: slideOverlay }} />
             </div>
           )}
-          <div className="relative z-10">
+          {/* Content */}
+          <div className="relative z-10 flex-1">
             {/* Badge */}
             <div className="flex items-center gap-2 mb-5">
               <span className="h-1.5 w-1.5 rounded-full bg-academy-gold flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(212,175,55,0.6)" }} />
@@ -891,16 +891,16 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
                 {slide.cta_label} →
               </Link>
             )}
-            {/* Path */}
-            <div className="mt-5">
-              <div className="h-px mb-3" style={{ background: "linear-gradient(90deg, rgba(240,146,38,0.15), transparent)" }} />
-              <div className="flex items-center gap-3 text-[0.75rem] font-black tracking-[0.28em] uppercase">
-                <span style={{ color: "#CD7F32" }}>PRIMAL</span>
-                <span style={{ color: "rgba(240,146,38,0.2)" }}>—</span>
-                <span style={{ color: "#C0C0C0" }}>VIS</span>
-                <span style={{ color: "rgba(240,146,38,0.2)" }}>—</span>
-                <span style={{ color: "#D4AF37" }}>VICTOR</span>
-              </div>
+          </div>
+          {/* Path — pinned to bottom */}
+          <div className="relative z-10 mt-4">
+            <div className="h-px mb-3" style={{ background: "linear-gradient(90deg, rgba(240,146,38,0.15), transparent)" }} />
+            <div className="flex items-center gap-3 text-[0.75rem] font-black tracking-[0.28em] uppercase">
+              <span style={{ color: "#CD7F32" }}>PRIMAL</span>
+              <span style={{ color: "rgba(240,146,38,0.2)" }}>—</span>
+              <span style={{ color: "#C0C0C0" }}>VIS</span>
+              <span style={{ color: "rgba(240,146,38,0.2)" }}>—</span>
+              <span style={{ color: "#D4AF37" }}>VICTOR</span>
             </div>
           </div>
           {/* Slide dots */}
@@ -935,7 +935,6 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
             <div className="flex-1 h-px" style={{ background: "rgba(240,146,38,0.18)" }} />
           </div>
           <Link href="/percorso" className="relative z-10 flex items-center gap-2 text-[0.75rem] font-semibold tracking-[0.14em] uppercase" style={{ color: subtitleColor }}>
-            <span className="inline-block h-px w-3.5" style={{ background: "currentColor" }} />
             Il Percorso Completo
           </Link>
         </div>

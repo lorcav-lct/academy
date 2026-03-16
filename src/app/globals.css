@@ -24,8 +24,8 @@
   --color-academy-gray-800: #1c1c1e;
 
   /* Font families */
-  --font-heading: var(--font-inter), "Inter", system-ui, sans-serif;
-  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-heading: var(--font-saira), "Saira", system-ui, sans-serif;
+  --font-body: var(--font-saira), "Saira", system-ui, sans-serif;
 }
 
 /* ─── Base ─── */

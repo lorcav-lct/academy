@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Saira } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
-const inter = Inter({
+const saira = Saira({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-saira",
   display: "swap",
 });
 
@@ -45,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" className={inter.variable} data-theme="dark" suppressHydrationWarning>
+    <html lang="it" className={saira.variable} data-theme="dark" suppressHydrationWarning>
       {/* eslint-disable-next-line @next/next/no-head-element */}
       <head>
         {/* Anti-FOUC: must run before any CSS paint */}
