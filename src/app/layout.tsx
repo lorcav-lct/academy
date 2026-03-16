@@ -14,8 +14,8 @@ const saira = Saira({
 });
 
 // Anti-FOUC: runs synchronously before first paint.
-// Sets data-theme based on localStorage or local hour (dark after 18:00).
-const ANTI_FOUC = `(function(){var K='lacertosus-theme',DH=18;var s=null;try{s=localStorage.getItem(K);}catch(e){}var t=(s==='light'||s==='dark')?s:(new Date().getHours()>=DH?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();`;
+// Sets data-theme based on localStorage or local time (dark 22:30–04:30).
+const ANTI_FOUC = `(function(){var K='lacertosus-theme';var s=null;try{s=localStorage.getItem(K);}catch(e){}var n=new Date(),m=n.getHours()*60+n.getMinutes(),d=m>=1350||m<270;var t=(s==='light'||s==='dark')?s:(d?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();`;
 
 export const metadata: Metadata = {
   title: {
