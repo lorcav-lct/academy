@@ -30,8 +30,8 @@ const DOUBLE = [...ITEMS, ...ITEMS];
 function Sep() {
   return (
     <span
-      className="mx-4 shrink-0 opacity-20"
-      style={{ color: "#F09226", fontSize: "0.35rem", letterSpacing: "0.1em" }}
+      className="mx-4 shrink-0"
+      style={{ color: "rgba(240,146,38,0.3)", fontSize: "0.35rem" }}
     >
       ◆
     </span>
@@ -49,7 +49,10 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
         >
           {item.value}
         </span>
-        <span className="text-[0.48rem] font-bold tracking-[0.24em] text-academy-gray-600 uppercase">
+        <span
+          className="text-[0.55rem] font-bold tracking-[0.18em] uppercase"
+          style={{ color: "rgba(255,255,255,0.75)" }}
+        >
           {item.label}
         </span>
         <Sep />
@@ -64,13 +67,15 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
           className="text-[0.52rem] font-black tracking-[0.2em] px-2 py-[3px]"
           style={{
             color: "#F09226",
-            border: "1px solid rgba(240,146,38,0.28)",
-            letterSpacing: "0.22em",
+            border: "1px solid rgba(240,146,38,0.35)",
           }}
         >
           {item.value}
         </span>
-        <span className="text-[0.48rem] font-bold tracking-[0.2em] text-academy-gray-600 uppercase">
+        <span
+          className="text-[0.55rem] font-bold tracking-[0.18em] uppercase"
+          style={{ color: "rgba(255,255,255,0.75)" }}
+        >
           {item.label}
         </span>
         <Sep />
@@ -81,8 +86,11 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
   /* quote */
   return (
     <div className="flex items-center gap-2 shrink-0">
-      <span className="text-[0.7rem] text-academy-orange/25 leading-none">&ldquo;</span>
-      <span className="text-[0.58rem] font-medium tracking-[0.07em] text-academy-gray-500 italic">
+      <span style={{ color: "rgba(240,146,38,0.35)", fontSize: "0.7rem" }}>&ldquo;</span>
+      <span
+        className="text-[0.62rem] font-medium tracking-[0.06em] italic"
+        style={{ color: "rgba(255,255,255,0.7)" }}
+      >
         {item.text}
       </span>
       <Sep />
@@ -106,15 +114,15 @@ export function SocialProofBar() {
     >
       {/* Fade masks */}
       <div
-        className="pointer-events-none absolute left-0 top-0 z-10 h-full w-36"
+        className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24"
         style={{ background: "linear-gradient(90deg, #010015 0%, transparent 100%)" }}
       />
       <div
-        className="pointer-events-none absolute right-0 top-0 z-10 h-full w-36"
+        className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24"
         style={{ background: "linear-gradient(270deg, #010015 0%, transparent 100%)" }}
       />
 
-      {/* Top line — blends from hero bottom gradient */}
+      {/* Top line */}
       <div
         className="absolute top-0 left-0 right-0 h-px"
         style={{
@@ -127,7 +135,7 @@ export function SocialProofBar() {
         <div
           className="marquee-track flex items-center gap-8 whitespace-nowrap"
           style={{
-            animationDuration: "90s",
+            animationDuration: "38s",
             animationPlayState: paused ? "paused" : "running",
           }}
         >
