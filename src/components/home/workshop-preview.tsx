@@ -1,83 +1,116 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
-import { SectionContainer } from "@/components/shared/section-container";
-import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 import { WORKSHOPS } from "@/lib/constants/workshops";
-import { fadeUp, staggerContainer } from "@/lib/animations/variants";
+
+// Alternate bento sizes for visual rhythm
+const BENTO_SPANS = [2, 1, 1, 2, 1, 2, 2, 1];
 
 export function WorkshopPreview() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const sectionRef = useRef<HTMLElement>(null);
+  const headRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      gsap.from(headRef.current, {
+        scrollTrigger: { trigger: headRef.current, start: "top 85%", once: true },
+        opacity: 0, y: 28, duration: 0.7, ease: "power3.out",
+      });
+
+      const cards = gridRef.current?.querySelectorAll("[data-ws-card]");
+      if (cards) {
+        gsap.from(cards, {
+          scrollTrigger: { trigger: gridRef.current, start: "top 75%", once: true },
+          opacity: 0,
+          y: 35,
+          scale: 0.96,
+          duration: 0.6,
+          stagger: { amount: 0.6, from: "start" },
+          ease: "power3.out",
+        });
+      }
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <SectionContainer withReflection>
-      <motion.div
-        ref={ref}
-        variants={staggerContainer}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-      >
+    <section
+      ref={sectionRef}
+      id="workshop"
+      className="relative overflow-hidden py-24 md:py-32 light-reflection"
+    >
+      <div className="absolute inset-0 bg-academy-dark" />
+
+      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
         {/* Header */}
-        <motion.div variants={fadeUp} className="mb-12 text-center">
-          <span className="mb-4 inline-block text-xs font-semibold tracking-[0.3em] text-academy-orange uppercase">
-            Specializzazioni
-          </span>
-          <h2 className="mb-4 text-3xl font-black tracking-tight sm:text-5xl">
-            <GradientText>8 Workshop</GradientText> Specialistici
-          </h2>
-          <p className="mx-auto max-w-2xl text-academy-gray-400">
-            Approfondimenti pratici con professionisti e specialisti di settore.
-            Inclusi nei pack secondo la formula scelta.
-          </p>
-        </motion.div>
-
-        {/* Workshop grid */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {WORKSHOPS.map((workshop, i) => (
-            <motion.div key={workshop.slug} variants={fadeUp} custom={i}>
-              <Link href={`/workshop/${workshop.slug}`} className="group block">
-                <div className="card-squared relative overflow-hidden p-6 transition-all duration-500 hover:glow-orange">
-                  {/* Date badge */}
-                  <div className="mb-4 inline-block bg-academy-orange/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-academy-orange uppercase">
-                    {workshop.date}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="mb-2 text-base font-bold text-academy-gray-100 transition-colors group-hover:text-academy-orange">
-                    {workshop.title}
-                  </h3>
-
-                  {/* Focus */}
-                  <p className="mb-4 text-xs leading-relaxed text-academy-gray-500">
-                    {workshop.focus}
-                  </p>
-
-                  {/* Duration */}
-                  <span className="text-[10px] font-medium tracking-wider text-academy-gray-600 uppercase">
-                    {workshop.duration}
-                  </span>
-
-                  {/* Hover arrow */}
-                  <div className="absolute right-4 bottom-4 translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                    <span className="text-academy-orange">→</span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+        <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="label-tag mb-3 block">Master Specialistici</span>
+            <h2 className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight">
+              8 Workshop.{" "}
+              <span className="gradient-text">8 Specializzazioni.</span>
+            </h2>
+            <p className="mt-3 max-w-lg text-sm text-academy-gray-400">
+              Approfondimenti pratici con i migliori specialisti del settore. Acquistabili singolarmente o inclusi nel tuo percorso.
+            </p>
+          </div>
+          <Button href="/workshop" variant="outline" size="sm">
+            Vedi tutti i Workshop →
+          </Button>
         </div>
 
-        {/* CTA */}
-        <motion.div variants={fadeUp} className="mt-12 text-center">
-          <Button href="/pack" variant="secondary">
-            Scopri i Pack con Workshop inclusi
-          </Button>
-        </motion.div>
-      </motion.div>
-    </SectionContainer>
+        {/* Bento grid */}
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {WORKSHOPS.map((ws, i) => {
+            const span = BENTO_SPANS[i % BENTO_SPANS.length];
+            const isWide = span === 2;
+            return (
+              <Link
+                key={ws.slug}
+                href={`/workshop/${ws.slug}`}
+                data-ws-card
+                className={`group relative overflow-hidden ${isWide ? "sm:col-span-2 lg:col-span-2" : ""}`}
+              >
+                <div className="bento-card relative flex h-full min-h-[160px] flex-col justify-between p-6 transition-all duration-500 group-hover:border-academy-orange/30">
+                  <div className="mb-auto">
+                    <span className="mb-3 inline-block bg-academy-orange/10 px-2.5 py-1 text-[0.58rem] font-black tracking-[0.2em] text-academy-orange uppercase">
+                      {ws.date}
+                    </span>
+                    <h3 className="text-sm font-bold leading-snug text-academy-gray-200 transition-colors duration-300 group-hover:text-academy-orange">
+                      {ws.title}
+                    </h3>
+                    {isWide && (
+                      <p className="mt-1.5 text-xs leading-relaxed text-academy-gray-500">
+                        {ws.focus}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-4 flex items-end justify-between">
+                    <span className="text-[0.6rem] font-medium tracking-wider text-academy-gray-600 uppercase">
+                      {ws.duration}
+                    </span>
+                    <span className="translate-x-2 text-sm text-academy-orange opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+                      →
+                    </span>
+                  </div>
+
+                  <div className="absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-academy-orange/5 blur-xl opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-4 group-hover:-translate-y-4" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }

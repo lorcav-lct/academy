@@ -1,0 +1,141 @@
+"use client";
+
+import { useState } from "react";
+
+/* ── Item data ── */
+type MarqueeItemData =
+  | { type: "stat";  value: string; label: string }
+  | { type: "quote"; text: string }
+  | { type: "badge"; value: string; label: string };
+
+const ITEMS: MarqueeItemData[] = [
+  { type: "stat",  value: "+200",  label: "Professionisti Formati" },
+  { type: "quote", text: "Il percorso più completo del fitness italiano" },
+  { type: "badge", value: "FIPE",  label: "Certificazione Ufficiale" },
+  { type: "stat",  value: "9",     label: "Mesi di Formazione" },
+  { type: "quote", text: "Docenti universitari e professionisti d'eccellenza" },
+  { type: "badge", value: "100%",  label: "In Presenza" },
+  { type: "stat",  value: "★★★★★", label: "Valutazione Media Alumni" },
+  { type: "quote", text: "Dal tecnico all'imprenditore — formazione a 360°" },
+  { type: "badge", value: "3",     label: "Blocchi Progressivi" },
+  { type: "stat",  value: "8",     label: "Workshop Specialistici" },
+  { type: "quote", text: "L'unica academy che forma imprenditori del fitness" },
+  { type: "badge", value: "PRIMAL → VIS → VICTOR", label: "Percorso Progressivo" },
+];
+
+/* Two copies — CSS translateX(-50%) creates a seamless loop */
+const DOUBLE = [...ITEMS, ...ITEMS];
+
+/* ── Separator ── */
+function Sep() {
+  return (
+    <span
+      className="mx-4 shrink-0 opacity-20"
+      style={{ color: "#F09226", fontSize: "0.35rem", letterSpacing: "0.1em" }}
+    >
+      ◆
+    </span>
+  );
+}
+
+/* ── Single marquee item ── */
+function MarqueeItem({ item }: { item: MarqueeItemData }) {
+  if (item.type === "stat") {
+    return (
+      <div className="flex items-baseline gap-2.5 shrink-0">
+        <span
+          className="tabular-nums font-black"
+          style={{ fontSize: "1.05rem", color: item.value.startsWith("★") ? "#D4AF37" : "#F09226" }}
+        >
+          {item.value}
+        </span>
+        <span className="text-[0.48rem] font-bold tracking-[0.24em] text-academy-gray-600 uppercase">
+          {item.label}
+        </span>
+        <Sep />
+      </div>
+    );
+  }
+
+  if (item.type === "badge") {
+    return (
+      <div className="flex items-center gap-2.5 shrink-0">
+        <span
+          className="text-[0.52rem] font-black tracking-[0.2em] px-2 py-[3px]"
+          style={{
+            color: "#F09226",
+            border: "1px solid rgba(240,146,38,0.28)",
+            letterSpacing: "0.22em",
+          }}
+        >
+          {item.value}
+        </span>
+        <span className="text-[0.48rem] font-bold tracking-[0.2em] text-academy-gray-600 uppercase">
+          {item.label}
+        </span>
+        <Sep />
+      </div>
+    );
+  }
+
+  /* quote */
+  return (
+    <div className="flex items-center gap-2 shrink-0">
+      <span className="text-[0.7rem] text-academy-orange/25 leading-none">&ldquo;</span>
+      <span className="text-[0.58rem] font-medium tracking-[0.07em] text-academy-gray-500 italic">
+        {item.text}
+      </span>
+      <Sep />
+    </div>
+  );
+}
+
+/* ── Social Proof Bar — single premium strip ── */
+export function SocialProofBar() {
+  const [paused, setPaused] = useState(false);
+
+  return (
+    <div
+      className="relative overflow-hidden cursor-default"
+      style={{
+        background: "linear-gradient(180deg, #010015 0%, #010018 60%, #010020 100%)",
+        borderBottom: "1px solid rgba(240,146,38,0.06)",
+      }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Fade masks */}
+      <div
+        className="pointer-events-none absolute left-0 top-0 z-10 h-full w-36"
+        style={{ background: "linear-gradient(90deg, #010015 0%, transparent 100%)" }}
+      />
+      <div
+        className="pointer-events-none absolute right-0 top-0 z-10 h-full w-36"
+        style={{ background: "linear-gradient(270deg, #010015 0%, transparent 100%)" }}
+      />
+
+      {/* Top line — blends from hero bottom gradient */}
+      <div
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(240,146,38,0.1) 25%, rgba(212,175,55,0.14) 50%, rgba(240,146,38,0.1) 75%, transparent 100%)",
+        }}
+      />
+
+      {/* Scrolling track */}
+      <div className="py-5 overflow-hidden">
+        <div
+          className="marquee-track flex items-center gap-8 whitespace-nowrap"
+          style={{
+            animationDuration: "90s",
+            animationPlayState: paused ? "paused" : "running",
+          }}
+        >
+          {DOUBLE.map((item, i) => (
+            <MarqueeItem key={i} item={item} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,153 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+const COLORS = {
+  primal:   { bg: "rgba(240,146,38,0.12)",  border: "rgba(240,146,38,0.35)", text: "#F09226",  dot: "#F09226"  },
+  vis:      { bg: "rgba(212,175,55,0.10)",  border: "rgba(212,175,55,0.35)", text: "#D4AF37",  dot: "#D4AF37"  },
+  victor:   { bg: "rgba(240,146,38,0.08)",  border: "rgba(240,146,38,0.25)", text: "#F09226",  dot: "#F09226"  },
+  fipe:     { bg: "rgba(192,192,192,0.06)", border: "rgba(192,192,192,0.2)", text: "#C0C0C0",  dot: "#C0C0C0"  },
+  workshop: { bg: "rgba(212,175,55,0.05)",  border: "rgba(212,175,55,0.15)", text: "#D4AF37",  dot: "#D4AF3780" },
+};
+
+const EVENTS = [
+  { label: "PRIMAL 1",     dates: "11–12 Settembre",  type: "primal"   },
+  { label: "Master Hyrox", dates: "26 Settembre",      type: "workshop" },
+  { label: "PRIMAL 2",     dates: "9–10 Ottobre",      type: "primal"   },
+  { label: "Master Calcio",dates: "24 Ottobre",        type: "workshop" },
+  { label: "FIPE I",       dates: "13–14 Novembre",    type: "fipe"     },
+  { label: "Master FT",    dates: "28 Novembre",       type: "workshop" },
+  { label: "VIS 1",        dates: "11–12 Dicembre",    type: "vis"      },
+  { label: "Master End.",  dates: "19 Dicembre",       type: "workshop" },
+  { label: "VIS 2",        dates: "15–16 Gennaio",     type: "vis"      },
+  { label: "Master Nuoto", dates: "30 Gennaio",        type: "workshop" },
+  { label: "FIPE II",      dates: "12–13 Febbraio",    type: "fipe"     },
+  { label: "Master Rugby", dates: "27 Febbraio",       type: "workshop" },
+  { label: "VICTOR 1",     dates: "12–13 Marzo",       type: "victor"   },
+  { label: "Master Volley",dates: "27 Marzo",          type: "workshop" },
+  { label: "VICTOR 2",     dates: "9–10 Aprile",       type: "victor"   },
+  { label: "Master Combat",dates: "24 Aprile",         type: "workshop" },
+  { label: "FIPE III",     dates: "14–15 Maggio",      type: "fipe"     },
+];
+
+export function CalendarSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      gsap.from(headRef.current, {
+        scrollTrigger: { trigger: headRef.current, start: "top 85%", once: true },
+        opacity: 0, y: 25, duration: 0.7, ease: "power3.out",
+      });
+
+      // Timeline line grows downward as section scrolls
+      if (lineRef.current) {
+        gsap.fromTo(
+          lineRef.current,
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            transformOrigin: "top",
+            scrollTrigger: {
+              trigger: itemsRef.current,
+              start: "top 70%",
+              end: "bottom 60%",
+              scrub: 0.5,
+            },
+          }
+        );
+      }
+
+      // Items reveal
+      const items = itemsRef.current?.querySelectorAll("[data-cal-item]");
+      if (items) {
+        gsap.from(items, {
+          scrollTrigger: { trigger: itemsRef.current, start: "top 75%", once: true },
+          opacity: 0, x: 20, duration: 0.45, stagger: 0.07, ease: "power2.out",
+        });
+      }
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="calendario"
+      className="relative overflow-hidden py-24 md:py-32"
+    >
+      <div className="absolute inset-0 bg-academy-darker/40" />
+
+      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+        {/* Header */}
+        <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="label-tag mb-3 block">Calendario Formativo</span>
+            <h2 className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight">
+              Il percorso inizia{" "}
+              <span className="gradient-text">l&apos;11 Settembre.</span>
+            </h2>
+            <p className="mt-3 max-w-lg text-sm text-academy-gray-400">
+              Date reali, senza countdown artificiali. Sai già quando sarai in formazione per i prossimi 9 mesi.
+            </p>
+          </div>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: "Blocco formativo", color: "#F09226" },
+              { label: "Sessione FIPE",    color: "#C0C0C0" },
+              { label: "Master",           color: "#D4AF37" },
+            ].map((l) => (
+              <div key={l.label} className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full" style={{ background: l.color }} />
+                <span className="text-[0.6rem] font-medium text-academy-gray-500 uppercase">{l.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="relative">
+          {/* Vertical line */}
+          <div className="absolute left-[7px] top-0 bottom-0 w-px bg-academy-gray-700/30" />
+          <div
+            ref={lineRef}
+            className="absolute left-[7px] top-0 bottom-0 w-px timeline-progress"
+            style={{ background: "linear-gradient(180deg, #F09226, #D4AF37, #F09226)" }}
+          />
+
+          <div ref={itemsRef} className="grid grid-cols-1 gap-2 pl-8 sm:grid-cols-2 lg:grid-cols-3">
+            {EVENTS.map((ev) => {
+              const c = COLORS[ev.type as keyof typeof COLORS];
+              return (
+                <div
+                  key={`${ev.label}-${ev.dates}`}
+                  data-cal-item
+                  className="relative flex items-center gap-3 overflow-hidden px-4 py-3"
+                  style={{ background: c.bg, border: `1px solid ${c.border}` }}
+                >
+                  {/* Dot on the line */}
+                  <div
+                    className="absolute -left-8 h-3 w-3 shrink-0 rounded-full ring-2 ring-academy-dark"
+                    style={{ background: c.dot }}
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-academy-gray-200">{ev.label}</p>
+                    <p className="text-[0.62rem] font-medium" style={{ color: c.text }}>{ev.dates}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

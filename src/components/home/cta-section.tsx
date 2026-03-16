@@ -1,76 +1,162 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
-import { SectionContainer } from "@/components/shared/section-container";
-import { fadeUp, staggerContainer } from "@/lib/animations/variants";
+
+function SplitLine({ text, className }: { text: string; className?: string }) {
+  return (
+    <span className={`inline-flex overflow-hidden ${className ?? ""}`}>
+      {text.split("").map((ch, i) => (
+        <span key={i} data-cta-char className="inline-block">
+          {ch === " " ? "\u00A0" : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export function CTASection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const sectionRef = useRef<HTMLElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const line1Ref = useRef<HTMLDivElement>(null);
+  const line2Ref = useRef<HTMLDivElement>(null);
+  const subRef = useRef<HTMLDivElement>(null);
+  const btnsRef = useRef<HTMLDivElement>(null);
+  const pillsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      const chars1 = line1Ref.current?.querySelectorAll("[data-cta-char]");
+      const chars2 = line2Ref.current?.querySelectorAll("[data-cta-char]");
+
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: sectionRef.current, start: "top 65%", once: true },
+      });
+
+      tl.from(glowRef.current, { opacity: 0, scale: 0.5, duration: 1.2, ease: "power2.out" });
+
+      if (chars1?.length) {
+        tl.from(chars1, { y: "110%", opacity: 0, duration: 0.65, stagger: 0.022, ease: "power3.out" }, "<0.2");
+      }
+      if (chars2?.length) {
+        tl.from(chars2, { y: "110%", opacity: 0, duration: 0.65, stagger: 0.022, ease: "power3.out" }, "<0.05");
+      }
+
+      tl.from(subRef.current,  { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" }, "-=0.2");
+      tl.from(btnsRef.current, { opacity: 0, y: 15, duration: 0.45, ease: "power2.out" }, "-=0.25");
+      tl.from(pillsRef.current, { opacity: 0, y: 10, duration: 0.4, ease: "power2.out" }, "-=0.2");
+
+      // Glow pulse
+      gsap.to(glowRef.current, {
+        scale: 1.15,
+        opacity: 0.6,
+        duration: 3,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <SectionContainer className="relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-academy-orange/[0.04] blur-[150px]" />
-      </div>
+    <section
+      ref={sectionRef}
+      id="cta"
+      className="relative overflow-hidden py-28 md:py-40"
+    >
+      {/* Background */}
+      <div className="absolute inset-0 bg-academy-darker" />
 
-      <motion.div
-        ref={ref}
-        variants={staggerContainer}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        className="relative text-center"
-      >
-        <motion.div variants={fadeUp}>
-          <span className="mb-4 inline-block text-xs font-semibold tracking-[0.3em] text-academy-orange uppercase">
-            Inizia Ora
-          </span>
-        </motion.div>
+      {/* Massive central glow */}
+      <div
+        ref={glowRef}
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(240,146,38,0.1) 0%, rgba(212,175,55,0.04) 40%, transparent 70%)",
+        }}
+      />
 
-        <motion.h2
-          variants={fadeUp}
-          className="mb-6 text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl"
-        >
-          Forma il Tuo{" "}
-          <span className="gradient-text">Futuro</span>
-        </motion.h2>
+      {/* Grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(240,146,38,1) 1px, transparent 1px)," +
+            "linear-gradient(90deg, rgba(240,146,38,1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
 
-        <motion.p
-          variants={fadeUp}
-          className="mx-auto mb-10 max-w-xl text-lg text-academy-gray-400"
+      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px] text-center">
+        {/* Eyebrow */}
+        <div className="mb-6">
+          <span className="label-tag">Il Tuo Percorso Inizia Ora</span>
+        </div>
+
+        {/* Main headline — split text */}
+        <div ref={line1Ref} className="leading-none">
+          <SplitLine
+            text="IL PERCORSO INIZIA"
+            className="block text-[clamp(2rem,6vw,6rem)] font-black tracking-[-0.02em] text-academy-gray-100"
+          />
+        </div>
+        <div ref={line2Ref} className="mb-8 leading-none">
+          <SplitLine
+            text="L'11 SETTEMBRE."
+            className="block text-[clamp(2rem,6vw,6rem)] font-black tracking-[-0.02em] gradient-text"
+          />
+        </div>
+
+        <p
+          ref={subRef}
+          className="mx-auto mb-10 max-w-md text-sm leading-relaxed text-academy-gray-400"
         >
           La Lacertosus Academy non forma semplici istruttori.
           <br />
           <span className="font-semibold text-academy-gray-200">
             Forma professionisti. Forma imprenditori.
           </span>
-        </motion.p>
+        </p>
 
-        <motion.div
-          variants={fadeUp}
-          className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+        {/* CTAs */}
+        <div
+          ref={btnsRef}
+          className="flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <Button href="/pack" size="lg">
-            Scegli il Tuo Pack
+            Scegli il tuo Percorso
           </Button>
-          <Button href="/percorso" variant="ghost" size="lg">
-            Esplora il Percorso →
+          <Button href="/percorso" variant="outline" size="lg">
+            Esplora il Programma
           </Button>
-        </motion.div>
+        </div>
 
-        {/* Decorative lines */}
-        <motion.div
-          variants={fadeUp}
-          className="mt-16 flex items-center justify-center gap-6"
+        {/* Quick summary pills */}
+        <div
+          ref={pillsRef}
+          className="mt-12 flex flex-wrap items-center justify-center gap-3"
         >
-          <div className="h-px w-24 bg-gradient-to-r from-transparent to-academy-orange/20" />
-          <div className="h-2 w-2 rotate-45 border border-academy-orange/30" />
-          <div className="h-px w-24 bg-gradient-to-l from-transparent to-academy-orange/20" />
-        </motion.div>
-      </motion.div>
-    </SectionContainer>
+          {[
+            "9 mesi",
+            "3 blocchi formativi",
+            "Certificazione FIPE",
+            "8 Workshop specialistici",
+            "100% in presenza",
+          ].map((pill) => (
+            <span
+              key={pill}
+              className="border border-academy-orange/12 bg-academy-orange/4 px-3 py-1 text-[0.62rem] font-semibold tracking-wider text-academy-gray-500 uppercase"
+            >
+              {pill}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

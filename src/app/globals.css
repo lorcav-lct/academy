@@ -28,89 +28,179 @@
   --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
 }
 
-/* Base dark theme */
+/* ─── Base ─── */
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
 }
-
 body {
   background-color: var(--color-academy-dark);
   color: var(--color-academy-gray-100);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-academy-darker);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-academy-navy-light);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-academy-orange);
-}
+/* ─── Custom scrollbar ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-academy-darker); }
+::-webkit-scrollbar-thumb { background: rgba(240,146,38,0.3); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-academy-orange); }
 
-/* Selection */
-::selection {
-  background-color: rgba(240, 146, 38, 0.3);
-  color: white;
-}
+/* ─── Selection ─── */
+::selection { background-color: rgba(240,146,38,0.3); color: white; }
 
-/* Light reflection utility */
-.light-reflection {
-  position: relative;
-  overflow: hidden;
-}
+/* ─── Light reflection ─── */
+.light-reflection { position: relative; overflow: hidden; }
 .light-reflection::before {
   content: "";
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    ellipse at 30% 20%,
-    rgba(240, 146, 38, 0.06) 0%,
-    transparent 50%
-  );
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(240,146,38,0.05) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Gradient text utility */
+/* ─── Gradient text ─── */
 .gradient-text {
-  background: linear-gradient(135deg, #F09226, #f5a84d, #D4AF37);
+  background: linear-gradient(135deg, #F09226 0%, #f5a84d 40%, #D4AF37 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glow effect */
+/* ─── Glow effects ─── */
 .glow-orange {
-  box-shadow: 0 0 20px rgba(240, 146, 38, 0.15),
-              0 0 60px rgba(240, 146, 38, 0.05);
+  box-shadow: 0 0 20px rgba(240,146,38,0.15), 0 0 60px rgba(240,146,38,0.05);
 }
-
 .glow-orange-strong {
-  box-shadow: 0 0 30px rgba(240, 146, 38, 0.25),
-              0 0 80px rgba(240, 146, 38, 0.1);
+  box-shadow: 0 0 40px rgba(240,146,38,0.3), 0 0 100px rgba(240,146,38,0.1);
+}
+.glow-gold {
+  box-shadow: 0 0 20px rgba(212,175,55,0.2), 0 0 60px rgba(212,175,55,0.06);
 }
 
-/* Squared card style */
+/* ─── Cards ─── */
 .card-squared {
-  background: linear-gradient(135deg, rgba(10, 10, 58, 0.8), rgba(2, 0, 38, 0.9));
-  border: 1px solid rgba(240, 146, 38, 0.1);
+  background: linear-gradient(135deg, rgba(10,10,58,0.8), rgba(2,0,38,0.9));
+  border: 1px solid rgba(240,146,38,0.1);
   backdrop-filter: blur(10px);
 }
-
 .card-squared:hover {
-  border-color: rgba(240, 146, 38, 0.3);
-  box-shadow: 0 0 30px rgba(240, 146, 38, 0.08);
+  border-color: rgba(240,146,38,0.3);
+  box-shadow: 0 0 30px rgba(240,146,38,0.08);
 }
+.bento-card {
+  background: linear-gradient(135deg, rgba(10,10,58,0.55) 0%, rgba(2,0,38,0.85) 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(24px);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+.bento-card:hover {
+  border-color: rgba(240,146,38,0.22);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 30px rgba(240,146,38,0.06);
+}
+.bento-card-dark {
+  background: rgba(1,0,18,0.92);
+  border: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px);
+}
+.bento-card-accent {
+  background: linear-gradient(135deg, rgba(240,146,38,0.09) 0%, rgba(2,0,38,0.9) 100%);
+  border: 1px solid rgba(240,146,38,0.22);
+}
+.bento-card-gold {
+  background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(2,0,38,0.9) 100%);
+  border: 1px solid rgba(212,175,55,0.2);
+}
+
+/* ─── Marquee ─── */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee-x 34s linear infinite;
+  will-change: transform;
+}
+
+/* ─── Scroll bounce ─── */
+@keyframes bounce-y {
+  0%, 100% { transform: translateY(0) translateX(-50%); }
+  50%       { transform: translateY(7px) translateX(-50%); }
+}
+
+/* ─── Pulse glow ─── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(240,146,38,0.15); }
+  50%       { box-shadow: 0 0 40px rgba(240,146,38,0.35), 0 0 80px rgba(240,146,38,0.1); }
+}
+.pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+/* ─── Label tag ─── */
+.label-tag {
+  display: inline-block;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-academy-orange);
+}
+
+/* ─── Horizontal line decoration ─── */
+.line-h {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240,146,38,0.3), transparent);
+}
+
+/* ─── GSAP hints ─── */
+.gsap-target { will-change: transform, opacity; }
+
+/* ─── Bento interactive — cursor radial glow + 3D ready ─── */
+.bento-interactive {
+  position: relative;
+  transform-style: preserve-3d;
+}
+/* Primary glow follows cursor */
+.bento-interactive::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(320px at var(--mx, 50%) var(--my, 50%), rgba(240,146,38,0.13), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+/* Secondary: border highlight on hover */
+.bento-interactive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, rgba(240,146,38,0), rgba(240,146,38,0)) border-box;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+}
+.bento-interactive:hover::after  { opacity: 1; }
+.bento-interactive:hover::before {
+  opacity: 1;
+  background: linear-gradient(135deg, rgba(240,146,38,0.18), rgba(212,175,55,0.08)) border-box;
+  border-color: rgba(240,146,38,0.22);
+  box-shadow: inset 0 0 20px rgba(240,146,38,0.04);
+}
+
+/* ─── Timeline progress bar ─── */
+.timeline-progress {
+  transform-origin: top;
+  transform: scaleY(0);
+}
+
+/* ─── Tabular numbers ─── */
+.tabular-nums { font-variant-numeric: tabular-nums; }

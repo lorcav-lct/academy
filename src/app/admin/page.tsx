@@ -70,7 +70,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <Link href="/admin/scanner" className="group">
             <div className="card-squared p-8 transition-all hover:glow-orange">
               <h2 className="mb-2 text-xl font-bold group-hover:text-academy-orange">
@@ -88,6 +88,16 @@ export default function AdminDashboard() {
               </h2>
               <p className="text-sm text-academy-gray-400">
                 Visualizza e gestisci tutti gli ordini.
+              </p>
+            </div>
+          </Link>
+          <Link href="/admin/contenuti" className="group">
+            <div className="card-squared p-8 transition-all hover:glow-orange">
+              <h2 className="mb-2 text-xl font-bold group-hover:text-academy-orange">
+                Contenuti Sito
+              </h2>
+              <p className="text-sm text-academy-gray-400">
+                Modifica testi, slide, immagini e contenuti visibili sul sito.
               </p>
             </div>
           </Link>
