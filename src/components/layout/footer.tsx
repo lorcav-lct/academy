@@ -8,10 +8,10 @@ const footerLinks = {
     { href: "/corsi/victor", label: "VICTOR" },
   ],
   workshop: [
-    { href: "/workshop/master-hyrox", label: "Master Hyrox" },
-    { href: "/workshop/master-calcio", label: "Master Calcio" },
-    { href: "/workshop/master-functional", label: "Master Functional" },
-    { href: "/workshop/master-endurance", label: "Master Endurance" },
+    { href: "/masterclass/master-hyrox", label: "Master Hyrox" },
+    { href: "/masterclass/master-calcio", label: "Master Calcio" },
+    { href: "/masterclass/master-functional", label: "Master Functional" },
+    { href: "/masterclass/master-endurance", label: "Master Endurance" },
   ],
   info: [
     { href: "/pack", label: "Pack & Prezzi" },
@@ -22,7 +22,7 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-academy-orange/10 bg-academy-darker">
+    <footer className="themed-section section-bg-alt border-t border-academy-orange/10">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-4">
           {/* Brand */}
@@ -59,10 +59,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Workshop */}
+          {/* Masterclass */}
           <div>
             <h4 className="mb-4 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
-              Workshop
+              Masterclass
             </h4>
             <ul className="space-y-2">
               {footerLinks.workshop.map((link) => (

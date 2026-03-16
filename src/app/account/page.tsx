@@ -267,7 +267,7 @@ export default function AccountPage() {
                       Cambia
                     </button>
                   </div>
-                  <p className="mt-1 text-[10px] text-academy-gray-500">
+                  <p className="mt-1 text-[12px] text-academy-gray-500">
                     Riceverai una conferma via email.
                   </p>
                   {emailMsg && (
@@ -336,7 +336,7 @@ export default function AccountPage() {
                             <button
                               disabled={resuming === order.id}
                               onClick={() => handleResume(order.id)}
-                              className="text-[10px] font-bold tracking-wider text-academy-orange uppercase hover:underline disabled:opacity-50"
+                              className="text-[12px] font-bold tracking-wider text-academy-orange uppercase hover:underline disabled:opacity-50"
                             >
                               {resuming === order.id ? "..." : "Riprendi Pagamento →"}
                             </button>
@@ -344,7 +344,7 @@ export default function AccountPage() {
                           {ticket && order.status === "paid" && (
                             <Link
                               href="/account/tickets"
-                              className="text-[10px] font-bold tracking-wider text-green-400 uppercase hover:underline"
+                              className="text-[12px] font-bold tracking-wider text-green-400 uppercase hover:underline"
                             >
                               Vedi Ticket →
                             </Link>

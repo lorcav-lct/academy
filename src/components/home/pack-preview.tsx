@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
 import { PRODUCTS } from "@/lib/constants/packs";
+import { useTheme } from "@/components/providers/theme-provider";
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(cents / 100);
@@ -23,6 +24,9 @@ export function PackPreview() {
   const headRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { theme } = useTheme();
+  const d = theme === "dark";
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -46,38 +50,37 @@ export function PackPreview() {
     return () => ctx.revert();
   }, []);
 
+  const th = d ? undefined : "#111111";
+  const tb = d ? undefined : "#444444";
+  const tm = d ? undefined : "#777777";
+
   return (
-    <section
-      ref={sectionRef}
-      id="pack"
-      className="relative overflow-hidden py-24 md:py-32 light-reflection"
-    >
-      <div className="absolute inset-0 bg-academy-dark" />
-      {/* Central glow */}
+    <section ref={sectionRef} id="pack" className="themed-section relative overflow-hidden py-24 md:py-32 light-reflection">
+      <div className="absolute inset-0 section-bg-alt" />
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{ background: "radial-gradient(ellipse, rgba(240,146,38,0.04) 0%, transparent 70%)" }} />
 
       <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
-        {/* Header */}
         <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="label-tag mb-3 block">Costruisci il Tuo Percorso</span>
-            <h2 className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight">
+            <h2
+              className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight text-academy-gray-100"
+              style={{ color: th }}
+            >
               Scegli il Blocco.{" "}
               <span className="gradient-text">Scala il Livello.</span>
             </h2>
-            <p className="mt-3 max-w-lg text-sm text-academy-gray-400">
+            <p className="mt-3 max-w-lg text-sm text-academy-gray-400" style={{ color: tb }}>
               Ogni blocco è acquistabile singolarmente. Puoi iniziare da PRIMAL e completare il percorso al tuo ritmo.
             </p>
           </div>
-          <Button href="/pack" variant="outline" size="sm">
-            Tutti i prodotti →
-          </Button>
+          <Button href="/pack" variant="outline" size="sm">Tutti i prodotti →</Button>
         </div>
 
         {/* Cards */}
         <div ref={cardsRef} className="grid gap-4 md:grid-cols-3">
-          {courses.map((course, i) => {
+          {courses.map((course) => {
             const c = COURSE_COLORS[course.slug] || COURSE_COLORS.primal;
             const isHighlighted = course.highlighted;
             return (
@@ -86,9 +89,13 @@ export function PackPreview() {
                 data-pack-card
                 className="relative flex flex-col overflow-hidden p-8 transition-all duration-500"
                 style={{
-                  background: `linear-gradient(145deg, ${c.glow}, rgba(2,0,38,0.95))`,
+                  background: d
+                    ? `linear-gradient(145deg, ${c.glow}, rgba(2,0,38,0.95))`
+                    : `linear-gradient(145deg, ${c.glow}, rgba(255,255,255,0.98))`,
                   border: `1px solid ${c.border}`,
-                  boxShadow: isHighlighted ? `0 0 40px ${c.glow}, 0 20px 60px rgba(0,0,0,0.4)` : undefined,
+                  boxShadow: isHighlighted
+                    ? d ? `0 0 40px ${c.glow}, 0 20px 60px rgba(0,0,0,0.4)` : `0 0 30px ${c.glow}, 0 8px 30px rgba(0,0,0,0.06)`
+                    : undefined,
                   transform: isHighlighted ? "scale(1.02)" : undefined,
                 }}
               >
@@ -96,43 +103,35 @@ export function PackPreview() {
                   <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-academy-gold to-transparent" />
                 )}
                 {isHighlighted && (
-                  <span className="absolute right-4 top-4 bg-academy-gold/15 px-2 py-0.5 text-[0.58rem] font-black tracking-[0.2em] text-academy-gold uppercase">
+                  <span className="absolute right-4 top-4 bg-academy-gold/15 px-2 py-0.5 text-[0.75rem] font-black tracking-[0.2em] text-academy-gold uppercase">
                     Più acquistato
                   </span>
                 )}
-
                 <div className="mb-6">
                   <span className="label-tag mb-2 block opacity-60">{c.label}</span>
-                  <h3 className="text-3xl font-black tracking-tight text-academy-gray-100">
+                  <h3 className="text-3xl font-black tracking-tight text-academy-gray-100" style={{ color: th }}>
                     {course.name}
                   </h3>
-                  <p className="mt-1 text-sm text-academy-gray-500">{course.subtitle}</p>
+                  <p className="mt-1 text-sm text-academy-gray-500" style={{ color: tm }}>{course.subtitle}</p>
                 </div>
-
                 <ul className="mb-8 flex-1 space-y-2">
                   {course.includes.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-xs text-academy-gray-400">
+                    <li key={item} className="flex items-start gap-2 text-xs text-academy-gray-400" style={{ color: tb }}>
                       <span className="mt-1 h-1 w-1 shrink-0 bg-academy-orange" />
                       {item}
                     </li>
                   ))}
                 </ul>
-
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-[0.62rem] font-medium text-academy-gray-500 uppercase">
+                    <p className="text-[0.75rem] font-medium text-academy-gray-500 uppercase" style={{ color: tm }}>
                       {course.priceCents > 0 ? "A partire da" : ""}
                     </p>
                     <p className="text-2xl font-black text-academy-orange">
                       {course.priceCents > 0 ? formatPrice(course.priceCents) : "Prossimamente"}
                     </p>
                   </div>
-                  <Button
-                    href={`/checkout?pack=${course.slug}`}
-                    size="sm"
-                    variant={isHighlighted ? "primary" : "outline"}
-                    disabled={course.priceCents === 0}
-                  >
+                  <Button href={`/checkout?pack=${course.slug}`} size="sm" variant={isHighlighted ? "primary" : "outline"} disabled={course.priceCents === 0}>
                     Scegli
                   </Button>
                 </div>
@@ -144,18 +143,20 @@ export function PackPreview() {
         {/* Certification note */}
         <div
           ref={bottomRef}
-          className="mt-4 flex flex-col items-start gap-4 border border-academy-gold/15 bg-academy-gold/4 p-5 sm:flex-row sm:items-center sm:justify-between"
+          className="mt-4 flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
+          style={{
+            border: "1px solid rgba(212,175,55,0.15)",
+            background: d ? "rgba(212,175,55,0.04)" : "rgba(212,175,55,0.06)",
+          }}
         >
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rotate-45 bg-academy-gold" />
-            <p className="text-sm text-academy-gray-300">
+            <p className="text-sm text-academy-gray-300" style={{ color: tb }}>
               <span className="font-bold text-academy-gold">Certificazione FipexLacertosus</span>
               {" — "}inclusa nel percorso completo. Riconosciuta professionalmente nel settore fitness.
             </p>
           </div>
-          <Button href="/pack" variant="secondary" size="sm">
-            Confronta tutti i prodotti
-          </Button>
+          <Button href="/pack" variant="secondary" size="sm">Confronta tutti i prodotti</Button>
         </div>
       </div>
     </section>

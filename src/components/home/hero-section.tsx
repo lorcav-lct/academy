@@ -7,11 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { HeroSlide, DEFAULT_HERO_SLIDES } from "@/lib/constants/hero-slides";
 import { TEACHERS } from "@/lib/constants/teachers";
+import { useTheme } from "@/components/providers/theme-provider";
 
 /* ══════════════════════════════════════════════════════
    PARTICLE FIELD — mouse repulsion physics
 ══════════════════════════════════════════════════════ */
-function ParticleField() {
+function ParticleField({ isDark }: { isDark: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ function ParticleField() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" style={{ opacity: 0.55 }} />;
+  return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" style={{ opacity: isDark ? 0.55 : 0.22 }} />;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -150,7 +151,7 @@ function Brackets({ color = "rgba(240,146,38,0.22)" }: { color?: string }) {
 /* ══════════════════════════════════════════════════════
    TEACHERS CELL — auto-rotating faculty showcase
 ══════════════════════════════════════════════════════ */
-function TeachersCell({ mobile }: { mobile?: boolean }) {
+function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boolean; isDark: boolean }) {
   const [activeTeacher, setActiveTeacher] = useState(0);
   const activeTeacherRef = useRef(0);
   const isTransitioningTeacher = useRef(false);
@@ -187,31 +188,54 @@ function TeachersCell({ mobile }: { mobile?: boolean }) {
 
   return (
     <div
-      className="bento-card bento-interactive rounded-sm px-5 py-5 flex flex-col justify-between relative overflow-hidden"
-      style={mobile
-        ? { flex: "1 1 0%", borderLeft: `2px solid ${t.color}44` }
-        : { width: "200px", flexShrink: 0, borderLeft: `2px solid ${t.color}44` }
-      }
+      className="bento-interactive rounded-sm px-5 py-5 flex flex-col justify-between relative overflow-hidden"
+      style={{
+        ...(mobile
+          ? { flex: "1 1 0%" }
+          : fill
+          ? { flex: "2 1 0%" }
+          : { width: "200px", flexShrink: 0 }),
+        background: isDark ? "rgba(2,0,38,0.75)" : "rgba(255,255,255,0.92)",
+        border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.07)"}`,
+        borderLeft: `2px solid ${t.color}44`,
+      }}
       onMouseMove={onCellMove}
       onMouseLeave={onCellLeave}
     >
-      <div className="text-[0.52rem] font-bold tracking-[0.28em] text-academy-gray-400 uppercase">Docenti</div>
+      <div
+        className="text-[0.75rem] font-bold tracking-[0.28em] uppercase"
+        style={{ color: isDark ? "rgba(180,180,190,0.6)" : "rgba(0,0,0,0.4)" }}
+      >
+        Docenti
+      </div>
 
-      <div ref={teacherContentRef} className="flex flex-col gap-2.5">
+      <div ref={teacherContentRef} className="flex items-center gap-3">
         <div
-          className="w-11 h-11 rounded-full flex items-center justify-center text-[0.75rem] font-black flex-shrink-0"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-[0.75rem] font-black flex-shrink-0 overflow-hidden"
           style={{
             background: `${t.color}18`,
             border: `1px solid ${t.color}40`,
             color: t.color,
-            boxShadow: `0 0 14px ${t.color}1a`,
           }}
         >
-          {t.initials}
+          {t.image_url
+            ? <img src={t.image_url} alt={t.name} className="w-full h-full object-cover" />
+            : t.initials
+          }
         </div>
-        <div>
-          <div className="text-[0.88rem] font-bold text-white leading-tight">{t.name}</div>
-          <div className="text-[0.54rem] font-medium text-academy-gray-400 uppercase tracking-wider mt-0.5">{t.role}</div>
+        <div className="min-w-0">
+          <div
+            className="text-[0.88rem] font-bold leading-tight truncate"
+            style={{ color: isDark ? "#ffffff" : "#111111" }}
+          >
+            {t.name}
+          </div>
+          <div
+            className="text-[0.75rem] font-medium uppercase tracking-wider mt-0.5 truncate"
+            style={{ color: isDark ? "rgba(180,180,190,0.55)" : "rgba(0,0,0,0.45)" }}
+          >
+            {t.role}
+          </div>
         </div>
       </div>
 
@@ -224,7 +248,7 @@ function TeachersCell({ mobile }: { mobile?: boolean }) {
             style={{
               height: "3px",
               width: i === activeTeacher ? "14px" : "4px",
-              background: i === activeTeacher ? t.color : "rgba(255,255,255,0.12)",
+              background: i === activeTeacher ? t.color : (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"),
             }}
           />
         ))}
@@ -236,7 +260,7 @@ function TeachersCell({ mobile }: { mobile?: boolean }) {
 /* ══════════════════════════════════════════════════════
    VIDEO PRESENTATION CELL — GIF preview + Vimeo modal
 ══════════════════════════════════════════════════════ */
-function VideoPresentationCell({ mobile }: { mobile?: boolean }) {
+function VideoPresentationCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boolean; isDark: boolean }) {
   const [open, setOpen] = useState(false);
 
   const modal = open ? createPortal(
@@ -252,7 +276,7 @@ function VideoPresentationCell({ mobile }: { mobile?: boolean }) {
         {/* Close */}
         <button
           onClick={() => setOpen(false)}
-          className="absolute -top-10 right-0 flex items-center gap-1.5 text-[0.6rem] font-bold tracking-[0.25em] uppercase text-white/50 hover:text-white transition-colors"
+          className="absolute -top-10 right-0 flex items-center gap-1.5 text-[0.75rem] font-bold tracking-[0.25em] uppercase text-white/50 hover:text-white transition-colors"
         >
           <span>Chiudi</span>
           <span className="text-lg leading-none font-light">×</span>
@@ -285,20 +309,28 @@ function VideoPresentationCell({ mobile }: { mobile?: boolean }) {
       {/* Bento cell */}
       <div
         className="bento-interactive rounded-sm relative overflow-hidden cursor-pointer group"
-        style={mobile
-          ? {
-              width: "100%",
-              height: "150px",
-              flexShrink: 0,
-              border: "1px solid rgba(240,146,38,0.12)",
-              background: "rgba(1,0,18,0.92)",
-            }
-          : {
-              width: "220px",
-              flexShrink: 0,
-              border: "1px solid rgba(240,146,38,0.12)",
-              background: "rgba(1,0,18,0.92)",
-            }
+        style={
+          mobile
+            ? {
+                width: "100%",
+                height: "150px",
+                flexShrink: 0,
+                border: `1px solid ${isDark ? "rgba(240,146,38,0.12)" : "rgba(240,146,38,0.2)"}`,
+                background: isDark ? "rgba(1,0,18,0.92)" : "rgba(245,243,238,0.95)",
+              }
+            : fill
+            ? {
+                flex: "1 1 0%",
+                minHeight: 0,
+                border: `1px solid ${isDark ? "rgba(240,146,38,0.12)" : "rgba(240,146,38,0.2)"}`,
+                background: isDark ? "rgba(1,0,18,0.92)" : "rgba(245,243,238,0.95)",
+              }
+            : {
+                width: "220px",
+                flexShrink: 0,
+                border: `1px solid ${isDark ? "rgba(240,146,38,0.12)" : "rgba(240,146,38,0.2)"}`,
+                background: isDark ? "rgba(1,0,18,0.92)" : "rgba(245,243,238,0.95)",
+              }
         }
         onClick={() => setOpen(true)}
         onMouseMove={onCellMove}
@@ -309,15 +341,19 @@ function VideoPresentationCell({ mobile }: { mobile?: boolean }) {
           src="https://training-hub.lacertosus.com/assets/traininghub-demo-lq.gif.pagespeed.ce.w52WxtgIG2.gif"
           alt=""
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ opacity: 0.38 }}
+          style={{ opacity: 0.85 }}
           aria-hidden="true"
         />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(1,0,18,0.78) 0%, rgba(2,0,38,0.55) 100%)" }} />
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 50% 65%, rgba(240,146,38,0.1) 0%, transparent 70%)" }} />
 
         <div className="relative z-10 h-full flex flex-col justify-between p-5">
-          <div className="text-[0.52rem] font-bold tracking-[0.28em] text-academy-gray-400 uppercase">Presentazione</div>
+          <div
+            className="text-[0.75rem] font-bold tracking-[0.28em] uppercase"
+            style={{ color: "rgba(180,180,190,0.6)" }}
+          >
+            Presentazione
+          </div>
           <div className="flex items-center gap-2.5">
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
@@ -332,8 +368,18 @@ function VideoPresentationCell({ mobile }: { mobile?: boolean }) {
               </svg>
             </div>
             <div>
-              <div className="text-[0.7rem] font-bold text-white leading-tight">Guarda il video</div>
-              <div className="text-[0.5rem] font-medium text-academy-gray-400 mt-0.5 uppercase tracking-wide">Academy in 2 min</div>
+              <div
+                className="text-[0.75rem] font-bold leading-tight"
+                style={{ color: "#ffffff" }}
+              >
+                Guarda il video
+              </div>
+              <div
+                className="text-[0.75rem] font-medium mt-0.5 uppercase tracking-wide"
+                style={{ color: "rgba(180,180,190,0.55)" }}
+              >
+                Academy in 2 min
+              </div>
             </div>
           </div>
         </div>
@@ -350,7 +396,6 @@ function VideoPresentationCell({ mobile }: { mobile?: boolean }) {
 export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSlide[] }) {
   const sectionRef    = useRef<HTMLElement>(null);
   const bgGridRef     = useRef<HTMLDivElement>(null);
-  const glowRef       = useRef<HTMLDivElement>(null);
   const scanRef       = useRef<HTMLDivElement>(null);
   const hBeamRef      = useRef<HTMLDivElement>(null);
   const vBeamRef      = useRef<HTMLDivElement>(null);
@@ -361,6 +406,9 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
   const bottomRowRef  = useRef<HTMLDivElement>(null);
   const ctaWrapRef    = useRef<HTMLDivElement>(null);
   const slideContentRef = useRef<HTMLDivElement>(null);
+
+  const { theme } = useTheme();
+  const d = theme === "dark";
 
   /* ── Slider state ── */
   const [activeIdx, setActiveIdx] = useState(0);
@@ -412,7 +460,6 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
 
       /* backgrounds */
       tl.from(bgGridRef.current, { opacity: 0, duration: 2, ease: "power2.out" });
-      tl.from(glowRef.current,   { opacity: 0, scale: 0.4, duration: 1.8, ease: "power3.out" }, "<0.2");
 
       /* scanning line */
       tl.fromTo(scanRef.current, { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.95, ease: "power2.inOut" }, "<0.35");
@@ -447,8 +494,6 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
         );
       }
 
-      /* glow pulse */
-      gsap.to(glowRef.current, { scale: 1.18, opacity: 0.7, duration: 3.8, ease: "sine.inOut", repeat: -1, yoyo: true });
 
       /* ── Light beams — horizontal sweep ── */
       const hTl = gsap.timeline({ repeat: -1, delay: 4, repeatDelay: 7 });
@@ -478,7 +523,6 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
           if (rightColRef.current)  gsap.set(rightColRef.current,  { y: p * 28 });
           if (bottomRowRef.current) gsap.set(bottomRowRef.current, { y: p * 16 });
           if (bgGridRef.current)    gsap.set(bgGridRef.current,    { y: p * 55 });
-          if (glowRef.current)      gsap.set(glowRef.current,      { y: p * 80, scale: 1 + p * 0.3 });
         },
       });
     }, sectionRef);
@@ -502,20 +546,37 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
 
   const slide = slides[activeIdx] ?? slides[0];
 
+  /* ── Computed theme values ── */
+  const sectionBg = d ? "#010015" : "#f5f3ee";
+  const cardBg    = d ? "rgba(2,0,38,0.75)"   : "rgba(255,255,255,0.92)";
+  const cardBorder = d ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.08)";
+  const accentCardBg = d ? "rgba(8,4,40,0.85)" : "rgba(255,250,242,0.95)";
+  const accentBorder = d ? "rgba(240,146,38,0.18)" : "rgba(240,146,38,0.2)";
+  const titleColor = d ? "#ffffff" : "#111111";
+  const descColor  = d ? "rgba(160,155,175,1)" : "#666666";
+  const labelColor = d ? "rgba(180,180,190,0.6)" : "rgba(0,0,0,0.4)";
+  const subtitleColor = d ? "rgba(160,155,175,0.85)" : "#777777";
+  const slideOverlay = "linear-gradient(160deg, rgba(1,0,18,0.22) 0%, rgba(1,0,18,0.42) 100%)";
+  const inactiveDot = d ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)";
+  const dividerColor = d ? "rgba(240,146,38,0.15)" : "rgba(240,146,38,0.2)";
+  const bottomGradient = d ? "rgba(1,0,24,0.97)" : "rgba(245,243,238,0.97)";
+
   /* ────────────────────────── JSX ────────────────────────── */
   return (
-    <section ref={sectionRef} className="relative min-h-screen overflow-hidden flex flex-col bg-[#010015]">
+    <section ref={sectionRef} className="relative min-h-screen overflow-hidden flex flex-col" style={{ background: sectionBg }}>
 
       {/* Particles */}
-      <ParticleField />
+      <ParticleField isDark={d} />
 
       {/* BG Grid */}
-      <div ref={bgGridRef} className="absolute inset-0 opacity-[0.22]" style={{
+      <div ref={bgGridRef} className="absolute inset-0" style={{
+        opacity: d ? 0.22 : 0.07,
         backgroundImage:
           "linear-gradient(rgba(240,146,38,1) 1px, transparent 1px)," +
           "linear-gradient(90deg, rgba(240,146,38,1) 1px, transparent 1px)",
         backgroundSize: "72px 72px",
       }} />
+
 
       {/* Horizontal light beam */}
       <div ref={hBeamRef} className="pointer-events-none absolute left-0 right-0 z-[1]" style={{
@@ -555,13 +616,17 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
           <div
             ref={mainCellRef}
             data-no-tilt="1"
-            className="bento-card-dark bento-interactive rounded-sm flex flex-col p-9 relative overflow-hidden"
-            style={{ flex: "1 1 0%" }}
+            className="bento-interactive rounded-sm flex flex-col p-9 relative overflow-hidden"
+            style={{
+              flex: "1 1 0%",
+              background: "rgba(2,0,38,0.75)",
+              border: "1px solid rgba(255,255,255,0.04)",
+            }}
             onMouseMove={onCellMove}
             onMouseEnter={() => { isHovering.current = true; }}
             onMouseLeave={(e) => { isHovering.current = false; onCellLeave(e); }}
           >
-            <Brackets />
+            <Brackets color="rgba(240,146,38,0.22)" />
 
             {/* Slide background image */}
             {slide.bg_image_url && (
@@ -570,14 +635,14 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}>
-                <div className="absolute inset-0" style={{ background: "rgba(1,0,18,0.78)" }} />
+                <div className="absolute inset-0" style={{ background: slideOverlay }} />
               </div>
             )}
 
             {/* Badge */}
             <div data-hero-sub className="flex items-center gap-2.5 mb-auto relative z-10">
               <span className="h-1.5 w-1.5 rounded-full bg-academy-gold flex-shrink-0" style={{ boxShadow: "0 0 8px rgba(212,175,55,0.6)" }} />
-              <span className="text-[0.58rem] font-bold tracking-[0.3em] text-academy-orange uppercase">
+              <span className="text-[0.75rem] font-bold tracking-[0.3em] text-academy-orange uppercase">
                 Certificazione FIPE × LACERTOSUS Inclusa
               </span>
             </div>
@@ -587,7 +652,8 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
               <div ref={line1Ref}>
                 <SplitLine
                   text={slide.title_white}
-                  className="text-[clamp(2.2rem,4.6vw,5.8rem)] font-black tracking-[-0.03em] text-white"
+                  className="text-[clamp(2.2rem,4.6vw,5.8rem)] font-black tracking-[-0.03em]"
+                  style={{ color: "#ffffff" }}
                 />
               </div>
               <div ref={line2Ref} className="mt-1">
@@ -597,13 +663,13 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
                   style={{ color: "#F09226" }}
                 />
               </div>
-              <p data-hero-sub className="mt-6 max-w-md text-[clamp(0.78rem,1.05vw,0.94rem)] leading-[1.75] text-academy-gray-400">
+              <p data-hero-sub className="mt-6 max-w-md text-[clamp(0.78rem,1.05vw,0.94rem)] leading-[1.75]" style={{ color: "rgba(160,155,175,1)" }}>
                 {slide.description}
               </p>
               {slide.cta_href && slide.cta_label && (
                 <Link
                   href={slide.cta_href}
-                  className="mt-5 inline-flex items-center gap-2.5 text-[0.65rem] font-bold tracking-[0.18em] uppercase text-academy-orange hover:text-academy-orange-light transition-colors duration-200"
+                  className="mt-5 inline-flex items-center gap-2.5 text-[0.75rem] font-bold tracking-[0.18em] uppercase text-academy-orange hover:text-academy-orange-light transition-colors duration-200"
                 >
                   {slide.cta_label}
                   <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -614,7 +680,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
             {/* Path indicator */}
             <div data-hero-sub className="mt-auto relative z-10">
               <div className="h-px mb-4" style={{ background: "linear-gradient(90deg, rgba(240,146,38,0.15), transparent)" }} />
-              <div className="flex items-center gap-4 text-[0.57rem] font-black tracking-[0.3em] uppercase">
+              <div className="flex items-center gap-4 text-[0.75rem] font-black tracking-[0.3em] uppercase">
                 <span style={{ color: "#CD7F32" }}>PRIMAL</span>
                 <span style={{ color: "rgba(240,146,38,0.2)", letterSpacing: "0.05em" }}>———</span>
                 <span style={{ color: "#C0C0C0" }}>VIS</span>
@@ -650,45 +716,41 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
           >
             {/* Durata */}
             <div
-              className="bento-card-accent bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden min-h-0"
-              style={{ flex: "1 1 0%" }}
+              className="bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden min-h-0 hide-short-screen"
+              style={{
+                flex: "1 1 0%",
+                background: accentCardBg,
+                border: `1px solid ${accentBorder}`,
+              }}
               onMouseMove={onCellMove}
               onMouseLeave={onCellLeave}
             >
               <StatRing pct={0.75} size={46} color="#F09226" />
-              <div className="text-[0.53rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Durata percorso</div>
+              <div className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Durata percorso</div>
               <div>
                 <div className="text-[3.8rem] font-black text-academy-orange tabular-nums leading-none">9</div>
-                <div className="text-[0.58rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">mesi di formazione</div>
+                <div className="text-[0.75rem] font-semibold uppercase tracking-wider mt-0.5" style={{ color: subtitleColor }}>mesi di formazione</div>
               </div>
             </div>
 
-            {/* Struttura */}
-            <div
-              className="bento-card bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden min-h-0"
-              style={{ flex: "1 1 0%" }}
-              onMouseMove={onCellMove}
-              onMouseLeave={onCellLeave}
-            >
-              <StatRing pct={0.6} size={46} color="#D4AF37" />
-              <div className="text-[0.53rem] font-bold tracking-[0.28em] text-academy-gray-400 uppercase">Struttura</div>
-              <div>
-                <div className="text-[3.8rem] font-black text-white tabular-nums leading-none">3</div>
-                <div className="text-[0.58rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">blocchi progressivi</div>
-              </div>
-            </div>
+            {/* Video Presentazione */}
+            <VideoPresentationCell isDark={d} fill />
 
-            {/* FIPE Cert — left-aligned */}
+            {/* FIPE Cert */}
             <div
-              className="bento-card-gold bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden min-h-0"
-              style={{ flex: "1 1 0%" }}
+              className="bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden min-h-0"
+              style={{
+                flex: "1 1 0%",
+                background: d ? "rgba(8,6,30,0.9)" : "rgba(252,250,240,0.95)",
+                border: `1px solid ${d ? "rgba(212,175,55,0.18)" : "rgba(212,175,55,0.25)"}`,
+              }}
               onMouseMove={onCellMove}
               onMouseLeave={onCellLeave}
             >
               <div className="absolute inset-0" style={{
                 background: "radial-gradient(ellipse at 30% 30%, rgba(212,175,55,0.18) 0%, transparent 68%)",
               }} />
-              <div className="relative text-[0.5rem] font-bold tracking-[0.28em] text-academy-gold/75 uppercase">
+              <div className="relative text-[0.75rem] font-bold tracking-[0.28em] text-academy-gold/75 uppercase">
                 Certificazione Ufficiale
               </div>
               <div className="relative flex items-center gap-3">
@@ -704,11 +766,11 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
                 </div>
                 <div>
                   <div className="text-[1.15rem] font-black text-academy-gold tracking-tight leading-none">FIPE</div>
-                  <div className="text-[0.52rem] text-academy-gold/60 tracking-[0.25em] my-0.5">×</div>
-                  <div className="text-[0.72rem] font-black text-academy-gold/90 tracking-[0.14em]">LACERTOSUS</div>
+                  <div className="text-[0.75rem] text-academy-gold/60 tracking-[0.25em] my-0.5">×</div>
+                  <div className="text-[0.75rem] font-black text-academy-gold/90 tracking-[0.14em]">LACERTOSUS</div>
                 </div>
               </div>
-              <div className="relative text-[0.45rem] font-semibold tracking-[0.15em] text-academy-gold/60 uppercase">
+              <div className="relative text-[0.75rem] font-semibold tracking-[0.15em] text-academy-gold/60 uppercase">
                 Riconosciuta a livello nazionale
               </div>
             </div>
@@ -720,8 +782,12 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
 
           {/* ① CTA — leftmost, flex-1 */}
           <div
-            className="bento-card-accent bento-interactive rounded-sm px-6 py-5 flex flex-col items-center justify-center gap-3.5 relative overflow-hidden"
-            style={{ flex: "1 1 0%" }}
+            className="bento-interactive rounded-sm px-6 py-5 flex flex-col items-center justify-center gap-3.5 relative overflow-hidden"
+            style={{
+              flex: "3 1 0%",
+              background: accentCardBg,
+              border: `1px solid ${accentBorder}`,
+            }}
             onMouseMove={onCellMove}
             onMouseLeave={onCellLeave}
           >
@@ -731,7 +797,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
             <div ref={ctaWrapRef} className="w-full relative z-10">
               <Link
                 href="#pack"
-                className="group flex items-center justify-center gap-2.5 w-full font-black text-[0.73rem] tracking-[0.2em] uppercase py-4 px-5 transition-all duration-200"
+                className="group flex items-center justify-center gap-2.5 w-full font-black text-[0.75rem] tracking-[0.2em] uppercase py-4 px-5 transition-all duration-200"
                 style={{ background: "#F09226", color: "#010015" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f5a84d"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#F09226"; }}
@@ -742,51 +808,50 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
             </div>
             <div className="w-full flex items-center gap-2 relative z-10">
               <div className="flex-1 h-px" style={{ background: "rgba(240,146,38,0.18)" }} />
-              <span className="text-[0.44rem] font-bold tracking-[0.22em] text-academy-gray-600 uppercase">oppure</span>
+              <span className="text-[0.75rem] font-bold tracking-[0.22em] uppercase" style={{ color: labelColor }}>oppure</span>
               <div className="flex-1 h-px" style={{ background: "rgba(240,146,38,0.18)" }} />
             </div>
             <Link
               href="/percorso"
-              className="group relative z-10 flex items-center gap-2 text-[0.66rem] font-semibold tracking-[0.14em] text-academy-gray-200 uppercase hover:text-white transition-colors duration-200"
+              className="group relative z-10 flex items-center gap-2 text-[0.75rem] font-semibold tracking-[0.14em] uppercase hover:text-academy-orange transition-colors duration-200"
+              style={{ color: subtitleColor }}
             >
               <span className="inline-block h-px transition-all duration-300 group-hover:w-5" style={{ width: "14px", background: "currentColor" }} />
               Il Percorso Completo
             </Link>
           </div>
 
-          {/* ② Video presentation */}
-          <VideoPresentationCell />
+          {/* ② Docenti */}
+          <TeachersCell isDark={d} fill />
 
-          {/* ③ Teachers showcase */}
-          <TeachersCell />
-
-          {/* ④ 8 Workshop */}
-          <div
-            className="bento-card bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden flex-shrink-0"
-            style={{ width: "162px" }}
-            onMouseMove={onCellMove}
-            onMouseLeave={onCellLeave}
+          {/* ③ 8 Masterclass */}
+          <Link
+            href="/masterclass"
+            className="bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden"
+            style={{ flex: "2 1 0%", background: cardBg, border: `1px solid ${cardBorder}` }}
+            onMouseMove={onCellMove as unknown as React.MouseEventHandler<HTMLAnchorElement>}
+            onMouseLeave={onCellLeave as unknown as React.MouseEventHandler<HTMLAnchorElement>}
           >
-            <div className="text-[0.52rem] font-bold tracking-[0.25em] text-academy-gray-400 uppercase">Workshop</div>
+            <div className="text-[0.75rem] font-bold tracking-[0.25em] uppercase" style={{ color: labelColor }}>Masterclass</div>
             <div>
-              <div className="text-[3.6rem] font-black text-white tabular-nums leading-none">8</div>
-              <div className="text-[0.56rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">specialistici</div>
+              <div className="text-[3.6rem] font-black tabular-nums leading-none" style={{ color: titleColor }}>8</div>
+              <div className="text-[0.75rem] font-semibold uppercase tracking-wider mt-0.5" style={{ color: subtitleColor }}>specialistici</div>
             </div>
-          </div>
+          </Link>
 
-          {/* ⑤ 100% Presenza */}
+          {/* ④ 100% Presenza */}
           <div
-            className="bento-card bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden flex-shrink-0"
-            style={{ width: "148px" }}
+            className="bento-interactive rounded-sm p-5 flex flex-col justify-between relative overflow-hidden"
+            style={{ flex: "2 1 0%", background: cardBg, border: `1px solid ${cardBorder}` }}
             onMouseMove={onCellMove}
             onMouseLeave={onCellLeave}
           >
-            <div className="text-[0.52rem] font-bold tracking-[0.25em] text-academy-gray-400 uppercase">Modalità</div>
+            <div className="text-[0.75rem] font-bold tracking-[0.25em] uppercase" style={{ color: labelColor }}>Modalità</div>
             <div>
-              <div className="text-[3rem] font-black text-white tabular-nums leading-none">
+              <div className="text-[3rem] font-black tabular-nums leading-none" style={{ color: titleColor }}>
                 100<span className="text-xl" style={{ color: "#F09226" }}>%</span>
               </div>
-              <div className="text-[0.56rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">in presenza</div>
+              <div className="text-[0.75rem] font-semibold uppercase tracking-wider mt-0.5" style={{ color: subtitleColor }}>in presenza</div>
             </div>
           </div>
 
@@ -799,34 +864,37 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
       <div className="relative z-10 lg:hidden flex flex-col w-full px-4 pt-24 pb-12 gap-3">
 
         {/* ① SLIDER */}
-        <div className="bento-card-dark rounded-sm p-6 relative overflow-hidden" style={{ minHeight: "52vh" }}>
+        <div
+          className="rounded-sm p-6 relative overflow-hidden"
+          style={{ minHeight: "52vh", background: "rgba(2,0,38,0.75)", border: "1px solid rgba(255,255,255,0.04)" }}
+        >
           {slide.bg_image_url && (
             <div className="absolute inset-0 z-0" style={{
               backgroundImage: `url(${slide.bg_image_url})`,
               backgroundSize: "cover", backgroundPosition: "center",
             }}>
-              <div className="absolute inset-0" style={{ background: "rgba(1,0,18,0.78)" }} />
+              <div className="absolute inset-0" style={{ background: slideOverlay }} />
             </div>
           )}
           <div className="relative z-10">
             {/* Badge */}
             <div className="flex items-center gap-2 mb-5">
               <span className="h-1.5 w-1.5 rounded-full bg-academy-gold flex-shrink-0" style={{ boxShadow: "0 0 6px rgba(212,175,55,0.6)" }} />
-              <span className="text-[0.55rem] font-bold tracking-[0.3em] text-academy-orange uppercase">Certificazione FIPE × LACERTOSUS Inclusa</span>
+              <span className="text-[0.75rem] font-bold tracking-[0.3em] text-academy-orange uppercase">Certificazione FIPE × LACERTOSUS Inclusa</span>
             </div>
             {/* Title */}
-            <SplitLine text={slide.title_white} className="text-[clamp(2.2rem,10vw,3.6rem)] font-black tracking-[-0.025em] text-white" />
+            <SplitLine text={slide.title_white} className="text-[clamp(2.2rem,10vw,3.6rem)] font-black tracking-[-0.025em]" style={{ color: "#ffffff" }} />
             <SplitLine text={slide.title_orange} className="text-[clamp(2.2rem,10vw,3.6rem)] font-black tracking-[-0.025em]" style={{ color: "#F09226" }} />
-            <p className="mt-4 text-[0.88rem] leading-relaxed text-academy-gray-400">{slide.description}</p>
+            <p className="mt-4 text-[0.88rem] leading-relaxed" style={{ color: "rgba(160,155,175,1)" }}>{slide.description}</p>
             {slide.cta_href && slide.cta_label && (
-              <Link href={slide.cta_href} className="mt-4 inline-flex items-center gap-2 text-[0.65rem] font-bold tracking-[0.18em] uppercase text-academy-orange">
+              <Link href={slide.cta_href} className="mt-4 inline-flex items-center gap-2 text-[0.75rem] font-bold tracking-[0.18em] uppercase text-academy-orange">
                 {slide.cta_label} →
               </Link>
             )}
             {/* Path */}
             <div className="mt-5">
               <div className="h-px mb-3" style={{ background: "linear-gradient(90deg, rgba(240,146,38,0.15), transparent)" }} />
-              <div className="flex items-center gap-3 text-[0.55rem] font-black tracking-[0.28em] uppercase">
+              <div className="flex items-center gap-3 text-[0.75rem] font-black tracking-[0.28em] uppercase">
                 <span style={{ color: "#CD7F32" }}>PRIMAL</span>
                 <span style={{ color: "rgba(240,146,38,0.2)" }}>—</span>
                 <span style={{ color: "#C0C0C0" }}>VIS</span>
@@ -850,7 +918,10 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
         </div>
 
         {/* ② CTA */}
-        <div className="bento-card-accent rounded-sm px-5 py-4 flex flex-col items-center gap-3 relative overflow-hidden">
+        <div
+          className="rounded-sm px-5 py-4 flex flex-col items-center gap-3 relative overflow-hidden"
+          style={{ background: accentCardBg, border: `1px solid ${accentBorder}` }}
+        >
           <div className="absolute inset-0 pointer-events-none" style={{
             background: "radial-gradient(ellipse at 50% 50%, rgba(240,146,38,0.08) 0%, transparent 70%)",
           }} />
@@ -860,35 +931,35 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
           </Link>
           <div className="w-full flex items-center gap-2 relative z-10">
             <div className="flex-1 h-px" style={{ background: "rgba(240,146,38,0.18)" }} />
-            <span className="text-[0.44rem] font-bold tracking-[0.22em] text-academy-gray-600 uppercase">oppure</span>
+            <span className="text-[0.75rem] font-bold tracking-[0.22em] uppercase" style={{ color: labelColor }}>oppure</span>
             <div className="flex-1 h-px" style={{ background: "rgba(240,146,38,0.18)" }} />
           </div>
-          <Link href="/percorso" className="relative z-10 flex items-center gap-2 text-[0.66rem] font-semibold tracking-[0.14em] text-academy-gray-300 uppercase">
+          <Link href="/percorso" className="relative z-10 flex items-center gap-2 text-[0.75rem] font-semibold tracking-[0.14em] uppercase" style={{ color: subtitleColor }}>
             <span className="inline-block h-px w-3.5" style={{ background: "currentColor" }} />
             Il Percorso Completo
           </Link>
         </div>
 
-        {/* ③ DURATA + STRUTTURA */}
-        <div className="flex gap-3" style={{ height: "110px" }}>
-          <div className="bento-card-accent rounded-sm p-4 flex flex-col justify-between relative overflow-hidden" style={{ flex: "1 1 0%" }}>
-            <div className="text-[0.5rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Durata</div>
-            <div>
-              <div className="text-[2.8rem] font-black text-academy-orange tabular-nums leading-none">9</div>
-              <div className="text-[0.54rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">mesi</div>
-            </div>
-          </div>
-          <div className="bento-card rounded-sm p-4 flex flex-col justify-between relative overflow-hidden" style={{ flex: "1 1 0%" }}>
-            <div className="text-[0.5rem] font-bold tracking-[0.28em] text-academy-gray-400 uppercase">Struttura</div>
-            <div>
-              <div className="text-[2.8rem] font-black text-white tabular-nums leading-none">3</div>
-              <div className="text-[0.54rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">blocchi</div>
-            </div>
+        {/* ③ DURATA */}
+        <div
+          className="rounded-sm p-4 flex flex-col justify-between relative overflow-hidden"
+          style={{ height: "110px", background: accentCardBg, border: `1px solid ${accentBorder}` }}
+        >
+          <div className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Durata percorso</div>
+          <div className="flex items-baseline gap-3">
+            <div className="text-[2.8rem] font-black text-academy-orange tabular-nums leading-none">9</div>
+            <div className="text-[0.75rem] font-semibold uppercase tracking-wider" style={{ color: subtitleColor }}>mesi di formazione</div>
           </div>
         </div>
 
         {/* ④ CERTIFICAZIONE */}
-        <div className="bento-card-gold rounded-sm p-4 flex items-center gap-4 relative overflow-hidden">
+        <div
+          className="rounded-sm p-4 flex items-center gap-4 relative overflow-hidden"
+          style={{
+            background: d ? "rgba(8,6,30,0.9)" : "rgba(252,250,240,0.95)",
+            border: `1px solid ${d ? "rgba(212,175,55,0.18)" : "rgba(212,175,55,0.25)"}`,
+          }}
+        >
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(212,175,55,0.15) 0%, transparent 65%)" }} />
           <div className="relative w-11 h-11 rounded-full border border-academy-gold/30 flex-shrink-0 flex items-center justify-center"
             style={{ background: "radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%)" }}>
@@ -899,48 +970,54 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
             </svg>
           </div>
           <div className="relative flex-1">
-            <div className="text-[0.48rem] font-bold tracking-[0.25em] text-academy-gold/75 uppercase mb-1">Certificazione Ufficiale</div>
+            <div className="text-[0.75rem] font-bold tracking-[0.25em] text-academy-gold/75 uppercase mb-1">Certificazione Ufficiale</div>
             <div className="flex items-center gap-2">
               <span className="text-[1rem] font-black text-academy-gold leading-none">FIPE</span>
-              <span className="text-[0.5rem] text-academy-gold/60 tracking-[0.2em]">×</span>
-              <span className="text-[0.7rem] font-black text-academy-gold/90 tracking-[0.12em]">LACERTOSUS</span>
+              <span className="text-[0.75rem] text-academy-gold/60 tracking-[0.2em]">×</span>
+              <span className="text-[0.75rem] font-black text-academy-gold/90 tracking-[0.12em]">LACERTOSUS</span>
             </div>
-            <div className="text-[0.44rem] font-semibold tracking-[0.15em] text-academy-gold/55 uppercase mt-1">Riconosciuta a livello nazionale</div>
+            <div className="text-[0.75rem] font-semibold tracking-[0.15em] text-academy-gold/55 uppercase mt-1">Riconosciuta a livello nazionale</div>
           </div>
         </div>
 
         {/* ⑤ VIDEO PRESENTAZIONE */}
-        <VideoPresentationCell mobile />
+        <VideoPresentationCell mobile isDark={d} />
 
         {/* ⑥ DOCENTI */}
-        <TeachersCell mobile />
+        <TeachersCell mobile isDark={d} />
 
-        {/* ⑦ WORKSHOP + MODALITÀ */}
+        {/* ⑦ MASTERCLASS + MODALITÀ */}
         <div className="flex gap-3" style={{ height: "110px" }}>
-          <div className="bento-card rounded-sm p-4 flex flex-col justify-between relative overflow-hidden" style={{ flex: "1 1 0%" }}>
-            <div className="text-[0.5rem] font-bold tracking-[0.25em] text-academy-gray-400 uppercase">Workshop</div>
+          <Link
+            href="/masterclass"
+            className="rounded-sm p-4 flex flex-col justify-between relative overflow-hidden"
+            style={{ flex: "1 1 0%", background: cardBg, border: `1px solid ${cardBorder}` }}
+          >
+            <div className="text-[0.75rem] font-bold tracking-[0.25em] uppercase" style={{ color: labelColor }}>Masterclass</div>
             <div>
-              <div className="text-[2.4rem] font-black text-white tabular-nums leading-none">8</div>
-              <div className="text-[0.5rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">specialistici</div>
+              <div className="text-[2.4rem] font-black tabular-nums leading-none" style={{ color: titleColor }}>8</div>
+              <div className="text-[0.75rem] font-semibold uppercase tracking-wider mt-0.5" style={{ color: subtitleColor }}>specialistici</div>
             </div>
-          </div>
-          <div className="bento-card rounded-sm p-4 flex flex-col justify-between relative overflow-hidden" style={{ flex: "1 1 0%" }}>
-            <div className="text-[0.5rem] font-bold tracking-[0.25em] text-academy-gray-400 uppercase">Modalità</div>
+          </Link>
+          <div
+            className="rounded-sm p-4 flex flex-col justify-between relative overflow-hidden"
+            style={{ flex: "1 1 0%", background: cardBg, border: `1px solid ${cardBorder}` }}
+          >
+            <div className="text-[0.75rem] font-bold tracking-[0.25em] uppercase" style={{ color: labelColor }}>Modalità</div>
             <div>
-              <div className="text-[2.2rem] font-black text-white tabular-nums leading-none">
+              <div className="text-[2.2rem] font-black tabular-nums leading-none" style={{ color: titleColor }}>
                 100<span className="text-base" style={{ color: "#F09226" }}>%</span>
               </div>
-              <div className="text-[0.5rem] font-semibold text-academy-gray-300 uppercase tracking-wider mt-0.5">in presenza</div>
+              <div className="text-[0.75rem] font-semibold uppercase tracking-wider mt-0.5" style={{ color: subtitleColor }}>in presenza</div>
             </div>
           </div>
         </div>
 
       </div>
 
-
       {/* Bottom gradient — bleeds into social proof */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-28" style={{
-        background: "linear-gradient(to bottom, transparent, rgba(1,0,24,0.97))",
+        background: `linear-gradient(to bottom, transparent, ${bottomGradient})`,
       }} />
     </section>
   );

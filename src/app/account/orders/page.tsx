@@ -134,12 +134,12 @@ export default function AccountOrdersPage() {
                       <p className="font-bold text-academy-gray-100">
                         {order.pack_id?.toUpperCase() || "Prodotto"}
                       </p>
-                      <p className="mt-0.5 font-mono text-[10px] text-academy-gray-600">
+                      <p className="mt-0.5 font-mono text-[12px] text-academy-gray-600">
                         #{order.id.slice(0, 8)}
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${statusColors[order.status]}`}
+                      className={`shrink-0 px-2.5 py-0.5 text-[12px] font-bold tracking-wider uppercase ${statusColors[order.status]}`}
                     >
                       {statusLabels[order.status]}
                     </span>

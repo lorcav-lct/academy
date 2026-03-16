@@ -67,7 +67,7 @@ function TimelineCard({ item, index }: { item: TimelineItem; index: number }) {
             {item.dates.map((d) => (
               <span
                 key={d}
-                className="inline-block bg-academy-orange/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-academy-orange uppercase"
+                className="inline-block bg-academy-orange/10 px-2.5 py-1 text-[12px] font-bold tracking-wider text-academy-orange uppercase"
               >
                 {d}
               </span>

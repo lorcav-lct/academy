@@ -145,12 +145,12 @@ export function CTASection() {
             "9 mesi",
             "3 blocchi formativi",
             "Certificazione FIPE",
-            "8 Workshop specialistici",
+            "8 Masterclass specialistici",
             "100% in presenza",
           ].map((pill) => (
             <span
               key={pill}
-              className="border border-academy-orange/12 bg-academy-orange/4 px-3 py-1 text-[0.62rem] font-semibold tracking-wider text-academy-gray-500 uppercase"
+              className="border border-academy-orange/12 bg-academy-orange/4 px-3 py-1 text-[0.75rem] font-semibold tracking-wider text-academy-gray-500 uppercase"
             >
               {pill}
             </span>

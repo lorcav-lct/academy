@@ -3,6 +3,7 @@ export interface Teacher {
   name: string;
   role: string;
   color: string;
+  image_url?: string;
 }
 
 export const TEACHERS: Teacher[] = [

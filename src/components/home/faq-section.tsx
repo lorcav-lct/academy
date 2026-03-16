@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useTheme } from "@/components/providers/theme-provider";
 
 const FAQS = [
   {
@@ -39,9 +40,13 @@ const FAQS = [
   },
 ];
 
-function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
+function FaqItem({ q, a, index, isDark }: { q: string; a: string; index: number; isDark: boolean }) {
   const [open, setOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  const th = isDark ? undefined : "#111111";
+  const tb = isDark ? undefined : "#555555";
+  const dividerColor = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
 
   useEffect(() => {
     if (!bodyRef.current) return;
@@ -65,17 +70,18 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
   return (
     <div
       data-faq-item
-      className="border-b border-academy-gray-700/30 last:border-0"
+      className="last:border-0"
+      style={{ borderBottom: `1px solid ${dividerColor}` }}
     >
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-start justify-between gap-6 py-5 text-left transition-colors duration-200 hover:text-academy-orange"
       >
         <div className="flex items-start gap-4">
-          <span className="mt-0.5 shrink-0 text-[0.6rem] font-black text-academy-orange/40">
+          <span className="mt-0.5 shrink-0 text-[0.75rem] font-black text-academy-orange/40">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className="text-sm font-semibold text-academy-gray-200">{q}</span>
+          <span className="text-sm font-semibold text-academy-gray-200" style={{ color: th }}>{q}</span>
         </div>
         <span
           className="mt-0.5 shrink-0 text-lg font-light text-academy-orange/60 transition-transform duration-300"
@@ -89,7 +95,7 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
         ref={bodyRef}
         style={{ maxHeight: 0, opacity: 0, overflow: "hidden" }}
       >
-        <p className="pb-5 pl-10 text-sm leading-relaxed text-academy-gray-400">{a}</p>
+        <p className="pb-5 pl-10 text-sm leading-relaxed text-academy-gray-400" style={{ color: tb }}>{a}</p>
       </div>
     </div>
   );
@@ -99,6 +105,9 @@ export function FaqSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  const { theme } = useTheme();
+  const d = theme === "dark";
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -118,24 +127,30 @@ export function FaqSection() {
     return () => ctx.revert();
   }, []);
 
+  const th = d ? undefined : "#111111";
+  const tm = d ? undefined : "#777777";
+
   return (
     <section
       ref={sectionRef}
       id="faq"
-      className="relative overflow-hidden py-24 md:py-32"
+      className="themed-section relative overflow-hidden py-24 md:py-32"
     >
-      <div className="absolute inset-0 bg-academy-dark" />
+      <div className="absolute inset-0 section-bg-alt" />
 
       <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
         <div className="grid gap-12 md:grid-cols-12">
           {/* Left: header */}
           <div ref={headRef} className="md:col-span-4">
             <span className="label-tag mb-3 block">Domande Frequenti</span>
-            <h2 className="text-[clamp(1.9rem,3.5vw,3rem)] font-black leading-[1.05] tracking-tight">
+            <h2
+              className="text-[clamp(1.9rem,3.5vw,3rem)] font-black leading-[1.05] tracking-tight text-academy-gray-100"
+              style={{ color: th }}
+            >
               Hai ancora{" "}
               <span className="gradient-text">domande?</span>
             </h2>
-            <p className="mt-4 text-sm text-academy-gray-500">
+            <p className="mt-4 text-sm text-academy-gray-500" style={{ color: tm }}>
               Ecco le risposte alle domande più comuni. Per tutto il resto, contattaci direttamente.
             </p>
             <div className="mt-8">
@@ -151,7 +166,7 @@ export function FaqSection() {
           {/* Right: FAQ list */}
           <div ref={listRef} className="md:col-span-8">
             {FAQS.map((faq, i) => (
-              <FaqItem key={faq.q} q={faq.q} a={faq.a} index={i} />
+              <FaqItem key={faq.q} q={faq.q} a={faq.a} index={i} isDark={d} />
             ))}
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useTheme } from "@/components/providers/theme-provider";
 
 const COLORS = {
   primal:   { bg: "rgba(240,146,38,0.12)",  border: "rgba(240,146,38,0.35)", text: "#F09226",  dot: "#F09226"  },
@@ -38,6 +39,9 @@ export function CalendarSection() {
   const lineRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
 
+  const { theme } = useTheme();
+  const d = theme === "dark";
+
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
@@ -46,7 +50,6 @@ export function CalendarSection() {
         opacity: 0, y: 25, duration: 0.7, ease: "power3.out",
       });
 
-      // Timeline line grows downward as section scrolls
       if (lineRef.current) {
         gsap.fromTo(
           lineRef.current,
@@ -65,7 +68,6 @@ export function CalendarSection() {
         );
       }
 
-      // Items reveal
       const items = itemsRef.current?.querySelectorAll("[data-cal-item]");
       if (items) {
         gsap.from(items, {
@@ -77,24 +79,31 @@ export function CalendarSection() {
     return () => ctx.revert();
   }, []);
 
+  const th = d ? undefined : "#111111";
+  const tm = d ? undefined : "#777777";
+  const ringColor = d ? "#020026" : "#ffffff";
+
   return (
     <section
       ref={sectionRef}
       id="calendario"
-      className="relative overflow-hidden py-24 md:py-32"
+      className="themed-section relative overflow-hidden py-24 md:py-32"
     >
-      <div className="absolute inset-0 bg-academy-darker/40" />
+      <div className="absolute inset-0 section-bg" />
 
       <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
         {/* Header */}
         <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="label-tag mb-3 block">Calendario Formativo</span>
-            <h2 className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight">
+            <h2
+              className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight text-academy-gray-100"
+              style={{ color: th }}
+            >
               Il percorso inizia{" "}
               <span className="gradient-text">l&apos;11 Settembre.</span>
             </h2>
-            <p className="mt-3 max-w-lg text-sm text-academy-gray-400">
+            <p className="mt-3 max-w-lg text-sm text-academy-gray-400" style={{ color: tm }}>
               Date reali, senza countdown artificiali. Sai già quando sarai in formazione per i prossimi 9 mesi.
             </p>
           </div>
@@ -107,7 +116,7 @@ export function CalendarSection() {
             ].map((l) => (
               <div key={l.label} className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full" style={{ background: l.color }} />
-                <span className="text-[0.6rem] font-medium text-academy-gray-500 uppercase">{l.label}</span>
+                <span className="text-[0.75rem] font-medium text-academy-gray-500 uppercase" style={{ color: tm }}>{l.label}</span>
               </div>
             ))}
           </div>
@@ -116,7 +125,10 @@ export function CalendarSection() {
         {/* Timeline */}
         <div className="relative">
           {/* Vertical line */}
-          <div className="absolute left-[7px] top-0 bottom-0 w-px bg-academy-gray-700/30" />
+          <div
+            className="absolute left-[7px] top-0 bottom-0 w-px"
+            style={{ background: d ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.1)" }}
+          />
           <div
             ref={lineRef}
             className="absolute left-[7px] top-0 bottom-0 w-px timeline-progress"
@@ -135,12 +147,15 @@ export function CalendarSection() {
                 >
                   {/* Dot on the line */}
                   <div
-                    className="absolute -left-8 h-3 w-3 shrink-0 rounded-full ring-2 ring-academy-dark"
-                    style={{ background: c.dot }}
+                    className="absolute -left-8 h-3 w-3 shrink-0 rounded-full"
+                    style={{
+                      background: c.dot,
+                      boxShadow: `0 0 0 2px ${ringColor}`,
+                    }}
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-bold text-academy-gray-200">{ev.label}</p>
-                    <p className="text-[0.62rem] font-medium" style={{ color: c.text }}>{ev.dates}</p>
+                    <p className="truncate text-xs font-bold text-academy-gray-200" style={{ color: th }}>{ev.label}</p>
+                    <p className="text-[0.75rem] font-medium" style={{ color: c.text }}>{ev.dates}</p>
                   </div>
                 </div>
               );

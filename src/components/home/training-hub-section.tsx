@@ -4,10 +4,14 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/components/providers/theme-provider";
 
 export function TrainingHubSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const { theme } = useTheme();
+  const d = theme === "dark";
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -23,14 +27,17 @@ export function TrainingHubSection() {
     return () => ctx.revert();
   }, []);
 
+  const th = d ? undefined : "#111111";
+  const tb = d ? undefined : "#444444";
+  const tm = d ? undefined : "#777777";
+
   return (
     <section
       ref={sectionRef}
       id="training-hub"
-      className="relative overflow-hidden py-24 md:py-32"
+      className="themed-section relative overflow-hidden py-24 md:py-32"
     >
-      {/* Full-bleed dark background with angled stripe */}
-      <div className="absolute inset-0 bg-academy-darker" />
+      <div className="absolute inset-0 section-bg" />
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -56,14 +63,15 @@ export function TrainingHubSection() {
             </span>
             <h2
               data-hub-item
-              className="text-[clamp(2rem,4.5vw,4rem)] font-black leading-[1.0] tracking-tight"
+              className="text-[clamp(2rem,4.5vw,4rem)] font-black leading-[1.0] tracking-tight text-academy-gray-100"
+              style={{ color: th }}
             >
               Apri il tuo{" "}
               <span className="gradient-text">Training Hub</span>
               <br />
               Lacertosus.
             </h2>
-            <p data-hub-item className="mt-5 max-w-md text-sm leading-relaxed text-academy-gray-400">
+            <p data-hub-item className="mt-5 max-w-md text-sm leading-relaxed text-academy-gray-400" style={{ color: tb }}>
               L&apos;investimento nel percorso formativo può diventare un asset imprenditoriale concreto.
               Diventa un nodo della rete Lacertosus Academy sul territorio.
             </p>
@@ -77,8 +85,8 @@ export function TrainingHubSection() {
                 <div key={p.title} className="flex gap-4">
                   <span className="mt-1 h-1.5 w-1.5 shrink-0 bg-academy-orange" />
                   <div>
-                    <p className="text-sm font-bold text-academy-gray-200">{p.title}</p>
-                    <p className="text-xs text-academy-gray-500">{p.desc}</p>
+                    <p className="text-sm font-bold text-academy-gray-200" style={{ color: th }}>{p.title}</p>
+                    <p className="text-xs text-academy-gray-500" style={{ color: tm }}>{p.desc}</p>
                   </div>
                 </div>
               ))}
@@ -96,7 +104,9 @@ export function TrainingHubSection() {
             <div
               className="relative overflow-hidden p-10"
               style={{
-                background: "linear-gradient(145deg, rgba(240,146,38,0.06), rgba(2,0,38,0.95))",
+                background: d
+                  ? "linear-gradient(145deg, rgba(240,146,38,0.06), rgba(2,0,38,0.95))"
+                  : "linear-gradient(145deg, rgba(240,146,38,0.06), rgba(255,255,255,0.98))",
                 border: "1px solid rgba(240,146,38,0.18)",
               }}
             >
@@ -116,14 +126,17 @@ export function TrainingHubSection() {
                 ].map((item) => (
                   <div key={item.n} className="flex items-center gap-4">
                     <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center text-[0.6rem] font-black"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center text-[0.75rem] font-black"
                       style={{ border: "1px solid rgba(240,146,38,0.3)", color: "#F09226" }}
                     >
                       {item.n}
                     </span>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-academy-gray-300">{item.label}</p>
-                      <div className="mt-1.5 h-px w-full bg-academy-gray-700/40" />
+                      <p className="text-sm font-semibold text-academy-gray-300" style={{ color: th }}>{item.label}</p>
+                      <div
+                        className="mt-1.5 h-px w-full"
+                        style={{ background: d ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)" }}
+                      />
                     </div>
                   </div>
                 ))}

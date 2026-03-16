@@ -65,7 +65,7 @@ function ProductCard({ product, index }: { product: AcademyProduct; index: numbe
             style={{ background: accentColor }}
           />
           <span
-            className="text-[10px] font-bold tracking-[0.25em] uppercase"
+            className="text-[12px] font-bold tracking-[0.25em] uppercase"
             style={{ color: accentColor }}
           >
             {TYPE_LABEL[product.type]}
@@ -214,7 +214,7 @@ export function PackComparison() {
           <p className="mb-6 text-academy-gray-400">
             Sessioni intensive di un giorno su temi avanzati. Acquistabili singolarmente, aperti a tutti.
           </p>
-          <Button href="/workshop" variant="secondary">
+          <Button href="/masterclass" variant="secondary">
             Scopri i Master
           </Button>
         </div>

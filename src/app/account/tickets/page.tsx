@@ -103,7 +103,7 @@ export default function TicketsPage() {
                     {ticket.course_id?.toUpperCase() || "Corso"}
                   </h3>
                   <span
-                    className={`text-[10px] font-bold tracking-wider uppercase ${
+                    className={`text-[12px] font-bold tracking-wider uppercase ${
                       ticket.is_used ? "text-academy-gray-500" : "text-green-400"
                     }`}
                   >
@@ -129,7 +129,7 @@ export default function TicketsPage() {
 
                 {/* Footer */}
                 <div className="p-4">
-                  <p className="mb-1 text-[10px] font-semibold tracking-wider text-academy-gray-500 uppercase">
+                  <p className="mb-1 text-[12px] font-semibold tracking-wider text-academy-gray-500 uppercase">
                     Codice Ticket
                   </p>
                   <p

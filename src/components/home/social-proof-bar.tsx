@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "@/components/providers/theme-provider";
 
-/* ── Item data ── */
 type MarqueeItemData =
   | { type: "stat";  value: string; label: string }
   | { type: "quote"; text: string }
@@ -18,28 +18,25 @@ const ITEMS: MarqueeItemData[] = [
   { type: "stat",  value: "★★★★★", label: "Valutazione Media Alumni" },
   { type: "quote", text: "Dal tecnico all'imprenditore — formazione a 360°" },
   { type: "badge", value: "3",     label: "Blocchi Progressivi" },
-  { type: "stat",  value: "8",     label: "Workshop Specialistici" },
+  { type: "stat",  value: "8",     label: "Masterclass Specialistici" },
   { type: "quote", text: "L'unica academy che forma imprenditori del fitness" },
   { type: "badge", value: "PRIMAL → VIS → VICTOR", label: "Percorso Progressivo" },
 ];
 
-/* Two copies — CSS translateX(-50%) creates a seamless loop */
 const DOUBLE = [...ITEMS, ...ITEMS];
 
-/* ── Separator ── */
 function Sep() {
   return (
-    <span
-      className="mx-4 shrink-0"
-      style={{ color: "rgba(240,146,38,0.3)", fontSize: "0.35rem" }}
-    >
+    <span className="mx-4 shrink-0" style={{ color: "rgba(240,146,38,0.3)", fontSize: "0.35rem" }}>
       ◆
     </span>
   );
 }
 
-/* ── Single marquee item ── */
-function MarqueeItem({ item }: { item: MarqueeItemData }) {
+function MarqueeItem({ item, isDark }: { item: MarqueeItemData; isDark: boolean }) {
+  const labelColor = isDark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.65)";
+  const quoteColor = isDark ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.6)";
+
   if (item.type === "stat") {
     return (
       <div className="flex items-baseline gap-2.5 shrink-0">
@@ -49,10 +46,7 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
         >
           {item.value}
         </span>
-        <span
-          className="text-[0.55rem] font-bold tracking-[0.18em] uppercase"
-          style={{ color: "rgba(255,255,255,0.75)" }}
-        >
+        <span className="text-[0.75rem] font-bold tracking-[0.18em] uppercase" style={{ color: labelColor }}>
           {item.label}
         </span>
         <Sep />
@@ -64,18 +58,12 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
     return (
       <div className="flex items-center gap-2.5 shrink-0">
         <span
-          className="text-[0.52rem] font-black tracking-[0.2em] px-2 py-[3px]"
-          style={{
-            color: "#F09226",
-            border: "1px solid rgba(240,146,38,0.35)",
-          }}
+          className="text-[0.75rem] font-black tracking-[0.2em] px-2 py-[3px]"
+          style={{ color: "#F09226", border: "1px solid rgba(240,146,38,0.35)" }}
         >
           {item.value}
         </span>
-        <span
-          className="text-[0.55rem] font-bold tracking-[0.18em] uppercase"
-          style={{ color: "rgba(255,255,255,0.75)" }}
-        >
+        <span className="text-[0.75rem] font-bold tracking-[0.18em] uppercase" style={{ color: labelColor }}>
           {item.label}
         </span>
         <Sep />
@@ -83,14 +71,10 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
     );
   }
 
-  /* quote */
   return (
     <div className="flex items-center gap-2 shrink-0">
       <span style={{ color: "rgba(240,146,38,0.35)", fontSize: "0.7rem" }}>&ldquo;</span>
-      <span
-        className="text-[0.62rem] font-medium tracking-[0.06em] italic"
-        style={{ color: "rgba(255,255,255,0.7)" }}
-      >
+      <span className="text-[0.75rem] font-medium tracking-[0.06em] italic" style={{ color: quoteColor }}>
         {item.text}
       </span>
       <Sep />
@@ -98,29 +82,21 @@ function MarqueeItem({ item }: { item: MarqueeItemData }) {
   );
 }
 
-/* ── Social Proof Bar — single premium strip ── */
 export function SocialProofBar() {
   const [paused, setPaused] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <div
-      className="relative overflow-hidden cursor-default"
-      style={{
-        background: "linear-gradient(180deg, #010015 0%, #010018 60%, #010020 100%)",
-        borderBottom: "1px solid rgba(240,146,38,0.06)",
-      }}
+      className="spb-bg relative overflow-hidden cursor-default themed-section"
+      style={{ borderBottom: "1px solid rgba(240,146,38,0.06)" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Fade masks */}
-      <div
-        className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24"
-        style={{ background: "linear-gradient(90deg, #010015 0%, transparent 100%)" }}
-      />
-      <div
-        className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24"
-        style={{ background: "linear-gradient(270deg, #010015 0%, transparent 100%)" }}
-      />
+      <div className="spb-fade-l pointer-events-none absolute left-0 top-0 z-10 h-full w-24" />
+      <div className="spb-fade-r pointer-events-none absolute right-0 top-0 z-10 h-full w-24" />
 
       {/* Top line */}
       <div
@@ -130,7 +106,6 @@ export function SocialProofBar() {
         }}
       />
 
-      {/* Scrolling track */}
       <div className="py-5 overflow-hidden">
         <div
           className="marquee-track flex items-center gap-8 whitespace-nowrap"
@@ -140,7 +115,7 @@ export function SocialProofBar() {
           }}
         >
           {DOUBLE.map((item, i) => (
-            <MarqueeItem key={i} item={item} />
+            <MarqueeItem key={i} item={item} isDark={isDark} />
           ))}
         </div>
       </div>

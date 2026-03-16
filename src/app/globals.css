@@ -33,6 +33,12 @@ html {
   color-scheme: dark;
   scroll-behavior: smooth;
 }
+@media (max-height: 730px) and (min-width: 1000px) {
+  .hide-short-screen {
+    display: none !important;
+  }
+}
+
 body {
   background-color: var(--color-academy-dark);
   color: var(--color-academy-gray-100);
@@ -204,3 +210,103 @@ body {
 
 /* ─── Tabular numbers ─── */
 .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ════════════════════════════════════════════════════
+   THEME SYSTEM — light / dark
+════════════════════════════════════════════════════ */
+
+/* ─── CSS vars: dark defaults ─── */
+:root,
+[data-theme="dark"] {
+  --section-bg: #020026;
+  --section-bg-alt: #010018;
+}
+
+/* ─── CSS vars: light overrides ─── */
+[data-theme="light"] {
+  --section-bg: #ffffff;
+  --section-bg-alt: #F2F2F2;
+}
+
+/* ─── Section bg utilities ─── */
+.section-bg     { background-color: var(--section-bg); }
+.section-bg-alt { background-color: var(--section-bg-alt); }
+
+/* ─── Body in light mode ─── */
+[data-theme="light"] body {
+  background-color: #ffffff;
+  color-scheme: light;
+}
+[data-theme="light"] .themed-section {
+  color: #111111;
+}
+[data-theme="light"] ::-webkit-scrollbar-track { background: #e5e5ea; }
+
+/* ─── Navbar scrolled bg (theme-aware) ─── */
+.navbar-scrolled-bg {
+  background: rgba(2,0,38,0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 1px 60px rgba(0,0,0,0.5);
+}
+[data-theme="light"] .navbar-scrolled-bg {
+  background: rgba(255,255,255,0.93);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 1px 20px rgba(0,0,0,0.08);
+}
+
+/* ─── Social proof bar backgrounds ─── */
+.spb-bg {
+  background: linear-gradient(180deg, #010015 0%, #010018 60%, #010020 100%);
+}
+[data-theme="light"] .spb-bg { background: #F2F2F2; }
+
+.spb-fade-l { background: linear-gradient(90deg, #010015 0%, transparent 100%); }
+.spb-fade-r { background: linear-gradient(270deg, #010015 0%, transparent 100%); }
+[data-theme="light"] .spb-fade-l { background: linear-gradient(90deg, #F2F2F2 0%, transparent 100%); }
+[data-theme="light"] .spb-fade-r { background: linear-gradient(270deg, #F2F2F2 0%, transparent 100%); }
+
+/* ─── Text overrides inside themed sections ─── */
+[data-theme="light"] .themed-section { color: #111111; }
+[data-theme="light"] .themed-section .text-academy-gray-100 { color: #111111; }
+[data-theme="light"] .themed-section .text-academy-gray-200 { color: #1a1a1a; }
+[data-theme="light"] .themed-section .text-academy-gray-300 { color: #333333; }
+[data-theme="light"] .themed-section .text-academy-gray-400 { color: #555555; }
+[data-theme="light"] .themed-section .text-academy-gray-500 { color: #777777; }
+[data-theme="light"] .themed-section .text-academy-gray-600 { color: #999999; }
+
+/* ─── Bento cards in themed sections ─── */
+/* .bento-card specificity: 0-1-0 → overridden by [data-theme] + .bento-card--themed: 0-2-0 */
+[data-theme="light"] .bento-card--themed {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .bento-card--themed:hover {
+  border-color: rgba(240,146,38,0.32);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 0 16px rgba(240,146,38,0.07);
+}
+[data-theme="light"] .bento-card-accent--themed {
+  background: linear-gradient(135deg, rgba(240,146,38,0.07) 0%, rgba(255,255,255,0.97) 100%);
+  border-color: rgba(240,146,38,0.25);
+}
+[data-theme="light"] .bento-card-dark--themed {
+  background: rgba(248,248,248,0.97);
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .card-squared--themed {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(0,0,0,0.1);
+}
+[data-theme="light"] .card-squared--themed:hover {
+  border-color: rgba(240,146,38,0.3);
+  box-shadow: 0 0 20px rgba(240,146,38,0.08);
+}
+
+/* ─── Border overrides in themed sections ─── */
+[data-theme="light"] .themed-section .border-white\/5  { border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .themed-section .border-white\/8  { border-color: rgba(0,0,0,0.07); }
+[data-theme="light"] .themed-section .border-white\/10 { border-color: rgba(0,0,0,0.08); }
+
+/* ─── FAQ divider ─── */
+[data-theme="light"] .themed-section .faq-item-border { border-color: rgba(0,0,0,0.08); }

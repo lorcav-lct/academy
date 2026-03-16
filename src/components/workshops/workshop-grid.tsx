@@ -35,7 +35,7 @@ export function WorkshopGrid() {
               variants={fadeUp}
               className="mb-4 text-4xl font-black tracking-tight sm:text-6xl"
             >
-              Workshop <GradientText>Specialistici</GradientText>
+              Masterclass <GradientText>Specialistici</GradientText>
             </motion.h1>
             <motion.p
               variants={fadeUp}
@@ -59,10 +59,10 @@ export function WorkshopGrid() {
         >
           {WORKSHOPS.map((workshop, i) => (
             <motion.div key={workshop.slug} variants={fadeUp} custom={i}>
-              <Link href={`/workshop/${workshop.slug}`} className="group block h-full">
+              <Link href={`/masterclass/${workshop.slug}`} className="group block h-full">
                 <div className="card-squared flex h-full flex-col p-8 transition-all duration-500 hover:glow-orange">
                   {/* Date */}
-                  <div className="mb-5 inline-block self-start bg-academy-orange/10 px-3 py-1 text-[10px] font-bold tracking-wider text-academy-orange uppercase">
+                  <div className="mb-5 inline-block self-start bg-academy-orange/10 px-3 py-1 text-[12px] font-bold tracking-wider text-academy-orange uppercase">
                     {workshop.date}
                   </div>
 
@@ -78,7 +78,7 @@ export function WorkshopGrid() {
 
                   {/* Footer */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium tracking-wider text-academy-gray-600 uppercase">
+                    <span className="text-[12px] font-medium tracking-wider text-academy-gray-600 uppercase">
                       {workshop.duration}
                     </span>
                     <span className="text-sm text-academy-orange opacity-0 transition-all group-hover:opacity-100">

@@ -7,6 +7,6 @@ export const metadata: Metadata = {
     "8 masterclass specialistici con professionisti del settore: Hyrox, Calcio, Functional Training, Endurance, Nuoto, Rugby, Volley, Sport da Combattimento.",
 };
 
-export default function WorkshopIndexPage() {
+export default function MasterclassIndexPage() {
   return <WorkshopGrid />;
 }

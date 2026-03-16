@@ -104,23 +104,23 @@ export function CertificationSection() {
                     <span className="text-xs font-black text-academy-gold">LCT</span>
                   </div>
                   <div>
-                    <p className="text-[0.55rem] font-bold tracking-[0.25em] text-academy-gold/60 uppercase">
+                    <p className="text-[0.75rem] font-bold tracking-[0.25em] text-academy-gold/60 uppercase">
                       Lacertosus Academy
                     </p>
-                    <p className="text-[0.55rem] font-bold tracking-[0.22em] text-academy-gold/40 uppercase">
+                    <p className="text-[0.75rem] font-bold tracking-[0.22em] text-academy-gold/40 uppercase">
                       FIPE × LACERTOSUS
                     </p>
                   </div>
                 </div>
 
                 {/* Certificate text */}
-                <p className="mb-1 text-[0.6rem] font-bold tracking-[0.3em] text-academy-gray-500 uppercase">
+                <p className="mb-1 text-[0.75rem] font-bold tracking-[0.3em] text-academy-gray-500 uppercase">
                   Certifica che
                 </p>
                 <div className="mb-4 border-b border-academy-gold/15 pb-3">
                   <p className="text-lg font-black italic text-academy-gold">Nome Cognome</p>
                 </div>
-                <p className="mb-4 text-[0.72rem] leading-relaxed text-academy-gray-400">
+                <p className="mb-4 text-[0.75rem] leading-relaxed text-academy-gray-400">
                   ha completato con successo il{" "}
                   <span className="font-semibold text-academy-gray-200">Percorso Formativo Lacertosus Academy</span>{" "}
                   e ottiene il titolo di
@@ -128,7 +128,7 @@ export function CertificationSection() {
                 <p className="mb-2 text-base font-black uppercase tracking-wider text-academy-gray-100">
                   Personal Trainer FIPE × LACERTOSUS
                 </p>
-                <p className="text-[0.6rem] text-academy-gray-500">
+                <p className="text-[0.75rem] text-academy-gray-500">
                   Riconosciuto professionalmente nel settore fitness
                 </p>
 
@@ -136,13 +136,13 @@ export function CertificationSection() {
                 <div className="mt-8 flex items-end justify-between">
                   <div>
                     <div className="mb-1 h-px w-24 bg-academy-gold/20" />
-                    <p className="text-[0.55rem] text-academy-gray-600">Firma del Direttore</p>
+                    <p className="text-[0.75rem] text-academy-gray-600">Firma del Direttore</p>
                   </div>
                   <div
                     className="flex h-12 w-12 items-center justify-center rounded-full border"
                     style={{ borderColor: "rgba(212,175,55,0.25)" }}
                   >
-                    <span className="text-[0.55rem] font-black text-academy-gold/50">FIPE</span>
+                    <span className="text-[0.75rem] font-black text-academy-gold/50">FIPE</span>
                   </div>
                 </div>
 
@@ -192,7 +192,7 @@ export function CertificationSection() {
                   data-cert-item
                   className="flex gap-5"
                 >
-                  <span className="mt-0.5 shrink-0 text-[0.62rem] font-black text-academy-gold/50">
+                  <span className="mt-0.5 shrink-0 text-[0.75rem] font-black text-academy-gold/50">
                     {item.n}
                   </span>
                   <div>

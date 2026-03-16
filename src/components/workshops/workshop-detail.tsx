@@ -30,7 +30,7 @@ export function WorkshopDetail({ workshop, otherWorkshops }: WorkshopDetailProps
           >
             <motion.div variants={fadeUp} className="mb-4 flex items-center gap-3">
               <span className="inline-block bg-academy-orange/10 px-3 py-1 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
-                Workshop Specialistico
+                Masterclass Specialistico
               </span>
               <span className="text-xs tracking-wider text-academy-gray-500 uppercase">
                 {workshop.duration}
@@ -112,7 +112,7 @@ export function WorkshopDetail({ workshop, otherWorkshops }: WorkshopDetailProps
               </span>
               <h2 className="mb-6 text-2xl font-black">Scegli il Tuo Pack</h2>
               <p className="mb-6 text-academy-gray-400">
-                Questo workshop e incluso come scelta nei pack Bronzo (1 workshop), Argento (2 workshop) e Oro/Oro Plus (3 workshop).
+                Questo masterclass è incluso come scelta nei pack Bronzo (1 masterclass), Argento (2 masterclass) e Oro/Oro Plus (3 masterclass).
               </p>
               <Button href="/pack" size="lg" className="w-full sm:w-auto">
                 Vedi i Pack Disponibili
@@ -125,14 +125,14 @@ export function WorkshopDetail({ workshop, otherWorkshops }: WorkshopDetailProps
       {/* Other Workshops */}
       <SectionContainer>
         <ScrollReveal>
-          <h2 className="mb-8 text-2xl font-black">Altri Workshop</h2>
+          <h2 className="mb-8 text-2xl font-black">Altri Masterclass</h2>
         </ScrollReveal>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {otherWorkshops.slice(0, 6).map((w, i) => (
             <ScrollReveal key={w.slug} delay={i * 0.05}>
-              <Link href={`/workshop/${w.slug}`} className="group block">
+              <Link href={`/masterclass/${w.slug}`} className="group block">
                 <div className="card-squared p-6 transition-all duration-500 hover:glow-orange">
-                  <div className="mb-3 inline-block bg-academy-orange/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-academy-orange uppercase">
+                  <div className="mb-3 inline-block bg-academy-orange/10 px-2 py-0.5 text-[12px] font-bold tracking-wider text-academy-orange uppercase">
                     {w.date}
                   </div>
                   <h3 className="mb-1 font-bold text-academy-gray-100 transition-colors group-hover:text-academy-orange">

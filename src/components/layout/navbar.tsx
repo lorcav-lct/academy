@@ -6,16 +6,18 @@ import { useRouter, usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { useTheme } from "@/components/providers/theme-provider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
   { href: "/percorso", label: "Il Percorso", num: "01" },
   { href: "/pack", label: "Pack", num: "02" },
-  { href: "/workshop", label: "Workshop", num: "03" },
+  { href: "/masterclass", label: "Masterclass", num: "03" },
 ];
 
 /* ─── User Avatar + Dropdown ─── */
-function UserAvatar({ user, onLogout }: { user: User; onLogout: () => void }) {
+function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => void; isDark: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -49,7 +51,8 @@ function UserAvatar({ user, onLogout }: { user: User; onLogout: () => void }) {
         </div>
         <svg
           className={cn(
-            "h-3 w-3 text-academy-gray-500 transition-transform duration-200",
+            "h-3 w-3 transition-transform duration-200",
+            isDark ? "text-academy-gray-500" : "text-[#888]",
             open && "rotate-180"
           )}
           viewBox="0 0 12 12"
@@ -68,17 +71,20 @@ function UserAvatar({ user, onLogout }: { user: User; onLogout: () => void }) {
       {/* Dropdown */}
       <div
         className={cn(
-          "absolute right-0 top-full mt-3 w-56 border border-white/8 bg-[#07071e]/95 shadow-2xl backdrop-blur-xl transition-all duration-200",
+          "absolute right-0 top-full mt-3 w-56 shadow-2xl backdrop-blur-xl transition-all duration-200",
+          isDark
+            ? "border border-white/8 bg-[#07071e]/95"
+            : "border border-black/8 bg-white/97",
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none translate-y-2 opacity-0"
         )}
       >
-        <div className="border-b border-white/5 px-4 py-3">
-          <p className="text-[10px] font-semibold tracking-[0.2em] text-academy-gray-500 uppercase">
+        <div className={cn("px-4 py-3", isDark ? "border-b border-white/5" : "border-b border-black/6")}>
+          <p className={cn("text-[12px] font-semibold tracking-[0.2em] uppercase", isDark ? "text-academy-gray-500" : "text-[#888]")}>
             Area Riservata
           </p>
-          <p className="mt-0.5 truncate text-sm font-medium text-academy-gray-200">
+          <p className={cn("mt-0.5 truncate text-sm font-medium", isDark ? "text-academy-gray-200" : "text-[#222]")}>
             {user.email}
           </p>
         </div>
@@ -92,13 +98,16 @@ function UserAvatar({ user, onLogout }: { user: User; onLogout: () => void }) {
               key={label}
               href={href}
               onClick={() => setOpen(false)}
-              className="block px-4 py-2.5 text-sm text-academy-gray-300 transition-colors hover:bg-academy-orange/10 hover:text-academy-orange"
+              className={cn(
+                "block px-4 py-2.5 text-sm transition-colors hover:bg-academy-orange/10 hover:text-academy-orange",
+                isDark ? "text-academy-gray-300" : "text-[#444]"
+              )}
             >
               {label}
             </Link>
           ))}
         </div>
-        <div className="border-t border-white/5 py-1">
+        <div className={cn("py-1", isDark ? "border-t border-white/5" : "border-t border-black/6")}>
           <button
             onClick={onLogout}
             className="w-full px-4 py-2.5 text-left text-sm text-red-400/70 transition-colors hover:bg-red-400/8 hover:text-red-400"
@@ -125,6 +134,8 @@ export function Navbar() {
 
   const router = useRouter();
   const pathname = usePathname();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   /* ── Entrance animation ── */
   useEffect(() => {
@@ -245,29 +256,31 @@ export function Navbar() {
     <>
       <header
         ref={headerRef}
-        style={{ opacity: 0 }} /* GSAP will animate this */
+        style={{ opacity: 0 }}
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-colors duration-500",
-          scrolled
-            ? "bg-academy-dark/88 backdrop-blur-2xl border-b border-white/5 shadow-[0_1px_60px_rgba(0,0,0,0.5)]"
-            : "bg-transparent"
+          scrolled ? "navbar-scrolled-bg" : "bg-transparent"
         )}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-[5%] py-5 md:px-10">
-          {/* Logo */}
-          <Link href="/" className="group flex items-center gap-3 shrink-0">
-            <div className="relative flex h-10 w-10 items-center justify-center border border-academy-orange/50 bg-academy-orange/10 transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20 group-hover:shadow-[0_0_24px_rgba(240,146,38,0.25)]">
-              <span className="text-lg font-black text-academy-orange">L</span>
-            </div>
-            <div className="hidden sm:flex sm:flex-col leading-none">
-              <span className="text-[11px] font-black tracking-[0.22em] text-academy-gray-100 uppercase">
-                Lacertosus
-              </span>
-              <span className="text-[11px] font-light tracking-[0.22em] text-academy-orange uppercase">
-                Academy
-              </span>
-            </div>
-          </Link>
+
+          {/* Logo + ThemeToggle */}
+          <div className="flex items-center gap-4 shrink-0">
+            <Link href="/" className="group flex items-center gap-3">
+              <div className="relative flex h-10 w-10 items-center justify-center border border-academy-orange/50 bg-academy-orange/10 transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20 group-hover:shadow-[0_0_24px_rgba(240,146,38,0.25)]">
+                <span className="text-lg font-black text-academy-orange">L</span>
+              </div>
+              <div className="hidden sm:flex sm:flex-col leading-none">
+                <span className={cn("text-[12px] font-black tracking-[0.22em] uppercase transition-colors duration-300", isDark ? "text-academy-gray-100" : "text-[#111]")}>
+                  Lacertosus
+                </span>
+                <span className="text-[12px] font-light tracking-[0.22em] text-academy-orange uppercase">
+                  Academy
+                </span>
+              </div>
+            </Link>
+            <ThemeToggle />
+          </div>
 
           {/* Desktop links */}
           <div
@@ -275,7 +288,6 @@ export function Navbar() {
             className="relative hidden items-center gap-10 md:flex"
             onMouseLeave={handleLinksLeave}
           >
-            {/* Sliding indicator */}
             <span
               ref={indicatorRef}
               className="pointer-events-none absolute -bottom-1 left-0 h-px bg-academy-orange opacity-0"
@@ -294,15 +306,19 @@ export function Navbar() {
                     "group flex flex-col items-center pb-1 transition-colors duration-200",
                     active
                       ? "text-academy-orange"
-                      : "text-academy-gray-300 hover:text-academy-orange"
+                      : isDark
+                        ? "text-academy-gray-300 hover:text-academy-orange"
+                        : "text-[#444] hover:text-academy-orange"
                   )}
                 >
                   <span
                     className={cn(
-                      "mb-0.5 text-[9px] font-bold tracking-[0.3em] uppercase transition-colors",
+                      "mb-0.5 text-[12px] font-bold tracking-[0.3em] uppercase transition-colors",
                       active
                         ? "text-academy-orange/60"
-                        : "text-academy-gray-600 group-hover:text-academy-orange/50"
+                        : isDark
+                          ? "text-academy-gray-600 group-hover:text-academy-orange/50"
+                          : "text-[#aaa] group-hover:text-academy-orange/50"
                     )}
                   >
                     {link.num}
@@ -318,19 +334,21 @@ export function Navbar() {
           {/* Desktop right */}
           <div className="hidden items-center gap-5 md:flex shrink-0">
             {user ? (
-              <UserAvatar user={user} onLogout={handleLogout} />
+              <UserAvatar user={user} onLogout={handleLogout} isDark={isDark} />
             ) : (
               <>
                 <Link
                   href="/auth/login"
-                  className="text-sm font-medium tracking-wider text-academy-gray-400 uppercase transition-colors hover:text-academy-gray-100"
+                  className={cn(
+                    "text-sm font-medium tracking-wider uppercase transition-colors",
+                    isDark ? "text-academy-gray-400 hover:text-academy-gray-100" : "text-[#555] hover:text-[#111]"
+                  )}
                 >
                   Accedi
                 </Link>
-                {/* Outlined fill-in CTA */}
                 <Link
                   href="/auth/register"
-                  className="group relative overflow-hidden border border-academy-orange px-6 py-2.5 text-[11px] font-black tracking-[0.22em] text-academy-orange uppercase transition-colors duration-300 hover:text-academy-dark"
+                  className="group relative overflow-hidden border border-academy-orange px-6 py-2.5 text-[12px] font-black tracking-[0.22em] text-academy-orange uppercase transition-colors duration-300 hover:text-academy-dark"
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-academy-orange transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-x-100" />
                   <span className="relative">Iscriviti Ora</span>
@@ -345,105 +363,82 @@ export function Navbar() {
             className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] md:hidden"
             aria-label={mobileOpen ? "Chiudi menu" : "Apri menu"}
           >
-            <span
-              className={cn(
-                "block h-px w-[22px] origin-center bg-academy-gray-100 transition-all duration-300",
-                mobileOpen && "translate-y-[7px] rotate-45"
-              )}
-            />
-            <span
-              className={cn(
-                "block h-px w-[22px] bg-academy-gray-100 transition-all duration-300",
-                mobileOpen && "opacity-0 scale-x-0"
-              )}
-            />
-            <span
-              className={cn(
-                "block h-px w-[22px] origin-center bg-academy-gray-100 transition-all duration-300",
-                mobileOpen && "-translate-y-[7px] -rotate-45"
-              )}
-            />
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={cn(
+                  "block h-px w-[22px] origin-center transition-all duration-300",
+                  isDark ? "bg-academy-gray-100" : "bg-[#111]",
+                  i === 0 && mobileOpen && "translate-y-[7px] rotate-45",
+                  i === 1 && mobileOpen && "opacity-0 scale-x-0",
+                  i === 2 && mobileOpen && "-translate-y-[7px] -rotate-45"
+                )}
+              />
+            ))}
           </button>
         </div>
       </header>
 
       {/* ── Mobile fullscreen overlay ── */}
-      {/* Always in DOM so GSAP can animate it; hidden via clipPath */}
       <div
         ref={overlayRef}
         aria-hidden={!mobileOpen}
         className={cn(
-          "fixed inset-0 z-40 bg-academy-darker md:hidden",
+          "fixed inset-0 z-40 md:hidden",
+          isDark ? "bg-academy-darker" : "bg-white",
           !mobileOpen && "pointer-events-none"
         )}
         style={{ clipPath: "circle(0% at 93% 4%)" }}
       >
-        {/* Ambient glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute right-0 top-0 h-[40vh] w-[40vw] bg-academy-orange/[0.04] blur-[100px]" />
           <div className="absolute left-0 bottom-0 h-[30vh] w-[30vw] bg-academy-orange/[0.02] blur-[120px]" />
         </div>
 
-        {/* Corner bracket decoration */}
-        <div className="absolute left-8 top-8 h-8 w-8 border-l border-t border-academy-orange/20" />
-        <div className="absolute right-8 bottom-8 h-8 w-8 border-r border-b border-academy-orange/20" />
+        <div className={cn("absolute left-8 top-8 h-8 w-8 border-l border-t", isDark ? "border-academy-orange/20" : "border-academy-orange/30")} />
+        <div className={cn("absolute right-8 bottom-8 h-8 w-8 border-r border-b", isDark ? "border-academy-orange/20" : "border-academy-orange/30")} />
 
-        {/* Content */}
         <div className="relative flex h-full flex-col justify-between px-[8%] pb-14 pt-28">
-          {/* Nav links */}
           <nav className="flex flex-col">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={closeMenu}
-                className="nav-overlay-item group flex items-baseline gap-5 border-b border-white/5 py-6"
+                className={cn(
+                  "nav-overlay-item group flex items-baseline gap-5 py-6",
+                  isDark ? "border-b border-white/5" : "border-b border-black/6"
+                )}
               >
                 <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/40 uppercase">
                   {link.num}
                 </span>
-                <span className="text-[2.5rem] font-black leading-none tracking-tight text-academy-gray-100 uppercase transition-colors duration-200 group-hover:text-academy-orange">
+                <span className={cn(
+                  "text-[2.5rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange",
+                  isDark ? "text-academy-gray-100" : "text-[#111]"
+                )}>
                   {link.label}
                 </span>
               </Link>
             ))}
           </nav>
 
-          {/* Bottom actions */}
           <div className="nav-overlay-item flex flex-col gap-4">
             {user ? (
               <>
-                <Link
-                  href="/account"
-                  onClick={closeMenu}
-                  className="text-sm font-bold tracking-[0.2em] text-academy-orange uppercase"
-                >
+                <Link href="/account" onClick={closeMenu} className="text-sm font-bold tracking-[0.2em] text-academy-orange uppercase">
                   Area Riservata →
                 </Link>
-                <button
-                  onClick={async () => {
-                    closeMenu();
-                    await handleLogout();
-                  }}
-                  className="text-left text-sm font-medium text-red-400/70"
-                >
+                <button onClick={async () => { closeMenu(); await handleLogout(); }} className="text-left text-sm font-medium text-red-400/70">
                   Esci
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/auth/register"
-                  onClick={closeMenu}
-                  className="flex items-center justify-center border border-academy-orange py-4 text-[11px] font-black tracking-[0.22em] text-academy-orange uppercase"
-                >
+                <Link href="/auth/register" onClick={closeMenu} className="flex items-center justify-center border border-academy-orange py-4 text-[12px] font-black tracking-[0.22em] text-academy-orange uppercase">
                   Iscriviti Ora
                 </Link>
-                <Link
-                  href="/auth/login"
-                  onClick={closeMenu}
-                  className="text-center text-xs font-medium tracking-widest text-academy-gray-500 uppercase"
-                >
+                <Link href="/auth/login" onClick={closeMenu} className={cn("text-center text-xs font-medium tracking-widest uppercase", isDark ? "text-academy-gray-500" : "text-[#888]")}>
                   Hai già un account? Accedi
                 </Link>
               </>

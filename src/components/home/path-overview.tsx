@@ -121,7 +121,7 @@ export function PathOverview() {
             className="absolute top-0 left-0 h-px w-full"
             style={{ background: "linear-gradient(90deg, #F09226, #D4AF37, #F09226)" }}
           />
-          <div className="mt-3 flex justify-between text-[0.6rem] font-bold tracking-[0.25em] text-academy-gray-600 uppercase">
+          <div className="mt-3 flex justify-between text-[0.75rem] font-bold tracking-[0.25em] text-academy-gray-600 uppercase">
             {["PRIMAL", "VIS", "VICTOR"].map((n, i) => (
               <span
                 key={n}
@@ -172,7 +172,7 @@ export function PathOverview() {
                 </div>
 
                 <span
-                  className="mb-1 block text-[0.6rem] font-bold tracking-[0.28em] uppercase"
+                  className="mb-1 block text-[0.75rem] font-bold tracking-[0.28em] uppercase"
                   style={{ color: `${meta.color}90` }}
                 >
                   {meta.area}
@@ -200,7 +200,7 @@ export function PathOverview() {
                   {meta.dates.map((d) => (
                     <span
                       key={d}
-                      className="border px-2.5 py-0.5 text-[0.6rem] font-bold tracking-wider uppercase"
+                      className="border px-2.5 py-0.5 text-[0.75rem] font-bold tracking-wider uppercase"
                       style={{ borderColor: `${meta.color}25`, color: `${meta.color}90` }}
                     >
                       {d}
