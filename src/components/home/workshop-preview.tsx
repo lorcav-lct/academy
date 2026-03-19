@@ -44,7 +44,7 @@ export function WorkshopPreview() {
     <section ref={sectionRef} id="workshop" className="themed-section relative overflow-hidden py-24 md:py-32 light-reflection">
       <div className="absolute inset-0 section-bg" />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="label-tag mb-3 block">Master Specialistici</span>

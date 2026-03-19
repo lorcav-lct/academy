@@ -100,7 +100,7 @@ export function PathOverview() {
     >
       <div className="absolute inset-0 bg-academy-darker/50" />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         {/* Header */}
         <div ref={headRef} className="mb-14">
           <span className="label-tag mb-3 block">I 3 Blocchi Formativi</span>

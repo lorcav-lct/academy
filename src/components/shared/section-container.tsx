@@ -23,7 +23,7 @@ export function SectionContainer({
         className
       )}
     >
-      <div className="mx-auto w-[90%] max-w-[1440px]">{children}</div>
+      <div className="mx-auto max-w-[1440px] px-[5%] md:px-10">{children}</div>
     </section>
   );
 }

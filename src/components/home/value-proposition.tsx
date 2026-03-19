@@ -90,7 +90,7 @@ export function ValueProposition() {
     <section ref={sectionRef} id="perche" className="themed-section relative overflow-hidden py-24 md:py-32">
       <div className="absolute inset-0 section-bg" />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         <div ref={headRef} className="mb-14">
           <span className="label-tag mb-3 block">Perché Lacertosus</span>
           <h2

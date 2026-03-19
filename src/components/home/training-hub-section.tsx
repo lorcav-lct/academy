@@ -54,7 +54,7 @@ export function TrainingHubSection() {
         }}
       />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         <div ref={contentRef} className="grid items-center gap-12 md:grid-cols-2">
           {/* Text */}
           <div>

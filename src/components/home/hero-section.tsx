@@ -607,7 +607,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
       {/* ════════════════════════════════════════════════════
           DESKTOP BENTO (lg+)
       ════════════════════════════════════════════════════ */}
-      <div className="relative z-10 hidden lg:flex flex-1 flex-col mx-auto w-full max-w-[1440px] px-6 pt-[88px] pb-8">
+      <div className="relative z-10 hidden lg:flex flex-1 flex-col mx-auto w-full max-w-[1440px] px-[5%] md:px-10 pt-[88px] pb-8">
 
         {/* Top row: main + right column */}
         <div className="flex flex-1 gap-3 min-h-0">
@@ -860,7 +860,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
       {/* ════════════════════════════════════════════════════
           MOBILE / TABLET LAYOUT (< lg)
       ════════════════════════════════════════════════════ */}
-      <div className="relative z-10 lg:hidden flex flex-col w-full px-4 pt-24 pb-12 gap-3">
+      <div className="relative z-10 lg:hidden flex flex-col w-full px-[5%] pt-24 pb-12 gap-3">
 
         {/* ① SLIDER */}
         <div

@@ -60,7 +60,7 @@ export function PackPreview() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{ background: "radial-gradient(ellipse, rgba(240,146,38,0.04) 0%, transparent 70%)" }} />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="label-tag mb-3 block">Costruisci il Tuo Percorso</span>

@@ -91,7 +91,7 @@ export function CalendarSection() {
     >
       <div className="absolute inset-0 section-bg" />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         {/* Header */}
         <div ref={headRef} className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>

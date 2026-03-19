@@ -92,7 +92,7 @@ export function CTASection() {
         }}
       />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px] text-center">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10 text-center">
         {/* Eyebrow */}
         <div className="mb-6">
           <span className="label-tag">Il Tuo Percorso Inizia Ora</span>

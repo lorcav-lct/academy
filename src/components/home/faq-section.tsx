@@ -138,7 +138,7 @@ export function FaqSection() {
     >
       <div className="absolute inset-0 section-bg-alt" />
 
-      <div className="relative z-10 mx-auto w-[90%] max-w-[1440px]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
         <div className="grid gap-12 md:grid-cols-12">
           {/* Left: header */}
           <div ref={headRef} className="md:col-span-4">
