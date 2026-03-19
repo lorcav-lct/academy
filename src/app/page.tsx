@@ -31,10 +31,10 @@ export default async function HomePage() {
     <>
       {/* #1  Hero */}
       <HeroSection slides={slides} />
-      {/* #2  Social Proof Bar */}
-      <SocialProofBar />
-      {/* #3  Perché Lacertosus */}
+      {/* #2  Perché Lacertosus */}
       <ValueProposition />
+      {/* #3  I Numeri — Social Proof Bento */}
+      <SocialProofBar />
       {/* #4  Pack / Pricing */}
       <PackPreview />
       {/* #5  I 3 Blocchi Formativi */}
