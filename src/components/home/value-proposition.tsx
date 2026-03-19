@@ -240,26 +240,10 @@ export function ValueProposition() {
             </div>
           </div>
 
-          {/* PRESENZA — 100% — col-span-4, row 1 */}
-          <div
-            className="flex flex-col justify-between p-7 lg:col-span-4"
-            style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
-          >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Presenza</p>
-            <div>
-              <div className="text-[clamp(3.5rem,7vw,5.5rem)] font-black leading-none gradient-text tabular-nums">
-                <span ref={counter100Ref}>0</span>
-                <span className="text-[clamp(1.8rem,3.5vw,2.8rem)]">%</span>
-              </div>
-              <p className="mt-1 text-base font-bold" style={{ color: th }}>In Presenza</p>
-              <p className="mt-1 text-[0.8rem]" style={{ color: tm }}>Nessuna lezione online. Solo pratica autentica e confronto diretto.</p>
-            </div>
-          </div>
-
-          {/* IMAGE PLACEHOLDER — col-span-8, row 2 (between Formazione and Presenza) */}
+          {/* IMAGE PLACEHOLDER — col-span-4, row-span-2 (right column, spanning both rows) */}
           <div
             ref={imagePlaceholderRef}
-            className="relative overflow-hidden lg:col-span-8"
+            className="relative overflow-hidden lg:col-span-4 lg:row-span-2"
             style={{
               minHeight: "200px",
               background: d ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.025)",
@@ -275,6 +259,22 @@ export function ValueProposition() {
               <p className="text-[0.68rem] font-bold tracking-[0.32em] uppercase" style={{ color: d ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)" }}>
                 Inserisci immagine
               </p>
+            </div>
+          </div>
+
+          {/* PRESENZA — 100% — col-span-4, row 2 (stacked below Formazione) */}
+          <div
+            className="flex flex-col justify-between p-7 lg:col-span-4"
+            style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+          >
+            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Presenza</p>
+            <div>
+              <div className="text-[clamp(3.5rem,7vw,5.5rem)] font-black leading-none gradient-text tabular-nums">
+                <span ref={counter100Ref}>0</span>
+                <span className="text-[clamp(1.8rem,3.5vw,2.8rem)]">%</span>
+              </div>
+              <p className="mt-1 text-base font-bold" style={{ color: th }}>In Presenza</p>
+              <p className="mt-1 text-[0.8rem]" style={{ color: tm }}>Nessuna lezione online. Solo pratica autentica e confronto diretto.</p>
             </div>
           </div>
 
