@@ -9,9 +9,8 @@ export function SocialProofBar() {
   const sectionRef = useRef<HTMLElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const counter200Ref = useRef<HTMLSpanElement>(null);
-  const counter9Ref = useRef<HTMLSpanElement>(null);
-  const counter8Ref = useRef<HTMLSpanElement>(null);
+  const cohortRef = useRef<HTMLDivElement>(null);
+  const counter30Ref = useRef<HTMLSpanElement>(null);
 
   const { theme } = useTheme();
   const d = theme === "dark";
@@ -20,11 +19,32 @@ export function SocialProofBar() {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
 
+      // Header
       gsap.from(headRef.current, {
         scrollTrigger: { trigger: headRef.current, start: "top 88%", once: true },
-        opacity: 0, y: 32, duration: 0.75, ease: "power3.out",
+        opacity: 0, y: 32, duration: 0.8, ease: "power3.out",
       });
 
+      // "COHORT 001" — letters reveal with stagger
+      if (cohortRef.current) {
+        const chars = cohortRef.current.querySelectorAll("[data-char]");
+        gsap.from(chars, {
+          scrollTrigger: { trigger: cohortRef.current, start: "top 80%", once: true },
+          opacity: 0, y: 30, duration: 0.5, stagger: 0.04, ease: "power3.out",
+        });
+      }
+
+      // Counter: 30 posti
+      if (counter30Ref.current) {
+        const obj = { val: 0 };
+        gsap.to(obj, {
+          scrollTrigger: { trigger: counter30Ref.current, start: "top 82%", once: true },
+          val: 30, duration: 1.2, ease: "power2.out",
+          onUpdate() { if (counter30Ref.current) counter30Ref.current.textContent = String(Math.round(obj.val)); },
+        });
+      }
+
+      // Card stagger entrance
       const cards = cardsRef.current?.querySelectorAll("[data-card]");
       if (cards?.length) {
         gsap.from(cards, {
@@ -32,20 +52,6 @@ export function SocialProofBar() {
           opacity: 0, y: 45, duration: 0.65, stagger: 0.09, ease: "power3.out",
         });
       }
-
-      const makeCounter = (el: HTMLSpanElement | null, target: number, dur: number) => {
-        if (!el) return;
-        const obj = { val: 0 };
-        gsap.to(obj, {
-          scrollTrigger: { trigger: el, start: "top 85%", once: true },
-          val: target, duration: dur, ease: "power2.out",
-          onUpdate() { el.textContent = String(Math.round(obj.val)); },
-        });
-      };
-
-      makeCounter(counter200Ref.current, 200, 1.8);
-      makeCounter(counter9Ref.current, 9, 1.2);
-      makeCounter(counter8Ref.current, 8, 1.0);
 
     }, sectionRef);
     return () => ctx.revert();
@@ -57,15 +63,21 @@ export function SocialProofBar() {
   const cardBg = d ? "rgba(10,8,28,0.7)" : "#ffffff";
   const cardBorder = d ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
   const accentBg = d
-    ? "linear-gradient(145deg, rgba(240,146,38,0.1), rgba(2,0,38,0.92))"
-    : "linear-gradient(145deg, rgba(240,146,38,0.08), rgba(255,255,255,0.99))";
+    ? "linear-gradient(145deg, rgba(240,146,38,0.1), rgba(2,0,38,0.94))"
+    : "linear-gradient(145deg, rgba(240,146,38,0.07), rgba(255,255,255,0.99))";
   const accentBorder = d ? "rgba(240,146,38,0.2)" : "rgba(240,146,38,0.22)";
-  const certBg = d
-    ? "linear-gradient(145deg, rgba(212,175,55,0.09), rgba(2,0,38,0.94))"
-    : "linear-gradient(145deg, rgba(212,175,55,0.06), rgba(255,255,255,0.99))";
-  const certBorder = d ? "rgba(212,175,55,0.18)" : "rgba(212,175,55,0.2)";
-  const quoteBg = d ? "rgba(8,6,20,0.65)" : "#F5F2EC";
-  const quoteBorder = d ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)";
+  const goldBg = d
+    ? "linear-gradient(145deg, rgba(212,175,55,0.1), rgba(2,0,38,0.96))"
+    : "linear-gradient(145deg, rgba(212,175,55,0.07), rgba(255,255,255,0.99))";
+  const goldBorder = d ? "rgba(212,175,55,0.2)" : "rgba(212,175,55,0.22)";
+  const quoteBg = d ? "rgba(6,4,16,0.7)" : "#F2EFE9";
+  const quoteBorder = d ? "rgba(212,175,55,0.1)" : "rgba(212,175,55,0.15)";
+
+  // Split "COHORT 001" into individual characters for GSAP stagger
+  const cohortChars = "COHORT 001".split("").map((c, i) =>
+    c === " " ? <span key={i} className="inline-block w-[0.45em]" /> :
+    <span key={i} data-char className="inline-block">{c}</span>
+  );
 
   return (
     <section ref={sectionRef} className="themed-section relative overflow-hidden py-20 md:py-28">
@@ -74,72 +86,66 @@ export function SocialProofBar() {
       <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
 
         <div ref={headRef} className="mb-10">
-          <span className="label-tag mb-3 block">I Numeri</span>
+          <span className="label-tag mb-3 block">Prima Edizione</span>
           <h2
             className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-black leading-tight tracking-tight"
             style={{ color: th }}
           >
-            Risultati concreti.{" "}
-            <span className="gradient-text">Alumni che crescono.</span>
+            Non è per tutti.{" "}
+            <span className="gradient-text">Forse è per te.</span>
           </h2>
         </div>
 
         <div ref={cardsRef} className="grid gap-3 lg:grid-cols-12">
 
-          {/* BIG STAT: +200 alumni — col-span-5 */}
+          {/* COHORT 001 — big founding member card */}
+          <div
+            data-card
+            className="flex flex-col justify-between p-8 lg:col-span-7"
+            style={{ background: accentBg, border: `1px solid ${accentBorder}` }}
+          >
+            <p className="text-[0.7rem] font-black tracking-[0.35em] text-academy-orange/65 uppercase">
+              Founding Cohort — Prima Edizione
+            </p>
+
+            <div>
+              {/* Animated COHORT 001 */}
+              <div
+                ref={cohortRef}
+                className="text-[clamp(2.8rem,7vw,5.5rem)] font-black leading-none tracking-tight text-academy-gold tabular-nums"
+                aria-label="COHORT 001"
+              >
+                {cohortChars}
+              </div>
+
+              <p className="mt-5 text-[clamp(0.95rem,1.4vw,1.1rem)] font-bold leading-snug" style={{ color: th }}>
+                Non stai acquistando un corso.<br />
+                Stai entrando in qualcosa di irripetibile.
+              </p>
+              <p className="mt-3 text-[0.85rem] leading-relaxed" style={{ color: tm }}>
+                I fondatori della prima edizione non saranno semplici alumni — porteranno con sé
+                qualcosa che nessun futuro partecipante potrà avere: il privilegio di aver aperto la strada
+                e di aver contribuito a definire lo standard della formazione fitness italiana.
+              </p>
+            </div>
+          </div>
+
+          {/* POSTI LIMITATI — accesso esclusivo */}
           <div
             data-card
             className="flex flex-col justify-between p-8 lg:col-span-5"
-            style={{ background: accentBg, border: `1px solid ${accentBorder}` }}
+            style={{ background: goldBg, border: `1px solid ${goldBorder}` }}
           >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/80 uppercase">Alumni certificati</p>
+            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-gold/80 uppercase">Accesso Esclusivo</p>
             <div>
-              <div className="text-[clamp(5rem,11vw,8rem)] font-black leading-none text-academy-orange tabular-nums">
-                +<span ref={counter200Ref}>0</span>
+              <div className="text-[clamp(4.5rem,9vw,7rem)] font-black leading-none text-academy-gold tabular-nums">
+                <span ref={counter30Ref}>0</span>
               </div>
-              <p className="mt-2 text-base font-bold" style={{ color: th }}>Professionisti Formati</p>
-              <p className="mt-1 text-[0.8rem]" style={{ color: tm }}>Trainer, coach e imprenditori del fitness in tutta Italia</p>
-            </div>
-          </div>
-
-          {/* STAR RATING — col-span-3 */}
-          <div
-            data-card
-            className="flex flex-col justify-between p-7 lg:col-span-3"
-            style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
-          >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Valutazione</p>
-            <div>
-              <div className="text-[2.8rem] font-black leading-none" style={{ color: "#D4AF37" }}>★★★★★</div>
-              <p className="mt-2 text-[0.88rem] font-bold" style={{ color: th }}>Media Alumni</p>
-              <p className="mt-1 text-[0.75rem]" style={{ color: tm }}>Su oltre 200 recensioni verificate</p>
-            </div>
-          </div>
-
-          {/* FIPE CERTIFICATION — col-span-4 */}
-          <div
-            data-card
-            className="flex flex-col justify-between p-7 lg:col-span-4"
-            style={{ background: certBg, border: `1px solid ${certBorder}` }}
-          >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-gold/80 uppercase">Certificazione Ufficiale</p>
-            <div className="flex items-center gap-4">
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-academy-gold/25"
-                style={{ background: "radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)" }}
-              >
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
-                  <path d="M12 2L3 7v6c0 5.25 3.75 10.18 9 11.25C17.25 23.18 21 18.25 21 13V7L12 2z"
-                    stroke="#D4AF37" strokeWidth="1.2" fill="rgba(212,175,55,0.1)" />
-                  <path d="M9 12l2 2 4-4" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-[1.15rem] font-black leading-none" style={{ color: "#D4AF37" }}>FIPE × LACERTOSUS</div>
-                <p className="mt-1 text-[0.75rem]" style={{ color: d ? "rgba(212,175,55,0.55)" : "rgba(130,100,15,0.7)" }}>
-                  Riconosciuta a livello nazionale
-                </p>
-              </div>
+              <p className="mt-1 text-lg font-bold" style={{ color: th }}>partecipanti per edizione</p>
+              <p className="mt-2 text-[0.82rem] leading-relaxed" style={{ color: tm }}>
+                Ogni posto è riservato a chi dimostra la determinazione giusta.
+                Non si entra per caso. Non si entra per primo. Si entra perché si è pronti.
+              </p>
             </div>
           </div>
 
@@ -150,65 +156,68 @@ export function SocialProofBar() {
             style={{ background: quoteBg, border: `1px solid ${quoteBorder}` }}
           >
             <blockquote className="text-center">
-              {/* decorative open-quote */}
-              <span className="mb-2 block text-[2.5rem] leading-none text-academy-orange/20 select-none">&ldquo;</span>
+              <span className="mb-2 block text-[2.5rem] leading-none text-academy-gold/25 select-none">&ldquo;</span>
               <p
                 className="text-[clamp(1.1rem,2.8vw,1.65rem)] font-black italic leading-snug"
                 style={{ color: th }}
               >
-                Il percorso più completo del fitness italiano
+                Essere qui non è un diritto. È un riconoscimento.
               </p>
-              <cite className="mt-4 block text-[0.72rem] font-bold not-italic tracking-[0.28em] text-academy-orange/60 uppercase">
-                Alumni Lacertosus Academy
+              <cite className="mt-4 block text-[0.72rem] font-bold not-italic tracking-[0.28em] text-academy-gold/60 uppercase">
+                Lacertosus Academy
               </cite>
             </blockquote>
           </div>
 
-          {/* BOTTOM ROW — 3 equal stat cards */}
-
-          {/* 9 Mesi */}
+          {/* I FONDATORI */}
           <div
             data-card
             className="flex flex-col justify-between p-7 lg:col-span-4"
             style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
           >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Durata</p>
+            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-gold/70 uppercase">I Fondatori</p>
             <div>
-              <div className="text-[clamp(3rem,6vw,4.5rem)] font-black leading-none text-academy-orange tabular-nums">
-                <span ref={counter9Ref}>0</span>
-              </div>
-              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>Mesi di Formazione</p>
-              <p className="mt-1 text-[0.75rem]" style={{ color: tm }}>PRIMAL → VIS → VICTOR</p>
+              {/* Roman numeral / founding mark */}
+              <div className="text-[3rem] font-black leading-none text-academy-gold/30 tabular-nums select-none">I</div>
+              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>La prima edizione è irripetibile</p>
+              <p className="mt-2 text-[0.78rem] leading-relaxed" style={{ color: tm }}>
+                Chi partecipa ora costruisce qualcosa che non può essere comprato in futuro:
+                il titolo di fondatore di un network destinato a durare.
+              </p>
             </div>
           </div>
 
-          {/* 8 Masterclass */}
+          {/* L'ECOSISTEMA */}
           <div
             data-card
             className="flex flex-col justify-between p-7 lg:col-span-4"
             style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
           >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Specializzazioni</p>
+            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">L'Ecosistema</p>
             <div>
-              <div className="text-[clamp(3rem,6vw,4.5rem)] font-black leading-none text-academy-orange tabular-nums">
-                <span ref={counter8Ref}>0</span>
-              </div>
-              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>Masterclass Specialistici</p>
-              <p className="mt-1 text-[0.75rem]" style={{ color: tm }}>Approfondimenti verticali esclusivi</p>
+              <div className="text-[3rem] font-black leading-none text-academy-orange/25 select-none">◈</div>
+              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>Chi ti circonda conta</p>
+              <p className="mt-2 text-[0.78rem] leading-relaxed" style={{ color: tm }}>
+                Sarai affiancato da persone selezionate con i tuoi stessi standard.
+                Le connessioni che costruirai durante il percorso valgono quanto il percorso stesso.
+              </p>
             </div>
           </div>
 
-          {/* 100% Presenza */}
+          {/* IL DOPO */}
           <div
             data-card
             className="flex flex-col justify-between p-7 lg:col-span-4"
             style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
           >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Modalità</p>
+            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Dopo il Percorso</p>
             <div>
-              <div className="text-[clamp(3rem,6vw,4.5rem)] font-black leading-none gradient-text tabular-nums">100%</div>
-              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>In Presenza</p>
-              <p className="mt-1 text-[0.75rem]" style={{ color: tm }}>Zero lezioni online, solo pratica diretta</p>
+              <div className="text-[3rem] font-black leading-none text-academy-orange/25 select-none">→</div>
+              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>Apri un Training Hub</p>
+              <p className="mt-2 text-[0.78rem] leading-relaxed" style={{ color: tm }}>
+                Gli alumni certificati possono portare il metodo Lacertosus nel proprio territorio,
+                aprendo un Training Hub e diventando punto di riferimento per la formazione fitness locale.
+              </p>
             </div>
           </div>
 
