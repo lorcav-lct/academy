@@ -40,10 +40,12 @@ function initials(name: string) {
 
 function PackModal({
   pack,
+  isDark,
   onClose,
   onBuy,
 }: {
   pack: AcademyProduct;
+  isDark: boolean;
   onClose: () => void;
   onBuy: (pack: AcademyProduct) => void;
 }) {
@@ -53,16 +55,28 @@ function PackModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
+  // Theme tokens
+  const panelLBg  = isDark ? "rgba(2,0,32,0.97)"      : "rgba(255,255,255,0.99)";
+  const panelRBg  = isDark ? "rgba(1,0,20,0.98)"       : "rgba(244,244,250,0.99)";
+  const textH     = isDark ? "#ffffff"                  : "#111111";
+  const textB     = isDark ? "rgba(180,180,200,0.7)"   : "#666666";
+  const textSub   = isDark ? "rgba(120,120,140,0.7)"   : "#aaaaaa";
+  const tileBg    = isDark ? "rgba(255,255,255,0.04)"  : "rgba(0,0,0,0.03)";
+  const tileBdr   = isDark ? "rgba(255,255,255,0.07)"  : "rgba(0,0,0,0.08)";
+  const statBdr   = isDark ? `rgba(${tier.rgb},0.12)`  : `rgba(${tier.rgb},0.18)`;
+  const closeCl   = isDark ? "rgba(255,255,255,0.35)"  : "rgba(0,0,0,0.35)";
+  const closHov   = isDark ? "rgba(255,255,255,0.85)"  : "rgba(0,0,0,0.85)";
+  const inclTxt   = isDark ? "rgba(200,200,220,0.8)"   : "#444444";
+  const overlayBg = isDark ? "rgba(1,0,18,0.88)"       : "rgba(0,0,0,0.55)";
+
   // Entrance animation + load video after mount
   useEffect(() => {
     const tl = gsap.timeline();
     tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.28, ease: "power2.out" });
     tl.fromTo(panelRef.current, { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, "-=0.1");
-    // Load video after animation
     const timeout = setTimeout(() => {
       setVideoSrc("https://player.vimeo.com/video/1161847546?autoplay=0&title=0&byline=0&portrait=0&dnt=1");
     }, 400);
-
     document.body.style.overflow = "hidden";
     return () => {
       clearTimeout(timeout);
@@ -87,7 +101,7 @@ function PackModal({
     <div
       ref={overlayRef}
       className="fixed inset-0 z-[300] flex items-stretch justify-center"
-      style={{ background: "rgba(1,0,18,0.88)", backdropFilter: "blur(16px)" }}
+      style={{ background: overlayBg, backdropFilter: "blur(16px)" }}
       onClick={close}
     >
       <div
@@ -98,8 +112,8 @@ function PackModal({
       >
         {/* ── LEFT: Info ─────────────────────────────────────────────── */}
         <div
-          className="flex flex-col gap-7 overflow-y-auto p-8 lg:w-[44%] lg:p-10"
-          style={{ background: "rgba(2,0,32,0.97)" }}
+          className="flex flex-col gap-6 overflow-y-auto p-8 lg:w-[44%] lg:p-10"
+          style={{ background: panelLBg }}
         >
           {/* Tier badge */}
           <div className="flex items-center gap-3">
@@ -116,20 +130,23 @@ function PackModal({
 
           {/* Name + subtitle */}
           <div>
-            <h2 className="text-[clamp(2rem,3.5vw,3rem)] font-black leading-[0.95] tracking-tight text-white">
+            <h2
+              className="text-[clamp(1.8rem,3vw,2.6rem)] font-black leading-[0.95] tracking-tight"
+              style={{ color: textH }}
+            >
               {pack.name}
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-academy-gray-400">{pack.subtitle}</p>
+            <p className="mt-2 text-sm leading-relaxed" style={{ color: textB }}>{pack.subtitle}</p>
           </div>
 
           {/* Includes */}
           <div>
-            <p className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
+            <p className="mb-3 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
               Cosa include
             </p>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {pack.includes.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm text-academy-gray-300">
+                <li key={item} className="flex items-start gap-3 text-sm" style={{ color: inclTxt }}>
                   <svg viewBox="0 0 16 16" fill="none" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: tier.color }}>
                     <path d="M13.5 4.5L6 12L2.5 8.5" stroke="currentColor" strokeWidth={2} strokeLinecap="square" />
                   </svg>
@@ -139,38 +156,63 @@ function PackModal({
             </ul>
           </div>
 
-          {/* Teachers */}
+          {/* ── CTA — above teachers ── */}
+          <div>
+            <button
+              onClick={() => onBuy(pack)}
+              className="w-full py-3.5 text-center text-sm font-black tracking-[0.18em] uppercase transition-all duration-200"
+              style={{ background: tier.color, color: pack.slug === "argento" ? "#111111" : "#010015" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+            >
+              Scegli {tier.label} →
+            </button>
+            <p className="mt-2 text-center text-[0.68rem]" style={{ color: textSub }}>
+              Nessun pagamento richiesto ora · Completa il profilo per procedere
+            </p>
+          </div>
+
+          {/* ── Teachers — bento grid ── */}
           <div>
             <p className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
               I Docenti
             </p>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {BLOCK_SLUGS.map((slug) => (
                 <div key={slug}>
-                  <p className="mb-2 text-[0.65rem] font-bold tracking-[0.25em] uppercase text-academy-gray-600">
+                  <p
+                    className="mb-2.5 text-[0.65rem] font-black tracking-[0.3em] uppercase"
+                    style={{ color: textSub }}
+                  >
                     {BLOCK_LABELS[slug]}
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {teachers[slug].map((t) => (
                       <div
                         key={t.slug}
-                        className="flex items-center gap-2 rounded-full px-2.5 py-1.5"
-                        style={{ background: `${t.color}10`, border: `1px solid ${t.color}28` }}
+                        className="flex flex-col items-center gap-2 p-3 text-center"
+                        style={{ background: tileBg, border: `1px solid ${tileBdr}` }}
                         title={t.role}
                       >
+                        {/* Avatar */}
                         <div
-                          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[0.55rem] font-black"
-                          style={{ background: `${t.color}22`, color: t.color }}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.7rem] font-black"
+                          style={{ background: `${t.color}20`, color: t.color }}
                         >
                           {t.image_url
                             // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={t.image_url} alt={t.name} className="h-full w-full rounded-full object-cover" />
+                            ? <img src={t.image_url} alt={t.name} className="h-full w-full object-cover" />
                             : initials(t.name)
                           }
                         </div>
-                        <span className="text-[0.72rem] font-semibold leading-none text-academy-gray-300 whitespace-nowrap">
-                          {t.name.split(" ")[0]}
-                        </span>
+                        <div>
+                          <p className="text-[0.72rem] font-bold leading-tight" style={{ color: textH }}>
+                            {t.name}
+                          </p>
+                          <p className="mt-0.5 text-[0.6rem] leading-snug line-clamp-2" style={{ color: textSub }}>
+                            {t.role}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -178,44 +220,21 @@ function PackModal({
               ))}
             </div>
           </div>
-
-          {/* CTA */}
-          <div className="mt-auto pt-2">
-            <button
-              onClick={() => onBuy(pack)}
-              className="w-full py-4 text-center text-sm font-black tracking-[0.18em] uppercase transition-all duration-200"
-              style={{
-                background: tier.color,
-                color: pack.slug === "argento" ? "#111111" : "#010015",
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-            >
-              Scegli {tier.label} →
-            </button>
-            <p className="mt-3 text-center text-[0.7rem] text-academy-gray-600">
-              Nessun pagamento richiesto ora · Completa il profilo per procedere
-            </p>
-          </div>
         </div>
 
         {/* ── RIGHT: Video ────────────────────────────────────────────── */}
         <div
           className="relative flex flex-col justify-center lg:w-[56%]"
-          style={{ background: "rgba(1,0,20,0.98)" }}
+          style={{ background: panelRBg }}
         >
-          {/* Tier glow BG */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{ background: `radial-gradient(ellipse at 60% 40%, rgba(${tier.rgb},0.07) 0%, transparent 65%)` }}
           />
-
           <div className="relative z-10 p-6 lg:p-10">
             <p className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
               L&apos;Academy in 2 minuti
             </p>
-
-            {/* 16:9 video container */}
             <div
               className="relative w-full overflow-hidden"
               style={{
@@ -233,7 +252,6 @@ function PackModal({
                   allowFullScreen
                 />
               ) : (
-                /* Placeholder while loading */
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div
                     className="flex h-14 w-14 items-center justify-center rounded-full"
@@ -250,8 +268,6 @@ function PackModal({
                 </div>
               )}
             </div>
-
-            {/* Stat strip below video */}
             <div className="mt-6 grid grid-cols-3 gap-3">
               {[
                 { val: "9", label: "mesi" },
@@ -261,20 +277,23 @@ function PackModal({
                 <div
                   key={s.label}
                   className="flex flex-col items-center gap-1 p-3 text-center"
-                  style={{ border: `1px solid rgba(${tier.rgb},0.12)` }}
+                  style={{ border: `1px solid ${statBdr}` }}
                 >
                   <span className="text-xl font-black" style={{ color: tier.color }}>{s.val}</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-academy-gray-500">{s.label}</span>
+                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider" style={{ color: textSub }}>{s.label}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Close button */}
+        {/* Close */}
         <button
           onClick={close}
-          className="absolute right-5 top-5 z-20 flex items-center gap-1.5 text-[0.7rem] font-bold tracking-[0.22em] uppercase text-white/40 hover:text-white/80 transition-colors"
+          className="absolute right-5 top-5 z-20 flex items-center gap-1.5 text-[0.7rem] font-bold tracking-[0.22em] uppercase transition-colors"
+          style={{ color: closeCl }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = closHov; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = closeCl; }}
         >
           Chiudi <span className="text-lg font-light">×</span>
         </button>
@@ -472,11 +491,66 @@ export function PackPreview() {
         scrollTrigger: { trigger: headRef.current, start: "top 85%", once: true },
         opacity: 0, y: 30, duration: 0.7, ease: "power3.out",
       });
-      const cards = cardsRef.current?.querySelectorAll("[data-pack-card]");
-      if (cards) {
-        gsap.from(cards, {
-          scrollTrigger: { trigger: cardsRef.current, start: "top 78%", once: true },
-          opacity: 0, y: 50, duration: 0.75, stagger: 0.14, ease: "power3.out",
+
+      // ── Card deal animation ─────────────────────────────────────────────────
+      const cardEls = Array.from(
+        cardsRef.current?.querySelectorAll("[data-pack-card]") ?? []
+      ) as HTMLElement[];
+
+      if (cardEls.length === 3) {
+        const [c0, c1, c2] = cardEls; // BRONZO · ARGENTO · ORO
+
+        // Hide all cards until trigger fires
+        gsap.set(cardEls, { opacity: 0 });
+
+        ScrollTrigger.create({
+          trigger: cardsRef.current,
+          // Fire early so animation is fully in view when section arrives
+          start: "top 92%",
+          once: true,
+          onEnter: () => {
+            const isMobile = window.innerWidth < 768;
+
+            if (isMobile) {
+              // Mobile: cards rise from below one by one — ARGENTO (middle) first
+              const order = [c1, c0, c2];
+              order.forEach((el, i) => {
+                gsap.fromTo(el,
+                  { y: 80, scale: 0.88, opacity: 0, rotation: (i === 0 ? 0 : i === 1 ? -2 : 2) },
+                  { y: 0, scale: 1, opacity: 1, rotation: 0,
+                    duration: 1.0, delay: i * 0.22, ease: "expo.out" }
+                );
+              });
+            } else {
+              // Desktop: cards start as a near-stacked fan near ARGENTO's position,
+              // then deal out smoothly. Each card has its own timeline slot.
+              const tl = gsap.timeline({
+                onComplete: () => { gsap.set(cardEls, { clearProps: "zIndex" }); },
+              });
+
+              // ARGENTO stays at its position but emerges from thin air (scale up)
+              tl.fromTo(c1,
+                { scale: 0.82, rotation: 0, opacity: 0, xPercent: 0, zIndex: 3 },
+                { scale: 1.025, rotation: 0, opacity: 1, xPercent: 0,
+                  duration: 1.15, ease: "expo.out" },
+                0.05
+              )
+              // BRONZO starts near ARGENTO (shifted right), fans left to its cell
+              .fromTo(c0,
+                { scale: 0.82, rotation: 18, opacity: 0, xPercent: 60, zIndex: 1 },
+                { scale: 1, rotation: 0, opacity: 1, xPercent: 0,
+                  duration: 1.05, ease: "expo.out" },
+                0.35
+              )
+              // ORO starts near ARGENTO (shifted left), fans right to its cell
+              .fromTo(c2,
+                { scale: 0.82, rotation: -18, opacity: 0, xPercent: -60, zIndex: 2 },
+                { scale: 1, rotation: 0, opacity: 1, xPercent: 0,
+                  duration: 1.05, ease: "expo.out" },
+                0.52
+              );
+            }
+          },
         });
       }
     }, sectionRef);
@@ -582,6 +656,7 @@ export function PackPreview() {
       {activeModal && (
         <PackModal
           pack={activeModal}
+          isDark={d}
           onClose={() => setActiveModal(null)}
           onBuy={handleBuy}
         />

@@ -11,6 +11,7 @@ export function SocialProofBar() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const cohortRef = useRef<HTMLDivElement>(null);
   const counter30Ref = useRef<HTMLSpanElement>(null);
+  const dopoRef = useRef<HTMLDivElement>(null);
 
   const { theme } = useTheme();
   const d = theme === "dark";
@@ -53,6 +54,16 @@ export function SocialProofBar() {
         });
       }
 
+      // "Dopo il Percorso" — rows slide up on scroll
+      const dopoEl = dopoRef.current;
+      if (dopoEl) {
+        const items = dopoEl.querySelectorAll("[data-dopo-item]");
+        gsap.from(items, {
+          scrollTrigger: { trigger: dopoEl, start: "top 80%", once: true },
+          opacity: 0, y: 18, duration: 0.55, stagger: 0.13, ease: "power3.out",
+        });
+      }
+
     }, sectionRef);
     return () => ctx.revert();
   }, []);
@@ -70,9 +81,6 @@ export function SocialProofBar() {
     ? "linear-gradient(145deg, rgba(212,175,55,0.1), rgba(2,0,38,0.96))"
     : "linear-gradient(145deg, rgba(212,175,55,0.07), rgba(255,255,255,0.99))";
   const goldBorder = d ? "rgba(212,175,55,0.2)" : "rgba(212,175,55,0.22)";
-  const quoteBg = d ? "rgba(6,4,16,0.7)" : "#F2EFE9";
-  const quoteBorder = d ? "rgba(212,175,55,0.1)" : "rgba(212,175,55,0.15)";
-
   // Split "COHORT 001" into individual characters for GSAP stagger
   const cohortChars = "COHORT 001".split("").map((c, i) =>
     c === " " ? <span key={i} className="inline-block w-[0.45em]" /> :
@@ -149,26 +157,6 @@ export function SocialProofBar() {
             </div>
           </div>
 
-          {/* QUOTE — full width */}
-          <div
-            data-card
-            className="flex items-center justify-center px-8 py-10 lg:col-span-12"
-            style={{ background: quoteBg, border: `1px solid ${quoteBorder}` }}
-          >
-            <blockquote className="text-center">
-              <span className="mb-2 block text-[2.5rem] leading-none text-academy-gold/25 select-none">&ldquo;</span>
-              <p
-                className="text-[clamp(1.1rem,2.8vw,1.65rem)] font-black italic leading-snug"
-                style={{ color: th }}
-              >
-                Essere qui non è un diritto. È un riconoscimento.
-              </p>
-              <cite className="mt-4 block text-[0.72rem] font-bold not-italic tracking-[0.28em] text-academy-gold/60 uppercase">
-                Lacertosus Academy
-              </cite>
-            </blockquote>
-          </div>
-
           {/* I FONDATORI */}
           <div
             data-card
@@ -204,20 +192,42 @@ export function SocialProofBar() {
             </div>
           </div>
 
-          {/* IL DOPO */}
+          {/* IL DOPO — minimal bento, 3 output rows */}
           <div
             data-card
-            className="flex flex-col justify-between p-7 lg:col-span-4"
+            ref={dopoRef}
+            className="flex flex-col gap-6 p-7 lg:col-span-4"
             style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
           >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Dopo il Percorso</p>
             <div>
-              <div className="text-[3rem] font-black leading-none text-academy-orange/25 select-none">→</div>
-              <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>Apri un Training Hub</p>
-              <p className="mt-2 text-[0.78rem] leading-relaxed" style={{ color: tm }}>
-                Gli alumni certificati possono portare il metodo Lacertosus nel proprio territorio,
-                aprendo un Training Hub e diventando punto di riferimento per la formazione fitness locale.
+              <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">Dopo il Percorso</p>
+              <p className="mt-2 text-[0.82rem] leading-snug" style={{ color: tm }}>
+                Il percorso apre tre porte concrete.
               </p>
+            </div>
+
+            {/* Three outputs — minimal rows */}
+            <div className="flex flex-col gap-px">
+              {[
+                { n: "01", title: "Training Hub", body: "Apri nel tuo territorio" },
+                { n: "02", title: "Tirocinio",    body: "Pratica certificata sul campo" },
+                { n: "03", title: "Certificazione FIPE", body: "Titolo riconosciuto nazionale" },
+              ].map((item) => (
+                <div
+                  key={item.n}
+                  data-dopo-item
+                  className="flex items-center gap-5 py-4"
+                  style={{ borderBottom: `1px solid ${d ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)"}` }}
+                >
+                  <span className="shrink-0 text-[0.65rem] font-black tracking-[0.3em] text-academy-orange/45">
+                    {item.n}
+                  </span>
+                  <div>
+                    <p className="text-[0.85rem] font-bold leading-tight" style={{ color: th }}>{item.title}</p>
+                    <p className="text-[0.68rem] mt-0.5" style={{ color: tm }}>{item.body}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
