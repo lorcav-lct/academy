@@ -38,13 +38,14 @@ export function ScrollProgress() {
       aria-label={`Scroll: ${pct}%`}
     >
       <div className="relative flex items-center justify-center" style={{ width: SIZE, height: SIZE }}>
-        {/* Dark bg disc */}
+        {/* Light bg disc */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: "rgba(1,0,21,0.88)",
+            background: "rgba(255,255,255,0.92)",
             backdropFilter: "blur(10px)",
-            border: "1px solid rgba(240,146,38,0.14)",
+            border: "1px solid rgba(0,0,0,0.1)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
           }}
         />
 
@@ -59,7 +60,7 @@ export function ScrollProgress() {
           <circle
             cx={SIZE / 2} cy={SIZE / 2} r={R}
             fill="none"
-            stroke="rgba(240,146,38,0.1)"
+            stroke="rgba(0,0,0,0.1)"
             strokeWidth="1.8"
           />
           {/* Progress */}
@@ -82,7 +83,7 @@ export function ScrollProgress() {
           style={{
             fontSize: "0.58rem",
             fontWeight: 800,
-            color: "#F09226",
+            color: "#1a1a1a",
             letterSpacing: "-0.01em",
             lineHeight: 1,
           }}

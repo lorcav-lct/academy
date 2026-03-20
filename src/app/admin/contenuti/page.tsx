@@ -14,6 +14,16 @@ const CONTENT_SECTIONS = [
       </svg>
     ),
   },
+  {
+    href: "/admin/contenuti/cta-tel",
+    label: "CTA Telefonica",
+    desc: "Modifica il numero di telefono e il testo del widget di contatto flottante in basso a destra.",
+    icon: (
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M2 6.5A1.5 1.5 0 013.5 5h3a1.5 1.5 0 011.4.97l.87 2.17a1.5 1.5 0 01-.34 1.64l-.93.93a10.02 10.02 0 004.96 4.96l.93-.93a1.5 1.5 0 011.64-.34l2.17.87A1.5 1.5 0 0119 16.5v3A1.5 1.5 0 0117.5 21C9.49 21 3 14.51 3 6.5z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminContenutiPage() {
