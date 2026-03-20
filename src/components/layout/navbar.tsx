@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: "/percorso", label: "Il Percorso", num: "01" },
   { href: "/pack", label: "Pack", num: "02" },
   { href: "/masterclass", label: "Masterclass", num: "03" },
+  { href: "/docenti", label: "Docenti", num: "04" },
 ];
 
 /* ─── User Avatar + Dropdown ─── */

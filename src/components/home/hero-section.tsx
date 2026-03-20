@@ -220,7 +220,7 @@ function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boole
         >
           {t.image_url
             ? <img src={t.image_url} alt={t.name} className="w-full h-full object-cover" />
-            : t.initials
+            : t.name.split(" ").map((w) => w[0]).slice(0, 2).join("")
           }
         </div>
         <div className="min-w-0">

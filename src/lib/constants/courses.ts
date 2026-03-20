@@ -11,6 +11,8 @@ export interface Course {
   objective: string;
   curriculum: string[];
   dates: string[];
+  /** Slugs of teachers involved in this course block */
+  teacherSlugs: string[];
   sortOrder: number;
 }
 
@@ -37,6 +39,15 @@ export const COURSES: Course[] = [
       "Functional Training: gli attrezzi",
     ],
     dates: ["11-12 Settembre", "9-10 Ottobre"],
+    teacherSlugs: [
+      "guido-belli",
+      "francesco-campa",
+      "samuele-marcora",
+      "juri-chechi",
+      "matteo-romanazzi",
+      "marco-bani",
+      "pierluigi-mauro",
+    ],
     sortOrder: 1,
   },
   {
@@ -60,6 +71,17 @@ export const COURSES: Course[] = [
       "S&C atleta tattico",
     ],
     dates: ["11-12 Dicembre", "15-16 Gennaio"],
+    teacherSlugs: [
+      "sandro-bartolomei",
+      "giuseppe-coratella",
+      "andrea-quarto",
+      "antonio-squillante",
+      "luca-cerri",
+      "tommaso-mazzia",
+      "matteo-ferrari",
+      "massimiliano-febbi",
+      "angelo-zullo",
+    ],
     sortOrder: 3,
   },
   {
@@ -85,6 +107,19 @@ export const COURSES: Course[] = [
       "La storia di LCT",
     ],
     dates: ["12-13 Marzo", "9-10 Aprile"],
+    teacherSlugs: [
+      "giacomo-zennaro",
+      "riccardo-capello",
+      "simone-doti",
+      "elisabetta-borgia",
+      "luca-bondi-elisa-sibilla",
+      "filippo-ongaro",
+      "enrico-dellacasa",
+      "matteo-seghedoni",
+      "jonata-raffaeli",
+      "fabrizio-bramati",
+      "ettore-mendicino",
+    ],
     sortOrder: 5,
   },
 ];

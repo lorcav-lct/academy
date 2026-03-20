@@ -6,6 +6,7 @@ interface CreateCheckoutParams {
   orderId: string;
   packId: string;
   workshopIds: string[];
+  masterclassIds?: string[];
 }
 
 export async function createCheckoutSession(params: CreateCheckoutParams) {
@@ -27,6 +28,7 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
       order_id: params.orderId,
       pack_id: params.packId,
       workshop_ids: JSON.stringify(params.workshopIds),
+      masterclass_ids: JSON.stringify(params.masterclassIds ?? []),
     },
   });
 

@@ -1,12 +1,12 @@
 /**
- * Lacertosus Academy — Prodotti acquistabili singolarmente.
- * Nessun tier: ogni blocco, la certificazione e ogni master si acquistano individualmente.
+ * Lacertosus Academy — Prodotti acquistabili.
+ * Bundle (Bronzo/Argento/Oro) come offerta principale + singoli blocchi e masterclass.
  */
 export interface AcademyProduct {
   slug: string;
   name: string;
   subtitle: string;
-  type: "course" | "certification" | "workshop";
+  type: "course" | "certification" | "workshop" | "bundle";
   priceCents: number;          // 0 = prezzo da definire
   stripePriceId: string;       // ID Stripe Price — da collegare dopo setup prodotti
   includes: string[];
@@ -14,15 +14,82 @@ export interface AcademyProduct {
   courseSlug?: string;
   /** Workshop corrispondente (solo per type=workshop) */
   workshopSlug?: string;
+  /** Numero di masterclass selezionabili (bundle Argento/Oro = 2, Bronzo = 0) */
+  masterclassSelectionCount?: number;
+  /** Vitto e alloggio inclusi (solo bundle Oro) */
+  includesAccommodation?: boolean;
   highlighted?: boolean;
   sortOrder: number;
 }
 
 export const PRODUCTS: AcademyProduct[] = [
-  // ─── Blocchi formativi ───────────────────────────────────────────────
+  // ─── Bundle ──────────────────────────────────────────────────────────────
+  {
+    slug: "bronzo",
+    name: "BRONZO",
+    subtitle: "Il percorso completo — 3 blocchi formativi",
+    type: "bundle",
+    priceCents: 0,
+    stripePriceId: "",
+    includes: [
+      "CORPUS — Blocco I: Functional Training (2 weekend)",
+      "VIS — Blocco II: Strength & Conditioning (2 weekend)",
+      "VICTOR — Blocco III: Business & Performance (2 weekend)",
+      "9 mesi di formazione in presenza",
+      "Materiale didattico digitale",
+      "Accesso alla community Lacertosus",
+    ],
+    masterclassSelectionCount: 0,
+    sortOrder: 1,
+  },
+  {
+    slug: "argento",
+    name: "ARGENTO",
+    subtitle: "Il percorso completo + Certificazione + 2 Masterclass",
+    type: "bundle",
+    priceCents: 0,
+    stripePriceId: "",
+    includes: [
+      "CORPUS — Blocco I: Functional Training (2 weekend)",
+      "VIS — Blocco II: Strength & Conditioning (2 weekend)",
+      "VICTOR — Blocco III: Business & Performance (2 weekend)",
+      "Certificazione FIPE × Lacertosus",
+      "2 Masterclass a scelta tra le 8 disponibili",
+      "9 mesi di formazione in presenza",
+      "Materiale didattico digitale",
+      "Accesso alla community Lacertosus",
+    ],
+    masterclassSelectionCount: 2,
+    highlighted: true,
+    sortOrder: 2,
+  },
+  {
+    slug: "oro",
+    name: "ORO",
+    subtitle: "L'esperienza completa — con vitto e alloggio inclusi",
+    type: "bundle",
+    priceCents: 0,
+    stripePriceId: "",
+    includes: [
+      "CORPUS — Blocco I: Functional Training (2 weekend)",
+      "VIS — Blocco II: Strength & Conditioning (2 weekend)",
+      "VICTOR — Blocco III: Business & Performance (2 weekend)",
+      "Certificazione FIPE × Lacertosus",
+      "2 Masterclass a scelta tra le 8 disponibili",
+      "Vitto e alloggio inclusi per tutta la durata",
+      "9 mesi di formazione in presenza",
+      "Materiale didattico digitale",
+      "Accesso prioritario alla community Lacertosus",
+    ],
+    masterclassSelectionCount: 2,
+    includesAccommodation: true,
+    sortOrder: 3,
+  },
+
+  // ─── Blocchi formativi (acquistabili separatamente) ───────────────────────
   {
     slug: "primal",
-    name: "PRIMAL",
+    name: "CORPUS",
     subtitle: "Blocco I — Functional Training",
     type: "course",
     priceCents: 150000,
@@ -35,7 +102,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico digitale",
       "Accesso alla community",
     ],
-    sortOrder: 1,
+    sortOrder: 10,
   },
   {
     slug: "vis",
@@ -52,8 +119,8 @@ export const PRODUCTS: AcademyProduct[] = [
       "Programmazione atleta tattico",
       "Materiale didattico digitale",
     ],
-    highlighted: true,
-    sortOrder: 2,
+    highlighted: false,
+    sortOrder: 11,
   },
   {
     slug: "victor",
@@ -70,9 +137,10 @@ export const PRODUCTS: AcademyProduct[] = [
       "Gestione clienti e processi",
       "Materiale didattico digitale",
     ],
-    sortOrder: 3,
+    sortOrder: 12,
   },
-  // ─── Certificazione ──────────────────────────────────────────────────
+
+  // ─── Certificazione ───────────────────────────────────────────────────────
   {
     slug: "certificazione-fipe",
     name: "Certificazione FIPE",
@@ -81,101 +149,142 @@ export const PRODUCTS: AcademyProduct[] = [
     priceCents: 0,
     stripePriceId: "",
     includes: [
-      "3 sessioni formative FipexLacertosus",
-      "Certificato Personal Trainer FipexLacertosus",
-      "Riconoscimento professionale nel settore",
-      "Valutazione teorico-pratica delle competenze",
+      "Esame di certificazione FIPE",
+      "Doppia certificazione FipexLacertosus",
+      "Riconoscimento professionale nazionale",
+      "Accesso al registro professionisti",
     ],
-    sortOrder: 4,
+    sortOrder: 13,
   },
-  // ─── Master (workshops acquistabili) ─────────────────────────────────
+
+  // ─── Masterclass (acquistabili separatamente) ─────────────────────────────
   {
-    slug: "master-hyrox",
-    name: "Master Hyrox",
-    subtitle: "Workshop — Preparazione Hyrox",
+    slug: "master-functional-bulgarian",
+    name: "Masterclass Functional Movement & Bulgarian",
+    subtitle: "Metodo bulgaro e functional training avanzato",
     type: "workshop",
     priceCents: 50000,
     stripePriceId: "",
-    workshopSlug: "master-hyrox",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 10,
+    workshopSlug: "master-functional-bulgarian",
+    includes: [
+      "1-2 giornate in presenza",
+      "Ivan Ivanov + Pierluigi Mauro",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 20,
+  },
+  {
+    slug: "master-strength",
+    name: "Masterclass Strength",
+    subtitle: "Strength training avanzato e performance",
+    type: "workshop",
+    priceCents: 50000,
+    stripePriceId: "",
+    workshopSlug: "master-strength",
+    includes: [
+      "1-2 giornate in presenza",
+      "Andrea Quarto + Emanuela Romano",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 21,
   },
   {
     slug: "master-calcio",
-    name: "Master Calcio",
-    subtitle: "Workshop — Preparazione Atletica nel Calcio",
+    name: "Masterclass Calcio",
+    subtitle: "Preparazione fisica nel calcio professionistico",
     type: "workshop",
     priceCents: 50000,
     stripePriceId: "",
     workshopSlug: "master-calcio",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 11,
-  },
-  {
-    slug: "master-functional",
-    name: "Master Functional Training",
-    subtitle: "Workshop — Functional Training Avanzato",
-    type: "workshop",
-    priceCents: 50000,
-    stripePriceId: "",
-    workshopSlug: "master-functional",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 12,
-  },
-  {
-    slug: "master-endurance",
-    name: "Master Endurance",
-    subtitle: "Workshop — Resistenza e Capacità Aerobica",
-    type: "workshop",
-    priceCents: 50000,
-    stripePriceId: "",
-    workshopSlug: "master-endurance",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 13,
-  },
-  {
-    slug: "master-nuoto",
-    name: "Master Nuoto",
-    subtitle: "Workshop — Allenamento in Acqua",
-    type: "workshop",
-    priceCents: 50000,
-    stripePriceId: "",
-    workshopSlug: "master-nuoto",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 14,
-  },
-  {
-    slug: "master-rugby",
-    name: "Master Rugby",
-    subtitle: "Workshop — Allenamento Specifico Rugby",
-    type: "workshop",
-    priceCents: 50000,
-    stripePriceId: "price_1T7u0LCGgXzYzpRp2XeH0tZ8",
-    workshopSlug: "master-rugby",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 15,
+    includes: [
+      "1-2 giornate in presenza",
+      "Mino Fulco",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 22,
   },
   {
     slug: "master-volley",
-    name: "Master Volley",
-    subtitle: "Workshop — Allenamento e Prevenzione Volley",
+    name: "Masterclass Pallavolo",
+    subtitle: "S&C per la pallavolo di alto livello",
     type: "workshop",
     priceCents: 50000,
     stripePriceId: "",
     workshopSlug: "master-volley",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 16,
+    includes: [
+      "1-2 giornate in presenza",
+      "Oscar Berti",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 23,
   },
   {
-    slug: "master-combattimento",
-    name: "Master Sport da Combattimento",
-    subtitle: "Workshop — Preparazione Atletica Arti Marziali",
+    slug: "master-hyrox",
+    name: "Masterclass Hyrox",
+    subtitle: "Preparazione e performance per Hyrox",
     type: "workshop",
     priceCents: 50000,
     stripePriceId: "",
-    workshopSlug: "master-combattimento",
-    includes: ["1-2 giornate in presenza", "Materiale didattico", "Attestato di partecipazione"],
-    sortOrder: 17,
+    workshopSlug: "master-hyrox",
+    includes: [
+      "1-2 giornate in presenza",
+      "Giovanni Benzon",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 24,
+  },
+  {
+    slug: "master-rugby",
+    name: "Masterclass Rugby",
+    subtitle: "Preparazione atletica specifica per il rugby",
+    type: "workshop",
+    priceCents: 0,
+    stripePriceId: "price_1T7u0LCGgXzYzpRp2XeH0tZ8",
+    workshopSlug: "master-rugby",
+    includes: [
+      "1-2 giornate in presenza",
+      "Trainer da definire",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 25,
+  },
+  {
+    slug: "master-running",
+    name: "Masterclass Running",
+    subtitle: "Performance e metodologia per la corsa",
+    type: "workshop",
+    priceCents: 50000,
+    stripePriceId: "",
+    workshopSlug: "master-running",
+    includes: [
+      "1-2 giornate in presenza",
+      "Fitri — Running Club Parma",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 26,
+  },
+  {
+    slug: "master-sport-combattimento",
+    name: "Masterclass Sport da Combattimento",
+    subtitle: "Preparazione atletica per arti marziali",
+    type: "workshop",
+    priceCents: 0,
+    stripePriceId: "",
+    workshopSlug: "master-sport-combattimento",
+    includes: [
+      "1-2 giornate in presenza",
+      "Trainer da definire",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 27,
   },
 ];
 
@@ -183,7 +292,19 @@ export function getProductBySlug(slug: string): AcademyProduct | undefined {
   return PRODUCTS.find((p) => p.slug === slug);
 }
 
-// Legacy alias per compatibilità con codice esistente
+export function getBundles(): AcademyProduct[] {
+  return PRODUCTS.filter((p) => p.type === "bundle");
+}
+
+export function getMasterclassProducts(): AcademyProduct[] {
+  return PRODUCTS.filter((p) => p.type === "workshop");
+}
+
+export function getCourseProducts(): AcademyProduct[] {
+  return PRODUCTS.filter((p) => p.type === "course");
+}
+
+// Legacy aliases
 export const PACKS = PRODUCTS;
 export type Pack = AcademyProduct;
 export const getPackBySlug = getProductBySlug;

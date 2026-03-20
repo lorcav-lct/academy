@@ -6,11 +6,14 @@ import { SectionContainer } from "@/components/shared/section-container";
 import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 import { getPackBySlug } from "@/lib/constants/packs";
+import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
 
 export function CheckoutContent() {
   const searchParams = useSearchParams();
   const packSlug = searchParams.get("pack") || "primal";
+  const mc1 = searchParams.get("mc1") ?? "";
+  const mc2 = searchParams.get("mc2") ?? "";
   const pack = getPackBySlug(packSlug);
 
   const [loading, setLoading] = useState(false);
@@ -31,14 +34,33 @@ export function CheckoutContent() {
     );
   }
 
+  // Resolve masterclass slugs → workshop titles (only for bundles with selection)
+  const masterclassIds = [mc1, mc2].filter(Boolean);
+  const selectedMasterclasses =
+    pack.type === "bundle" && (pack.masterclassSelectionCount ?? 0) > 0
+      ? masterclassIds.map((slug) => getWorkshopBySlug(slug)).filter(Boolean)
+      : [];
+
+  // Build the full checkout URL (used for post-auth redirect)
+  function buildCheckoutUrl() {
+    const params = new URLSearchParams({ pack: packSlug });
+    if (mc1) params.set("mc1", mc1);
+    if (mc2) params.set("mc2", mc2);
+    return `/checkout?${params.toString()}`;
+  }
+
   async function handleCheckout() {
+    if (!pack) return;
     setLoading(true);
     setError("");
 
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
-      const next = `/checkout?pack=${packSlug}`;
+      const next = buildCheckoutUrl();
       localStorage.setItem("pending_checkout", next);
       window.location.href = `/auth/register?next=${encodeURIComponent(next)}`;
       return;
@@ -49,9 +71,10 @@ export function CheckoutContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          packId: pack!.slug,
-          priceId: pack!.stripePriceId,
+          packId: pack.slug,
+          priceId: pack.stripePriceId,
           workshopIds: [],
+          masterclassIds: masterclassIds,
         }),
       });
 
@@ -96,6 +119,42 @@ export function CheckoutContent() {
                 </li>
               ))}
             </ul>
+
+            {/* Selected masterclasses */}
+            {selectedMasterclasses.length > 0 && (
+              <div className="mt-6 border-t border-white/10 pt-5">
+                <p className="mb-3 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
+                  Masterclass Selezionate
+                </p>
+                <ul className="space-y-2">
+                  {selectedMasterclasses.map((w) => (
+                    <li
+                      key={w!.slug}
+                      className="flex items-center gap-2 text-sm text-academy-gray-300"
+                    >
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="h-4 w-4 shrink-0 text-academy-orange"
+                      >
+                        <path
+                          d="M13.5 4.5L6 12L2.5 8.5"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="square"
+                        />
+                      </svg>
+                      <span>
+                        <span className="font-semibold">{w!.title}</span>
+                        {w!.trainerLabel && (
+                          <span className="ml-1 text-academy-gray-500">— {w!.trainerLabel}</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Error */}

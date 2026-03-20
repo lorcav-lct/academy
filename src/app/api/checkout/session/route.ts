@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { packId, priceId, workshopIds } = body;
+    const { packId, priceId, workshopIds, masterclassIds } = body;
 
     if (!packId || !priceId) {
       return NextResponse.json(
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
       orderId: order.id,
       packId,
       workshopIds: workshopIds || [],
+      masterclassIds: masterclassIds || [],
     });
 
     // Update order with Stripe session ID
