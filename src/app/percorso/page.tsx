@@ -3,6 +3,7 @@ import { PercorsoTimeline } from "@/components/percorso/percorso-timeline";
 import { PercorsoHero } from "@/components/percorso/percorso-hero";
 import { PercorsoOutcome } from "@/components/percorso/percorso-outcome";
 import { PercorsoTirocinio } from "@/components/percorso/percorso-tirocinio";
+import { TrainingHubSection } from "@/components/home/training-hub-section";
 
 export const metadata: Metadata = {
   title: "Il Percorso Formativo",
@@ -17,6 +18,7 @@ export default function PercorsoPage() {
       <PercorsoTimeline />
       <PercorsoOutcome />
       <PercorsoTirocinio />
+      <TrainingHubSection />
     </>
   );
 }

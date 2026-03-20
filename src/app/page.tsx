@@ -6,9 +6,6 @@ import { ValueProposition } from "@/components/home/value-proposition";
 import { PackPreview } from "@/components/home/pack-preview";
 import { PathOverview } from "@/components/home/path-overview";
 import { CertificationSection } from "@/components/home/certification-section";
-import { WorkshopPreview } from "@/components/home/workshop-preview";
-import { CalendarSection } from "@/components/home/calendar-section";
-import { TrainingHubSection } from "@/components/home/training-hub-section";
 import { FaqSection } from "@/components/home/faq-section";
 import { CTASection } from "@/components/home/cta-section";
 
@@ -41,13 +38,7 @@ export default async function HomePage() {
       <PathOverview />
       {/* #6  Certificazione FipexLacertosus */}
       <CertificationSection />
-      {/* #7  Workshop Specialistici */}
-      <WorkshopPreview />
-      {/* #8  Calendario Formativo */}
-      <CalendarSection />
-      {/* #10 Training Hub */}
-      <TrainingHubSection />
-      {/* #11 FAQ */}
+      {/* #7  FAQ */}
       <FaqSection />
       {/* #12 CTA Finale */}
       <CTASection />
