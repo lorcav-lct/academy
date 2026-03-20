@@ -5,7 +5,6 @@ import { SocialProofBar } from "@/components/home/social-proof-bar";
 import { ValueProposition } from "@/components/home/value-proposition";
 import { PackPreview } from "@/components/home/pack-preview";
 import { PathOverview } from "@/components/home/path-overview";
-import { CertificationSection } from "@/components/home/certification-section";
 import { FaqSection } from "@/components/home/faq-section";
 import { CTASection } from "@/components/home/cta-section";
 
@@ -36,9 +35,7 @@ export default async function HomePage() {
       <PackPreview />
       {/* #5  I 3 Blocchi Formativi */}
       <PathOverview />
-      {/* #6  Certificazione FipexLacertosus */}
-      <CertificationSection />
-      {/* #7  FAQ */}
+      {/* #6  FAQ */}
       <FaqSection />
       {/* #12 CTA Finale */}
       <CTASection />
