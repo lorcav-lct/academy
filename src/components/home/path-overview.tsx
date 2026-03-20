@@ -6,11 +6,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { COURSES } from "@/lib/constants/courses";
 import { Button } from "@/components/ui/button";
 
-// Block accent: CORPUS/VICTOR orange, VIS white
 const META = {
-  corpus: { roman: "I",   color: "#F09226", rgb: "240,146,38", tagline: "Le Fondamenta", fipeDate: "13–14 Nov" },
-  vis:    { roman: "II",  color: "#ffffff", rgb: "255,255,255", tagline: "La Forza",      fipeDate: "12–13 Feb" },
-  victor: { roman: "III", color: "#F09226", rgb: "240,146,38", tagline: "La Vittoria",   fipeDate: "14–15 Mag" },
+  corpus: { roman: "I",   color: "#F09226", tagline: "Le Fondamenta", fipeDate: "13–14 Nov" },
+  vis:    { roman: "II",  color: "#F09226", tagline: "La Forza",      fipeDate: "12–13 Feb" },
+  victor: { roman: "III", color: "#F09226", tagline: "La Vittoria",   fipeDate: "14–15 Mag" },
 } as const;
 
 const CERT_ITEMS = [
@@ -19,42 +18,45 @@ const CERT_ITEMS = [
   { n: "03", title: "Immediatamente spendibile",     body: "Dal giorno del conseguimento puoi esercitare la professione." },
 ];
 
-const DIM   = "rgba(255,255,255,0.65)";
-const DIM2  = "rgba(255,255,255,0.45)";
-const FAINT = "rgba(255,255,255,0.1)";
-const NUM_PANELS = 5; // intro + 3 blocks + fipe
+const NUM_PANELS = 5;
 
-// ── Particle canvas ──────────────────────────────────────────────────────────
+// ── Improved particles ──────────────────────────────────────────────────────
 function initParticles(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return () => {};
+  const dpr = window.devicePixelRatio || 1;
 
   const resize = () => {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width  = window.innerWidth  * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width  = window.innerWidth  + "px";
+    canvas.style.height = window.innerHeight + "px";
+    ctx.scale(dpr, dpr);
   };
+
+  const ctx = canvas.getContext("2d")!;
   resize();
   window.addEventListener("resize", resize);
 
-  const particles = Array.from({ length: 55 }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    vx: (Math.random() - 0.5) * 0.25,
-    vy: (Math.random() - 0.5) * 0.25,
-    r: Math.random() * 1.2 + 0.4,
-    a: Math.random() * 0.35 + 0.05,
+  const W = () => window.innerWidth;
+  const H = () => window.innerHeight;
+
+  const pts = Array.from({ length: 90 }, () => ({
+    x: Math.random() * W(),
+    y: Math.random() * H(),
+    vx: (Math.random() - 0.5) * 0.35,
+    vy: (Math.random() - 0.5) * 0.35,
+    r: Math.random() * 2.5 + 1.2,
+    a: Math.random() * 0.55 + 0.25,
   }));
 
   let raf = 0;
   const draw = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0) p.x = canvas.width;
-      else if (p.x > canvas.width) p.x = 0;
-      if (p.y < 0) p.y = canvas.height;
-      else if (p.y > canvas.height) p.y = 0;
+    ctx.clearRect(0, 0, W(), H());
+    ctx.shadowColor = "rgba(240,146,38,0.9)";
+    ctx.shadowBlur  = 8;
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W(); else if (p.x > W()) p.x = 0;
+      if (p.y < 0) p.y = H(); else if (p.y > H()) p.y = 0;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(240,146,38,${p.a})`;
@@ -64,32 +66,30 @@ function initParticles(canvas: HTMLCanvasElement) {
   };
   draw();
 
-  return () => {
-    cancelAnimationFrame(raf);
-    window.removeEventListener("resize", resize);
-  };
+  return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function PathOverview() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const trackRef   = useRef<HTMLDivElement>(null);
-  const arrowRef   = useRef<HTMLSpanElement>(null);
+  const sectionRef  = useRef<HTMLElement>(null);
+  const trackRef    = useRef<HTMLDivElement>(null);
+  const arrowRef    = useRef<HTMLSpanElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
-  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const canvasRef   = useRef<HTMLCanvasElement>(null);
 
-  // Particles (desktop only)
   useEffect(() => {
-    if (window.innerWidth < 1024 || !canvasRef.current) return;
-    return initParticles(canvasRef.current);
+    if (typeof window === "undefined") return;
+    if (window.innerWidth < 1024) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    return initParticles(canvas);
   }, []);
 
-  // GSAP
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    const section  = sectionRef.current;
-    const track    = trackRef.current;
+    const section = sectionRef.current;
+    const track   = trackRef.current;
     if (!section || !track) return;
 
     const ctx = gsap.context(() => {
@@ -97,46 +97,33 @@ export function PathOverview() {
 
       mm.add("(min-width: 1024px)", () => {
         section.style.overflow = "hidden";
-
         const panels = track.querySelectorAll<HTMLElement>("[data-panel]");
 
-        // Arrow bounce
-        if (arrowRef.current) {
+        if (arrowRef.current)
           gsap.to(arrowRef.current, { x: 10, yoyo: true, repeat: -1, duration: 0.72, ease: "sine.inOut" });
-        }
 
-        // Main horizontal scroll
         const scrollTween = gsap.to(track, {
           x: () => -(track.scrollWidth - window.innerWidth),
           ease: "none",
           scrollTrigger: {
-            trigger: section,
-            pin: true,
-            scrub: 1.4,
+            trigger: section, pin: true, scrub: 1.4,
             end: () => `+=${track.scrollWidth - window.innerWidth}`,
             invalidateOnRefresh: true,
             snap: { snapTo: 1 / (NUM_PANELS - 1), duration: { min: 0.2, max: 0.5 }, ease: "power2.inOut" },
             onUpdate(self) {
-              // Fade arrow out after first move
               if (arrowRef.current) arrowRef.current.style.opacity = self.progress > 0.05 ? "0" : "1";
-              // Animate progress bar
               if (progressRef.current) progressRef.current.style.transform = `scaleX(${self.progress})`;
             },
           },
         });
 
-        // Per-panel content animations
         panels.forEach((panel) => {
           const items = panel.querySelectorAll("[data-anim]");
           if (!items.length) return;
           ScrollTrigger.create({
-            trigger: panel,
-            containerAnimation: scrollTween,
-            start: "left 80%",
-            once: true,
-            onEnter: () => {
-              gsap.from(items, { opacity: 0, y: 28, stagger: 0.08, duration: 0.7, ease: "power3.out" });
-            },
+            trigger: panel, containerAnimation: scrollTween,
+            start: "left 80%", once: true,
+            onEnter: () => gsap.from(items, { opacity: 0, y: 28, stagger: 0.08, duration: 0.7, ease: "power3.out" }),
           });
         });
 
@@ -145,19 +132,9 @@ export function PathOverview() {
 
       mm.add("(max-width: 1023px)", () => {
         const header = section.querySelector("[data-mobile-head]");
-        if (header) {
-          gsap.from(header, {
-            scrollTrigger: { trigger: header, start: "top 85%", once: true },
-            opacity: 0, y: 30, duration: 0.65, ease: "power3.out",
-          });
-        }
+        if (header) gsap.from(header, { scrollTrigger: { trigger: header, start: "top 85%", once: true }, opacity: 0, y: 30, duration: 0.65, ease: "power3.out" });
         const cards = section.querySelectorAll("[data-mobile-card]");
-        if (cards.length) {
-          gsap.from(cards, {
-            scrollTrigger: { trigger: section, start: "top 75%", once: true },
-            opacity: 0, y: 40, duration: 0.65, stagger: 0.1, ease: "power3.out",
-          });
-        }
+        if (cards.length) gsap.from(cards, { scrollTrigger: { trigger: section, start: "top 75%", once: true }, opacity: 0, y: 40, duration: 0.65, stagger: 0.1, ease: "power3.out" });
       });
     }, sectionRef);
 
@@ -165,60 +142,55 @@ export function PathOverview() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="percorso" className="relative bg-academy-dark">
-
-      {/* Particle canvas — desktop only, above all content */}
+    <section
+      ref={sectionRef}
+      id="percorso"
+      className="relative"
+      style={{ background: "radial-gradient(ellipse at 18% 55%, rgba(240,146,38,0.09) 0%, transparent 58%), radial-gradient(ellipse at 82% 25%, rgba(240,146,38,0.05) 0%, transparent 45%), #020026" }}
+    >
+      {/* Canvas particles */}
       <canvas
         ref={canvasRef}
         aria-hidden
         className="pointer-events-none hidden lg:block"
-        style={{ position: "absolute", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 10 }}
+        style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
       />
 
-      {/* Progress bar — desktop horizontal scroll */}
-      <div className="pointer-events-none absolute top-0 left-0 z-10 hidden h-[2px] w-full lg:block"
-        style={{ background: "rgba(255,255,255,0.06)" }}>
+      {/* Progress bar */}
+      <div className="pointer-events-none absolute top-0 left-0 hidden h-[2px] w-full lg:block"
+        style={{ background: "rgba(255,255,255,0.12)", zIndex: 20 }}>
         <div ref={progressRef} className="h-full w-full origin-left"
-          style={{ background: "linear-gradient(90deg,#F09226,#ffffff)", transform: "scaleX(0)", transition: "transform 0.05s linear" }} />
+          style={{ background: "linear-gradient(90deg,#F09226,#fff8)", transform: "scaleX(0)" }} />
       </div>
 
       {/* ── DESKTOP horizontal track ── */}
-      <div ref={trackRef} className="relative hidden lg:flex will-change-transform" style={{ zIndex: 2 }}>
+      <div ref={trackRef} className="relative hidden lg:flex will-change-transform" style={{ zIndex: 5 }}>
 
         {/* Panel 0 — Intro */}
-        <div data-panel className="relative flex flex-col justify-center py-24"
+        <div data-panel className="relative flex flex-col justify-center"
           style={{ width: "100vw", minHeight: "100vh", flexShrink: 0, padding: "6rem 5%" }}>
-
-          <div className="mx-auto w-full max-w-[1440px]">
-            {/* Bg decoration */}
-            <div className="pointer-events-none absolute right-[4%] top-1/2 -translate-y-1/2 select-none font-black leading-none text-white"
-              style={{ fontSize: "clamp(10rem,16vw,18rem)", opacity: 0.025 }}>LCT</div>
-
+          <div className="mx-auto w-full max-w-[1400px]">
             <span data-anim className="label-tag mb-5 block">I 3 Blocchi Formativi — 2025/26</span>
             <h2 data-anim className="font-black leading-[0.95] tracking-tight text-white"
               style={{ fontSize: "clamp(3.5rem,6.5vw,7rem)" }}>
               Il<br /><span style={{ color: "#F09226" }}>Percorso.</span>
             </h2>
-            <p data-anim className="mt-6 max-w-lg text-[1.0625rem] leading-relaxed" style={{ color: DIM }}>
+            <p data-anim className="mt-6 max-w-lg text-[1.0625rem] leading-relaxed text-white/70">
               9 mesi di formazione progressiva. Tre blocchi che si costruiscono l&apos;uno
               sull&apos;altro fino alla certificazione FIPE.
             </p>
-
-            {/* Stats */}
             <div data-anim className="mt-10 grid max-w-lg grid-cols-3 gap-3">
               {[{ v: "9", u: "mesi" }, { v: "11", u: "weekend" }, { v: "30", u: "posti" }].map(({ v, u }) => (
                 <div key={u} className="p-5 text-center"
-                  style={{ border: `1px solid ${FAINT}`, background: "rgba(255,255,255,0.025)" }}>
+                  style={{ border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}>
                   <p className="text-[2.2rem] font-black leading-none tabular-nums" style={{ color: "#F09226" }}>{v}</p>
-                  <p className="mt-1 text-[0.78rem] font-bold tracking-[0.18em] uppercase" style={{ color: DIM }}>{u}</p>
+                  <p className="mt-1 text-[0.8rem] font-bold tracking-[0.18em] uppercase text-white/60">{u}</p>
                 </div>
               ))}
             </div>
-
-            {/* Scroll hint */}
             <div data-anim className="mt-12 flex items-center gap-3">
               <span ref={arrowRef} className="inline-block text-xl" style={{ color: "#F09226" }}>→</span>
-              <span className="text-[0.72rem] font-bold tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <span className="text-[0.72rem] font-bold tracking-[0.3em] uppercase text-white/50">
                 CORPUS · VIS · VICTOR · FIPE
               </span>
             </div>
@@ -229,77 +201,81 @@ export function PathOverview() {
         {COURSES.map((course, idx) => {
           const meta = META[course.slug as keyof typeof META];
           if (!meta) return null;
-          const { color, rgb, roman, tagline, fipeDate } = meta;
-          const ra = (a: number) => `rgba(${rgb},${a})`;
+          const { roman, color, tagline, fipeDate } = meta;
 
           return (
             <div key={course.slug} data-panel className="relative flex flex-col justify-center"
-              style={{ width: "100vw", minHeight: "100vh", flexShrink: 0, padding: "6rem 5%" }}>
-              <div className="mx-auto w-full max-w-[1440px]">
+              style={{ width: "100vw", minHeight: "100vh", flexShrink: 0, padding: "4rem 5%" }}>
+              <div className="mx-auto w-full max-w-[1400px]">
+                <div className="grid grid-cols-2 gap-5" style={{ minHeight: "calc(100vh - 8rem)" }}>
 
-                {/* Decorative bg roman */}
-                <div className="pointer-events-none absolute right-[4%] top-1/2 -translate-y-1/2 select-none font-black leading-none"
-                  style={{ fontSize: "clamp(14rem,20vw,22rem)", color, opacity: 0.04 }}>{roman}</div>
+                  {/* LEFT — light card */}
+                  <div data-anim className="flex flex-col justify-between"
+                    style={{ background: "#f8f8fc", border: "1px solid rgba(0,0,0,0.06)", padding: "3rem 3.5rem" }}>
+                    {/* Top: progress dots */}
+                    <div className="flex items-center gap-1.5 mb-2">
+                      {COURSES.map((_, di) => (
+                        <span key={di} className="block"
+                          style={{ width: di === idx ? 28 : 8, height: 2, background: di === idx ? color : "rgba(0,0,0,0.15)" }} />
+                      ))}
+                      <span className="ml-3 text-[0.65rem] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(0,0,0,0.35)" }}>
+                        {roman} / III
+                      </span>
+                    </div>
 
-                {/* Progress dots */}
-                <div data-anim className="mb-10 flex items-center gap-2">
-                  {COURSES.map((_, di) => (
-                    <span key={di} className="block"
-                      style={{ width: di === idx ? 32 : 8, height: 2, background: di === idx ? color : "rgba(255,255,255,0.3)", transition: "width 0.3s" }} />
-                  ))}
-                  <span className="ml-4 text-[0.68rem] font-bold tracking-[0.25em] uppercase" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Blocco {roman} / III
-                  </span>
-                </div>
+                    <div>
+                      {/* Roman numeral — full opacity, big */}
+                      <div className="font-black leading-none tabular-nums" style={{ fontSize: "clamp(5rem,9vw,10rem)", color, lineHeight: 0.9 }}>
+                        {roman}
+                      </div>
+                      <span className="mt-4 block text-[0.72rem] font-black tracking-[0.32em] uppercase" style={{ color: "rgba(240,146,38,0.75)" }}>
+                        {course.area}
+                      </span>
+                      <h2 className="font-black leading-none tracking-tight" style={{ fontSize: "clamp(2.5rem,4.5vw,5rem)", color: "#111111", marginTop: "0.25rem" }}>
+                        {course.title}
+                      </h2>
+                      <p className="text-[1.1rem] font-black" style={{ color, marginTop: "0.25rem" }}>{tagline}</p>
+                      <p className="text-[1rem] leading-relaxed" style={{ color: "#444444", marginTop: "0.75rem" }}>{course.objective}</p>
+                    </div>
 
-                <div className="grid grid-cols-2 gap-20">
-                  {/* Left */}
-                  <div>
-                    <span data-anim className="mb-2 block text-[0.72rem] font-black tracking-[0.32em] uppercase" style={{ color: ra(0.55) }}>
-                      {course.area}
-                    </span>
-                    <h2 data-anim className="font-black leading-none tracking-tight text-white"
-                      style={{ fontSize: "clamp(3rem,5vw,5.5rem)" }}>
-                      {course.title}
-                    </h2>
-                    <p data-anim className="mt-1 text-[1.125rem] font-black" style={{ color }}>{tagline}</p>
-                    <p data-anim className="mt-4 text-[1.0625rem] leading-relaxed" style={{ color: DIM }}>{course.objective}</p>
-                    <div data-anim className="mt-5 flex flex-wrap gap-2">
+                    {/* Dates */}
+                    <div className="flex flex-wrap gap-2 mt-5">
                       {course.dates.map((d) => (
-                        <span key={d} className="px-3 py-1 text-[0.8rem] font-bold"
-                          style={{ border: `1px solid ${ra(0.22)}`, color: ra(0.72), background: ra(0.06) }}>
+                        <span key={d} className="px-3 py-1 text-[0.78rem] font-bold"
+                          style={{ border: "1px solid rgba(240,146,38,0.3)", color: "#D47B10", background: "rgba(240,146,38,0.06)" }}>
                           {d}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Right */}
-                  <div className="flex flex-col justify-between">
+                  {/* RIGHT — dark card, curriculum */}
+                  <div data-anim className="flex flex-col justify-between"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: "3rem" }}>
                     <div>
-                      <p data-anim className="mb-3 text-[0.68rem] font-black tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.5)" }}>
+                      <p className="mb-5 text-[0.68rem] font-black tracking-[0.28em] uppercase text-white/55">
                         Programma
                       </p>
-                      <ul data-anim className="space-y-2.5">
+                      <ul className="space-y-3">
                         {course.curriculum.slice(0, 5).map((item) => (
-                          <li key={item} className="flex items-start gap-3 text-[0.9375rem]" style={{ color: "rgba(255,255,255,0.72)" }}>
+                          <li key={item} className="flex items-start gap-3 text-[0.9375rem] text-white/82">
                             <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
                             {item}
                           </li>
                         ))}
                         {course.curriculum.length > 5 && (
-                          <li className="pl-[18px] text-[0.85rem]" style={{ color: "rgba(255,255,255,0.45)" }}>
+                          <li className="pl-[18px] text-[0.85rem] text-white/45">
                             + {course.curriculum.length - 5} argomenti
                           </li>
                         )}
                       </ul>
                     </div>
-                    <div data-anim className="mt-8">
+                    <div className="mt-6">
                       <Button href={`/corsi/${course.slug}`} variant="ghost" size="sm">
                         Scopri il programma →
                       </Button>
-                      <p className="mt-3 text-[0.78rem]" style={{ color: "rgba(255,255,255,0.45)" }}>
-                        <span style={{ color: "#F09226" }}>✦</span>{" "}
+                      <p className="mt-3 text-[0.78rem] text-white/55">
+                        <span style={{ color }}>✦</span>{" "}
                         Sessione FIPE inclusa — {fipeDate}
                       </p>
                     </div>
@@ -310,28 +286,28 @@ export function PathOverview() {
           );
         })}
 
-        {/* Panel 4 — FIPE Certification */}
+        {/* Panel 4 — FIPE */}
         <div data-panel className="flex flex-col justify-center"
           style={{ width: "100vw", minHeight: "100vh", flexShrink: 0, padding: "6rem 5%" }}>
-          <div className="mx-auto w-full max-w-[1440px]">
-            <div className="grid grid-cols-2 items-center gap-20">
+          <div className="mx-auto w-full max-w-[1400px]">
+            <div className="grid grid-cols-2 items-center gap-16">
 
-              {/* Certificate mockup — light theme */}
-              <div data-anim style={{ filter: "drop-shadow(0 32px 64px rgba(240,146,38,0.15))" }}>
-                <div className="w-full max-w-[420px] overflow-hidden p-10"
+              {/* Certificate — light */}
+              <div data-anim style={{ filter: "drop-shadow(0 32px 64px rgba(240,146,38,0.2))" }}>
+                <div className="w-full max-w-[420px] overflow-hidden p-9"
                   style={{ background: "#ffffff", border: "1px solid rgba(240,146,38,0.3)" }}>
-                  <div className="mb-8 h-px w-full" style={{ background: "linear-gradient(90deg,transparent,#F09226,transparent)" }} />
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center border" style={{ borderColor: "rgba(240,146,38,0.4)" }}>
+                  <div className="mb-7 h-px w-full" style={{ background: "linear-gradient(90deg,transparent,#F09226,transparent)" }} />
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center border" style={{ borderColor: "rgba(240,146,38,0.5)" }}>
                       <span className="text-[0.7rem] font-black" style={{ color: "#F09226" }}>LCT</span>
                     </div>
                     <div>
                       <p className="text-[0.7rem] font-bold tracking-[0.2em] uppercase" style={{ color: "#D47B10" }}>Lacertosus Academy</p>
-                      <p className="text-[0.7rem] font-bold tracking-[0.16em] uppercase" style={{ color: "rgba(212,123,16,0.5)" }}>FIPE × LACERTOSUS</p>
+                      <p className="text-[0.7rem] font-bold tracking-[0.16em] uppercase" style={{ color: "rgba(212,123,16,0.6)" }}>FIPE × LACERTOSUS</p>
                     </div>
                   </div>
-                  <p className="mb-1 text-[0.68rem] font-bold tracking-[0.25em] uppercase" style={{ color: "#999" }}>Certifica che</p>
-                  <div className="mb-4 border-b pb-3" style={{ borderColor: "rgba(240,146,38,0.15)" }}>
+                  <p className="mb-1 text-[0.68rem] font-bold tracking-[0.25em] uppercase" style={{ color: "#888" }}>Certifica che</p>
+                  <div className="mb-4 border-b pb-3" style={{ borderColor: "rgba(240,146,38,0.18)" }}>
                     <p className="text-[1.1rem] font-black italic" style={{ color: "#F09226" }}>Nome Cognome</p>
                   </div>
                   <p className="mb-3 text-[0.8rem] leading-relaxed" style={{ color: "#555" }}>
@@ -342,17 +318,17 @@ export function PathOverview() {
                   <p className="mb-1 text-[0.92rem] font-black uppercase tracking-wide" style={{ color: "#111" }}>
                     Personal Trainer<br />FIPE × LACERTOSUS
                   </p>
-                  <p className="text-[0.7rem]" style={{ color: "#999" }}>Riconosciuto nel settore fitness</p>
-                  <div className="mt-8 flex items-end justify-between">
+                  <p className="text-[0.7rem]" style={{ color: "#888" }}>Riconosciuto nel settore fitness</p>
+                  <div className="mt-7 flex items-end justify-between">
                     <div>
-                      <div className="mb-1 h-px w-20" style={{ background: "rgba(240,146,38,0.25)" }} />
+                      <div className="mb-1 h-px w-20" style={{ background: "rgba(240,146,38,0.28)" }} />
                       <p className="text-[0.68rem]" style={{ color: "#bbb" }}>Firma del Direttore</p>
                     </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border" style={{ borderColor: "rgba(240,146,38,0.35)" }}>
-                      <span className="text-[0.7rem] font-black" style={{ color: "rgba(240,146,38,0.55)" }}>FIPE</span>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border" style={{ borderColor: "rgba(240,146,38,0.4)" }}>
+                      <span className="text-[0.7rem] font-black" style={{ color: "#F09226" }}>FIPE</span>
                     </div>
                   </div>
-                  <div className="mt-7 h-px w-full" style={{ background: "linear-gradient(90deg,transparent,#F09226,transparent)" }} />
+                  <div className="mt-6 h-px w-full" style={{ background: "linear-gradient(90deg,transparent,#F09226,transparent)" }} />
                 </div>
               </div>
 
@@ -370,13 +346,13 @@ export function PathOverview() {
                       <span className="mt-0.5 shrink-0 text-[0.72rem] font-black" style={{ color: "rgba(240,146,38,0.7)" }}>{item.n}</span>
                       <div>
                         <p className="text-[0.9375rem] font-bold text-white">{item.title}</p>
-                        <p className="mt-0.5 text-[0.875rem] leading-relaxed" style={{ color: DIM }}>{item.body}</p>
+                        <p className="mt-0.5 text-[0.875rem] leading-relaxed text-white/65">{item.body}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div data-anim className="mt-8 inline-flex items-center gap-3 border px-5 py-3"
-                  style={{ borderColor: "rgba(240,146,38,0.2)", background: "rgba(240,146,38,0.04)" }}>
+                  style={{ borderColor: "rgba(240,146,38,0.25)", background: "rgba(240,146,38,0.05)" }}>
                   <span style={{ color: "#F09226" }}>✦</span>
                   <span className="text-[0.78rem] font-bold tracking-wider uppercase" style={{ color: "#F09226" }}>
                     FIPE × LACERTOSUS — Inclusa nel percorso
@@ -388,43 +364,42 @@ export function PathOverview() {
         </div>
       </div>
 
-      {/* ── MOBILE: native swipe carousel ── */}
+      {/* ── MOBILE ── */}
       <div className="relative lg:hidden" style={{ zIndex: 2 }}>
         <div data-mobile-head className="px-[5%] pt-16 pb-6">
           <span className="label-tag mb-3 block">I 3 Blocchi Formativi</span>
-          <h2 className="font-black leading-tight tracking-tight text-white"
-            style={{ fontSize: "clamp(2.2rem,8vw,3rem)" }}>
+          <h2 className="font-black leading-tight tracking-tight text-white" style={{ fontSize: "clamp(2.2rem,8vw,3rem)" }}>
             Il Percorso.
           </h2>
-          <p className="mt-2 text-[0.9375rem] leading-relaxed" style={{ color: DIM }}>
+          <p className="mt-2 text-[0.9375rem] leading-relaxed text-white/65">
             9 mesi · 3 blocchi · 1 certificazione
           </p>
         </div>
 
-        {/* Horizontal swipe */}
         <div className="overflow-x-auto pb-6"
           style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", paddingLeft: "5%", paddingRight: "5%", display: "flex", gap: "12px" }}>
 
           {COURSES.map((course) => {
             const meta = META[course.slug as keyof typeof META];
             if (!meta) return null;
-            const { color, rgb, roman, tagline, fipeDate } = meta;
-            const ra = (a: number) => `rgba(${rgb},${a})`;
+            const { roman, color, tagline, fipeDate } = meta;
             return (
               <div key={course.slug} data-mobile-card className="relative flex shrink-0 flex-col justify-between p-6"
-                style={{ width: "82vw", scrollSnapAlign: "start", background: "rgba(255,255,255,0.03)", border: `1px solid ${FAINT}` }}>
-                <span className="pointer-events-none absolute right-4 bottom-3 select-none font-black leading-none"
-                  style={{ fontSize: "5.5rem", color, opacity: 0.06 }}>{roman}</span>
+                style={{ width: "82vw", scrollSnapAlign: "start", background: "#f8f8fc", border: "1px solid rgba(0,0,0,0.07)" }}>
+                {/* Roman numeral — visible */}
+                <div className="font-black leading-none tabular-nums mb-3" style={{ fontSize: "3.5rem", color }}>
+                  {roman}
+                </div>
                 <div>
-                  <span className="mb-1 block text-[0.7rem] font-bold tracking-[0.28em] uppercase" style={{ color: ra(0.5) }}>
-                    {roman} · {course.area}
+                  <span className="mb-1 block text-[0.7rem] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(240,146,38,0.75)" }}>
+                    {course.area}
                   </span>
-                  <h3 className="text-[2rem] font-black leading-none text-white">{course.title}</h3>
+                  <h3 className="text-[2rem] font-black leading-none" style={{ color: "#111" }}>{course.title}</h3>
                   <p className="mt-0.5 text-[0.9375rem] font-bold" style={{ color }}>{tagline}</p>
-                  <p className="mt-3 text-[0.9375rem] leading-relaxed" style={{ color: DIM }}>{course.objective}</p>
+                  <p className="mt-3 text-[0.9375rem] leading-relaxed" style={{ color: "#444" }}>{course.objective}</p>
                   <ul className="mt-4 space-y-1.5">
                     {course.curriculum.slice(0, 4).map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[0.875rem]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                      <li key={item} className="flex items-start gap-2 text-[0.875rem]" style={{ color: "#555" }}>
                         <span className="mt-[0.42em] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
                         {item}
                       </li>
@@ -435,10 +410,10 @@ export function PathOverview() {
                   <div className="flex flex-wrap gap-2 mb-3">
                     {course.dates.map((d) => (
                       <span key={d} className="px-2.5 py-1 text-[0.78rem] font-bold"
-                        style={{ border: `1px solid ${ra(0.2)}`, color: ra(0.7), background: ra(0.06) }}>{d}</span>
+                        style={{ border: "1px solid rgba(240,146,38,0.25)", color: "#D47B10", background: "rgba(240,146,38,0.06)" }}>{d}</span>
                     ))}
                   </div>
-                  <p className="text-[0.75rem]" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  <p className="text-[0.75rem]" style={{ color: "#888" }}>
                     <span style={{ color: "#F09226" }}>✦</span> Sessione FIPE — {fipeDate}
                   </p>
                 </div>
@@ -446,42 +421,41 @@ export function PathOverview() {
             );
           })}
 
-          {/* FIPE card */}
+          {/* FIPE card mobile — light */}
           <div data-mobile-card className="shrink-0 flex flex-col justify-between p-6"
-            style={{ width: "82vw", scrollSnapAlign: "start", background: "rgba(240,146,38,0.05)", border: "1px solid rgba(240,146,38,0.13)" }}>
+            style={{ width: "82vw", scrollSnapAlign: "start", background: "#ffffff", border: "1px solid rgba(240,146,38,0.25)" }}>
             <div>
-              <p className="mb-2 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: "rgba(240,146,38,0.6)" }}>
+              <p className="mb-2 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: "#D47B10" }}>
                 Certificazione Finale
               </p>
-              <h3 className="text-[1.75rem] font-black leading-tight text-white">FIPE × LACERTOSUS</h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed" style={{ color: DIM }}>
+              <h3 className="text-[1.75rem] font-black leading-tight" style={{ color: "#111" }}>FIPE × LACERTOSUS</h3>
+              <p className="mt-2 text-[0.9375rem] leading-relaxed" style={{ color: "#444" }}>
                 Titolo riconosciuto dal giorno del conseguimento.
               </p>
               <div className="mt-5 space-y-3">
                 {CERT_ITEMS.map((item) => (
                   <div key={item.n} className="flex gap-3">
-                    <span className="shrink-0 text-[0.7rem] font-black" style={{ color: "rgba(240,146,38,0.7)" }}>{item.n}</span>
-                    <p className="text-[0.875rem]" style={{ color: "rgba(255,255,255,0.7)" }}>
-                      <span className="font-bold text-white">{item.title}</span> — {item.body}
+                    <span className="shrink-0 text-[0.7rem] font-black" style={{ color: "#F09226" }}>{item.n}</span>
+                    <p className="text-[0.875rem]" style={{ color: "#444" }}>
+                      <span className="font-bold" style={{ color: "#111" }}>{item.title}</span> — {item.body}
                     </p>
                   </div>
                 ))}
               </div>
             </div>
             <div className="mt-6 inline-flex items-center gap-2 border px-4 py-2.5"
-              style={{ borderColor: "rgba(240,146,38,0.2)", background: "rgba(240,146,38,0.05)" }}>
+              style={{ borderColor: "rgba(240,146,38,0.3)", background: "rgba(240,146,38,0.06)" }}>
               <span style={{ color: "#F09226" }}>✦</span>
-              <span className="text-[0.72rem] font-bold tracking-wider uppercase" style={{ color: "#F09226" }}>
+              <span className="text-[0.72rem] font-bold tracking-wider uppercase" style={{ color: "#D47B10" }}>
                 Inclusa nel percorso
               </span>
             </div>
           </div>
         </div>
 
-        {/* Swipe hint */}
         <div className="flex justify-center gap-1.5 pb-12">
           {Array.from({ length: 4 }, (_, i) => (
-            <span key={i} className="block h-px w-5" style={{ background: i === 0 ? "#F09226" : "rgba(255,255,255,0.14)" }} />
+            <span key={i} className="block h-px w-5" style={{ background: i === 0 ? "#F09226" : "rgba(255,255,255,0.2)" }} />
           ))}
         </div>
       </div>
