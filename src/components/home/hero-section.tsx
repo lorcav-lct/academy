@@ -151,7 +151,7 @@ function Brackets({ color = "rgba(240,146,38,0.22)" }: { color?: string }) {
 /* ══════════════════════════════════════════════════════
    TEACHERS CELL — auto-rotating faculty showcase
 ══════════════════════════════════════════════════════ */
-function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boolean; isDark: boolean }) {
+function TeachersCell({ mobile, fill, isDark, href }: { mobile?: boolean; fill?: boolean; isDark: boolean; href?: string }) {
   const [activeTeacher, setActiveTeacher] = useState(0);
   const activeTeacherRef = useRef(0);
   const isTransitioningTeacher = useRef(false);
@@ -186,22 +186,21 @@ function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boole
 
   const t = TEACHERS[activeTeacher];
 
-  return (
-    <div
-      className="bento-interactive rounded-sm px-5 py-5 flex flex-col justify-between relative overflow-hidden"
-      style={{
-        ...(mobile
-          ? { flex: "1 1 0%", minHeight: "25vh" }
-          : fill
-          ? { flex: "2 1 0%" }
-          : { width: "200px", flexShrink: 0 }),
-        background: isDark ? "rgba(2,0,38,0.75)" : "rgba(255,255,255,0.92)",
-        border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.07)"}`,
-        borderLeft: `2px solid ${t.color}44`,
-      }}
-      onMouseMove={onCellMove}
-      onMouseLeave={onCellLeave}
-    >
+  const cellStyle = {
+    ...(mobile
+      ? { flex: "1 1 0%", minHeight: "25vh" }
+      : fill
+      ? { flex: "2 1 0%" }
+      : { width: "200px", flexShrink: 0 }),
+    background: isDark ? "rgba(2,0,38,0.75)" : "rgba(255,255,255,0.92)",
+    border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.07)"}`,
+    borderLeft: `2px solid ${t.color}44`,
+  };
+
+  const cellClass = "bento-interactive rounded-sm px-5 py-5 flex flex-col justify-between relative overflow-hidden";
+
+  const inner = (
+    <>
       <div
         className="text-[0.75rem] font-bold tracking-[0.28em] uppercase"
         style={{ color: isDark ? "rgba(180,180,190,0.6)" : "rgba(0,0,0,0.4)" }}
@@ -253,6 +252,31 @@ function TeachersCell({ mobile, fill, isDark }: { mobile?: boolean; fill?: boole
           />
         ))}
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cellClass}
+        style={cellStyle}
+        onMouseMove={onCellMove as unknown as React.MouseEventHandler<HTMLAnchorElement>}
+        onMouseLeave={onCellLeave as unknown as React.MouseEventHandler<HTMLAnchorElement>}
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      className={cellClass}
+      style={cellStyle}
+      onMouseMove={onCellMove}
+      onMouseLeave={onCellLeave}
+    >
+      {inner}
     </div>
   );
 }
@@ -681,7 +705,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
             <div data-hero-sub className="mt-auto relative z-10">
               <div className="h-px mb-4" style={{ background: "linear-gradient(90deg, rgba(240,146,38,0.15), transparent)" }} />
               <div className="flex items-center gap-4 text-[0.75rem] font-black tracking-[0.3em] uppercase">
-                <span style={{ color: "#CD7F32" }}>PRIMAL</span>
+                <span style={{ color: "#CD7F32" }}>CORPUS</span>
                 <span style={{ color: "rgba(240,146,38,0.2)", letterSpacing: "0.05em" }}>———</span>
                 <span style={{ color: "#C0C0C0" }}>VIS</span>
                 <span style={{ color: "rgba(240,146,38,0.2)", letterSpacing: "0.05em" }}>———</span>
@@ -821,7 +845,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
           </div>
 
           {/* ② Docenti */}
-          <TeachersCell isDark={d} fill />
+          <TeachersCell isDark={d} fill href="/docenti" />
 
           {/* ③ 8 Masterclass */}
           <Link
@@ -986,7 +1010,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
         <VideoPresentationCell mobile isDark={d} />
 
         {/* ⑥ DOCENTI */}
-        <TeachersCell mobile isDark={d} />
+        <TeachersCell mobile isDark={d} href="/docenti" />
 
         {/* ⑦ MASTERCLASS + MODALITÀ */}
         <div className="flex gap-3" style={{ height: "110px" }}>

@@ -88,13 +88,13 @@ export const PRODUCTS: AcademyProduct[] = [
 
   // ─── Blocchi formativi (acquistabili separatamente) ───────────────────────
   {
-    slug: "primal",
+    slug: "corpus",
     name: "CORPUS",
     subtitle: "Blocco I — Functional Training",
     type: "course",
     priceCents: 150000,
     stripePriceId: "price_1T7tseCGgXzYzpRp7P4QCO5G",
-    courseSlug: "primal",
+    courseSlug: "corpus",
     includes: [
       "2 weekend di formazione in presenza",
       "Anatomia e biomeccanica applicata",

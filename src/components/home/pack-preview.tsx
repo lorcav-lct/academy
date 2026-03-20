@@ -13,6 +13,7 @@ function formatPrice(cents: number) {
 
 const COURSE_COLORS: Record<string, { border: string; glow: string; label: string }> = {
   primal:  { border: "rgba(240,146,38,0.25)", glow: "rgba(240,146,38,0.08)", label: "Blocco I" },
+  corpus:  { border: "rgba(240,146,38,0.25)", glow: "rgba(240,146,38,0.08)", label: "Blocco I" },
   vis:     { border: "rgba(212,175,55,0.45)", glow: "rgba(212,175,55,0.12)", label: "Blocco II — In evidenza" },
   victor:  { border: "rgba(240,146,38,0.25)", glow: "rgba(240,146,38,0.06)", label: "Blocco III" },
 };
@@ -72,7 +73,7 @@ export function PackPreview() {
               <span className="gradient-text">Scala il Livello.</span>
             </h2>
             <p className="mt-3 max-w-lg text-sm text-academy-gray-400" style={{ color: tb }}>
-              Ogni blocco è acquistabile singolarmente. Puoi iniziare da PRIMAL e completare il percorso al tuo ritmo.
+              Ogni blocco è acquistabile singolarmente. Puoi iniziare da CORPUS e completare il percorso al tuo ritmo.
             </p>
           </div>
           <Button href="/pack" variant="outline" size="sm">Tutti i prodotti →</Button>

@@ -23,7 +23,7 @@ interface CourseRef {
 
 const FILTERS = [
   { key: "all", label: "Tutti" },
-  { key: "primal", label: "CORPUS" },
+  { key: "corpus", label: "CORPUS" },
   { key: "vis", label: "VIS" },
   { key: "victor", label: "VICTOR" },
   { key: "masterclass", label: "Masterclass" },
@@ -47,7 +47,7 @@ function matchesFilter(teacher: Teacher, filter: FilterKey): boolean {
 // ─── getCourseRef helper ──────────────────────────────────────────────────────
 
 function getCourseRef(slug: string): CourseRef {
-  if (slug === "primal") return { label: "CORPUS", href: "/corsi/primal", type: "Blocco Formativo" };
+  if (slug === "corpus") return { label: "CORPUS", href: "/corsi/corpus", type: "Blocco Formativo" };
   if (slug === "vis") return { label: "VIS", href: "/corsi/vis", type: "Blocco Formativo" };
   if (slug === "victor") return { label: "VICTOR", href: "/corsi/victor", type: "Blocco Formativo" };
   const workshop = WORKSHOPS.find((w) => w.slug === slug);
@@ -60,7 +60,7 @@ function getCourseRef(slug: string): CourseRef {
 // ─── Course label badge colors ────────────────────────────────────────────────
 
 function getCourseColor(slug: string): string {
-  if (slug === "primal") return "#F09226";
+  if (slug === "corpus") return "#F09226";
   if (slug === "vis") return "#D4AF37";
   if (slug === "victor") return "#C0C0C0";
   return "#CD7F32"; // masterclass = bronze

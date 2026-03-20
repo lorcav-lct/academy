@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export function CheckoutContent() {
   const searchParams = useSearchParams();
-  const packSlug = searchParams.get("pack") || "primal";
+  const packSlug = searchParams.get("pack") || "corpus";
   const mc1 = searchParams.get("mc1") ?? "";
   const mc2 = searchParams.get("mc2") ?? "";
   const pack = getPackBySlug(packSlug);

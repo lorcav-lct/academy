@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { COURSES } from "@/lib/constants/courses";
 
 const BLOCK_META = {
-  primal: {
+  corpus: {
     roman: "I",
     area: "Functional Training",
     color: "#F09226",
@@ -74,7 +74,7 @@ export function PathOverview() {
       }
 
       // Active state per scroll
-      const triggers = ["primal", "vis", "victor"].map((slug, i) => {
+      const triggers = ["corpus", "vis", "victor"].map((slug, i) => {
         const el = sectionRef.current?.querySelector(`[data-block="${slug}"]`);
         if (!el) return null;
         return ScrollTrigger.create({
@@ -122,7 +122,7 @@ export function PathOverview() {
             style={{ background: "linear-gradient(90deg, #F09226, #D4AF37, #F09226)" }}
           />
           <div className="mt-3 flex justify-between text-[0.75rem] font-bold tracking-[0.25em] text-academy-gray-600 uppercase">
-            {["PRIMAL", "VIS", "VICTOR"].map((n, i) => (
+            {["CORPUS", "VIS", "VICTOR"].map((n, i) => (
               <span
                 key={n}
                 className="transition-colors duration-300"

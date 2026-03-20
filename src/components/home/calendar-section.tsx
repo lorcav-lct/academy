@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTheme } from "@/components/providers/theme-provider";
 
 const COLORS = {
-  primal:   { bg: "rgba(240,146,38,0.12)",  border: "rgba(240,146,38,0.35)", text: "#F09226",  dot: "#F09226"  },
+  corpus:   { bg: "rgba(240,146,38,0.12)",  border: "rgba(240,146,38,0.35)", text: "#F09226",  dot: "#F09226"  },
   vis:      { bg: "rgba(212,175,55,0.10)",  border: "rgba(212,175,55,0.35)", text: "#D4AF37",  dot: "#D4AF37"  },
   victor:   { bg: "rgba(240,146,38,0.08)",  border: "rgba(240,146,38,0.25)", text: "#F09226",  dot: "#F09226"  },
   fipe:     { bg: "rgba(192,192,192,0.06)", border: "rgba(192,192,192,0.2)", text: "#C0C0C0",  dot: "#C0C0C0"  },
@@ -14,9 +14,9 @@ const COLORS = {
 };
 
 const EVENTS = [
-  { label: "PRIMAL 1",     dates: "11–12 Settembre",  type: "primal"   },
+  { label: "CORPUS 1",     dates: "11–12 Settembre",  type: "corpus"   },
   { label: "Master Hyrox", dates: "26 Settembre",      type: "workshop" },
-  { label: "PRIMAL 2",     dates: "9–10 Ottobre",      type: "primal"   },
+  { label: "CORPUS 2",     dates: "9–10 Ottobre",      type: "corpus"   },
   { label: "Master Calcio",dates: "24 Ottobre",        type: "workshop" },
   { label: "FIPE I",       dates: "13–14 Novembre",    type: "fipe"     },
   { label: "Master FT",    dates: "28 Novembre",       type: "workshop" },

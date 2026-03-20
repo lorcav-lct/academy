@@ -9,13 +9,13 @@ export interface Teacher {
 }
 
 export const TEACHERS: Teacher[] = [
-  // CORPUS — course: "primal"
+  // CORPUS — course: "corpus"
   {
     slug: "guido-belli",
     name: "Guido Belli",
     role: "Functional Training",
     bio: "Esperto di functional training e preparazione fisica con esperienza pluriennale nel settore.",
-    courses: ["primal"],
+    courses: ["corpus"],
     color: "#F09226",
   },
   {
@@ -23,7 +23,7 @@ export const TEACHERS: Teacher[] = [
     name: "Francesco Campa",
     role: "Docente Universitario — Scienze Motorie",
     bio: "PhD, Professore Associato all'Università di Padova.",
-    courses: ["primal"],
+    courses: ["corpus"],
     color: "#D4AF37",
   },
   {
@@ -31,7 +31,7 @@ export const TEACHERS: Teacher[] = [
     name: "Samuele Marcora",
     role: "Fisiologia dell'Esercizio",
     bio: "Professore di Fisiologia dell'Esercizio all'Università di Bologna, tra i ricercatori più citati al mondo nel settore.",
-    courses: ["primal"],
+    courses: ["corpus"],
     color: "#C0C0C0",
   },
   {
@@ -39,7 +39,7 @@ export const TEACHERS: Teacher[] = [
     name: "Juri Chechi",
     role: "Campione Olimpico — Ginnastica",
     bio: "Campione Olimpico ad Atlanta 1996, plurimedagliato mondiale nella ginnastica artistica.",
-    courses: ["primal"],
+    courses: ["corpus"],
     color: "#F09226",
   },
   {
@@ -47,7 +47,7 @@ export const TEACHERS: Teacher[] = [
     name: "Matteo Romanazzi",
     role: "Ricercatore in Biomeccanica",
     bio: "Ricercatore in biomeccanica e analisi del movimento 3D applicata a sport, riabilitazione e fitness — Università di Torino.",
-    courses: ["primal"],
+    courses: ["corpus"],
     color: "#D4AF37",
   },
   {
@@ -55,7 +55,7 @@ export const TEACHERS: Teacher[] = [
     name: "Marco Bani",
     role: "Docente Universitario",
     bio: "Docente presso l'Università di Ferrara (UNIFE), esperto di metodologia dell'allenamento.",
-    courses: ["primal", "master-functional-bulgarian"],
+    courses: ["corpus", "master-functional-bulgarian"],
     color: "#C0C0C0",
   },
   {
@@ -63,7 +63,7 @@ export const TEACHERS: Teacher[] = [
     name: "Pierluigi Mauro",
     role: "Kettlebell & Functional Expert",
     bio: "Primo ad introdurre in Italia l'utilizzo della Macebell; ideatore di un metodo basato su esercizi e protocolli a corpo libero, con Clubbell e Kettlebell.",
-    courses: ["primal", "master-functional-bulgarian"],
+    courses: ["corpus", "master-functional-bulgarian"],
     color: "#CD7F32",
   },
 

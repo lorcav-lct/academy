@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   getBundles,
   getMasterclassProducts,
+  getCourseProducts,
   type AcademyProduct,
 } from "@/lib/constants/packs";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
@@ -218,6 +219,7 @@ export function PackComparison() {
   const [selectedPack, setSelectedPack] = useState<AcademyProduct | null>(null);
 
   const bundles = getBundles();
+  const courses = getCourseProducts();
   const masterclasses = getMasterclassProducts();
 
   function openSelector(product: AcademyProduct) {
@@ -260,7 +262,70 @@ export function PackComparison() {
         </motion.div>
       </SectionContainer>
 
-      {/* ── Section 2: Individual masterclasses ───────────────────────────── */}
+      {/* ── Section 2: Individual course blocks ───────────────────────────── */}
+      <SectionContainer withReflection>
+        <div className="mb-10">
+          <span className="text-xs font-bold tracking-[0.3em] text-academy-orange uppercase">
+            Blocchi Singoli
+          </span>
+          <h2 className="mt-2 text-2xl font-black">Acquista un singolo blocco</h2>
+          <p className="mt-2 text-sm text-academy-gray-400">
+            Puoi iniziare da CORPUS e completare il percorso al tuo ritmo.
+          </p>
+        </div>
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="grid gap-4 sm:grid-cols-3"
+        >
+          {courses.map((product, i) => (
+            <motion.div
+              key={product.slug}
+              variants={fadeUp}
+              custom={i}
+              className="card-squared flex flex-col p-6"
+            >
+              <div className="mb-3 h-0.5 w-8 bg-academy-orange/50" />
+              <h3 className="mb-1 text-xl font-black">{product.name}</h3>
+              <p className="mb-4 flex-1 text-xs leading-relaxed text-academy-gray-400">{product.subtitle}</p>
+              <ul className="mb-6 space-y-1.5">
+                {product.includes.map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-xs text-academy-gray-500">
+                    <span className="mt-1 h-1 w-1 shrink-0 bg-academy-orange" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xl font-black text-academy-orange">
+                  {product.priceCents > 0 ? formatPrice(product.priceCents) : "Da definire"}
+                </span>
+                <Button
+                  onClick={async () => {
+                    const supabase = createClient();
+                    const { data: { user } } = await supabase.auth.getUser();
+                    const dest = `/checkout?pack=${product.slug}`;
+                    if (!user) {
+                      localStorage.setItem("pending_checkout", dest);
+                      window.location.href = `/auth/register?next=${encodeURIComponent(dest)}`;
+                      return;
+                    }
+                    window.location.href = dest;
+                  }}
+                  variant="secondary"
+                  size="sm"
+                  disabled={product.priceCents === 0}
+                >
+                  {product.priceCents > 0 ? "Acquista" : "Prossimamente"}
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </SectionContainer>
+
+      {/* ── Section 3: Individual masterclasses ───────────────────────────── */}
       <SectionContainer withReflection>
         <div className="mb-10">
           <span className="text-xs font-bold tracking-[0.3em] text-academy-orange uppercase">

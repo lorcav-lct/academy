@@ -7,6 +7,7 @@ import { GradientText } from "@/components/shared/gradient-text";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import type { Workshop } from "@/lib/constants/workshops";
+import { getMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
 interface WorkshopDetailProps {
@@ -15,6 +16,23 @@ interface WorkshopDetailProps {
 }
 
 export function WorkshopDetail({ workshop, otherWorkshops }: WorkshopDetailProps) {
+  const product = getMasterclassProducts().find((p) => p.workshopSlug === workshop.slug);
+  const isTbd = workshop.tbd || !product || product.priceCents === 0;
+
+  async function handleBuy() {
+    if (!product) return;
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const dest = `/checkout?pack=${product.slug}`;
+    if (!user) {
+      localStorage.setItem("pending_checkout", dest);
+      window.location.href = `/auth/register?next=${encodeURIComponent(dest)}`;
+      return;
+    }
+    window.location.href = dest;
+  }
+
   return (
     <>
       {/* Hero */}
@@ -110,13 +128,39 @@ export function WorkshopDetail({ workshop, otherWorkshops }: WorkshopDetailProps
               <span className="mb-4 inline-block text-xs font-semibold tracking-[0.3em] text-academy-orange uppercase">
                 Come Partecipare
               </span>
-              <h2 className="mb-6 text-2xl font-black">Scegli il Tuo Pack</h2>
-              <p className="mb-6 text-academy-gray-400">
-                Questo masterclass è incluso come scelta nei pack Bronzo (1 masterclass), Argento (2 masterclass) e Oro/Oro Plus (3 masterclass).
-              </p>
-              <Button href="/pack" size="lg" className="w-full sm:w-auto">
-                Vedi i Pack Disponibili
-              </Button>
+              <h2 className="mb-6 text-2xl font-black">Acquista questo Masterclass</h2>
+
+              {isTbd ? (
+                <div className="card-squared p-6">
+                  <p className="text-academy-gray-400">
+                    Data e disponibilità in definizione. Puoi anche scegliere questa masterclass come parte dei pack Argento o Oro.
+                  </p>
+                  <Button href="/pack" size="lg" className="mt-4 w-full sm:w-auto">
+                    Vedi i Pack Disponibili
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="card-squared p-6">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-sm font-bold text-academy-gray-300">Masterclass singola</span>
+                      <span className="text-2xl font-black text-academy-orange">
+                        {product ? new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(product.priceCents / 100) : ""}
+                      </span>
+                    </div>
+                    <p className="mb-4 text-sm text-academy-gray-400">
+                      {workshop.trainerLabel} · {workshop.duration}
+                    </p>
+                    <Button onClick={handleBuy} size="lg" className="w-full">
+                      Acquista ora →
+                    </Button>
+                  </div>
+                  <p className="text-xs text-academy-gray-500">
+                    Oppure sceglila come parte di un pack Argento o Oro.{" "}
+                    <Link href="/pack" className="text-academy-orange underline">Confronta i pack</Link>
+                  </p>
+                </div>
+              )}
             </div>
           </ScrollReveal>
         </div>

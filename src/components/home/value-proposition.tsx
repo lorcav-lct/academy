@@ -236,7 +236,7 @@ export function ValueProposition() {
                 <span ref={counter9Ref}>0</span>
               </div>
               <p className="mt-1 text-lg font-bold" style={{ color: th }}>mesi di trasformazione</p>
-              <p className="mt-2 text-[0.8rem]" style={{ color: tm }}>PRIMAL → VIS → VICTOR + Certificazione FIPE</p>
+              <p className="mt-2 text-[0.8rem]" style={{ color: tm }}>CORPUS → VIS → VICTOR + Certificazione FIPE</p>
             </div>
           </div>
 

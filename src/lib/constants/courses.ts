@@ -4,7 +4,7 @@ export interface Course {
   subtitle: string;
   type: "block" | "fipe_session";
   blockNumber: number;
-  blockName: "PRIMAL" | "VIS" | "VICTOR";
+  blockName: "CORPUS" | "VIS" | "VICTOR";
   curriculumLabel: string;
   area: string;
   duration: string;
@@ -18,12 +18,12 @@ export interface Course {
 
 export const COURSES: Course[] = [
   {
-    slug: "primal",
-    title: "PRIMAL",
+    slug: "corpus",
+    title: "CORPUS",
     subtitle: "Blocco I — Le Fondamenta",
     type: "block",
     blockNumber: 1,
-    blockName: "PRIMAL",
+    blockName: "CORPUS",
     curriculumLabel: "CORPUS",
     area: "Functional Training",
     duration: "2 weekend",
@@ -125,7 +125,7 @@ export const COURSES: Course[] = [
 ];
 
 export const FIPE_SESSIONS = [
-  { slug: "fipe-1", title: "Sessione FIPE I", dates: ["13-14 Novembre"], afterBlock: "PRIMAL", sortOrder: 2 },
+  { slug: "fipe-1", title: "Sessione FIPE I", dates: ["13-14 Novembre"], afterBlock: "CORPUS", sortOrder: 2 },
   { slug: "fipe-2", title: "Sessione FIPE II", dates: ["12-13 Febbraio"], afterBlock: "VIS", sortOrder: 4 },
   { slug: "fipe-3", title: "Sessione FIPE III", dates: ["14-15 Maggio"], afterBlock: "VICTOR", sortOrder: 6 },
 ];
