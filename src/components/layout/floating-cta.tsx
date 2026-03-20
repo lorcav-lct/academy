@@ -87,6 +87,20 @@ export function FloatingCTA() {
     );
   }, [visible]);
 
+  // Push ScrollProgress upward so it doesn't overlap the CTA card
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!visible) {
+      root.style.removeProperty("--sp-bottom");
+    } else if (minimized) {
+      root.style.setProperty("--sp-bottom", "80px");
+    } else {
+      root.style.setProperty("--sp-bottom", "178px");
+    }
+    return () => { root.style.removeProperty("--sp-bottom"); };
+  }, [visible, minimized]);
+
   function dismiss(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -117,8 +131,9 @@ export function FloatingCTA() {
         /* ── Collapsed pill ── */
         <button
           onClick={toggleMinimize}
-          className="flex items-center gap-2.5 rounded-full px-4 py-2.5 shadow-xl transition-all duration-300 hover:scale-105"
+          className="flex items-center gap-2.5 px-4 py-2.5 shadow-xl transition-all duration-300 hover:scale-105"
           style={{
+            borderRadius: "2px",
             background: "#ffffff",
             border: "1px solid rgba(0,0,0,0.1)",
             boxShadow: "0 8px 28px rgba(0,0,0,0.18)",

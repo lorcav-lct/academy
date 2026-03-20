@@ -33,8 +33,13 @@ export function ScrollProgress() {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-7 right-7 z-50 transition-opacity duration-500"
-      style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? "auto" : "none" }}
+      className="fixed right-7 z-50 transition-opacity duration-500"
+      style={{
+        bottom: "var(--sp-bottom, 28px)",
+        transition: "bottom 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.5s",
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? "auto" : "none",
+      }}
       aria-label={`Scroll: ${pct}%`}
     >
       <div className="relative flex items-center justify-center" style={{ width: SIZE, height: SIZE }}>
