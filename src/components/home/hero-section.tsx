@@ -218,6 +218,7 @@ function TeachersCell({ mobile, fill, isDark, href }: { mobile?: boolean; fill?:
           }}
         >
           {t.image_url
+            // eslint-disable-next-line @next/next/no-img-element
             ? <img src={t.image_url} alt={t.name} className="w-full h-full object-cover" />
             : t.name.split(" ").map((w) => w[0]).slice(0, 2).join("")
           }
@@ -361,6 +362,7 @@ function VideoPresentationCell({ mobile, fill, isDark }: { mobile?: boolean; fil
         onMouseLeave={onCellLeave}
       >
         {/* GIF background */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://training-hub.lacertosus.com/assets/traininghub-demo-lq.gif.pagespeed.ce.w52WxtgIG2.gif"
           alt=""
@@ -577,12 +579,9 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
   const accentCardBg = d ? "rgba(8,4,40,0.85)" : "rgba(255,250,242,0.95)";
   const accentBorder = d ? "rgba(240,146,38,0.18)" : "rgba(240,146,38,0.2)";
   const titleColor = d ? "#ffffff" : "#111111";
-  const descColor  = d ? "rgba(160,155,175,1)" : "#666666";
   const labelColor = d ? "rgba(180,180,190,0.6)" : "rgba(0,0,0,0.4)";
   const subtitleColor = d ? "rgba(160,155,175,0.85)" : "#777777";
   const slideOverlay = "linear-gradient(160deg, rgba(1,0,18,0.22) 0%, rgba(1,0,18,0.42) 100%)";
-  const inactiveDot = d ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)";
-  const dividerColor = d ? "rgba(240,146,38,0.15)" : "rgba(240,146,38,0.2)";
   const bottomGradient = d ? "rgba(1,0,24,0.97)" : "rgba(245,243,238,0.97)";
 
   /* ────────────────────────── JSX ────────────────────────── */

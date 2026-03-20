@@ -47,7 +47,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={saira.variable} data-theme="dark" suppressHydrationWarning>
-      {/* eslint-disable-next-line @next/next/no-head-element */}
       <head>
         {/* Anti-FOUC: must run before any CSS paint */}
         <script dangerouslySetInnerHTML={{ __html: ANTI_FOUC }} />

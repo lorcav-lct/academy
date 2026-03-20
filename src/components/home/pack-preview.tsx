@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
-import { getBundles, getMasterclassProducts, type AcademyProduct } from "@/lib/constants/packs";
+import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import { createClient } from "@/lib/supabase/client";
@@ -163,6 +163,7 @@ function PackModal({
                           style={{ background: `${t.color}22`, color: t.color }}
                         >
                           {t.image_url
+                            // eslint-disable-next-line @next/next/no-img-element
                             ? <img src={t.image_url} alt={t.name} className="h-full w-full rounded-full object-cover" />
                             : initials(t.name)
                           }
@@ -301,12 +302,10 @@ function onLeave(e: React.MouseEvent<HTMLDivElement>) {
 
 function PackCard({
   pack,
-  index,
   isDark,
   onClick,
 }: {
   pack: AcademyProduct;
-  index: number;
   isDark: boolean;
   onClick: () => void;
 }) {
@@ -424,6 +423,7 @@ function PackCard({
                 title={t.name}
               >
                 {t.image_url
+                  // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={t.image_url} alt={t.name} className="h-full w-full rounded-full object-cover" />
                   : initials(t.name)
                 }
@@ -553,11 +553,10 @@ export function PackPreview() {
             className="grid gap-4 md:grid-cols-3"
             style={{ perspective: "1200px" }}
           >
-            {bundles.map((pack, i) => (
+            {bundles.map((pack) => (
               <PackCard
                 key={pack.slug}
                 pack={pack}
-                index={i}
                 isDark={d}
                 onClick={() => setActiveModal(pack)}
               />

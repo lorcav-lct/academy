@@ -6,7 +6,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
-import { SectionContainer } from "@/components/shared/section-container";
 import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
 import { WORKSHOPS } from "@/lib/constants/workshops";
 import { staggerContainer, fadeUp } from "@/lib/animations/variants";
@@ -87,7 +86,6 @@ interface TeacherCardProps {
 }
 
 function TeacherCard({ teacher, onClick, isDark }: TeacherCardProps) {
-  const mainCourse = teacher.courses[0];
   const accentColor = teacher.color;
 
   return (

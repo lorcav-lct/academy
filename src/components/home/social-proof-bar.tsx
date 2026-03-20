@@ -193,7 +193,7 @@ export function SocialProofBar() {
             className="flex flex-col justify-between p-7 lg:col-span-4"
             style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
           >
-            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">L'Ecosistema</p>
+            <p className="text-[0.75rem] font-bold tracking-[0.28em] text-academy-orange/70 uppercase">L&apos;Ecosistema</p>
             <div>
               <div className="text-[3rem] font-black leading-none text-academy-orange/25 select-none">◈</div>
               <p className="mt-1 text-[0.88rem] font-bold" style={{ color: th }}>Chi ti circonda conta</p>
