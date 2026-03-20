@@ -259,7 +259,7 @@ export function Navbar() {
         ref={headerRef}
         style={{ opacity: 0 }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-colors duration-500",
+          "fixed top-0 left-0 right-0 z-[60] transition-colors duration-500",
           scrolled ? "navbar-scrolled-bg" : "bg-transparent"
         )}
       >
@@ -358,24 +358,50 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Hamburger */}
+          {/* Hamburger — bento toggle */}
           <button
             onClick={mobileOpen ? closeMenu : openMenu}
-            className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] md:hidden"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 md:hidden transition-all duration-150 active:scale-95",
+              mobileOpen
+                ? "border border-red-400/50 hover:border-red-400/80"
+                : isDark
+                  ? "border border-white/20 hover:border-academy-orange/60"
+                  : "border border-black/15 hover:border-academy-orange/50"
+            )}
             aria-label={mobileOpen ? "Chiudi menu" : "Apri menu"}
           >
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className={cn(
-                  "block h-px w-[22px] origin-center transition-all duration-300",
-                  isDark ? "bg-academy-gray-100" : "bg-[#111]",
-                  i === 0 && mobileOpen && "translate-y-[7px] rotate-45",
-                  i === 1 && mobileOpen && "opacity-0 scale-x-0",
-                  i === 2 && mobileOpen && "-translate-y-[7px] -rotate-45"
-                )}
-              />
-            ))}
+            {mobileOpen ? (
+              <>
+                {/* X icon */}
+                <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
+                  <path d="M1.5 1.5l11 11M12.5 1.5l-11 11" stroke="#f87171" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <span className="text-[0.58rem] font-black tracking-[0.22em] uppercase text-red-400">
+                  Chiudi
+                </span>
+              </>
+            ) : (
+              <>
+                {/* 2×2 bento grid icon */}
+                <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
+                  <rect x="0.5" y="0.5" width="5.5" height="5.5" rx="0.5"
+                    fill={isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"} />
+                  <rect x="8" y="0.5" width="5.5" height="5.5" rx="0.5"
+                    fill="rgba(240,146,38,0.8)" />
+                  <rect x="0.5" y="8" width="5.5" height="5.5" rx="0.5"
+                    fill="rgba(240,146,38,0.8)" />
+                  <rect x="8" y="8" width="5.5" height="5.5" rx="0.5"
+                    fill={isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"} />
+                </svg>
+                <span className={cn(
+                  "text-[0.58rem] font-black tracking-[0.22em] uppercase",
+                  isDark ? "text-academy-gray-300" : "text-[#444]"
+                )}>
+                  Menu
+                </span>
+              </>
+            )}
           </button>
         </div>
       </header>
@@ -385,7 +411,7 @@ export function Navbar() {
         ref={overlayRef}
         aria-hidden={!mobileOpen}
         className={cn(
-          "fixed inset-0 z-40 md:hidden",
+          "fixed inset-0 z-[55] md:hidden",
           isDark ? "bg-academy-darker" : "bg-white",
           !mobileOpen && "pointer-events-none"
         )}
