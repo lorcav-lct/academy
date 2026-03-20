@@ -150,7 +150,7 @@ export function CTASection() {
           ].map((pill) => (
             <span
               key={pill}
-              className="border border-academy-orange/12 bg-academy-orange/4 px-3 py-1 text-[0.75rem] font-semibold tracking-wider text-academy-gray-500 uppercase"
+              className="border border-academy-orange/12 bg-academy-orange/4 px-3 py-1 text-[0.75rem] font-semibold tracking-wider text-academy-gray-300 uppercase"
             >
               {pill}
             </span>

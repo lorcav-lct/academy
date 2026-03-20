@@ -38,7 +38,7 @@ export function WorkshopPreview() {
   }, []);
 
   const th = d ? undefined : "#111111";
-  const tm = d ? undefined : "#777777";
+  const tm = d ? "#c7c7cc" : "#777777";
 
   return (
     <section ref={sectionRef} id="workshop" className="themed-section relative overflow-hidden py-24 md:py-32 light-reflection">

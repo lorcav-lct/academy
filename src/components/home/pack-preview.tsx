@@ -587,7 +587,7 @@ export function PackPreview() {
   }
 
   const th = d ? undefined : "#111111";
-  const tb = d ? undefined : "#555555";
+  const tb = d ? "#c7c7cc" : "#555555";
 
   return (
     <>

@@ -203,7 +203,7 @@ function TeachersCell({ mobile, fill, isDark, href }: { mobile?: boolean; fill?:
     <>
       <div
         className="text-[0.75rem] font-bold tracking-[0.28em] uppercase"
-        style={{ color: isDark ? "rgba(180,180,190,0.6)" : "rgba(0,0,0,0.4)" }}
+        style={{ color: isDark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.6)" }}
       >
         Docenti
       </div>
@@ -232,7 +232,7 @@ function TeachersCell({ mobile, fill, isDark, href }: { mobile?: boolean; fill?:
           </div>
           <div
             className="text-[0.75rem] font-medium uppercase tracking-wider mt-0.5 truncate"
-            style={{ color: isDark ? "rgba(180,180,190,0.55)" : "rgba(0,0,0,0.45)" }}
+            style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)" }}
           >
             {t.role}
           </div>
@@ -376,7 +376,7 @@ function VideoPresentationCell({ mobile, fill, isDark }: { mobile?: boolean; fil
         <div className="relative z-10 h-full flex flex-col justify-between p-5">
           <div
             className="text-[0.75rem] font-bold tracking-[0.28em] uppercase"
-            style={{ color: "rgba(180,180,190,0.6)" }}
+            style={{ color: "rgba(255,255,255,0.75)" }}
           >
             Presentazione
           </div>
@@ -402,7 +402,7 @@ function VideoPresentationCell({ mobile, fill, isDark }: { mobile?: boolean; fil
               </div>
               <div
                 className="text-[0.75rem] font-medium mt-0.5 uppercase tracking-wide"
-                style={{ color: "rgba(180,180,190,0.55)" }}
+                style={{ color: "rgba(255,255,255,0.7)" }}
               >
                 Academy in 2 min
               </div>
@@ -579,7 +579,7 @@ export function HeroSection({ slides = DEFAULT_HERO_SLIDES }: { slides?: HeroSli
   const accentCardBg = d ? "rgba(8,4,40,0.85)" : "rgba(255,250,242,0.95)";
   const accentBorder = d ? "rgba(240,146,38,0.18)" : "rgba(240,146,38,0.2)";
   const titleColor = d ? "#ffffff" : "#111111";
-  const labelColor = d ? "rgba(180,180,190,0.6)" : "rgba(0,0,0,0.4)";
+  const labelColor = d ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.4)";
   const subtitleColor = d ? "rgba(160,155,175,0.85)" : "#777777";
   const slideOverlay = "linear-gradient(160deg, rgba(1,0,18,0.22) 0%, rgba(1,0,18,0.42) 100%)";
   const bottomGradient = d ? "rgba(1,0,24,0.97)" : "rgba(245,243,238,0.97)";

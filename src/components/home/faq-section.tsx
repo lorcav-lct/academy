@@ -128,7 +128,7 @@ export function FaqSection() {
   }, []);
 
   const th = d ? undefined : "#111111";
-  const tm = d ? undefined : "#777777";
+  const tm = d ? "#c7c7cc" : "#777777";
 
   return (
     <section

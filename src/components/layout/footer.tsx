@@ -100,10 +100,10 @@ export function Footer() {
 
         <div className="mt-12 border-t border-white/5 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-xs text-academy-gray-500">
+            <p className="text-xs text-academy-gray-400">
               &copy; {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti riservati.
             </p>
-            <p className="text-xs text-academy-gray--600">
+            <p className="text-xs text-academy-gray-400">
               Un progetto{" "}
               <span className="font-semibold text-academy-orange">Lacertosus</span>
             </p>

@@ -191,7 +191,7 @@ export function ValueProposition() {
                     </span>
                     <span
                       className="relative text-[0.85rem] leading-snug"
-                      style={{ color: d ? "rgba(255,255,255,0.48)" : "rgba(0,0,0,0.4)" }}
+                      style={{ color: d ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                     >
                       {p}
                       {/* Animated strikethrough */}
@@ -251,12 +251,12 @@ export function ValueProposition() {
             }}
           >
             <div ref={imgInnerRef} className="absolute inset-0 flex flex-col items-center justify-center gap-3 select-none">
-              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" style={{ color: d ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.18)" }}>
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" style={{ color: d ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.35)" }}>
                 <rect x="2" y="6" width="20" height="15" rx="2" stroke="currentColor" strokeWidth="1.2" />
                 <circle cx="12" cy="13.5" r="3.5" stroke="currentColor" strokeWidth="1.2" />
                 <path d="M8 6l1.5-2.5h5L16 6" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
               </svg>
-              <p className="text-[0.68rem] font-bold tracking-[0.32em] uppercase" style={{ color: d ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)" }}>
+              <p className="text-[0.68rem] font-bold tracking-[0.32em] uppercase" style={{ color: d ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.38)" }}>
                 Inserisci immagine
               </p>
             </div>

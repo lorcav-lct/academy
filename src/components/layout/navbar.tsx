@@ -53,7 +53,7 @@ function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => vo
         <svg
           className={cn(
             "h-3 w-3 transition-transform duration-200",
-            isDark ? "text-academy-gray-500" : "text-[#888]",
+            isDark ? "text-academy-gray-300" : "text-[#666]",
             open && "rotate-180"
           )}
           viewBox="0 0 12 12"
@@ -82,7 +82,7 @@ function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => vo
         )}
       >
         <div className={cn("px-4 py-3", isDark ? "border-b border-white/5" : "border-b border-black/6")}>
-          <p className={cn("text-[12px] font-semibold tracking-[0.2em] uppercase", isDark ? "text-academy-gray-500" : "text-[#888]")}>
+          <p className={cn("text-[12px] font-semibold tracking-[0.2em] uppercase", isDark ? "text-academy-gray-300" : "text-[#666]")}>
             Area Riservata
           </p>
           <p className={cn("mt-0.5 truncate text-sm font-medium", isDark ? "text-academy-gray-200" : "text-[#222]")}>
@@ -316,10 +316,10 @@ export function Navbar() {
                     className={cn(
                       "mb-0.5 text-[12px] font-bold tracking-[0.3em] uppercase transition-colors",
                       active
-                        ? "text-academy-orange/60"
+                        ? "text-academy-orange"
                         : isDark
-                          ? "text-academy-gray-600 group-hover:text-academy-orange/50"
-                          : "text-[#aaa] group-hover:text-academy-orange/50"
+                          ? "text-academy-gray-400 group-hover:text-academy-orange"
+                          : "text-[#888] group-hover:text-academy-orange"
                     )}
                   >
                     {link.num}
@@ -465,7 +465,7 @@ export function Navbar() {
                 <Link href="/auth/register" onClick={closeMenu} className="flex items-center justify-center border border-academy-orange py-4 text-[12px] font-black tracking-[0.22em] text-academy-orange uppercase">
                   Iscriviti Ora
                 </Link>
-                <Link href="/auth/login" onClick={closeMenu} className={cn("text-center text-xs font-medium tracking-widest uppercase", isDark ? "text-academy-gray-500" : "text-[#888]")}>
+                <Link href="/auth/login" onClick={closeMenu} className={cn("text-center text-xs font-medium tracking-widest uppercase", isDark ? "text-academy-gray-300" : "text-[#666]")}>
                   Hai già un account? Accedi
                 </Link>
               </>

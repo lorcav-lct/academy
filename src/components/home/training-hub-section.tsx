@@ -28,8 +28,8 @@ export function TrainingHubSection() {
   }, []);
 
   const th = d ? undefined : "#111111";
-  const tb = d ? undefined : "#444444";
-  const tm = d ? undefined : "#777777";
+  const tb = d ? "#e5e5ea" : "#444444";
+  const tm = d ? "#c7c7cc" : "#777777";
 
   return (
     <section
