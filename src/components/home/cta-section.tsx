@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// ── Split-char component ──────────────────────────────────────────────────────
+// ── Split-char helper (solid-color only — gradient doesn't clip per-char) ─────
 
 function SplitLine({ text, className }: { text: string; className?: string }) {
   return (
-    <span className={`inline-flex overflow-hidden ${className ?? ""}`}>
+    <span className={`inline-flex flex-wrap overflow-hidden ${className ?? ""}`}>
       {text.split("").map((ch, i) => (
         <span key={i} data-cta-char className="inline-block">
           {ch === " " ? "\u00A0" : ch}
@@ -18,193 +18,124 @@ function SplitLine({ text, className }: { text: string; className?: string }) {
   );
 }
 
-// ── Magnetic button ───────────────────────────────────────────────────────────
-
-function MagneticBtn({
-  href,
-  primary,
-  children,
-}: {
-  href: string;
-  primary?: boolean;
-  children: React.ReactNode;
-}) {
-  const btnRef = useRef<HTMLAnchorElement>(null);
-
-  useEffect(() => {
-    const el = btnRef.current;
-    if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-      gsap.to(el, { x: dx * 0.28, y: dy * 0.28, duration: 0.4, ease: "power2.out" });
-    };
-    const onLeave = () => {
-      gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1,0.4)" });
-    };
-    el.addEventListener("mousemove", onMove);
-    el.addEventListener("mouseleave", onLeave);
-    return () => {
-      el.removeEventListener("mousemove", onMove);
-      el.removeEventListener("mouseleave", onLeave);
-    };
-  }, []);
-
-  if (primary) {
-    return (
-      <a
-        ref={btnRef}
-        href={href}
-        className="relative inline-flex items-center gap-3 overflow-hidden px-10 py-4 text-sm font-black tracking-[0.18em] uppercase"
-        style={{
-          background: "linear-gradient(135deg, #F09226 0%, #e07d10 100%)",
-          color: "#010015",
-          boxShadow: "0 0 40px rgba(240,146,38,0.35), 0 8px 32px rgba(0,0,0,0.4)",
-        }}
-      >
-        <span className="relative z-10">{children}</span>
-        {/* Shimmer */}
-        <span
-          className="shimmer-overlay pointer-events-none absolute inset-0"
-          aria-hidden
-          style={{
-            background:
-              "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)",
-            backgroundSize: "200% 100%",
-            animation: "shimmer 2.8s infinite",
-          }}
-        />
-      </a>
-    );
-  }
-
-  return (
-    <a
-      ref={btnRef}
-      href={href}
-      className="inline-flex items-center gap-3 px-10 py-4 text-sm font-black tracking-[0.18em] uppercase transition-colors duration-200"
-      style={{
-        border: "1px solid rgba(240,146,38,0.35)",
-        color: "rgba(240,146,38,0.85)",
-        background: "rgba(240,146,38,0.04)",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(240,146,38,0.7)";
-        (e.currentTarget as HTMLElement).style.color = "#F09226";
-        (e.currentTarget as HTMLElement).style.background = "rgba(240,146,38,0.08)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(240,146,38,0.35)";
-        (e.currentTarget as HTMLElement).style.color = "rgba(240,146,38,0.85)";
-        (e.currentTarget as HTMLElement).style.background = "rgba(240,146,38,0.04)";
-      }}
-    >
-      {children}
-    </a>
-  );
-}
-
 // ── Animated counter ──────────────────────────────────────────────────────────
 
-function Counter({
-  to,
-  suffix = "",
-  prefix = "",
-}: {
-  to: number;
-  suffix?: string;
-  prefix?: string;
-}) {
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const spanRef = useRef<HTMLSpanElement>(null);
-
   useEffect(() => {
     const el = spanRef.current;
     if (!el) return;
     const obj = { val: 0 };
     ScrollTrigger.create({
       trigger: el,
-      start: "top 85%",
+      start: "top 88%",
       once: true,
       onEnter: () => {
         gsap.to(obj, {
           val: to,
           duration: 1.8,
           ease: "power2.out",
-          onUpdate: () => {
-            el.textContent = prefix + Math.round(obj.val) + suffix;
-          },
+          onUpdate: () => { el.textContent = Math.round(obj.val) + suffix; },
         });
       },
     });
-  }, [to, suffix, prefix]);
+  }, [to, suffix]);
+  return <span ref={spanRef}>0{suffix}</span>;
+}
 
+// ── Bento tilt helpers ────────────────────────────────────────────────────────
+
+function onTilt(e: React.MouseEvent<HTMLDivElement>) {
+  const r = e.currentTarget.getBoundingClientRect();
+  const dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+  const dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+  gsap.to(e.currentTarget, { rotateX: -dy * 3, rotateY: dx * 3, duration: 0.4, ease: "power2.out", transformPerspective: 900 });
+}
+function offTilt(e: React.MouseEvent<HTMLDivElement>) {
+  gsap.to(e.currentTarget, { rotateX: 0, rotateY: 0, duration: 0.8, ease: "elastic.out(1,0.4)" });
+}
+
+// ── Stat cell ─────────────────────────────────────────────────────────────────
+
+function StatCell({
+  to, suffix = "", label,
+}: { to: number; suffix?: string; label: string }) {
   return (
-    <span ref={spanRef} aria-label={`${prefix}${to}${suffix}`}>
-      {prefix}0{suffix}
-    </span>
+    <div
+      data-bento-stat
+      className="flex flex-col items-center justify-center gap-2 p-6"
+      style={{
+        background: "rgba(240,146,38,0.05)",
+        border: "1px solid rgba(240,146,38,0.14)",
+      }}
+      onMouseMove={onTilt}
+      onMouseLeave={offTilt}
+    >
+      <span
+        className="text-[clamp(2rem,3.5vw,2.8rem)] font-black leading-none"
+        style={{ color: "#F09226" }}
+      >
+        <Counter to={to} suffix={suffix} />
+      </span>
+      <span
+        className="text-[0.65rem] font-bold tracking-[0.25em] uppercase text-center"
+        style={{ color: "#8888a8" }}
+      >
+        {label}
+      </span>
+    </div>
   );
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export function CTASection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const watermarkRef = useRef<HTMLDivElement>(null);
-  const line1Ref = useRef<HTMLDivElement>(null);
-  const line2Ref = useRef<HTMLDivElement>(null);
-  const subRef = useRef<HTMLDivElement>(null);
-  const btnsRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const dividerRef = useRef<HTMLDivElement>(null);
+  const sectionRef  = useRef<HTMLElement>(null);
+  const glowRef     = useRef<HTMLDivElement>(null);
+  const heroRef     = useRef<HTMLDivElement>(null);
+  const line1Ref    = useRef<HTMLDivElement>(null);
+  const line2Ref    = useRef<HTMLDivElement>(null);
+  const subRef      = useRef<HTMLParagraphElement>(null);
+  const statsRef    = useRef<HTMLDivElement>(null);
+  const ctaRowRef   = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       const chars1 = line1Ref.current?.querySelectorAll("[data-cta-char]");
-      const chars2 = line2Ref.current?.querySelectorAll("[data-cta-char]");
+      const stats  = statsRef.current?.querySelectorAll("[data-bento-stat]");
 
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: sectionRef.current, start: "top 60%", once: true },
+        scrollTrigger: { trigger: sectionRef.current, start: "top 62%", once: true },
       });
 
-      // Glow entrance
-      tl.from(glowRef.current, { opacity: 0, scale: 0.4, duration: 1.4, ease: "power2.out" });
+      // Glow in
+      tl.from(glowRef.current, { opacity: 0, scale: 0.5, duration: 1.4, ease: "power2.out" });
 
-      // Watermark parallax
-      gsap.to(watermarkRef.current, {
-        yPercent: -20,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.5,
-        },
-      });
+      // Hero cell
+      tl.from(heroRef.current, { opacity: 0, y: 28, duration: 0.6, ease: "power3.out" }, "<0.2");
 
-      // Chars
+      // Per-char on "DA ATLETA"
       if (chars1?.length) {
-        tl.from(chars1, { y: "115%", opacity: 0, duration: 0.7, stagger: 0.02, ease: "power3.out" }, "<0.25");
-      }
-      if (chars2?.length) {
-        tl.from(chars2, { y: "115%", opacity: 0, duration: 0.7, stagger: 0.02, ease: "power3.out" }, "<0.05");
+        tl.from(chars1, { y: "115%", opacity: 0, duration: 0.65, stagger: 0.022, ease: "power3.out" }, "<0.15");
       }
 
-      tl.from(dividerRef.current, { scaleX: 0, duration: 0.55, ease: "power3.out" }, "-=0.3");
-      tl.from(subRef.current, { opacity: 0, y: 24, duration: 0.55, ease: "power2.out" }, "-=0.3");
-      tl.from(btnsRef.current, { opacity: 0, y: 18, duration: 0.5, ease: "power2.out" }, "-=0.25");
-      tl.from(statsRef.current, { opacity: 0, y: 16, duration: 0.45, ease: "power2.out" }, "-=0.2");
+      // "A PROFESSIONISTA." as a block
+      tl.from(line2Ref.current, { y: 30, opacity: 0, duration: 0.55, ease: "power3.out" }, "-=0.2");
+      tl.from(subRef.current,   { opacity: 0, y: 16, duration: 0.45, ease: "power2.out" }, "-=0.2");
 
-      // Glow ambient pulse
+      // Stats stagger
+      if (stats?.length) {
+        tl.from(stats, { opacity: 0, y: 22, duration: 0.55, stagger: 0.1, ease: "power3.out" }, "-=0.35");
+      }
+
+      // CTA row
+      tl.from(ctaRowRef.current, { opacity: 0, y: 18, duration: 0.45, ease: "power2.out" }, "-=0.2");
+
+      // Ambient glow pulse
       gsap.to(glowRef.current, {
-        scale: 1.18,
-        opacity: 0.75,
-        duration: 3.5,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
+        scale: 1.15, opacity: 0.7, duration: 3.5,
+        ease: "sine.inOut", repeat: -1, yoyo: true,
       });
     }, sectionRef);
     return () => ctx.revert();
@@ -212,25 +143,25 @@ export function CTASection() {
 
   return (
     <>
-      {/* Shimmer keyframes */}
-      <style>{`@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`}</style>
+      <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
       <section
         ref={sectionRef}
         id="cta"
-        className="relative overflow-hidden py-32 md:py-48"
+        className="relative overflow-hidden py-20 md:py-28"
       >
-        {/* Background */}
+        {/* BG */}
         <div className="absolute inset-0" style={{ background: "#020026" }} />
 
-        {/* Grid overlay */}
+        {/* Subtle grid */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.025]"
+          className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
               "linear-gradient(rgba(240,146,38,1) 1px, transparent 1px)," +
               "linear-gradient(90deg, rgba(240,146,38,1) 1px, transparent 1px)",
             backgroundSize: "64px 64px",
+            opacity: 0.022,
           }}
         />
 
@@ -239,129 +170,171 @@ export function CTASection() {
           ref={glowRef}
           className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           style={{
-            width: "900px",
-            height: "900px",
+            width: "960px",
+            height: "960px",
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse at center, rgba(240,146,38,0.14) 0%, rgba(240,146,38,0.04) 40%, transparent 68%)",
+              "radial-gradient(ellipse at center, rgba(240,146,38,0.12) 0%, rgba(240,146,38,0.03) 45%, transparent 70%)",
           }}
         />
 
-        {/* Watermark */}
-        <div
-          ref={watermarkRef}
-          className="pointer-events-none absolute inset-0 flex items-center justify-center select-none overflow-hidden"
-          aria-hidden
-        >
-          <span
-            className="whitespace-nowrap font-black uppercase tracking-[0.08em]"
-            style={{
-              fontSize: "clamp(8rem,20vw,22rem)",
-              color: "transparent",
-              WebkitTextStroke: "1px rgba(240,146,38,0.07)",
-              lineHeight: 1,
-            }}
-          >
-            LACERTOSUS
-          </span>
-        </div>
-
         <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
-          <div className="flex flex-col items-center text-center">
 
-            {/* Eyebrow */}
-            <div className="mb-8">
-              <span className="label-tag">Edizione 2026/27</span>
-            </div>
+          {/* ── Bento grid ─────────────────────────────────────────────────── */}
+          <div className="grid gap-3 min-[981px]:grid-cols-12">
 
-            {/* Headline */}
-            <div ref={line1Ref} className="leading-none">
-              <SplitLine
-                text="DA ATLETA"
-                className="block text-[clamp(2.4rem,7vw,7rem)] font-black tracking-[-0.025em] text-[#e8e8f0]"
-              />
-            </div>
-            <div ref={line2Ref} className="mb-6 leading-none">
-              <SplitLine
-                text="A PROFESSIONISTA."
-                className="block text-[clamp(2.4rem,7vw,7rem)] font-black tracking-[-0.025em] gradient-text"
-              />
-            </div>
-
-            {/* Divider */}
+            {/* A: Hero cell — col 1-7, row 1-2 */}
             <div
-              ref={dividerRef}
-              className="mb-8 h-px w-24 origin-left"
-              style={{ background: "linear-gradient(90deg, #F09226, transparent)" }}
-            />
-
-            {/* Sub */}
-            <p
-              ref={subRef}
-              className="mx-auto mb-10 max-w-lg text-base leading-relaxed"
-              style={{ color: "rgba(200,200,220,0.6)" }}
+              ref={heroRef}
+              className="flex flex-col justify-between gap-8 p-8 md:p-10
+                min-[981px]:col-start-1 min-[981px]:col-span-7
+                min-[981px]:row-start-1 min-[981px]:row-span-2"
+              style={{
+                background: "rgba(255,255,255,0.028)",
+                border: "1px solid rgba(240,146,38,0.14)",
+              }}
             >
-              La Lacertosus Academy è l'unico percorso in Italia che unisce{" "}
-              <span style={{ color: "rgba(240,146,38,0.9)", fontWeight: 700 }}>scienza del movimento</span>,{" "}
-              <span style={{ color: "rgba(240,146,38,0.9)", fontWeight: 700 }}>certificazione FIPE</span>{" "}
-              e mentalità imprenditoriale in 9 mesi intensivi.
-            </p>
+              <div>
+                <span className="label-tag mb-5 block">Edizione 2026/27</span>
 
-            {/* CTAs */}
-            <div
-              ref={btnsRef}
-              className="flex flex-col items-center justify-center gap-4 sm:flex-row"
-            >
-              <MagneticBtn href="/pack" primary>
-                Scegli il tuo Percorso →
-              </MagneticBtn>
-              <MagneticBtn href="/percorso">
-                Esplora il Programma
-              </MagneticBtn>
-            </div>
+                {/* "DA ATLETA" — white, per-char animated */}
+                <div ref={line1Ref} className="leading-none overflow-hidden">
+                  <SplitLine
+                    text="DA ATLETA"
+                    className="block text-[clamp(2.6rem,5.5vw,5.5rem)] font-black tracking-[-0.025em] text-white"
+                  />
+                </div>
 
-            {/* Stats row */}
-            <div
-              ref={statsRef}
-              className="mt-16 grid grid-cols-2 gap-px min-[540px]:grid-cols-4"
-              style={{ border: "1px solid rgba(240,146,38,0.1)", background: "rgba(240,146,38,0.06)" }}
-            >
-              {[
-                { to: 33, suffix: "+", label: "Docenti" },
-                { to: 9,  suffix: "",  label: "Mesi" },
-                { to: 30, suffix: "",  label: "Posti disponibili" },
-                { to: 100, suffix: "%", label: "In presenza" },
-              ].map((s, i) => (
-                <div
-                  key={s.label}
-                  className="flex flex-col items-center gap-1 px-8 py-6"
-                  style={{
-                    borderRight: i < 3 ? "1px solid rgba(240,146,38,0.1)" : undefined,
-                  }}
-                >
+                {/* "A PROFESSIONISTA." — gradient, block animated */}
+                <div ref={line2Ref} className="mb-6 leading-none overflow-hidden">
                   <span
-                    className="text-[clamp(1.8rem,3vw,2.6rem)] font-black leading-none"
-                    style={{ color: "#F09226" }}
+                    className="block text-[clamp(2.6rem,5.5vw,5.5rem)] font-black tracking-[-0.025em] gradient-text"
                   >
-                    <Counter to={s.to} suffix={s.suffix} />
-                  </span>
-                  <span
-                    className="text-[0.68rem] font-bold tracking-[0.22em] uppercase"
-                    style={{ color: "rgba(200,200,220,0.45)" }}
-                  >
-                    {s.label}
+                    A PROFESSIONISTA.
                   </span>
                 </div>
-              ))}
+
+                <p
+                  ref={subRef}
+                  className="max-w-md text-[0.95rem] leading-relaxed"
+                  style={{ color: "#a8a8c0" }}
+                >
+                  L&apos;unico percorso in Italia che unisce{" "}
+                  <span style={{ color: "#d4d4e8", fontWeight: 700 }}>scienza del movimento</span>,{" "}
+                  <span style={{ color: "#d4d4e8", fontWeight: 700 }}>certificazione FIPE</span>{" "}
+                  e mentalità imprenditoriale — in 9 mesi intensivi, 100% in presenza.
+                </p>
+              </div>
+
+              {/* Trust pills inside hero cell */}
+              <div className="flex flex-wrap gap-2">
+                {["Certificazione FIPE", "9 mesi formativi", "100% in presenza", "30 posti"].map((t) => (
+                  <span
+                    key={t}
+                    className="px-3 py-1 text-[0.65rem] font-bold tracking-[0.2em] uppercase"
+                    style={{
+                      border: "1px solid rgba(240,146,38,0.18)",
+                      color: "#7878a0",
+                      background: "rgba(240,146,38,0.04)",
+                    }}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {/* Trust line */}
-            <p
-              className="mt-6 text-[0.72rem] font-semibold tracking-[0.18em] uppercase"
-              style={{ color: "rgba(200,200,220,0.3)" }}
+            {/* B: Stats 2×2 — col 8-12, row 1-2 */}
+            <div
+              ref={statsRef}
+              className="grid grid-cols-2 gap-3
+                min-[981px]:col-start-8 min-[981px]:col-span-5
+                min-[981px]:row-start-1 min-[981px]:row-span-2"
+              style={{ alignContent: "stretch" }}
             >
-              Posti limitati · Selezione in ingresso · Nessun pagamento immediato
-            </p>
+              <StatCell to={33} suffix="+" label="Docenti" />
+              <StatCell to={9}  label="Mesi" />
+              <StatCell to={100} suffix="%" label="In presenza" />
+              <StatCell to={30} label="Posti disponibili" />
+            </div>
+
+            {/* C + D: CTA row — col 1-12, row 3 */}
+            <div
+              ref={ctaRowRef}
+              className="grid gap-3 grid-cols-1 min-[540px]:grid-cols-2
+                min-[981px]:col-start-1 min-[981px]:col-span-12 min-[981px]:row-start-3"
+            >
+              {/* Primary CTA */}
+              <a
+                href="/pack"
+                className="group relative flex items-center justify-between overflow-hidden p-8 md:p-10"
+                style={{
+                  background: "linear-gradient(135deg, #F09226 0%, #e07d10 100%)",
+                  boxShadow: "0 0 60px rgba(240,146,38,0.2), 0 12px 40px rgba(0,0,0,0.35)",
+                }}
+              >
+                <div>
+                  <p className="text-[0.62rem] font-black tracking-[0.3em] uppercase mb-1" style={{ color: "rgba(1,0,21,0.55)" }}>
+                    Inizia ora
+                  </p>
+                  <p className="text-lg font-black tracking-tight" style={{ color: "#010015" }}>
+                    Scegli il tuo Percorso
+                  </p>
+                </div>
+                <span
+                  className="flex h-12 w-12 items-center justify-center text-xl font-black transition-transform duration-300 group-hover:translate-x-1"
+                  style={{ border: "1.5px solid rgba(1,0,21,0.25)", color: "#010015" }}
+                >
+                  →
+                </span>
+                {/* Shimmer */}
+                <span
+                  className="pointer-events-none absolute inset-0"
+                  aria-hidden
+                  style={{
+                    background: "linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%)",
+                    backgroundSize: "200% 100%",
+                    animation: "shimmer 3s infinite",
+                  }}
+                />
+              </a>
+
+              {/* Secondary CTA */}
+              <a
+                href="/percorso"
+                className="group flex items-center justify-between p-8 md:p-10 transition-colors duration-200"
+                style={{
+                  background: "rgba(240,146,38,0.04)",
+                  border: "1px solid rgba(240,146,38,0.18)",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(240,146,38,0.08)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(240,146,38,0.35)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(240,146,38,0.04)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(240,146,38,0.18)";
+                }}
+              >
+                <div>
+                  <p className="text-[0.62rem] font-black tracking-[0.3em] uppercase mb-1" style={{ color: "rgba(240,146,38,0.45)" }}>
+                    Approfondisci
+                  </p>
+                  <p className="text-lg font-black tracking-tight" style={{ color: "#e8e8f4" }}>
+                    Esplora il Programma
+                  </p>
+                  <p className="mt-1 text-[0.78rem]" style={{ color: "#6868a0" }}>
+                    Curriculum · Docenti · Certificazione
+                  </p>
+                </div>
+                <span
+                  className="flex h-12 w-12 shrink-0 items-center justify-center text-xl font-black transition-transform duration-300 group-hover:translate-x-1"
+                  style={{ border: "1px solid rgba(240,146,38,0.25)", color: "#F09226" }}
+                >
+                  →
+                </span>
+              </a>
+            </div>
 
           </div>
         </div>
