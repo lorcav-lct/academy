@@ -200,12 +200,20 @@ export function PathOverview() {
           x: () => -(track.scrollWidth - window.innerWidth),
           ease: "none",
           scrollTrigger: {
-            trigger: section, pin: true, scrub: 1, anticipatePin: 1,
+            trigger: section, pin: true, scrub: 1.2, anticipatePin: 1,
             end: () => `+=${track.scrollWidth - window.innerWidth}`,
             invalidateOnRefresh: true,
             snap: {
-              snapTo: 1 / (NUM_PANELS - 1),
-              duration: { min: 0.2, max: 0.45 },
+              // Wide sticky zone for panel 0 (needs >18% scroll to leave intro)
+              // and for last panel (>82% to stay on FIPE)
+              snapTo: (v: number) => {
+                const n = NUM_PANELS - 1;
+                if (v < 0.18) return 0;
+                if (v > 1 - 0.18) return 1;
+                return Math.round(v * n) / n;
+              },
+              delay: 0.12,
+              duration: { min: 0.3, max: 0.55 },
               ease: "power2.inOut",
             },
             onEnter:     () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
@@ -351,32 +359,6 @@ export function PathOverview() {
                   perspectiveOrigin: "50% 48%",
                 }}
               >
-                {/* Subtle folder base / tray */}
-                <div
-                  className="absolute"
-                  style={{
-                    bottom: "12%",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: "460px",
-                    height: "4px",
-                    background: "linear-gradient(90deg, transparent, rgba(240,146,38,0.22), transparent)",
-                    filter: "blur(1px)",
-                  }}
-                />
-                <div
-                  className="absolute"
-                  style={{
-                    bottom: "10%",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: "380px",
-                    height: "12px",
-                    background: "rgba(240,146,38,0.04)",
-                    border: "1px solid rgba(240,146,38,0.12)",
-                  }}
-                />
-
                 {/* Cards */}
                 {COURSES.map((course, idx) => {
                   const meta = META[course.slug as keyof typeof META];
@@ -407,7 +389,7 @@ export function PathOverview() {
                           background: "#f8f8fc",
                           border: "1px solid rgba(0,0,0,0.07)",
                           overflow: "hidden",
-                          boxShadow: "0 24px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2)",
+                          boxShadow: "0 28px 70px rgba(0,0,0,0.4), 0 4px 18px rgba(0,0,0,0.18)",
                           height: "350px",
                           display: "flex",
                           flexDirection: "column",
@@ -419,61 +401,52 @@ export function PathOverview() {
                         {/* Top accent bar */}
                         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${color}, transparent)` }} />
 
-                        {/* Top: roman + progress */}
+                        {/* Header: roman + step indicator */}
                         <div>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                            <div className="font-black leading-none tabular-nums" style={{ fontSize: "4.5rem", color, lineHeight: 0.88 }}>
+                          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                            <div className="font-black leading-none tabular-nums" style={{ fontSize: "5rem", color, lineHeight: 0.85 }}>
                               {roman}
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                            {/* Step dots */}
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, paddingTop: "0.4rem" }}>
                               {COURSES.map((_, di) => (
-                                <span key={di} style={{ width: di === idx ? 24 : 8, height: 2, background: di === idx ? color : "rgba(0,0,0,0.15)", display: "block" }} />
+                                <span key={di} style={{ width: di === idx ? 22 : 7, height: 2, background: di === idx ? color : "rgba(0,0,0,0.14)", display: "block", transition: "all 0.3s" }} />
                               ))}
+                              <span style={{ fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.2em", color: "rgba(0,0,0,0.3)", marginTop: 2 }}>{roman}/III</span>
                             </div>
                           </div>
-                          <span style={{ fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(240,146,38,0.7)" }}>
+                          <span style={{ fontSize: "0.58rem", fontWeight: 900, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(240,146,38,0.65)", display: "block", marginTop: "0.5rem" }}>
                             {course.area}
                           </span>
-                          <h3 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#111", lineHeight: 1, marginTop: "0.2rem" }}>
+                          <h3 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#111", lineHeight: 0.95, marginTop: "0.25rem" }}>
                             {course.title}
                           </h3>
-                          <p style={{ fontSize: "0.875rem", fontWeight: 700, color, marginTop: "0.2rem" }}>{tagline}</p>
+                          <p style={{ fontSize: "0.875rem", fontWeight: 700, color, marginTop: "0.25rem" }}>{tagline}</p>
                         </div>
 
-                        {/* Curriculum preview */}
-                        <ul style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          {course.curriculum.slice(0, 3).map((item) => (
-                            <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.8rem", color: "#555" }}>
-                              <span style={{ marginTop: 5, width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
+                        {/* Objective */}
+                        <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1rem" }}>
+                          <p style={{ fontSize: "0.8rem", lineHeight: 1.55, color: "#555", marginBottom: "0.9rem" }}>
+                            {course.objective}
+                          </p>
+                          {/* Duration + season */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C06A0A", background: "rgba(240,146,38,0.08)", border: "1px solid rgba(240,146,38,0.2)", padding: "2px 8px" }}>
+                              {season}
+                            </span>
+                            <span style={{ fontSize: "0.62rem", color: "rgba(0,0,0,0.28)", fontWeight: 700, letterSpacing: "0.12em" }}>
+                              {course.duration}
+                            </span>
+                          </div>
+                        </div>
 
-                        {/* Footer */}
-                        <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: "0.65rem", fontWeight: 700, color: "rgba(0,0,0,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                            {season}
-                          </span>
-                          <span style={{ fontSize: "0.75rem", fontWeight: 900, color, display: "flex", alignItems: "center", gap: 4 }}>
-                            Scopri →
+                        {/* CTA hint */}
+                        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", paddingTop: "0.5rem" }}>
+                          <span style={{ fontSize: "0.72rem", fontWeight: 900, color, letterSpacing: "0.1em" }}>
+                            Scopri il blocco →
                           </span>
                         </div>
                       </div>
-
-                      {/* Card "depth" edge (bottom) */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: -6,
-                          left: 6,
-                          right: -6,
-                          height: "100%",
-                          background: "#e8e8ec",
-                          zIndex: -1,
-                          border: "1px solid rgba(0,0,0,0.05)",
-                        }}
-                      />
                     </div>
                   );
                 })}
