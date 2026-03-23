@@ -509,7 +509,7 @@ export function PackPreview() {
           start: "top 92%",
           once: true,
           onEnter: () => {
-            const isMobile = window.innerWidth < 768;
+            const isMobile = window.innerWidth < 981;
 
             if (isMobile) {
               // Mobile: cards rise from below one by one — ARGENTO (middle) first
@@ -624,7 +624,7 @@ export function PackPreview() {
           {/* Cards */}
           <div
             ref={cardsRef}
-            className="grid gap-4 md:grid-cols-3"
+            className="grid gap-4 min-[981px]:grid-cols-3"
             style={{ perspective: "1200px" }}
           >
             {bundles.map((pack) => (
