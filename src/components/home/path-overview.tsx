@@ -4,12 +4,11 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { COURSES } from "@/lib/constants/courses";
-import { Button } from "@/components/ui/button";
 
 const META = {
-  corpus: { roman: "I",   color: "#F09226", tagline: "Le Fondamenta", fipeDate: "13–14 Nov" },
-  vis:    { roman: "II",  color: "#F09226", tagline: "La Forza",      fipeDate: "12–13 Feb" },
-  victor: { roman: "III", color: "#F09226", tagline: "La Vittoria",   fipeDate: "14–15 Mag" },
+  corpus: { roman: "I",   color: "#F09226", tagline: "Le Fondamenta", season: "Autunno 2025",     fipeSeason: "Novembre" },
+  vis:    { roman: "II",  color: "#F09226", tagline: "La Forza",      season: "Inverno 2025/26",  fipeSeason: "Febbraio" },
+  victor: { roman: "III", color: "#F09226", tagline: "La Vittoria",   season: "Primavera 2026",   fipeSeason: "Maggio"   },
 } as const;
 
 const CERT_ITEMS = [
@@ -20,19 +19,18 @@ const CERT_ITEMS = [
 
 const NUM_PANELS = 5;
 
-// ── Improved particles ──────────────────────────────────────────────────────
+// ── Particles ─────────────────────────────────────────────────────────────────
 function initParticles(canvas: HTMLCanvasElement) {
   const dpr = window.devicePixelRatio || 1;
+  const ctx = canvas.getContext("2d")!;
 
   const resize = () => {
     canvas.width  = window.innerWidth  * dpr;
     canvas.height = window.innerHeight * dpr;
     canvas.style.width  = window.innerWidth  + "px";
     canvas.style.height = window.innerHeight + "px";
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
-
-  const ctx = canvas.getContext("2d")!;
   resize();
   window.addEventListener("resize", resize);
 
@@ -40,12 +38,9 @@ function initParticles(canvas: HTMLCanvasElement) {
   const H = () => window.innerHeight;
 
   const pts = Array.from({ length: 90 }, () => ({
-    x: Math.random() * W(),
-    y: Math.random() * H(),
-    vx: (Math.random() - 0.5) * 0.35,
-    vy: (Math.random() - 0.5) * 0.35,
-    r: Math.random() * 2.5 + 1.2,
-    a: Math.random() * 0.55 + 0.25,
+    x: Math.random() * W(), y: Math.random() * H(),
+    vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+    r: Math.random() * 2.5 + 1.2, a: Math.random() * 0.55 + 0.25,
   }));
 
   let raf = 0;
@@ -69,6 +64,17 @@ function initParticles(canvas: HTMLCanvasElement) {
   return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
 }
 
+// ── Tilt helpers (same pattern as pack-preview) ──────────────────────────────
+function onTiltMove(e: React.MouseEvent<HTMLDivElement>) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const dx = (e.clientX - (rect.left + rect.width  / 2)) / (rect.width  / 2);
+  const dy = (e.clientY - (rect.top  + rect.height / 2)) / (rect.height / 2);
+  gsap.to(e.currentTarget, { rotateX: -dy * 4, rotateY: dx * 4, duration: 0.5, ease: "power2.out", transformPerspective: 1000 });
+}
+function onTiltLeave(e: React.MouseEvent<HTMLDivElement>) {
+  gsap.to(e.currentTarget, { rotateX: 0, rotateY: 0, duration: 0.9, ease: "elastic.out(1,0.4)" });
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function PathOverview() {
@@ -78,14 +84,15 @@ export function PathOverview() {
   const progressRef = useRef<HTMLDivElement>(null);
   const canvasRef   = useRef<HTMLCanvasElement>(null);
 
+  // Particles — desktop only
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.innerWidth < 1024) return;
+    if (typeof window === "undefined" || window.innerWidth < 1024) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     return initParticles(canvas);
   }, []);
 
+  // GSAP + navbar hide
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
@@ -95,9 +102,11 @@ export function PathOverview() {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
 
+      // ── Desktop ────────────────────────────────────────────────────────────
       mm.add("(min-width: 1024px)", () => {
         section.style.overflow = "hidden";
         const panels = track.querySelectorAll<HTMLElement>("[data-panel]");
+        const header = document.querySelector("header");
 
         if (arrowRef.current)
           gsap.to(arrowRef.current, { x: 10, yoyo: true, repeat: -1, duration: 0.72, ease: "sine.inOut" });
@@ -106,10 +115,14 @@ export function PathOverview() {
           x: () => -(track.scrollWidth - window.innerWidth),
           ease: "none",
           scrollTrigger: {
-            trigger: section, pin: true, scrub: 1.4,
+            trigger: section, pin: true, scrub: 1, anticipatePin: 1,
             end: () => `+=${track.scrollWidth - window.innerWidth}`,
             invalidateOnRefresh: true,
-            snap: { snapTo: 1 / (NUM_PANELS - 1), duration: { min: 0.2, max: 0.5 }, ease: "power2.inOut" },
+            snap: { snapTo: 1 / (NUM_PANELS - 1), duration: { min: 0.2, max: 0.45 }, ease: "power2.inOut" },
+            onEnter:     () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
+            onLeave:     () => { if (header) gsap.to(header, { yPercent: 0, opacity: 1, duration: 0.5,  ease: "power3.out" }); },
+            onEnterBack: () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
+            onLeaveBack: () => { if (header) gsap.to(header, { yPercent: 0, opacity: 1, duration: 0.5,  ease: "power3.out" }); },
             onUpdate(self) {
               if (arrowRef.current) arrowRef.current.style.opacity = self.progress > 0.05 ? "0" : "1";
               if (progressRef.current) progressRef.current.style.transform = `scaleX(${self.progress})`;
@@ -127,14 +140,35 @@ export function PathOverview() {
           });
         });
 
-        return () => { section.style.overflow = ""; };
+        return () => {
+          section.style.overflow = "";
+          if (header) gsap.set(header, { clearProps: "all" });
+        };
       });
 
+      // ── Mobile ─────────────────────────────────────────────────────────────
       mm.add("(max-width: 1023px)", () => {
-        const header = section.querySelector("[data-mobile-head]");
-        if (header) gsap.from(header, { scrollTrigger: { trigger: header, start: "top 85%", once: true }, opacity: 0, y: 30, duration: 0.65, ease: "power3.out" });
+        const header = document.querySelector("header");
+
+        const navST = ScrollTrigger.create({
+          trigger: section,
+          start: "top 20%",
+          end: "bottom 10%",
+          onEnter:     () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.4, ease: "power3.inOut" }); },
+          onLeave:     () => { if (header) gsap.to(header, { yPercent: 0, opacity: 1, duration: 0.4, ease: "power3.out" }); },
+          onEnterBack: () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.4, ease: "power3.inOut" }); },
+          onLeaveBack: () => { if (header) gsap.to(header, { yPercent: 0, opacity: 1, duration: 0.4, ease: "power3.out" }); },
+        });
+
+        const mobHead = section.querySelector("[data-mobile-head]");
+        if (mobHead) gsap.from(mobHead, { scrollTrigger: { trigger: mobHead, start: "top 85%", once: true }, opacity: 0, y: 30, duration: 0.65, ease: "power3.out" });
         const cards = section.querySelectorAll("[data-mobile-card]");
         if (cards.length) gsap.from(cards, { scrollTrigger: { trigger: section, start: "top 75%", once: true }, opacity: 0, y: 40, duration: 0.65, stagger: 0.1, ease: "power3.out" });
+
+        return () => {
+          navST.kill();
+          if (header) gsap.set(header, { clearProps: "all" });
+        };
       });
     }, sectionRef);
 
@@ -163,7 +197,7 @@ export function PathOverview() {
           style={{ background: "linear-gradient(90deg,#F09226,#fff8)", transform: "scaleX(0)" }} />
       </div>
 
-      {/* ── DESKTOP horizontal track ── */}
+      {/* ── DESKTOP horizontal track ─────────────────────────────────────────── */}
       <div ref={trackRef} className="relative hidden lg:flex will-change-transform" style={{ zIndex: 5 }}>
 
         {/* Panel 0 — Intro */}
@@ -175,7 +209,8 @@ export function PathOverview() {
               style={{ fontSize: "clamp(3.5rem,6.5vw,7rem)" }}>
               Il<br /><span style={{ color: "#F09226" }}>Percorso.</span>
             </h2>
-            <p data-anim className="mt-6 max-w-lg text-[1.0625rem] leading-relaxed text-white/70">
+            <p data-anim className="mt-6 max-w-lg text-[1.0625rem] leading-relaxed"
+              style={{ color: "rgba(255,255,255,0.72)" }}>
               9 mesi di formazione progressiva. Tre blocchi che si costruiscono l&apos;uno
               sull&apos;altro fino alla certificazione FIPE.
             </p>
@@ -184,13 +219,13 @@ export function PathOverview() {
                 <div key={u} className="p-5 text-center"
                   style={{ border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}>
                   <p className="text-[2.2rem] font-black leading-none tabular-nums" style={{ color: "#F09226" }}>{v}</p>
-                  <p className="mt-1 text-[0.8rem] font-bold tracking-[0.18em] uppercase text-white/60">{u}</p>
+                  <p className="mt-1 text-[0.8rem] font-bold tracking-[0.18em] uppercase" style={{ color: "rgba(255,255,255,0.55)" }}>{u}</p>
                 </div>
               ))}
             </div>
             <div data-anim className="mt-12 flex items-center gap-3">
               <span ref={arrowRef} className="inline-block text-xl" style={{ color: "#F09226" }}>→</span>
-              <span className="text-[0.72rem] font-bold tracking-[0.3em] uppercase text-white/50">
+              <span className="text-[0.72rem] font-bold tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>
                 CORPUS · VIS · VICTOR · FIPE
               </span>
             </div>
@@ -201,7 +236,7 @@ export function PathOverview() {
         {COURSES.map((course, idx) => {
           const meta = META[course.slug as keyof typeof META];
           if (!meta) return null;
-          const { roman, color, tagline, fipeDate } = meta;
+          const { roman, color, tagline, season, fipeSeason } = meta;
 
           return (
             <div key={course.slug} data-panel className="relative flex flex-col justify-center"
@@ -209,11 +244,16 @@ export function PathOverview() {
               <div className="mx-auto w-full max-w-[1400px]">
                 <div className="grid grid-cols-2 gap-5" style={{ minHeight: "calc(100vh - 8rem)" }}>
 
-                  {/* LEFT — light card */}
-                  <div data-anim className="flex flex-col justify-between"
-                    style={{ background: "#f8f8fc", border: "1px solid rgba(0,0,0,0.06)", padding: "3rem 3.5rem" }}>
-                    {/* Top: progress dots */}
-                    <div className="flex items-center gap-1.5 mb-2">
+                  {/* LEFT — light card with tilt */}
+                  <div
+                    data-anim
+                    className="flex flex-col justify-between"
+                    style={{ background: "#f8f8fc", border: "1px solid rgba(0,0,0,0.06)", padding: "3rem 3.5rem", willChange: "transform" }}
+                    onMouseMove={onTiltMove}
+                    onMouseLeave={onTiltLeave}
+                  >
+                    {/* Progress dots */}
+                    <div className="flex items-center gap-1.5">
                       {COURSES.map((_, di) => (
                         <span key={di} className="block"
                           style={{ width: di === idx ? 28 : 8, height: 2, background: di === idx ? color : "rgba(0,0,0,0.15)" }} />
@@ -224,7 +264,6 @@ export function PathOverview() {
                     </div>
 
                     <div>
-                      {/* Roman numeral — full opacity, big */}
                       <div className="font-black leading-none tabular-nums" style={{ fontSize: "clamp(5rem,9vw,10rem)", color, lineHeight: 0.9 }}>
                         {roman}
                       </div>
@@ -238,14 +277,13 @@ export function PathOverview() {
                       <p className="text-[1rem] leading-relaxed" style={{ color: "#444444", marginTop: "0.75rem" }}>{course.objective}</p>
                     </div>
 
-                    {/* Dates */}
-                    <div className="flex flex-wrap gap-2 mt-5">
-                      {course.dates.map((d) => (
-                        <span key={d} className="px-3 py-1 text-[0.78rem] font-bold"
-                          style={{ border: "1px solid rgba(240,146,38,0.3)", color: "#D47B10", background: "rgba(240,146,38,0.06)" }}>
-                          {d}
-                        </span>
-                      ))}
+                    {/* Season tag */}
+                    <div className="flex items-center gap-2 mt-4">
+                      <span className="text-[0.68rem] font-bold tracking-[0.2em] uppercase" style={{ color: "rgba(0,0,0,0.3)" }}>Periodo</span>
+                      <span className="px-3 py-1 text-[0.75rem] font-bold"
+                        style={{ border: "1px solid rgba(240,146,38,0.3)", color: "#C06A0A", background: "rgba(240,146,38,0.06)" }}>
+                        {season}
+                      </span>
                     </div>
                   </div>
 
@@ -253,82 +291,130 @@ export function PathOverview() {
                   <div data-anim className="flex flex-col justify-between"
                     style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: "3rem" }}>
                     <div>
-                      <p className="mb-5 text-[0.68rem] font-black tracking-[0.28em] uppercase text-white/55">
+                      <p className="mb-5 text-[0.68rem] font-black tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.5)" }}>
                         Programma
                       </p>
                       <ul className="space-y-3">
                         {course.curriculum.slice(0, 5).map((item) => (
-                          <li key={item} className="flex items-start gap-3 text-[0.9375rem] text-white/82">
+                          <li key={item} className="flex items-start gap-3 text-[0.9375rem]" style={{ color: "rgba(255,255,255,0.82)" }}>
                             <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
                             {item}
                           </li>
                         ))}
                         {course.curriculum.length > 5 && (
-                          <li className="pl-[18px] text-[0.85rem] text-white/45">
+                          <li className="pl-[18px] text-[0.85rem]" style={{ color: "rgba(255,255,255,0.4)" }}>
                             + {course.curriculum.length - 5} argomenti
                           </li>
                         )}
                       </ul>
                     </div>
-                    <div className="mt-6">
-                      <Button href={`/corsi/${course.slug}`} variant="ghost" size="sm">
+                    <div className="mt-6 space-y-3">
+                      {/* Prominent CTA */}
+                      <a
+                        href={`/corsi/${course.slug}`}
+                        className="block w-full py-4 text-center text-[0.875rem] font-black tracking-[0.18em] uppercase transition-opacity duration-200"
+                        style={{ background: "#F09226", color: "#010015" }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.85"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
+                      >
                         Scopri il programma →
-                      </Button>
-                      <p className="mt-3 text-[0.78rem] text-white/55">
-                        <span style={{ color }}>✦</span>{" "}
-                        Sessione FIPE inclusa — {fipeDate}
+                      </a>
+                      <p className="text-[0.75rem]" style={{ color: "rgba(255,255,255,0.45)" }}>
+                        <span style={{ color }}>✦</span>{" "}Sessione FIPE inclusa — {fipeSeason}
                       </p>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
           );
         })}
 
-        {/* Panel 4 — FIPE */}
+        {/* Panel 4 — FIPE Certificate */}
         <div data-panel className="flex flex-col justify-center"
           style={{ width: "100vw", minHeight: "100vh", flexShrink: 0, padding: "6rem 5%" }}>
           <div className="mx-auto w-full max-w-[1400px]">
             <div className="grid grid-cols-2 items-center gap-16">
 
-              {/* Certificate — light */}
-              <div data-anim style={{ filter: "drop-shadow(0 32px 64px rgba(240,146,38,0.2))" }}>
-                <div className="w-full max-w-[420px] overflow-hidden p-9"
-                  style={{ background: "#ffffff", border: "1px solid rgba(240,146,38,0.3)" }}>
-                  <div className="mb-7 h-px w-full" style={{ background: "linear-gradient(90deg,transparent,#F09226,transparent)" }} />
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center border" style={{ borderColor: "rgba(240,146,38,0.5)" }}>
-                      <span className="text-[0.7rem] font-black" style={{ color: "#F09226" }}>LCT</span>
+              {/* Certificate document */}
+              <div data-anim>
+                <div
+                  className="relative w-full max-w-[440px] overflow-hidden"
+                  style={{
+                    background: "#ffffff",
+                    boxShadow: "0 40px 100px rgba(0,0,0,0.35), 0 0 0 1px rgba(240,146,38,0.12)",
+                    willChange: "transform",
+                  }}
+                  onMouseMove={onTiltMove}
+                  onMouseLeave={onTiltLeave}
+                >
+                  {/* Header bar */}
+                  <div style={{ background: "#020026", padding: "0.9rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                      <div style={{ width: 6, height: 6, background: "#F09226" }} />
+                      <span style={{ fontSize: "0.58rem", fontWeight: 900, letterSpacing: "0.32em", color: "#F09226", textTransform: "uppercase" }}>
+                        Lacertosus Academy
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-[0.7rem] font-bold tracking-[0.2em] uppercase" style={{ color: "#D47B10" }}>Lacertosus Academy</p>
-                      <p className="text-[0.7rem] font-bold tracking-[0.16em] uppercase" style={{ color: "rgba(212,123,16,0.6)" }}>FIPE × LACERTOSUS</p>
+                    <span style={{ fontSize: "0.52rem", color: "rgba(240,146,38,0.5)", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+                      FIPE × LCT
+                    </span>
+                  </div>
+
+                  {/* Body */}
+                  <div style={{ padding: "1.75rem 2rem 1.5rem" }}>
+                    {/* Top rule */}
+                    <div style={{ height: 3, background: "linear-gradient(90deg, #F09226, rgba(240,146,38,0.15))", marginBottom: "1.5rem" }} />
+
+                    <p style={{ fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.3em", color: "#999999", textTransform: "uppercase", marginBottom: "0.3rem" }}>
+                      Si certifica che
+                    </p>
+                    <p style={{ fontSize: "1.25rem", fontWeight: 900, fontStyle: "italic", color: "#F09226", borderBottom: "1px solid rgba(240,146,38,0.18)", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
+                      Nome Cognome
+                    </p>
+
+                    <p style={{ fontSize: "0.78rem", lineHeight: 1.65, color: "#555555", marginBottom: "0.75rem" }}>
+                      ha completato con successo il{" "}
+                      <strong style={{ color: "#111111" }}>Percorso Formativo Lacertosus Academy</strong>
+                      {" "}(CORPUS · VIS · VICTOR) e ottiene il titolo professionale di
+                    </p>
+
+                    <div style={{ background: "rgba(240,146,38,0.05)", border: "1px solid rgba(240,146,38,0.18)", padding: "0.75rem 1rem", marginBottom: "1.5rem" }}>
+                      <p style={{ fontSize: "0.95rem", fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase", color: "#111111", lineHeight: 1.2 }}>
+                        Personal Trainer<br />
+                        <span style={{ color: "#F09226" }}>FIPE × Lacertosus</span>
+                      </p>
+                      <p style={{ fontSize: "0.58rem", color: "#888888", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", marginTop: "0.3rem" }}>
+                        Riconosciuto nel settore fitness italiano
+                      </p>
+                    </div>
+
+                    {/* Signatures */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                      <div>
+                        <div style={{ height: 1, width: 80, background: "rgba(0,0,0,0.18)", marginBottom: "0.3rem" }} />
+                        <p style={{ fontSize: "0.56rem", color: "#aaaaaa", letterSpacing: "0.12em" }}>Direttore Didattico</p>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ height: 1, width: 80, background: "rgba(0,0,0,0.18)", marginBottom: "0.3rem" }} />
+                        <p style={{ fontSize: "0.56rem", color: "#aaaaaa", letterSpacing: "0.12em" }}>Responsabile FIPE</p>
+                      </div>
+                    </div>
+
+                    {/* Bottom divider */}
+                    <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(240,146,38,0.3), transparent)", margin: "1.25rem 0 0.75rem" }} />
+
+                    {/* Footer */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <p style={{ fontSize: "0.52rem", color: "#cccccc", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                        Lacertosus Academy S.r.l.
+                      </p>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: "50%", border: "1.5px solid rgba(240,146,38,0.4)" }}>
+                        <span style={{ fontSize: "0.48rem", fontWeight: 900, color: "#F09226", letterSpacing: "0.05em" }}>FIPE</span>
+                      </div>
                     </div>
                   </div>
-                  <p className="mb-1 text-[0.68rem] font-bold tracking-[0.25em] uppercase" style={{ color: "#888" }}>Certifica che</p>
-                  <div className="mb-4 border-b pb-3" style={{ borderColor: "rgba(240,146,38,0.18)" }}>
-                    <p className="text-[1.1rem] font-black italic" style={{ color: "#F09226" }}>Nome Cognome</p>
-                  </div>
-                  <p className="mb-3 text-[0.8rem] leading-relaxed" style={{ color: "#555" }}>
-                    ha completato il{" "}
-                    <span className="font-semibold" style={{ color: "#111" }}>Percorso Formativo Lacertosus Academy</span>{" "}
-                    e ottiene il titolo di
-                  </p>
-                  <p className="mb-1 text-[0.92rem] font-black uppercase tracking-wide" style={{ color: "#111" }}>
-                    Personal Trainer<br />FIPE × LACERTOSUS
-                  </p>
-                  <p className="text-[0.7rem]" style={{ color: "#888" }}>Riconosciuto nel settore fitness</p>
-                  <div className="mt-7 flex items-end justify-between">
-                    <div>
-                      <div className="mb-1 h-px w-20" style={{ background: "rgba(240,146,38,0.28)" }} />
-                      <p className="text-[0.68rem]" style={{ color: "#bbb" }}>Firma del Direttore</p>
-                    </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border" style={{ borderColor: "rgba(240,146,38,0.4)" }}>
-                      <span className="text-[0.7rem] font-black" style={{ color: "#F09226" }}>FIPE</span>
-                    </div>
-                  </div>
-                  <div className="mt-6 h-px w-full" style={{ background: "linear-gradient(90deg,transparent,#F09226,transparent)" }} />
                 </div>
               </div>
 
@@ -346,7 +432,7 @@ export function PathOverview() {
                       <span className="mt-0.5 shrink-0 text-[0.72rem] font-black" style={{ color: "rgba(240,146,38,0.7)" }}>{item.n}</span>
                       <div>
                         <p className="text-[0.9375rem] font-bold text-white">{item.title}</p>
-                        <p className="mt-0.5 text-[0.875rem] leading-relaxed text-white/65">{item.body}</p>
+                        <p className="mt-0.5 text-[0.875rem] leading-relaxed" style={{ color: "rgba(255,255,255,0.62)" }}>{item.body}</p>
                       </div>
                     </div>
                   ))}
@@ -359,34 +445,45 @@ export function PathOverview() {
                   </span>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── MOBILE ── */}
+      {/* ── MOBILE ──────────────────────────────────────────────────────────── */}
       <div className="relative lg:hidden" style={{ zIndex: 2 }}>
         <div data-mobile-head className="px-[5%] pt-16 pb-6">
           <span className="label-tag mb-3 block">I 3 Blocchi Formativi</span>
           <h2 className="font-black leading-tight tracking-tight text-white" style={{ fontSize: "clamp(2.2rem,8vw,3rem)" }}>
             Il Percorso.
           </h2>
-          <p className="mt-2 text-[0.9375rem] leading-relaxed text-white/65">
+          <p className="mt-2 text-[0.9375rem] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
             9 mesi · 3 blocchi · 1 certificazione
           </p>
         </div>
 
-        <div className="overflow-x-auto pb-6"
-          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", paddingLeft: "5%", paddingRight: "5%", display: "flex", gap: "12px" }}>
-
+        <div
+          className="overflow-x-auto pb-6"
+          style={{
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            display: "flex",
+            gap: "12px",
+            paddingLeft: "5%",
+            paddingRight: "5%",
+            scrollPaddingInlineStart: "5%",
+          }}
+        >
           {COURSES.map((course) => {
             const meta = META[course.slug as keyof typeof META];
             if (!meta) return null;
-            const { roman, color, tagline, fipeDate } = meta;
+            const { roman, color, tagline, season, fipeSeason } = meta;
             return (
-              <div key={course.slug} data-mobile-card className="relative flex shrink-0 flex-col justify-between p-6"
-                style={{ width: "82vw", scrollSnapAlign: "start", background: "#f8f8fc", border: "1px solid rgba(0,0,0,0.07)" }}>
-                {/* Roman numeral — visible */}
+              <div key={course.slug} data-mobile-card
+                className="relative flex shrink-0 flex-col justify-between p-6"
+                style={{ width: "82vw", scrollSnapAlign: "start", scrollSnapStop: "always", background: "#f8f8fc", border: "1px solid rgba(0,0,0,0.07)" }}>
                 <div className="font-black leading-none tabular-nums mb-3" style={{ fontSize: "3.5rem", color }}>
                   {roman}
                 </div>
@@ -406,51 +503,66 @@ export function PathOverview() {
                     ))}
                   </ul>
                 </div>
-                <div className="mt-5">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {course.dates.map((d) => (
-                      <span key={d} className="px-2.5 py-1 text-[0.78rem] font-bold"
-                        style={{ border: "1px solid rgba(240,146,38,0.25)", color: "#D47B10", background: "rgba(240,146,38,0.06)" }}>{d}</span>
-                    ))}
-                  </div>
+                <div className="mt-5 space-y-3">
+                  <span className="inline-block px-2.5 py-1 text-[0.75rem] font-bold"
+                    style={{ border: "1px solid rgba(240,146,38,0.25)", color: "#C06A0A", background: "rgba(240,146,38,0.06)" }}>
+                    {season}
+                  </span>
                   <p className="text-[0.75rem]" style={{ color: "#888" }}>
-                    <span style={{ color: "#F09226" }}>✦</span> Sessione FIPE — {fipeDate}
+                    <span style={{ color: "#F09226" }}>✦</span> FIPE — {fipeSeason}
                   </p>
+                  <a
+                    href={`/corsi/${course.slug}`}
+                    className="block w-full py-3 text-center text-[0.8rem] font-black tracking-[0.18em] uppercase"
+                    style={{ background: "#F09226", color: "#010015" }}
+                  >
+                    Scopri il programma →
+                  </a>
                 </div>
               </div>
             );
           })}
 
-          {/* FIPE card mobile — light */}
-          <div data-mobile-card className="shrink-0 flex flex-col justify-between p-6"
-            style={{ width: "82vw", scrollSnapAlign: "start", background: "#ffffff", border: "1px solid rgba(240,146,38,0.25)" }}>
-            <div>
-              <p className="mb-2 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: "#D47B10" }}>
-                Certificazione Finale
-              </p>
-              <h3 className="text-[1.75rem] font-black leading-tight" style={{ color: "#111" }}>FIPE × LACERTOSUS</h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed" style={{ color: "#444" }}>
-                Titolo riconosciuto dal giorno del conseguimento.
-              </p>
-              <div className="mt-5 space-y-3">
-                {CERT_ITEMS.map((item) => (
-                  <div key={item.n} className="flex gap-3">
-                    <span className="shrink-0 text-[0.7rem] font-black" style={{ color: "#F09226" }}>{item.n}</span>
-                    <p className="text-[0.875rem]" style={{ color: "#444" }}>
-                      <span className="font-bold" style={{ color: "#111" }}>{item.title}</span> — {item.body}
-                    </p>
-                  </div>
-                ))}
+          {/* FIPE card mobile — document style */}
+          <div data-mobile-card
+            className="shrink-0 flex flex-col overflow-hidden"
+            style={{ width: "82vw", scrollSnapAlign: "start", scrollSnapStop: "always", background: "#ffffff", border: "1px solid rgba(240,146,38,0.2)" }}>
+            {/* Doc header */}
+            <div style={{ background: "#020026", padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+              <span style={{ fontSize: "0.52rem", fontWeight: 900, letterSpacing: "0.28em", color: "#F09226", textTransform: "uppercase" }}>Lacertosus Academy</span>
+              <span style={{ fontSize: "0.5rem", color: "rgba(240,146,38,0.5)", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase" }}>FIPE</span>
+            </div>
+            <div className="flex flex-col justify-between flex-1 p-5">
+              <div>
+                <div style={{ height: 2, background: "linear-gradient(90deg, #F09226, rgba(240,146,38,0.15))", marginBottom: "1rem" }} />
+                <p className="mb-1 text-[0.62rem] font-bold tracking-[0.28em] uppercase" style={{ color: "#999" }}>Certificazione Finale</p>
+                <h3 className="text-[1.75rem] font-black leading-tight" style={{ color: "#111" }}>FIPE × LACERTOSUS</h3>
+                <p className="mt-2 text-[0.9375rem] leading-relaxed" style={{ color: "#444" }}>
+                  Titolo riconosciuto dal giorno del conseguimento.
+                </p>
+                <div className="mt-5 space-y-3">
+                  {CERT_ITEMS.map((item) => (
+                    <div key={item.n} className="flex gap-3">
+                      <span className="shrink-0 text-[0.7rem] font-black" style={{ color: "#F09226" }}>{item.n}</span>
+                      <p className="text-[0.875rem]" style={{ color: "#444" }}>
+                        <span className="font-bold" style={{ color: "#111" }}>{item.title}</span> — {item.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-5 inline-flex items-center gap-2 border px-4 py-2.5"
+                style={{ borderColor: "rgba(240,146,38,0.3)", background: "rgba(240,146,38,0.06)" }}>
+                <span style={{ color: "#F09226" }}>✦</span>
+                <span className="text-[0.72rem] font-bold tracking-wider uppercase" style={{ color: "#C06A0A" }}>
+                  Inclusa nel percorso
+                </span>
               </div>
             </div>
-            <div className="mt-6 inline-flex items-center gap-2 border px-4 py-2.5"
-              style={{ borderColor: "rgba(240,146,38,0.3)", background: "rgba(240,146,38,0.06)" }}>
-              <span style={{ color: "#F09226" }}>✦</span>
-              <span className="text-[0.72rem] font-bold tracking-wider uppercase" style={{ color: "#D47B10" }}>
-                Inclusa nel percorso
-              </span>
-            </div>
           </div>
+
+          {/* Trailing spacer so last card snaps cleanly */}
+          <div style={{ width: "5%", flexShrink: 0 }} aria-hidden />
         </div>
 
         <div className="flex justify-center gap-1.5 pb-12">
