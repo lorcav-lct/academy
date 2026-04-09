@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { SectionContainer } from "@/components/shared/section-container";
+import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
 import { COURSES, FIPE_SESSIONS } from "@/lib/constants/courses";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
@@ -89,7 +89,13 @@ ITEMS.forEach((item, idx) => {
 
 // ── Block panel ───────────────────────────────────────────────────────────────
 
-function BlockPanel({ item }: { item: BlockItem }) {
+function BlockPanel({
+  item,
+  onOpenBlock,
+}: {
+  item: BlockItem;
+  onOpenBlock: (slug: BlockSlug) => void;
+}) {
   return (
     <div className="grid gap-8 md:gap-12 md:grid-cols-[45fr_55fr]">
       {/* Left */}
@@ -132,13 +138,13 @@ function BlockPanel({ item }: { item: BlockItem }) {
           ))}
         </div>
 
-        <Link
-          href={`/corsi/${item.slug}`}
-          className="group inline-flex items-center gap-3 text-[0.85rem] font-bold text-academy-orange transition-all duration-300 hover:gap-5 w-fit"
+        <button
+          onClick={() => onOpenBlock(item.slug as BlockSlug)}
+          className="group inline-flex items-center gap-3 text-[0.85rem] font-bold text-academy-orange transition-all duration-300 hover:gap-5 w-fit focus-visible:outline-none"
         >
           Scopri il Blocco
           <span className="h-px w-8 bg-current transition-all duration-300 group-hover:w-12" />
-        </Link>
+        </button>
       </div>
 
       {/* Right — curriculum */}
@@ -245,6 +251,7 @@ function FipePanel({ item }: { item: FipeItem }) {
 
 export function PercorsoTimeline() {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [openBlock, setOpenBlock] = useState<BlockSlug | null>(null);
   const touchStartX = useRef<number>(0);
 
   const goTo = useCallback(
@@ -303,213 +310,226 @@ export function PercorsoTimeline() {
   }, [activeIdx]);
 
   return (
-    <SectionContainer id="calendario" className="themed-section">
-      {/* ── Section header ─────────────────────────────────────────── */}
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
-        className="mb-14 text-center"
-      >
-        <motion.span variants={fadeUp} className="label-tag mb-4 block">
-          2026 / 2027
-        </motion.span>
-        <motion.h2
-          variants={fadeUp}
-          className="text-3xl font-black tracking-tight sm:text-4xl mb-4 text-academy-gray-100"
+    <>
+      <SectionContainer id="calendario" className="themed-section">
+        {/* ── Section header ─────────────────────────────────────────── */}
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="mb-14 text-center"
         >
-          Calendario Formativo
-        </motion.h2>
-        <motion.p
-          variants={fadeUp}
-          className="mx-auto max-w-xl text-[0.9rem] text-academy-gray-400"
-        >
-          9 mesi di formazione strutturata. Ogni blocco si costruisce sulle
-          fondamenta del precedente.
-        </motion.p>
-      </motion.div>
+          <motion.span variants={fadeUp} className="label-tag mb-4 block">
+            2026 / 2027
+          </motion.span>
+          <motion.h2
+            variants={fadeUp}
+            className="text-3xl font-black tracking-tight sm:text-4xl mb-4 text-academy-gray-100"
+          >
+            Calendario Formativo
+          </motion.h2>
+          <motion.p
+            variants={fadeUp}
+            className="mx-auto max-w-xl text-[0.9rem] text-academy-gray-400"
+          >
+            9 mesi di formazione strutturata. Ogni blocco si costruisce sulle
+            fondamenta del precedente.
+          </motion.p>
+        </motion.div>
 
-      {/* ── Month progress strip ────────────────────────────────────── */}
-      <div className="mb-10 overflow-x-auto -mx-2 px-2">
-        <div className="flex min-w-[480px]">
-          {MONTHS.map((month, mi) => {
-            const itemIdx = MONTH_TO_ITEM[mi];
-            const isActive = activeMonths.includes(mi);
-            const activeColor = "rgba(240,146,38,0.9)";
-            const activeTextColor = "#F09226";
+        {/* ── Month progress strip ────────────────────────────────────── */}
+        <div className="mb-10 overflow-x-auto -mx-2 px-2">
+          <div className="flex min-w-[480px]">
+            {MONTHS.map((month, mi) => {
+              const itemIdx = MONTH_TO_ITEM[mi];
+              const isActive = activeMonths.includes(mi);
+              const activeColor = "rgba(240,146,38,0.9)";
+              const activeTextColor = "#F09226";
+
+              return (
+                <button
+                  key={month}
+                  onClick={() => goTo(itemIdx)}
+                  className="flex-1 flex flex-col items-center gap-2 py-3 transition-all duration-200 focus-visible:outline-none"
+                  aria-label={`Vai a ${ITEMS[itemIdx]?.title ?? month}`}
+                >
+                  {/* Bar */}
+                  <div
+                    className={`w-full h-[3px] transition-all duration-300${isActive ? "" : " cal-month-bar"}`}
+                    style={isActive ? { background: activeColor } : undefined}
+                  />
+                  {/* Label */}
+                  <span
+                    className={`text-[0.61rem] font-bold tracking-[0.2em] transition-colors duration-200${isActive ? "" : " cal-month-text"}`}
+                    style={isActive ? { color: activeTextColor } : undefined}
+                  >
+                    {month}
+                  </span>
+                  {/* Dot */}
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full transition-all duration-300${isActive ? "" : " cal-month-dot"}`}
+                    style={
+                      isActive
+                        ? {
+                            background: activeTextColor,
+                            transform: "scale(1.4)",
+                          }
+                        : undefined
+                    }
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Event selector tabs ─────────────────────────────────────── */}
+        <div
+          className="flex gap-2 overflow-x-auto -mx-2 px-2 pb-1 mb-6 scroll-smooth"
+          role="tablist"
+          aria-label="Seleziona evento formativo"
+        >
+          {ITEMS.map((item, idx) => {
+            const isActive = idx === activeIdx;
+            const label =
+              item.type === "block"
+                ? item.title
+                : (item as FipeItem).displayTitle;
+            const sublabel =
+              item.type === "block"
+                ? `Blocco ${String((item as BlockItem).blockNumber).padStart(2, "0")}`
+                : "FIPE";
+            const month = MONTHS[item.monthIndices[0]];
 
             return (
               <button
-                key={month}
-                onClick={() => goTo(itemIdx)}
-                className="flex-1 flex flex-col items-center gap-2 py-3 transition-all duration-200 focus-visible:outline-none"
-                aria-label={`Vai a ${ITEMS[itemIdx]?.title ?? month}`}
+                key={item.slug}
+                ref={isActive ? activeTabRef : null}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => goTo(idx)}
+                className={`shrink-0 flex flex-col items-start gap-1 px-5 py-4 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange/50${isActive ? "" : " cal-tab"}`}
+                style={
+                  isActive
+                    ? {
+                        border: "1px solid rgba(240,146,38,0.45)",
+                        background: "rgba(240,146,38,0.07)",
+                        minWidth: "118px",
+                      }
+                    : { minWidth: "118px" }
+                }
               >
-                {/* Bar */}
-                <div
-                  className={`w-full h-[3px] transition-all duration-300${isActive ? "" : " cal-month-bar"}`}
-                  style={isActive ? { background: activeColor } : undefined}
-                />
-                {/* Label */}
                 <span
-                  className={`text-[0.61rem] font-bold tracking-[0.2em] transition-colors duration-200${isActive ? "" : " cal-month-text"}`}
-                  style={isActive ? { color: activeTextColor } : undefined}
+                  className="text-[0.54rem] font-black tracking-[0.3em] uppercase"
+                  style={{
+                    color: isActive ? "rgba(240,146,38,0.7)" : undefined,
+                  }}
+                >
+                  {sublabel}
+                </span>
+                <span
+                  className="text-[0.88rem] font-black tracking-tight leading-tight"
+                  style={{ color: isActive ? "#F09226" : undefined }}
+                >
+                  {label}
+                </span>
+                <span
+                  className="text-[0.62rem] font-medium"
+                  style={{
+                    color: isActive ? "rgba(240,146,38,0.5)" : undefined,
+                  }}
                 >
                   {month}
                 </span>
-                {/* Dot */}
-                <div
-                  className={`h-1.5 w-1.5 rounded-full transition-all duration-300${isActive ? "" : " cal-month-dot"}`}
-                  style={
-                    isActive
-                      ? {
-                          background: activeTextColor,
-                          transform: "scale(1.4)",
-                        }
-                      : undefined
-                  }
-                />
               </button>
             );
           })}
         </div>
-      </div>
 
-      {/* ── Event selector tabs ─────────────────────────────────────── */}
-      <div
-        className="flex gap-2 overflow-x-auto -mx-2 px-2 pb-1 mb-6 scroll-smooth"
-        role="tablist"
-        aria-label="Seleziona evento formativo"
-      >
-        {ITEMS.map((item, idx) => {
-          const isActive = idx === activeIdx;
-          const label =
-            item.type === "block"
-              ? item.title
-              : (item as FipeItem).displayTitle;
-          const sublabel =
-            item.type === "block"
-              ? `Blocco ${String((item as BlockItem).blockNumber).padStart(2, "0")}`
-              : "FIPE";
-          const month = MONTHS[item.monthIndices[0]];
-
-          return (
-            <button
-              key={item.slug}
-              ref={isActive ? activeTabRef : null}
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => goTo(idx)}
-              className={`shrink-0 flex flex-col items-start gap-1 px-5 py-4 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange/50${isActive ? "" : " cal-tab"}`}
-              style={
-                isActive
-                  ? {
-                      border: "1px solid rgba(240,146,38,0.45)",
-                      background: "rgba(240,146,38,0.07)",
-                      minWidth: "118px",
-                    }
-                  : { minWidth: "118px" }
-              }
-            >
-              <span
-                className="text-[0.54rem] font-black tracking-[0.3em] uppercase"
-                style={{ color: isActive ? "rgba(240,146,38,0.7)" : undefined }}
-              >
-                {sublabel}
-              </span>
-              <span
-                className="text-[0.88rem] font-black tracking-tight leading-tight"
-                style={{ color: isActive ? "#F09226" : undefined }}
-              >
-                {label}
-              </span>
-              <span
-                className="text-[0.62rem] font-medium"
-                style={{ color: isActive ? "rgba(240,146,38,0.5)" : undefined }}
-              >
-                {month}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Content panel ───────────────────────────────────────────── */}
-      <div>
-        {/*
+        {/* ── Content panel ───────────────────────────────────────────── */}
+        <div>
+          {/*
           Grid-stacking: tutti i pannelli sono nel DOM contemporaneamente
           nella stessa cella della griglia → l'altezza è sempre quella del
           pannello più alto. Solo quello attivo è visibile (opacity 1).
         */}
-        <div
-          className="cal-panel p-8 md:p-10 lg:p-12"
-          role="tabpanel"
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-          style={{ display: "grid", gridTemplateColumns: "1fr" }}
-        >
-          {ITEMS.map((item, idx) => {
-            const isActive = idx === activeIdx;
-            return (
-              <motion.div
-                key={item.slug}
-                style={{
-                  gridArea: "1 / 1",
-                  pointerEvents: isActive ? "auto" : "none",
-                }}
-                animate={{ opacity: isActive ? 1 : 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                aria-hidden={!isActive}
-              >
-                {item.type === "block" ? (
-                  <BlockPanel item={item as BlockItem} />
-                ) : (
-                  <FipePanel item={item as FipeItem} />
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Navigation row */}
-        <div className="flex items-center justify-between mt-5 px-1">
-          <button
-            onClick={prev}
-            disabled={activeIdx === 0}
-            className="cal-nav-btn flex items-center gap-2 text-[0.8rem] font-bold tracking-wide transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed focus-visible:outline-none"
-            aria-label="Evento precedente"
+          <div
+            className="cal-panel p-8 md:p-10 lg:p-12"
+            role="tabpanel"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            style={{ display: "grid", gridTemplateColumns: "1fr" }}
           >
-            ← Precedente
-          </button>
-
-          {/* Dot progress */}
-          <div className="flex items-center gap-2" aria-hidden>
-            {ITEMS.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => goTo(idx)}
-                className={`h-1.5 transition-all duration-300 focus-visible:outline-none${idx === activeIdx ? "" : " cal-dot"}`}
-                style={{
-                  width: idx === activeIdx ? "22px" : "6px",
-                  background: idx === activeIdx ? "#F09226" : undefined,
-                  borderRadius: "1px",
-                }}
-                aria-label={`Vai all'evento ${idx + 1}`}
-              />
-            ))}
+            {ITEMS.map((item, idx) => {
+              const isActive = idx === activeIdx;
+              return (
+                <motion.div
+                  key={item.slug}
+                  style={{
+                    gridArea: "1 / 1",
+                    pointerEvents: isActive ? "auto" : "none",
+                  }}
+                  animate={{ opacity: isActive ? 1 : 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  aria-hidden={!isActive}
+                >
+                  {item.type === "block" ? (
+                    <BlockPanel
+                      item={item as BlockItem}
+                      onOpenBlock={setOpenBlock}
+                    />
+                  ) : (
+                    <FipePanel item={item as FipeItem} />
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
 
-          <button
-            onClick={next}
-            disabled={activeIdx === ITEMS.length - 1}
-            className="cal-nav-btn flex items-center gap-2 text-[0.8rem] font-bold tracking-wide transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed focus-visible:outline-none"
-            aria-label="Evento successivo"
-          >
-            Successivo →
-          </button>
+          {/* Navigation row */}
+          <div className="flex items-center justify-between mt-5 px-1">
+            <button
+              onClick={prev}
+              disabled={activeIdx === 0}
+              className="cal-nav-btn flex items-center gap-2 text-[0.8rem] font-bold tracking-wide transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed focus-visible:outline-none"
+              aria-label="Evento precedente"
+            >
+              ← Precedente
+            </button>
+
+            {/* Dot progress */}
+            <div className="flex items-center gap-2" aria-hidden>
+              {ITEMS.map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goTo(idx)}
+                  className={`h-1.5 transition-all duration-300 focus-visible:outline-none${idx === activeIdx ? "" : " cal-dot"}`}
+                  style={{
+                    width: idx === activeIdx ? "22px" : "6px",
+                    background: idx === activeIdx ? "#F09226" : undefined,
+                    borderRadius: "1px",
+                  }}
+                  aria-label={`Vai all'evento ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={next}
+              disabled={activeIdx === ITEMS.length - 1}
+              className="cal-nav-btn flex items-center gap-2 text-[0.8rem] font-bold tracking-wide transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed focus-visible:outline-none"
+              aria-label="Evento successivo"
+            >
+              Successivo →
+            </button>
+          </div>
         </div>
-      </div>
-    </SectionContainer>
+      </SectionContainer>
+
+      {openBlock && (
+        <BlockModal slug={openBlock} onClose={() => setOpenBlock(null)} />
+      )}
+    </>
   );
 }
