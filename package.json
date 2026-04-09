@@ -13,6 +13,8 @@
     "@stripe/stripe-js": "^5.5.0",
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.49.0",
+    "@types/three": "^0.183.1",
+    "@vimeo/player": "^2.30.3",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "clsx": "^2.1.1",
@@ -27,6 +29,7 @@
     "resend": "^4.1.0",
     "stripe": "^17.7.0",
     "tailwind-merge": "^3.0.0",
+    "three": "^0.183.2",
     "zod": "^3.24.0"
   },
   "devDependencies": {

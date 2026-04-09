@@ -6,9 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { COURSES } from "@/lib/constants/courses";
 
 const META = {
-  corpus: { roman: "I",   color: "#F09226", tagline: "Le Fondamenta", season: "Autunno 2025",     fipeSeason: "Novembre" },
-  vis:    { roman: "II",  color: "#F09226", tagline: "La Forza",      season: "Inverno 2025/26",  fipeSeason: "Febbraio" },
-  victor: { roman: "III", color: "#F09226", tagline: "La Vittoria",   season: "Primavera 2026",   fipeSeason: "Maggio"   },
+  corpus: { roman: "I",   color: "#F09226", tagline: "Le Fondamenta", season: "Autunno 2026",     fipeSeason: "Novembre" },
+  vis:    { roman: "II",  color: "#F09226", tagline: "La Forza",      season: "Inverno 2026/27",  fipeSeason: "Febbraio" },
+  victor: { roman: "III", color: "#F09226", tagline: "La Vittoria",   season: "Primavera 2027",   fipeSeason: "Maggio"   },
 } as const;
 
 const CERT_ITEMS = [
@@ -216,10 +216,10 @@ export function PathOverview() {
               duration: { min: 0.3, max: 0.55 },
               ease: "power2.inOut",
             },
-            onEnter:     () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
-            onLeave:     () => { if (header) gsap.to(header, { yPercent: 0,    opacity: 1, duration: 0.5,  ease: "power3.out"   }); },
-            onEnterBack: () => { if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
-            onLeaveBack: () => { if (header) gsap.to(header, { yPercent: 0,    opacity: 1, duration: 0.5,  ease: "power3.out"   }); },
+            onEnter:     () => { document.documentElement.dataset.pathActive = "1"; if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
+            onLeave:     () => { delete document.documentElement.dataset.pathActive; if (header) gsap.to(header, { yPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out" }); },
+            onEnterBack: () => { document.documentElement.dataset.pathActive = "1"; if (header) gsap.to(header, { yPercent: -110, opacity: 0, duration: 0.45, ease: "power3.inOut" }); },
+            onLeaveBack: () => { delete document.documentElement.dataset.pathActive; if (header) gsap.to(header, { yPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out" }); },
             onUpdate(self) {
               if (arrowRef.current) arrowRef.current.style.opacity = self.progress > 0.05 ? "0" : "1";
               if (progressRef.current) progressRef.current.style.transform = `scaleX(${self.progress})`;
@@ -323,7 +323,7 @@ export function PathOverview() {
 
               {/* LEFT — text */}
               <div>
-                <span data-anim className="label-tag mb-5 block">I 3 Blocchi Formativi — 2025/26</span>
+                <span data-anim className="label-tag mb-5 block">I 3 Blocchi Formativi — 2026/27</span>
                 <h2 data-anim className="font-black leading-[0.95] tracking-tight text-white"
                   style={{ fontSize: "clamp(3.5rem,6.5vw,7rem)" }}>
                   Il<br /><span style={{ color: "#F09226" }}>Percorso.</span>

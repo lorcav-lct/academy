@@ -18,7 +18,15 @@ const NAV_LINKS = [
 ];
 
 /* ─── User Avatar + Dropdown ─── */
-function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => void; isDark: boolean }) {
+function UserAvatar({
+  user,
+  onLogout,
+  isDark,
+}: {
+  user: User;
+  onLogout: () => void;
+  isDark: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -54,7 +62,7 @@ function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => vo
           className={cn(
             "h-3 w-3 transition-transform duration-200",
             isDark ? "text-academy-gray-300" : "text-[#666]",
-            open && "rotate-180"
+            open && "rotate-180",
           )}
           viewBox="0 0 12 12"
           fill="none"
@@ -78,14 +86,29 @@ function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => vo
             : "border border-black/8 bg-white/97",
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-2 opacity-0"
+            : "pointer-events-none translate-y-2 opacity-0",
         )}
       >
-        <div className={cn("px-4 py-3", isDark ? "border-b border-white/5" : "border-b border-black/6")}>
-          <p className={cn("text-[12px] font-semibold tracking-[0.2em] uppercase", isDark ? "text-academy-gray-300" : "text-[#666]")}>
+        <div
+          className={cn(
+            "px-4 py-3",
+            isDark ? "border-b border-white/5" : "border-b border-black/6",
+          )}
+        >
+          <p
+            className={cn(
+              "text-[12px] font-semibold tracking-[0.2em] uppercase",
+              isDark ? "text-academy-gray-300" : "text-[#666]",
+            )}
+          >
             Area Riservata
           </p>
-          <p className={cn("mt-0.5 truncate text-sm font-medium", isDark ? "text-academy-gray-200" : "text-[#222]")}>
+          <p
+            className={cn(
+              "mt-0.5 truncate text-sm font-medium",
+              isDark ? "text-academy-gray-200" : "text-[#222]",
+            )}
+          >
             {user.email}
           </p>
         </div>
@@ -101,14 +124,19 @@ function UserAvatar({ user, onLogout, isDark }: { user: User; onLogout: () => vo
               onClick={() => setOpen(false)}
               className={cn(
                 "block px-4 py-2.5 text-sm transition-colors hover:bg-academy-orange/10 hover:text-academy-orange",
-                isDark ? "text-academy-gray-300" : "text-[#444]"
+                isDark ? "text-academy-gray-300" : "text-[#444]",
               )}
             >
               {label}
             </Link>
           ))}
         </div>
-        <div className={cn("py-1", isDark ? "border-t border-white/5" : "border-t border-black/6")}>
+        <div
+          className={cn(
+            "py-1",
+            isDark ? "border-t border-white/5" : "border-t border-black/6",
+          )}
+        >
           <button
             onClick={onLogout}
             className="w-full px-4 py-2.5 text-left text-sm text-red-400/70 transition-colors hover:bg-red-400/8 hover:text-red-400"
@@ -144,17 +172,65 @@ export function Navbar() {
       gsap.fromTo(
         headerRef.current,
         { y: -90, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.1, ease: "expo.out", delay: 0.15 }
+        { y: 0, opacity: 1, duration: 1.1, ease: "expo.out", delay: 0.15 },
       );
     });
     return () => ctx.revert();
   }, []);
 
-  /* ── Scroll ── */
+  /* ── Scroll: backdrop + hide-on-down / show-on-up ── */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    let lastY = window.scrollY;
+    let ticking = false;
+    // Wait for entrance animation to finish before enabling hide/show
+    let ready = false;
+    const readyTimer = setTimeout(() => {
+      ready = true;
+    }, 1300);
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setScrolled(y > 30);
+
+        if (ready && !document.documentElement.dataset.pathActive) {
+          const header = headerRef.current;
+          if (y < 80) {
+            gsap.to(header, {
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.38,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          } else if (y > lastY + 4) {
+            gsap.to(header, {
+              yPercent: -110,
+              duration: 0.42,
+              ease: "power3.inOut",
+              overwrite: "auto",
+            });
+          } else if (y < lastY - 4) {
+            gsap.to(header, {
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.38,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          }
+        }
+        lastY = y;
+        ticking = false;
+      });
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      clearTimeout(readyTimer);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   /* ── Auth ── */
@@ -164,7 +240,7 @@ export function Navbar() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_e, session) =>
-      setUser(session?.user ?? null)
+      setUser(session?.user ?? null),
     );
     return () => subscription.unsubscribe();
   }, []);
@@ -181,16 +257,21 @@ export function Navbar() {
     const items = overlay.querySelectorAll<HTMLElement>(".nav-overlay-item");
     gsap.set(items, { x: -50, opacity: 0 });
 
-    gsap.timeline({ onComplete: () => setIsAnimating(false) })
+    gsap
+      .timeline({ onComplete: () => setIsAnimating(false) })
       .fromTo(
         overlay,
         { clipPath: "circle(0% at 93% 4%)" },
-        { clipPath: "circle(150% at 93% 4%)", duration: 0.75, ease: "expo.inOut" }
+        {
+          clipPath: "circle(150% at 93% 4%)",
+          duration: 0.75,
+          ease: "expo.inOut",
+        },
       )
       .to(
         items,
         { x: 0, opacity: 1, stagger: 0.07, duration: 0.55, ease: "expo.out" },
-        "-=0.35"
+        "-=0.35",
       );
   }
 
@@ -204,12 +285,13 @@ export function Navbar() {
 
     const items = overlay.querySelectorAll<HTMLElement>(".nav-overlay-item");
 
-    gsap.timeline({
-      onComplete: () => {
-        setMobileOpen(false);
-        setIsAnimating(false);
-      },
-    })
+    gsap
+      .timeline({
+        onComplete: () => {
+          setMobileOpen(false);
+          setIsAnimating(false);
+        },
+      })
       .to(items, {
         x: -30,
         opacity: 0,
@@ -220,7 +302,7 @@ export function Navbar() {
       .to(
         overlay,
         { clipPath: "circle(0% at 93% 4%)", duration: 0.6, ease: "expo.inOut" },
-        "-=0.1"
+        "-=0.1",
       );
   }
 
@@ -260,19 +342,25 @@ export function Navbar() {
         style={{ opacity: 0 }}
         className={cn(
           "fixed top-0 left-0 right-0 z-[60] transition-colors duration-500",
-          scrolled ? "navbar-scrolled-bg" : "bg-transparent"
+          scrolled ? "navbar-scrolled-bg" : "bg-transparent",
         )}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-[5%] py-5 md:px-10">
-
           {/* Logo + ThemeToggle */}
           <div className="flex items-center gap-4 shrink-0">
             <Link href="/" className="group flex items-center gap-3">
               <div className="relative flex h-10 w-10 items-center justify-center border border-academy-orange/50 bg-academy-orange/10 transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20 group-hover:shadow-[0_0_24px_rgba(240,146,38,0.25)]">
-                <span className="text-lg font-black text-academy-orange">L</span>
+                <span className="text-lg font-black text-academy-orange">
+                  L
+                </span>
               </div>
               <div className="hidden sm:flex sm:flex-col leading-none">
-                <span className={cn("text-[12px] font-black tracking-[0.22em] uppercase transition-colors duration-300", isDark ? "text-academy-gray-100" : "text-[#111]")}>
+                <span
+                  className={cn(
+                    "text-[12px] font-black tracking-[0.22em] uppercase transition-colors duration-300",
+                    isDark ? "text-academy-gray-100" : "text-[#111]",
+                  )}
+                >
                   Lacertosus
                 </span>
                 <span className="text-[12px] font-light tracking-[0.22em] text-academy-orange uppercase">
@@ -286,7 +374,7 @@ export function Navbar() {
           {/* Desktop links */}
           <div
             ref={linksContainerRef}
-            className="relative hidden items-center gap-10 md:flex"
+            className="relative hidden items-center gap-10 min-[981px]:flex"
             onMouseLeave={handleLinksLeave}
           >
             <span
@@ -309,7 +397,7 @@ export function Navbar() {
                       ? "text-academy-orange"
                       : isDark
                         ? "text-academy-gray-300 hover:text-academy-orange"
-                        : "text-[#444] hover:text-academy-orange"
+                        : "text-[#444] hover:text-academy-orange",
                   )}
                 >
                   <span
@@ -319,7 +407,7 @@ export function Navbar() {
                         ? "text-academy-orange"
                         : isDark
                           ? "text-academy-gray-400 group-hover:text-academy-orange"
-                          : "text-[#888] group-hover:text-academy-orange"
+                          : "text-[#888] group-hover:text-academy-orange",
                     )}
                   >
                     {link.num}
@@ -333,7 +421,7 @@ export function Navbar() {
           </div>
 
           {/* Desktop right */}
-          <div className="hidden items-center gap-5 md:flex shrink-0">
+          <div className="hidden items-center gap-5 min-[981px]:flex shrink-0">
             {user ? (
               <UserAvatar user={user} onLogout={handleLogout} isDark={isDark} />
             ) : (
@@ -342,7 +430,9 @@ export function Navbar() {
                   href="/auth/login"
                   className={cn(
                     "text-sm font-medium tracking-wider uppercase transition-colors",
-                    isDark ? "text-academy-gray-400 hover:text-academy-gray-100" : "text-[#555] hover:text-[#111]"
+                    isDark
+                      ? "text-academy-gray-400 hover:text-academy-gray-100"
+                      : "text-[#555] hover:text-[#111]",
                   )}
                 >
                   Accedi
@@ -362,12 +452,12 @@ export function Navbar() {
           <button
             onClick={mobileOpen ? closeMenu : openMenu}
             className={cn(
-              "flex items-center gap-2 px-3 py-2 md:hidden transition-all duration-150 active:scale-95",
+              "flex items-center gap-2 px-3 py-2 min-[981px]:hidden transition-all duration-150 active:scale-95",
               mobileOpen
                 ? "border border-red-400/50 hover:border-red-400/80"
                 : isDark
                   ? "border border-white/20 hover:border-academy-orange/60"
-                  : "border border-black/15 hover:border-academy-orange/50"
+                  : "border border-black/15 hover:border-academy-orange/50",
             )}
             aria-label={mobileOpen ? "Chiudi menu" : "Apri menu"}
           >
@@ -375,7 +465,12 @@ export function Navbar() {
               <>
                 {/* X icon */}
                 <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
-                  <path d="M1.5 1.5l11 11M12.5 1.5l-11 11" stroke="#f87171" strokeWidth="2" strokeLinecap="round" />
+                  <path
+                    d="M1.5 1.5l11 11M12.5 1.5l-11 11"
+                    stroke="#f87171"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 <span className="text-[0.58rem] font-black tracking-[0.22em] uppercase text-red-400">
                   Chiudi
@@ -385,19 +480,49 @@ export function Navbar() {
               <>
                 {/* 2×2 bento grid icon */}
                 <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
-                  <rect x="0.5" y="0.5" width="5.5" height="5.5" rx="0.5"
-                    fill={isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"} />
-                  <rect x="8" y="0.5" width="5.5" height="5.5" rx="0.5"
-                    fill="rgba(240,146,38,0.8)" />
-                  <rect x="0.5" y="8" width="5.5" height="5.5" rx="0.5"
-                    fill="rgba(240,146,38,0.8)" />
-                  <rect x="8" y="8" width="5.5" height="5.5" rx="0.5"
-                    fill={isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"} />
+                  <rect
+                    x="0.5"
+                    y="0.5"
+                    width="5.5"
+                    height="5.5"
+                    rx="0.5"
+                    fill={
+                      isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"
+                    }
+                  />
+                  <rect
+                    x="8"
+                    y="0.5"
+                    width="5.5"
+                    height="5.5"
+                    rx="0.5"
+                    fill="rgba(240,146,38,0.8)"
+                  />
+                  <rect
+                    x="0.5"
+                    y="8"
+                    width="5.5"
+                    height="5.5"
+                    rx="0.5"
+                    fill="rgba(240,146,38,0.8)"
+                  />
+                  <rect
+                    x="8"
+                    y="8"
+                    width="5.5"
+                    height="5.5"
+                    rx="0.5"
+                    fill={
+                      isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"
+                    }
+                  />
                 </svg>
-                <span className={cn(
-                  "text-[0.58rem] font-black tracking-[0.22em] uppercase",
-                  isDark ? "text-academy-gray-300" : "text-[#444]"
-                )}>
+                <span
+                  className={cn(
+                    "text-[0.58rem] font-black tracking-[0.22em] uppercase",
+                    isDark ? "text-academy-gray-300" : "text-[#444]",
+                  )}
+                >
                   Menu
                 </span>
               </>
@@ -411,9 +536,9 @@ export function Navbar() {
         ref={overlayRef}
         aria-hidden={!mobileOpen}
         className={cn(
-          "fixed inset-0 z-[55] md:hidden",
+          "fixed inset-0 z-[55] min-[981px]:hidden",
           isDark ? "bg-academy-darker" : "bg-white",
-          !mobileOpen && "pointer-events-none"
+          !mobileOpen && "pointer-events-none",
         )}
         style={{ clipPath: "circle(0% at 93% 4%)" }}
       >
@@ -422,8 +547,18 @@ export function Navbar() {
           <div className="absolute left-0 bottom-0 h-[30vh] w-[30vw] bg-academy-orange/[0.02] blur-[120px]" />
         </div>
 
-        <div className={cn("absolute left-8 top-8 h-8 w-8 border-l border-t", isDark ? "border-academy-orange/20" : "border-academy-orange/30")} />
-        <div className={cn("absolute right-8 bottom-8 h-8 w-8 border-r border-b", isDark ? "border-academy-orange/20" : "border-academy-orange/30")} />
+        <div
+          className={cn(
+            "absolute left-8 top-8 h-8 w-8 border-l border-t",
+            isDark ? "border-academy-orange/20" : "border-academy-orange/30",
+          )}
+        />
+        <div
+          className={cn(
+            "absolute right-8 bottom-8 h-8 w-8 border-r border-b",
+            isDark ? "border-academy-orange/20" : "border-academy-orange/30",
+          )}
+        />
 
         <div className="relative flex h-full flex-col justify-between px-[8%] pb-14 pt-28">
           <nav className="flex flex-col">
@@ -434,16 +569,20 @@ export function Navbar() {
                 onClick={closeMenu}
                 className={cn(
                   "nav-overlay-item group flex items-baseline gap-5 py-6",
-                  isDark ? "border-b border-white/5" : "border-b border-black/6"
+                  isDark
+                    ? "border-b border-white/5"
+                    : "border-b border-black/6",
                 )}
               >
                 <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/40 uppercase">
                   {link.num}
                 </span>
-                <span className={cn(
-                  "text-[2.5rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange",
-                  isDark ? "text-academy-gray-100" : "text-[#111]"
-                )}>
+                <span
+                  className={cn(
+                    "text-[2.5rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange",
+                    isDark ? "text-academy-gray-100" : "text-[#111]",
+                  )}
+                >
                   {link.label}
                 </span>
               </Link>
@@ -453,19 +592,40 @@ export function Navbar() {
           <div className="nav-overlay-item flex flex-col gap-4">
             {user ? (
               <>
-                <Link href="/account" onClick={closeMenu} className="text-sm font-bold tracking-[0.2em] text-academy-orange uppercase">
+                <Link
+                  href="/account"
+                  onClick={closeMenu}
+                  className="text-sm font-bold tracking-[0.2em] text-academy-orange uppercase"
+                >
                   Area Riservata →
                 </Link>
-                <button onClick={async () => { closeMenu(); await handleLogout(); }} className="text-left text-sm font-medium text-red-400/70">
+                <button
+                  onClick={async () => {
+                    closeMenu();
+                    await handleLogout();
+                  }}
+                  className="text-left text-sm font-medium text-red-400/70"
+                >
                   Esci
                 </button>
               </>
             ) : (
               <>
-                <Link href="/auth/register" onClick={closeMenu} className="flex items-center justify-center border border-academy-orange py-4 text-[12px] font-black tracking-[0.22em] text-academy-orange uppercase">
+                <Link
+                  href="/auth/register"
+                  onClick={closeMenu}
+                  className="flex items-center justify-center border border-academy-orange py-4 text-[12px] font-black tracking-[0.22em] text-academy-orange uppercase"
+                >
                   Iscriviti Ora
                 </Link>
-                <Link href="/auth/login" onClick={closeMenu} className={cn("text-center text-xs font-medium tracking-widest uppercase", isDark ? "text-academy-gray-300" : "text-[#666]")}>
+                <Link
+                  href="/auth/login"
+                  onClick={closeMenu}
+                  className={cn(
+                    "text-center text-xs font-medium tracking-widest uppercase",
+                    isDark ? "text-academy-gray-300" : "text-[#666]",
+                  )}
+                >
                   Hai già un account? Accedi
                 </Link>
               </>
