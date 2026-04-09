@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, useInView } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
@@ -765,9 +766,11 @@ function PackModal({
                           style={{ background: `${t.color}20`, color: t.color }}
                         >
                           {t.image_url ? (
-                            <img
+                            <Image
                               src={t.image_url}
                               alt={t.name}
+                              width={40}
+                              height={40}
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -1119,9 +1122,11 @@ function PackCard({
                 title={t.name}
               >
                 {t.image_url ? (
-                  <img
+                  <Image
                     src={t.image_url}
                     alt={t.name}
+                    width={40}
+                    height={40}
                     className="h-full w-full rounded-full object-cover"
                   />
                 ) : (

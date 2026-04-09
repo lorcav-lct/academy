@@ -187,8 +187,8 @@ function VideoBlock({ isDark }: { isDark: boolean }) {
     setCurrentTime(parseFloat(e.target.value));
   }, []);
   const onSeekEnd = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      seekTo(parseFloat(e.target.value));
+    (e: React.SyntheticEvent<HTMLInputElement>) => {
+      seekTo(parseFloat(e.currentTarget.value));
       setIsSeeking(false);
     },
     [seekTo],
