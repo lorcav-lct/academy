@@ -13,19 +13,31 @@ import { createClient } from "@/lib/supabase/client";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TIER: Record<string, { color: string; rgb: string; label: string; roman: string }> = {
-  bronzo:  { color: "#CD7F32", rgb: "205,127,50",  label: "BRONZO",  roman: "I"   },
-  argento: { color: "#C0C0C0", rgb: "192,192,192", label: "ARGENTO", roman: "II"  },
-  oro:     { color: "#D4AF37", rgb: "212,175,55",  label: "ORO",     roman: "III" },
+const TIER: Record<
+  string,
+  { color: string; rgb: string; label: string; roman: string }
+> = {
+  bronzo: { color: "#CD7F32", rgb: "205,127,50", label: "BRONZO", roman: "I" },
+  argento: {
+    color: "#C0C0C0",
+    rgb: "192,192,192",
+    label: "ARGENTO",
+    roman: "II",
+  },
+  oro: { color: "#D4AF37", rgb: "212,175,55", label: "ORO", roman: "III" },
 };
 
 const BLOCK_SLUGS = ["corpus", "vis", "victor"] as const;
-const BLOCK_LABELS: Record<string, string> = { corpus: "CORPUS", vis: "VIS", victor: "VICTOR" };
+const BLOCK_LABELS: Record<string, string> = {
+  corpus: "CORPUS",
+  vis: "VIS",
+  victor: "VICTOR",
+};
 
 function getBundleTeachers(): Record<string, Teacher[]> {
   return {
     corpus: getTeachersByCourse("corpus"),
-    vis:    getTeachersByCourse("vis"),
+    vis: getTeachersByCourse("vis"),
     victor: getTeachersByCourse("victor"),
   };
 }
@@ -33,7 +45,12 @@ function getBundleTeachers(): Record<string, Teacher[]> {
 // ─── Initials ─────────────────────────────────────────────────────────────────
 
 function initials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 // ─── Pack Modal ───────────────────────────────────────────────────────────────
@@ -56,26 +73,37 @@ function PackModal({
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
   // Theme tokens
-  const panelLBg  = isDark ? "rgba(2,0,32,0.97)"      : "rgba(255,255,255,0.99)";
-  const panelRBg  = isDark ? "rgba(1,0,20,0.98)"       : "rgba(244,244,250,0.99)";
-  const textH     = isDark ? "#ffffff"                  : "#111111";
-  const textB     = isDark ? "rgba(180,180,200,0.7)"   : "#666666";
-  const textSub   = isDark ? "rgba(120,120,140,0.7)"   : "#aaaaaa";
-  const tileBg    = isDark ? "rgba(255,255,255,0.04)"  : "rgba(0,0,0,0.03)";
-  const tileBdr   = isDark ? "rgba(255,255,255,0.07)"  : "rgba(0,0,0,0.08)";
-  const statBdr   = isDark ? `rgba(${tier.rgb},0.12)`  : `rgba(${tier.rgb},0.18)`;
-  const closeCl   = isDark ? "rgba(255,255,255,0.35)"  : "rgba(0,0,0,0.35)";
-  const closHov   = isDark ? "rgba(255,255,255,0.85)"  : "rgba(0,0,0,0.85)";
-  const inclTxt   = isDark ? "rgba(200,200,220,0.8)"   : "#444444";
-  const overlayBg = isDark ? "rgba(1,0,18,0.88)"       : "rgba(0,0,0,0.55)";
+  const panelLBg = isDark ? "rgba(2,0,32,0.97)" : "rgba(255,255,255,0.99)";
+  const panelRBg = isDark ? "rgba(1,0,20,0.98)" : "rgba(244,244,250,0.99)";
+  const textH = isDark ? "#ffffff" : "#111111";
+  const textB = isDark ? "rgba(180,180,200,0.7)" : "#666666";
+  const textSub = isDark ? "rgba(120,120,140,0.7)" : "#aaaaaa";
+  const tileBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
+  const tileBdr = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
+  const statBdr = isDark ? `rgba(${tier.rgb},0.12)` : `rgba(${tier.rgb},0.18)`;
+  const closeCl = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)";
+  const closHov = isDark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)";
+  const inclTxt = isDark ? "rgba(200,200,220,0.8)" : "#444444";
+  const overlayBg = isDark ? "rgba(1,0,18,0.88)" : "rgba(0,0,0,0.55)";
 
   // Entrance animation + load video after mount
   useEffect(() => {
     const tl = gsap.timeline();
-    tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.28, ease: "power2.out" });
-    tl.fromTo(panelRef.current, { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, "-=0.1");
+    tl.fromTo(
+      overlayRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.28, ease: "power2.out" },
+    );
+    tl.fromTo(
+      panelRef.current,
+      { opacity: 0, y: 32 },
+      { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" },
+      "-=0.1",
+    );
     const timeout = setTimeout(() => {
-      setVideoSrc("https://player.vimeo.com/video/1161847546?autoplay=0&title=0&byline=0&portrait=0&dnt=1");
+      setVideoSrc(
+        "https://player.vimeo.com/video/1161847546?autoplay=0&title=0&byline=0&portrait=0&dnt=1",
+      );
     }, 400);
     document.body.style.overflow = "hidden";
     return () => {
@@ -86,14 +114,21 @@ function PackModal({
 
   // ESC to close
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
   function close() {
     const tl = gsap.timeline({ onComplete: onClose });
-    tl.to(panelRef.current, { opacity: 0, y: 24, duration: 0.28, ease: "power2.in" });
+    tl.to(panelRef.current, {
+      opacity: 0,
+      y: 24,
+      duration: 0.28,
+      ease: "power2.in",
+    });
     tl.to(overlayRef.current, { opacity: 0, duration: 0.18 }, "-=0.1");
   }
 
@@ -106,8 +141,8 @@ function PackModal({
     >
       <div
         ref={panelRef}
-        className="relative flex w-full max-w-[1180px] m-auto flex-col lg:flex-row overflow-hidden rounded-sm"
-        style={{ border: `1px solid ${tier.color}28`, maxHeight: "90vh" }}
+        className="relative flex w-full max-w-[1180px] m-auto flex-col lg:flex-row overflow-hidden rounded-sm h-dvh max-h-dvh md:h-auto md:max-h-[90vh]"
+        style={{ border: `1px solid ${tier.color}28` }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── LEFT: Info ─────────────────────────────────────────────── */}
@@ -123,7 +158,10 @@ function PackModal({
             >
               {tier.roman}
             </div>
-            <span className="text-xs font-black tracking-[0.32em] uppercase" style={{ color: tier.color }}>
+            <span
+              className="text-xs font-black tracking-[0.32em] uppercase"
+              style={{ color: tier.color }}
+            >
               Pack {tier.label}
             </span>
           </div>
@@ -136,19 +174,41 @@ function PackModal({
             >
               {pack.name}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed" style={{ color: textB }}>{pack.subtitle}</p>
+            <p
+              className="mt-2 text-sm leading-relaxed"
+              style={{ color: textB }}
+            >
+              {pack.subtitle}
+            </p>
           </div>
 
           {/* Includes */}
           <div>
-            <p className="mb-3 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
+            <p
+              className="mb-3 text-[0.7rem] font-black tracking-[0.3em] uppercase"
+              style={{ color: `${tier.color}80` }}
+            >
               Cosa include
             </p>
             <ul className="space-y-2.5">
               {pack.includes.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm" style={{ color: inclTxt }}>
-                  <svg viewBox="0 0 16 16" fill="none" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: tier.color }}>
-                    <path d="M13.5 4.5L6 12L2.5 8.5" stroke="currentColor" strokeWidth={2} strokeLinecap="square" />
+                <li
+                  key={item}
+                  className="flex items-start gap-3 text-sm"
+                  style={{ color: inclTxt }}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                    style={{ color: tier.color }}
+                  >
+                    <path
+                      d="M13.5 4.5L6 12L2.5 8.5"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="square"
+                    />
                   </svg>
                   {item}
                 </li>
@@ -161,20 +221,33 @@ function PackModal({
             <button
               onClick={() => onBuy(pack)}
               className="w-full py-3.5 text-center text-sm font-black tracking-[0.18em] uppercase transition-all duration-200"
-              style={{ background: tier.color, color: pack.slug === "argento" ? "#111111" : "#010015" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+              style={{
+                background: tier.color,
+                color: pack.slug === "argento" ? "#111111" : "#010015",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.opacity = "0.88";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.opacity = "1";
+              }}
             >
               Scegli {tier.label} →
             </button>
-            <p className="mt-2 text-center text-[0.68rem]" style={{ color: textSub }}>
+            <p
+              className="mt-2 text-center text-[0.68rem]"
+              style={{ color: textSub }}
+            >
               Nessun pagamento richiesto ora · Completa il profilo per procedere
             </p>
           </div>
 
           {/* ── Teachers — bento grid ── */}
           <div>
-            <p className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
+            <p
+              className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase"
+              style={{ color: `${tier.color}80` }}
+            >
               I Docenti
             </p>
             <div className="space-y-5">
@@ -191,7 +264,10 @@ function PackModal({
                       <div
                         key={t.slug}
                         className="flex flex-col items-center gap-2 p-3 text-center"
-                        style={{ background: tileBg, border: `1px solid ${tileBdr}` }}
+                        style={{
+                          background: tileBg,
+                          border: `1px solid ${tileBdr}`,
+                        }}
                         title={t.role}
                       >
                         {/* Avatar */}
@@ -199,17 +275,28 @@ function PackModal({
                           className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.7rem] font-black"
                           style={{ background: `${t.color}20`, color: t.color }}
                         >
-                          {t.image_url
+                          {t.image_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={t.image_url} alt={t.name} className="h-full w-full object-cover" />
-                            : initials(t.name)
-                          }
+                            <img
+                              src={t.image_url}
+                              alt={t.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            initials(t.name)
+                          )}
                         </div>
                         <div>
-                          <p className="text-[0.72rem] font-bold leading-tight" style={{ color: textH }}>
+                          <p
+                            className="text-[0.72rem] font-bold leading-tight"
+                            style={{ color: textH }}
+                          >
                             {t.name}
                           </p>
-                          <p className="mt-0.5 text-[0.6rem] leading-snug line-clamp-2" style={{ color: textSub }}>
+                          <p
+                            className="mt-0.5 text-[0.6rem] leading-snug line-clamp-2"
+                            style={{ color: textSub }}
+                          >
                             {t.role}
                           </p>
                         </div>
@@ -229,10 +316,15 @@ function PackModal({
         >
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: `radial-gradient(ellipse at 60% 40%, rgba(${tier.rgb},0.07) 0%, transparent 65%)` }}
+            style={{
+              background: `radial-gradient(ellipse at 60% 40%, rgba(${tier.rgb},0.07) 0%, transparent 65%)`,
+            }}
           />
           <div className="relative z-10 p-6 lg:p-10">
-            <p className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase" style={{ color: `${tier.color}80` }}>
+            <p
+              className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase"
+              style={{ color: `${tier.color}80` }}
+            >
               L&apos;Academy in 2 minuti
             </p>
             <div
@@ -261,7 +353,12 @@ function PackModal({
                       boxShadow: `0 0 24px rgba(${tier.rgb},0.15)`,
                     }}
                   >
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill={tier.color}>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill={tier.color}
+                    >
                       <path d="M8 5.14v14l11-7-11-7z" />
                     </svg>
                   </div>
@@ -279,8 +376,18 @@ function PackModal({
                   className="flex flex-col items-center gap-1 p-3 text-center"
                   style={{ border: `1px solid ${statBdr}` }}
                 >
-                  <span className="text-xl font-black" style={{ color: tier.color }}>{s.val}</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider" style={{ color: textSub }}>{s.label}</span>
+                  <span
+                    className="text-xl font-black"
+                    style={{ color: tier.color }}
+                  >
+                    {s.val}
+                  </span>
+                  <span
+                    className="text-[0.65rem] font-semibold uppercase tracking-wider"
+                    style={{ color: textSub }}
+                  >
+                    {s.label}
+                  </span>
                 </div>
               ))}
             </div>
@@ -292,14 +399,18 @@ function PackModal({
           onClick={close}
           className="absolute right-5 top-5 z-20 flex items-center gap-1.5 text-[0.7rem] font-bold tracking-[0.22em] uppercase transition-colors"
           style={{ color: closeCl }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = closHov; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = closeCl; }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = closHov;
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = closeCl;
+          }}
         >
           Chiudi <span className="text-lg font-light">×</span>
         </button>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -307,14 +418,31 @@ function PackModal({
 
 function onMove(e: React.MouseEvent<HTMLDivElement>) {
   const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty("--mx", `${((e.clientX - rect.left) / rect.width) * 100}%`);
-  e.currentTarget.style.setProperty("--my", `${((e.clientY - rect.top) / rect.height) * 100}%`);
+  e.currentTarget.style.setProperty(
+    "--mx",
+    `${((e.clientX - rect.left) / rect.width) * 100}%`,
+  );
+  e.currentTarget.style.setProperty(
+    "--my",
+    `${((e.clientY - rect.top) / rect.height) * 100}%`,
+  );
   const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
   const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-  gsap.to(e.currentTarget, { rotateX: -dy * 3, rotateY: dx * 3, duration: 0.5, ease: "power2.out", transformPerspective: 900 });
+  gsap.to(e.currentTarget, {
+    rotateX: -dy * 3,
+    rotateY: dx * 3,
+    duration: 0.5,
+    ease: "power2.out",
+    transformPerspective: 900,
+  });
 }
 function onLeave(e: React.MouseEvent<HTMLDivElement>) {
-  gsap.to(e.currentTarget, { rotateX: 0, rotateY: 0, duration: 0.9, ease: "elastic.out(1, 0.4)" });
+  gsap.to(e.currentTarget, {
+    rotateX: 0,
+    rotateY: 0,
+    duration: 0.9,
+    ease: "elastic.out(1, 0.4)",
+  });
 }
 
 // ─── Pack Card ────────────────────────────────────────────────────────────────
@@ -331,7 +459,10 @@ function PackCard({
   const tier = TIER[pack.slug] ?? TIER.bronzo;
   const teachers = getBundleTeachers();
   // Count total teachers across all blocks
-  const totalTeachers = BLOCK_SLUGS.reduce((acc, s) => acc + teachers[s].length, 0);
+  const totalTeachers = BLOCK_SLUGS.reduce(
+    (acc, s) => acc + teachers[s].length,
+    0,
+  );
   // Take first 5 teacher avatars to show as a strip
   const avatarTeachers = BLOCK_SLUGS.flatMap((s) => teachers[s]).slice(0, 5);
 
@@ -358,7 +489,12 @@ function PackCard({
       onMouseLeave={onLeave}
     >
       {/* Top accent bar */}
-      <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, ${tier.color}, ${tier.color}00)` }} />
+      <div
+        className="h-0.5 w-full"
+        style={{
+          background: `linear-gradient(90deg, ${tier.color}, ${tier.color}00)`,
+        }}
+      />
 
       {isHighlighted && (
         <div
@@ -373,7 +509,10 @@ function PackCard({
         {/* Roman numeral + tier */}
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-[0.65rem] font-black tracking-[0.35em] uppercase" style={{ color: `${tier.color}80` }}>
+            <span
+              className="text-[0.65rem] font-black tracking-[0.35em] uppercase"
+              style={{ color: `${tier.color}80` }}
+            >
               Pack
             </span>
             <div
@@ -392,7 +531,10 @@ function PackCard({
         </div>
 
         {/* Subtitle */}
-        <p className="text-sm leading-relaxed" style={{ color: isDark ? "rgba(180,180,190,0.65)" : "#666666" }}>
+        <p
+          className="text-sm leading-relaxed"
+          style={{ color: isDark ? "rgba(180,180,190,0.65)" : "#666666" }}
+        >
           {pack.subtitle}
         </p>
 
@@ -400,24 +542,42 @@ function PackCard({
         <div className="flex flex-col gap-2">
           {BLOCK_SLUGS.map((slug) => (
             <div key={slug} className="flex items-center gap-2.5">
-              <span className="h-1 w-1 shrink-0" style={{ background: tier.color }} />
-              <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: isDark ? "rgba(255,255,255,0.7)" : "#444" }}>
+              <span
+                className="h-1 w-1 shrink-0"
+                style={{ background: tier.color }}
+              />
+              <span
+                className="text-xs font-bold tracking-[0.18em] uppercase"
+                style={{ color: isDark ? "rgba(255,255,255,0.7)" : "#444" }}
+              >
                 {BLOCK_LABELS[slug]}
               </span>
             </div>
           ))}
           {(pack.masterclassSelectionCount ?? 0) > 0 && (
             <div className="flex items-center gap-2.5">
-              <span className="h-1 w-1 shrink-0" style={{ background: tier.color }} />
-              <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: `${tier.color}cc` }}>
+              <span
+                className="h-1 w-1 shrink-0"
+                style={{ background: tier.color }}
+              />
+              <span
+                className="text-xs font-bold tracking-[0.18em] uppercase"
+                style={{ color: `${tier.color}cc` }}
+              >
                 {pack.masterclassSelectionCount} Masterclass a scelta
               </span>
             </div>
           )}
           {pack.includesAccommodation && (
             <div className="flex items-center gap-2.5">
-              <span className="h-1 w-1 shrink-0" style={{ background: tier.color }} />
-              <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: `${tier.color}cc` }}>
+              <span
+                className="h-1 w-1 shrink-0"
+                style={{ background: tier.color }}
+              />
+              <span
+                className="text-xs font-bold tracking-[0.18em] uppercase"
+                style={{ color: `${tier.color}cc` }}
+              >
                 Vitto &amp; Alloggio
               </span>
             </div>
@@ -441,14 +601,22 @@ function PackCard({
                 }}
                 title={t.name}
               >
-                {t.image_url
+                {t.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={t.image_url} alt={t.name} className="h-full w-full rounded-full object-cover" />
-                  : initials(t.name)
-                }
+                  <img
+                    src={t.image_url}
+                    alt={t.name}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  initials(t.name)
+                )}
               </div>
             ))}
-            <span className="ml-2 text-[0.7rem] font-semibold" style={{ color: isDark ? "rgba(180,180,190,0.5)" : "#999" }}>
+            <span
+              className="ml-2 text-[0.7rem] font-semibold"
+              style={{ color: isDark ? "rgba(180,180,190,0.5)" : "#999" }}
+            >
               +{totalTeachers - avatarTeachers.length} docenti
             </span>
           </div>
@@ -459,7 +627,9 @@ function PackCard({
             style={{ color: tier.color }}
           >
             Esplora
-            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-1">
+              →
+            </span>
           </div>
         </div>
       </div>
@@ -488,13 +658,20 @@ export function PackPreview() {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.from(headRef.current, {
-        scrollTrigger: { trigger: headRef.current, start: "top 85%", once: true },
-        opacity: 0, y: 30, duration: 0.7, ease: "power3.out",
+        scrollTrigger: {
+          trigger: headRef.current,
+          start: "top 85%",
+          once: true,
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.7,
+        ease: "power3.out",
       });
 
       // ── Card deal animation ─────────────────────────────────────────────────
       const cardEls = Array.from(
-        cardsRef.current?.querySelectorAll("[data-pack-card]") ?? []
+        cardsRef.current?.querySelectorAll("[data-pack-card]") ?? [],
       ) as HTMLElement[];
 
       if (cardEls.length === 3) {
@@ -515,40 +692,94 @@ export function PackPreview() {
               // Mobile: cards rise from below one by one — ARGENTO (middle) first
               const order = [c1, c0, c2];
               order.forEach((el, i) => {
-                gsap.fromTo(el,
-                  { y: 80, scale: 0.88, opacity: 0, rotation: (i === 0 ? 0 : i === 1 ? -2 : 2) },
-                  { y: 0, scale: 1, opacity: 1, rotation: 0,
-                    duration: 1.0, delay: i * 0.22, ease: "expo.out" }
+                gsap.fromTo(
+                  el,
+                  {
+                    y: 80,
+                    scale: 0.88,
+                    opacity: 0,
+                    rotation: i === 0 ? 0 : i === 1 ? -2 : 2,
+                  },
+                  {
+                    y: 0,
+                    scale: 1,
+                    opacity: 1,
+                    rotation: 0,
+                    duration: 1.0,
+                    delay: i * 0.22,
+                    ease: "expo.out",
+                  },
                 );
               });
             } else {
               // Desktop: cards start as a near-stacked fan near ARGENTO's position,
               // then deal out smoothly. Each card has its own timeline slot.
               const tl = gsap.timeline({
-                onComplete: () => { gsap.set(cardEls, { clearProps: "zIndex" }); },
+                onComplete: () => {
+                  gsap.set(cardEls, { clearProps: "zIndex" });
+                },
               });
 
               // ARGENTO stays at its position but emerges from thin air (scale up)
-              tl.fromTo(c1,
-                { scale: 0.82, rotation: 0, opacity: 0, xPercent: 0, zIndex: 3 },
-                { scale: 1.025, rotation: 0, opacity: 1, xPercent: 0,
-                  duration: 1.15, ease: "expo.out" },
-                0.05
+              tl.fromTo(
+                c1,
+                {
+                  scale: 0.82,
+                  rotation: 0,
+                  opacity: 0,
+                  xPercent: 0,
+                  zIndex: 3,
+                },
+                {
+                  scale: 1.025,
+                  rotation: 0,
+                  opacity: 1,
+                  xPercent: 0,
+                  duration: 1.15,
+                  ease: "expo.out",
+                },
+                0.05,
               )
-              // BRONZO starts near ARGENTO (shifted right), fans left to its cell
-              .fromTo(c0,
-                { scale: 0.82, rotation: 18, opacity: 0, xPercent: 60, zIndex: 1 },
-                { scale: 1, rotation: 0, opacity: 1, xPercent: 0,
-                  duration: 1.05, ease: "expo.out" },
-                0.35
-              )
-              // ORO starts near ARGENTO (shifted left), fans right to its cell
-              .fromTo(c2,
-                { scale: 0.82, rotation: -18, opacity: 0, xPercent: -60, zIndex: 2 },
-                { scale: 1, rotation: 0, opacity: 1, xPercent: 0,
-                  duration: 1.05, ease: "expo.out" },
-                0.52
-              );
+                // BRONZO starts near ARGENTO (shifted right), fans left to its cell
+                .fromTo(
+                  c0,
+                  {
+                    scale: 0.82,
+                    rotation: 18,
+                    opacity: 0,
+                    xPercent: 60,
+                    zIndex: 1,
+                  },
+                  {
+                    scale: 1,
+                    rotation: 0,
+                    opacity: 1,
+                    xPercent: 0,
+                    duration: 1.05,
+                    ease: "expo.out",
+                  },
+                  0.35,
+                )
+                // ORO starts near ARGENTO (shifted left), fans right to its cell
+                .fromTo(
+                  c2,
+                  {
+                    scale: 0.82,
+                    rotation: -18,
+                    opacity: 0,
+                    xPercent: -60,
+                    zIndex: 2,
+                  },
+                  {
+                    scale: 1,
+                    rotation: 0,
+                    opacity: 1,
+                    xPercent: 0,
+                    duration: 1.05,
+                    ease: "expo.out",
+                  },
+                  0.52,
+                );
             }
           },
         });
@@ -560,7 +791,9 @@ export function PackPreview() {
   async function handleBuy(pack: AcademyProduct) {
     setActiveModal(null);
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const dest = `/checkout?pack=${pack.slug}`;
 
     if (!user) {
@@ -599,11 +832,13 @@ export function PackPreview() {
         <div className="absolute inset-0 section-bg-alt" />
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{ background: "radial-gradient(ellipse, rgba(240,146,38,0.03) 0%, transparent 70%)" }}
+          style={{
+            background:
+              "radial-gradient(ellipse, rgba(240,146,38,0.03) 0%, transparent 70%)",
+          }}
         />
 
         <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
-
           {/* Header */}
           <div ref={headRef} className="mb-14">
             <span className="label-tag mb-3 block">I Pacchetti Formativi</span>
@@ -615,8 +850,12 @@ export function PackPreview() {
                 Costruisci il tuo{" "}
                 <span className="gradient-text">percorso.</span>
               </h2>
-              <p className="max-w-sm text-sm leading-relaxed text-academy-gray-400" style={{ color: tb }}>
-                Tre livelli di accesso allo stesso percorso d&apos;eccellenza. Clicca su un pack per scoprire tutti i dettagli.
+              <p
+                className="max-w-sm text-sm leading-relaxed text-academy-gray-400"
+                style={{ color: tb }}
+              >
+                Tre livelli di accesso allo stesso percorso d&apos;eccellenza.
+                Clicca su un pack per scoprire tutti i dettagli.
               </p>
             </div>
           </div>
@@ -640,15 +879,20 @@ export function PackPreview() {
           {/* Footer note */}
           <div
             className="mt-6 flex items-center gap-3 p-4"
-            style={{ border: "1px solid rgba(212,175,55,0.12)", background: d ? "rgba(212,175,55,0.03)" : "rgba(212,175,55,0.04)" }}
+            style={{
+              border: "1px solid rgba(212,175,55,0.12)",
+              background: d ? "rgba(212,175,55,0.03)" : "rgba(212,175,55,0.04)",
+            }}
           >
             <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-academy-gold" />
             <p className="text-xs text-academy-gray-500" style={{ color: tb }}>
-              <span className="font-bold text-academy-gold">Certificazione FipexLacertosus</span>
-              {" — "}inclusa nei pack Argento e Oro. Riconosciuta professionalmente a livello nazionale.
+              <span className="font-bold text-academy-gold">
+                Certificazione FipexLacertosus
+              </span>
+              {" — "}inclusa nei pack Argento e Oro. Riconosciuta
+              professionalmente a livello nazionale.
             </p>
           </div>
-
         </div>
       </section>
 

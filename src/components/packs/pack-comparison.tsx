@@ -641,8 +641,8 @@ function PackModal({
     >
       <div
         ref={panelRef}
-        className="relative flex w-full max-w-[1180px] m-auto flex-col lg:flex-row overflow-hidden rounded-sm"
-        style={{ border: `1px solid ${tier.color}28`, maxHeight: "90vh" }}
+        className="relative flex w-full max-w-[1180px] m-auto flex-col lg:flex-row overflow-hidden rounded-sm h-dvh max-h-dvh md:h-auto md:max-h-[90vh]"
+        style={{ border: `1px solid ${tier.color}28` }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* LEFT */}
