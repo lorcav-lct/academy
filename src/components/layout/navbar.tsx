@@ -7,7 +7,6 @@ import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/providers/theme-provider";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
@@ -16,6 +15,52 @@ const NAV_LINKS = [
   { href: "/masterclass", label: "Masterclass", num: "03" },
   { href: "/docenti", label: "Docenti", num: "04" },
 ];
+
+const WHATSAPP_HREF = "https://wa.me/390521607870";
+
+function WhatsAppButton({
+  onDarkBg,
+  size = 40,
+}: {
+  onDarkBg: boolean;
+  size?: number;
+}) {
+  return (
+    <a
+      href={WHATSAPP_HREF}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Contattaci su WhatsApp"
+      className="flex items-center justify-center transition-all duration-200 active:scale-95 shrink-0"
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        background: onDarkBg ? "rgba(240,146,38,0.1)" : "rgba(240,146,38,0.08)",
+        border: "1.5px solid #F09226",
+        color: "#F09226",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "#F09226";
+        (e.currentTarget as HTMLElement).style.color = "#010015";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = onDarkBg
+          ? "rgba(240,146,38,0.1)"
+          : "rgba(240,146,38,0.08)";
+        (e.currentTarget as HTMLElement).style.color = "#F09226";
+      }}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width={size * 0.5}
+        height={size * 0.5}
+        fill="currentColor"
+      >
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+      </svg>
+    </a>
+  );
+}
 
 /* ─── User Avatar + Dropdown ─── */
 function UserAvatar({
@@ -55,7 +100,7 @@ function UserAvatar({
         className="group flex items-center gap-2.5"
         aria-label="Menu utente"
       >
-        <div className="flex h-9 w-9 items-center justify-center border border-academy-orange/40 bg-academy-orange/10 text-xs font-black text-academy-orange transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20">
+        <div className="flex h-[42px] w-[42px] items-center justify-center border border-academy-orange/40 bg-academy-orange/10 text-xs font-black text-academy-orange transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20">
           {initials}
         </div>
         <svg
@@ -160,11 +205,26 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+  // Track mobile breakpoint (matches navbar's `min-[981px]:flex` desktop cutoff)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 980px)");
+    setIsMobileViewport(mq.matches);
+    const onChange = () => setIsMobileViewport(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const router = useRouter();
   const pathname = usePathname();
   const { theme } = useTheme();
-  const isDark = theme === "dark";
+  // Over-hero mode: home above fold forces dark-bg treatment regardless of theme,
+  // because the hero section imposes its own dark cinematic background.
+  const overHeroDark = pathname === "/" && !scrolled;
+  // Mobile navbar has a dark gradient background always → nav text is white always.
+  const onDarkBg = overHeroDark || isMobileViewport;
+  const isDark = onDarkBg ? true : theme === "dark";
 
   /* ── Entrance animation ── */
   useEffect(() => {
@@ -178,11 +238,13 @@ export function Navbar() {
     return () => ctx.revert();
   }, []);
 
-  /* ── Scroll: backdrop + hide-on-down / show-on-up ── */
+  /* ── Scroll: backdrop + hide-on-down / show-on-up ──
+     On home, while #perche (next section after hero) has not yet reached the top
+     of the viewport, the navbar stays fully visible and transparent. After that
+     point it resumes normal hide-on-scroll-down / show-on-scroll-up behavior. */
   useEffect(() => {
     let lastY = window.scrollY;
     let ticking = false;
-    // Wait for entrance animation to finish before enabling hide/show
     let ready = false;
     const readyTimer = setTimeout(() => {
       ready = true;
@@ -193,11 +255,37 @@ export function Navbar() {
       ticking = true;
       requestAnimationFrame(() => {
         const y = window.scrollY;
-        setScrolled(y > 30);
+
+        // Gate: are we past the hero? (#perche has reached viewport top)
+        const perche = document.getElementById("perche");
+        const pastHero = perche
+          ? perche.getBoundingClientRect().top <= 0
+          : true;
+
+        setScrolled(pastHero && y > 30);
 
         if (ready && !document.documentElement.dataset.pathActive) {
           const header = headerRef.current;
-          if (y < 80) {
+          // Mobile: always visible, no hide-on-scroll-down
+          const mobile = window.matchMedia("(max-width: 980px)").matches;
+          if (mobile) {
+            gsap.to(header, {
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.38,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          } else if (!pastHero) {
+            // Inside hero: always visible, transparent
+            gsap.to(header, {
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.38,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          } else if (y < 80) {
             gsap.to(header, {
               yPercent: 0,
               opacity: 1,
@@ -227,9 +315,11 @@ export function Navbar() {
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
       clearTimeout(readyTimer);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, []);
 
@@ -244,6 +334,19 @@ export function Navbar() {
     );
     return () => subscription.unsubscribe();
   }, []);
+
+  /* ── Lock body scroll while mobile menu is open ── */
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
+    };
+  }, [mobileOpen]);
 
   /* ── Mobile open ── */
   function openMenu() {
@@ -339,17 +442,31 @@ export function Navbar() {
     <>
       <header
         ref={headerRef}
-        style={{ opacity: 0 }}
+        style={{
+          opacity: 0,
+          ...(isMobileViewport && !overHeroDark
+            ? {
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
+                background: "rgba(255,255,255,0.55)",
+                borderBottom: "1px solid rgba(0,0,0,0.05)",
+              }
+            : null),
+        }}
         className={cn(
           "fixed top-0 left-0 right-0 z-[60] transition-colors duration-500",
-          scrolled ? "navbar-scrolled-bg" : "bg-transparent",
+          isMobileViewport
+            ? "bg-transparent"
+            : scrolled
+              ? "navbar-scrolled-bg"
+              : "bg-transparent",
         )}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-[5%] py-5 md:px-10">
-          {/* Logo + ThemeToggle */}
+          {/* Logo */}
           <div className="flex items-center gap-4 shrink-0">
             <Link href="/" className="group flex items-center gap-3">
-              <div className="relative flex h-10 w-10 items-center justify-center border border-academy-orange/50 bg-academy-orange/10 transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20 group-hover:shadow-[0_0_24px_rgba(240,146,38,0.25)]">
+              <div className="relative flex h-11 w-11 items-center justify-center border border-academy-orange/50 bg-academy-orange/10 transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20 group-hover:shadow-[0_0_24px_rgba(240,146,38,0.25)]">
                 <span className="text-lg font-black text-academy-orange">
                   L
                 </span>
@@ -358,7 +475,11 @@ export function Navbar() {
                 <span
                   className={cn(
                     "text-[12px] font-black tracking-[0.22em] uppercase transition-colors duration-300",
-                    isDark ? "text-academy-gray-100" : "text-[#111]",
+                    onDarkBg
+                      ? "text-white"
+                      : isDark
+                        ? "text-academy-gray-100"
+                        : "text-[#111]",
                   )}
                 >
                   Lacertosus
@@ -368,7 +489,6 @@ export function Navbar() {
                 </span>
               </div>
             </Link>
-            <ThemeToggle />
           </div>
 
           {/* Desktop links */}
@@ -395,9 +515,11 @@ export function Navbar() {
                     "group flex flex-col items-center pb-1 transition-colors duration-200",
                     active
                       ? "text-academy-orange"
-                      : isDark
-                        ? "text-academy-gray-300 hover:text-academy-orange"
-                        : "text-[#444] hover:text-academy-orange",
+                      : onDarkBg
+                        ? "text-white hover:text-academy-orange"
+                        : isDark
+                          ? "text-academy-gray-300 hover:text-academy-orange"
+                          : "text-[#444] hover:text-academy-orange",
                   )}
                 >
                   <span
@@ -405,9 +527,11 @@ export function Navbar() {
                       "mb-0.5 text-[12px] font-bold tracking-[0.3em] uppercase transition-colors",
                       active
                         ? "text-academy-orange"
-                        : isDark
-                          ? "text-academy-gray-400 group-hover:text-academy-orange"
-                          : "text-[#888] group-hover:text-academy-orange",
+                        : onDarkBg
+                          ? "text-white/80 group-hover:text-academy-orange"
+                          : isDark
+                            ? "text-academy-gray-400 group-hover:text-academy-orange"
+                            : "text-[#888] group-hover:text-academy-orange",
                     )}
                   >
                     {link.num}
@@ -421,7 +545,8 @@ export function Navbar() {
           </div>
 
           {/* Desktop right */}
-          <div className="hidden items-center gap-5 min-[981px]:flex shrink-0">
+          <div className="hidden items-center gap-4 min-[981px]:flex shrink-0">
+            <WhatsAppButton onDarkBg={onDarkBg} size={42} />
             {user ? (
               <UserAvatar user={user} onLogout={handleLogout} isDark={isDark} />
             ) : (
@@ -430,9 +555,11 @@ export function Navbar() {
                   href="/auth/login"
                   className={cn(
                     "text-sm font-medium tracking-wider uppercase transition-colors",
-                    isDark
-                      ? "text-academy-gray-400 hover:text-academy-gray-100"
-                      : "text-[#555] hover:text-[#111]",
+                    onDarkBg
+                      ? "text-white hover:text-academy-orange"
+                      : isDark
+                        ? "text-academy-gray-400 hover:text-academy-gray-100"
+                        : "text-[#555] hover:text-[#111]",
                   )}
                 >
                   Accedi
@@ -448,117 +575,69 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Hamburger — bento toggle */}
-          <button
-            onClick={mobileOpen ? closeMenu : openMenu}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 min-[981px]:hidden transition-all duration-150 active:scale-95",
-              mobileOpen
-                ? "border border-red-400/50 hover:border-red-400/80"
-                : isDark
-                  ? "border border-white/20 hover:border-academy-orange/60"
-                  : "border border-black/15 hover:border-academy-orange/50",
-            )}
-            aria-label={mobileOpen ? "Chiudi menu" : "Apri menu"}
-          >
-            {mobileOpen ? (
-              <>
-                {/* X icon */}
-                <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
+          {/* Mobile right cluster — WhatsApp + Menu */}
+          <div className="flex items-center gap-2.5 min-[981px]:hidden">
+            <WhatsAppButton onDarkBg={onDarkBg} size={44} />
+
+            {/* Menu button — square 44×44, icon only (matches logo + WA) */}
+            <button
+              onClick={mobileOpen ? closeMenu : openMenu}
+              className="flex items-center justify-center transition-all duration-200 active:scale-95 shrink-0"
+              style={{
+                width: "44px",
+                height: "44px",
+                background: mobileOpen ? "transparent" : "#F09226",
+                border: mobileOpen
+                  ? "1.5px solid rgba(239,68,68,0.55)"
+                  : "1.5px solid #F09226",
+              }}
+              aria-label={mobileOpen ? "Chiudi menu" : "Apri menu"}
+            >
+              {mobileOpen ? (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none">
                   <path
-                    d="M1.5 1.5l11 11M12.5 1.5l-11 11"
-                    stroke="#f87171"
-                    strokeWidth="2"
-                    strokeLinecap="round"
+                    d="M2 2l12 12M14 2L2 14"
+                    stroke="#ef4444"
+                    strokeWidth="2.2"
+                    strokeLinecap="square"
                   />
                 </svg>
-                <span className="text-[0.58rem] font-black tracking-[0.22em] uppercase text-red-400">
-                  Chiudi
-                </span>
-              </>
-            ) : (
-              <>
-                {/* 2×2 bento grid icon */}
-                <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
-                  <rect
-                    x="0.5"
-                    y="0.5"
-                    width="5.5"
-                    height="5.5"
-                    rx="0.5"
-                    fill={
-                      isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"
-                    }
-                  />
-                  <rect
-                    x="8"
-                    y="0.5"
-                    width="5.5"
-                    height="5.5"
-                    rx="0.5"
-                    fill="rgba(240,146,38,0.8)"
-                  />
-                  <rect
-                    x="0.5"
-                    y="8"
-                    width="5.5"
-                    height="5.5"
-                    rx="0.5"
-                    fill="rgba(240,146,38,0.8)"
-                  />
-                  <rect
-                    x="8"
-                    y="8"
-                    width="5.5"
-                    height="5.5"
-                    rx="0.5"
-                    fill={
-                      isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)"
-                    }
-                  />
-                </svg>
-                <span
-                  className={cn(
-                    "text-[0.58rem] font-black tracking-[0.22em] uppercase",
-                    isDark ? "text-academy-gray-300" : "text-[#444]",
-                  )}
+              ) : (
+                <svg
+                  viewBox="0 0 18 14"
+                  width="18"
+                  height="14"
+                  fill="none"
+                  stroke="#010015"
+                  strokeWidth="2"
+                  strokeLinecap="square"
                 >
-                  Menu
-                </span>
-              </>
-            )}
-          </button>
+                  <path d="M1 2h16M1 7h16M1 12h11" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* ── Mobile fullscreen overlay ── */}
+      {/* ── Mobile fullscreen overlay (always light, body-scroll locked) ── */}
       <div
         ref={overlayRef}
         aria-hidden={!mobileOpen}
         className={cn(
-          "fixed inset-0 z-[55] min-[981px]:hidden",
-          isDark ? "bg-academy-darker" : "bg-white",
+          "fixed inset-0 z-[55] min-[981px]:hidden bg-white overflow-hidden overscroll-contain",
           !mobileOpen && "pointer-events-none",
         )}
         style={{ clipPath: "circle(0% at 93% 4%)" }}
+        onTouchMove={(e) => e.preventDefault()}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute right-0 top-0 h-[40vh] w-[40vw] bg-academy-orange/[0.04] blur-[100px]" />
           <div className="absolute left-0 bottom-0 h-[30vh] w-[30vw] bg-academy-orange/[0.02] blur-[120px]" />
         </div>
 
-        <div
-          className={cn(
-            "absolute left-8 top-8 h-8 w-8 border-l border-t",
-            isDark ? "border-academy-orange/20" : "border-academy-orange/30",
-          )}
-        />
-        <div
-          className={cn(
-            "absolute right-8 bottom-8 h-8 w-8 border-r border-b",
-            isDark ? "border-academy-orange/20" : "border-academy-orange/30",
-          )}
-        />
+        <div className="absolute left-8 top-8 h-8 w-8 border-l border-t border-academy-orange/30" />
+        <div className="absolute right-8 bottom-8 h-8 w-8 border-r border-b border-academy-orange/30" />
 
         <div className="relative flex h-full flex-col justify-between px-[8%] pb-14 pt-28">
           <nav className="flex flex-col">
@@ -567,22 +646,12 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={closeMenu}
-                className={cn(
-                  "nav-overlay-item group flex items-baseline gap-5 py-6",
-                  isDark
-                    ? "border-b border-white/5"
-                    : "border-b border-black/6",
-                )}
+                className="nav-overlay-item group flex items-baseline gap-5 py-6 border-b border-black/6"
               >
                 <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/40 uppercase">
                   {link.num}
                 </span>
-                <span
-                  className={cn(
-                    "text-[2.5rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange",
-                    isDark ? "text-academy-gray-100" : "text-[#111]",
-                  )}
-                >
+                <span className="text-[2.5rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange text-[#111]">
                   {link.label}
                 </span>
               </Link>
@@ -604,7 +673,7 @@ export function Navbar() {
                     closeMenu();
                     await handleLogout();
                   }}
-                  className="text-left text-sm font-medium text-red-400/70"
+                  className="text-left text-sm font-medium text-red-500/80"
                 >
                   Esci
                 </button>
@@ -621,10 +690,7 @@ export function Navbar() {
                 <Link
                   href="/auth/login"
                   onClick={closeMenu}
-                  className={cn(
-                    "text-center text-xs font-medium tracking-widest uppercase",
-                    isDark ? "text-academy-gray-300" : "text-[#666]",
-                  )}
+                  className="text-center text-xs font-medium tracking-widest uppercase text-[#666]"
                 >
                   Hai già un account? Accedi
                 </Link>

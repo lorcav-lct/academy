@@ -1,0 +1,934 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
+
+const PROBLEMS = [
+  "Corsi online senza pratica reale",
+  "Certificazioni non riconosciute dal settore",
+  "Formazione tecnica — zero visione business",
+  "Docenti senza esperienza concreta di campo",
+  "Nessuna rete professionale dopo il corso",
+];
+
+const RESPONSE_TAGS = ["Tecnica", "Pratica", "Business", "Network"];
+
+const FOUNDER_PERKS = [
+  {
+    icon: "◆",
+    label: "I Fondatori",
+    title: "La prima edizione è irripetibile",
+    sub: "Titolo di Fondatore",
+    body: "Chi partecipa ora costruisce qualcosa che non può essere comprato in futuro: il titolo di fondatore di un network destinato a durare.",
+  },
+  {
+    icon: "◈",
+    label: "L'Ecosistema",
+    title: "Chi ti circonda conta",
+    sub: "Network selezionato",
+    body: "Sarai affiancato da persone selezionate con i tuoi stessi standard. Le connessioni che costruirai durante il percorso valgono quanto il percorso stesso.",
+  },
+  {
+    icon: "⬡",
+    label: "Dopo il Percorso",
+    title: "Training Hub Lacertosus",
+    sub: "Apri nel tuo territorio",
+    body: "Il percorso ti dà le competenze, il metodo e il network per aprire un Training Hub certificato Lacertosus Academy nella tua città.",
+  },
+];
+
+const SLOT_COUNT = 30;
+
+function getCourseLabel(courses: string[]): string {
+  const first = courses[0] ?? "";
+  if (first === "corpus") return "CORPUS";
+  if (first === "vis") return "VIS";
+  if (first === "victor") return "VICTOR";
+  if (first.startsWith("master-")) return "MASTERCLASS";
+  return "ACADEMY";
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(/[\s&]+/)
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+/* Palette light minimal-luxury */
+const BG_SECTION = "#F5F3EF"; // warm off-white
+const CARD_BG = "#FFFFFF";
+const CARD_BORDER = "rgba(0,0,0,0.07)";
+const ACCENT_CARD_BG =
+  "linear-gradient(145deg, rgba(240,146,38,0.09), #FFFFFF 70%)";
+const ACCENT_CARD_BORDER = "rgba(240,146,38,0.28)";
+const TEXT_PRIMARY = "#111111";
+const TEXT_SECONDARY = "rgba(17,17,17,0.62)";
+const TEXT_TERTIARY = "rgba(17,17,17,0.42)";
+const DIVIDER = "rgba(0,0,0,0.08)";
+const STRIKE_ORANGE = "rgba(240,146,38,0.7)";
+
+function SplitLine({
+  text,
+  className,
+  style,
+}: {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <span className={`block leading-[0.92] ${className ?? ""}`} style={style}>
+      {text.split("").map((ch, i) => (
+        <span
+          key={i}
+          className="inline-block"
+          style={{ overflow: "hidden", verticalAlign: "bottom" }}
+        >
+          <span data-cohort-char className="inline-block">
+            {ch === " " ? "\u00A0" : ch}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function TeacherCard({
+  teacher,
+  index,
+  total,
+}: {
+  teacher: Teacher;
+  index: number;
+  total: number;
+}) {
+  const initials = getInitials(teacher.name);
+  const courseLabel = getCourseLabel(teacher.courses);
+  return (
+    <article
+      data-teacher-card
+      className="relative flex shrink-0 flex-col overflow-hidden p-6 md:p-7"
+      style={{
+        background: CARD_BG,
+        border: `1px solid ${CARD_BORDER}`,
+        width: "clamp(280px, 78vw, 360px)",
+        minHeight: "480px",
+        scrollSnapAlign: "start",
+      }}
+    >
+      {/* Top meta row */}
+      <div className="mb-5 flex items-center justify-between">
+        <span className="font-mono text-[0.62rem] font-bold tracking-[0.24em] uppercase text-academy-orange">
+          {String(index + 1).padStart(2, "0")} /{" "}
+          {String(total).padStart(2, "0")}
+        </span>
+        <span
+          className="font-mono text-[0.6rem] font-bold tracking-[0.25em] uppercase"
+          style={{ color: TEXT_TERTIARY }}
+        >
+          {courseLabel}
+        </span>
+      </div>
+
+      {/* Monogram block */}
+      <div
+        className="relative mb-6 flex aspect-[5/4] items-center justify-center overflow-hidden"
+        style={{
+          background: "rgba(240,146,38,0.07)",
+          border: "1px solid rgba(240,146,38,0.18)",
+        }}
+        aria-hidden
+      >
+        <span className="text-[clamp(4rem,12vw,6rem)] font-black leading-none tracking-tight text-academy-orange">
+          {initials}
+        </span>
+        {/* Corner brackets arancio */}
+        <span className="absolute top-2 left-2 h-2.5 w-2.5 border-t border-l border-academy-orange opacity-60" />
+        <span className="absolute top-2 right-2 h-2.5 w-2.5 border-t border-r border-academy-orange opacity-60" />
+        <span className="absolute bottom-2 left-2 h-2.5 w-2.5 border-b border-l border-academy-orange opacity-60" />
+        <span className="absolute bottom-2 right-2 h-2.5 w-2.5 border-b border-r border-academy-orange opacity-60" />
+      </div>
+
+      {/* Name + role */}
+      <h3
+        className="text-[1.15rem] md:text-[1.25rem] font-black leading-tight"
+        style={{ color: TEXT_PRIMARY }}
+      >
+        {teacher.name}
+      </h3>
+      <p className="mt-2 text-[0.68rem] font-bold tracking-[0.2em] uppercase text-academy-orange">
+        {teacher.role}
+      </p>
+
+      {/* Bio */}
+      <p
+        className="mt-4 text-[0.82rem] leading-relaxed"
+        style={{ color: TEXT_SECONDARY }}
+      >
+        {teacher.bio}
+      </p>
+    </article>
+  );
+}
+
+function CarouselArrow({
+  direction,
+  onClick,
+  disabled,
+}: {
+  direction: "prev" | "next";
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={
+        direction === "prev" ? "Docente precedente" : "Docente successivo"
+      }
+      className="flex h-12 w-12 items-center justify-center transition-opacity disabled:opacity-30"
+      style={{
+        background: "#FFFFFF",
+        border: "1px solid rgba(240,146,38,0.35)",
+      }}
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        stroke="#F09226"
+        strokeWidth="1.8"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        style={{
+          transform: direction === "prev" ? "rotate(180deg)" : undefined,
+        }}
+        aria-hidden
+      >
+        <path d="M4 2 L9 7 L4 12" />
+      </svg>
+    </button>
+  );
+}
+
+function MovementHeader({
+  num,
+  title,
+  headerRef,
+}: {
+  num: string;
+  title: string;
+  headerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <div ref={headerRef} className="mb-10 flex items-baseline gap-4">
+      <span className="font-mono text-[0.7rem] font-bold tracking-[0.3em] uppercase text-academy-orange">
+        § {num}
+      </span>
+      <span className="h-px flex-1" style={{ background: DIVIDER }} />
+      <span
+        className="font-mono text-[0.7rem] font-bold tracking-[0.3em] uppercase"
+        style={{ color: TEXT_TERTIARY }}
+      >
+        {title}
+      </span>
+    </div>
+  );
+}
+
+export function WhyLacertosus() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const m1HeaderRef = useRef<HTMLDivElement>(null);
+  const m2HeaderRef = useRef<HTMLDivElement>(null);
+  const m3HeaderRef = useRef<HTMLDivElement>(null);
+
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const teachersTitleRef = useRef<HTMLHeadingElement>(null);
+  const problemsRef = useRef<HTMLDivElement>(null);
+  const responseCardRef = useRef<HTMLDivElement>(null);
+  const fipeCardRef = useRef<HTMLDivElement>(null);
+
+  const cohortCardRef = useRef<HTMLDivElement>(null);
+  const stat30Ref = useRef<HTMLDivElement>(null);
+  const counter30Ref = useRef<HTMLSpanElement>(null);
+  const perksRef = useRef<HTMLDivElement>(null);
+
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [carouselProgress, setCarouselProgress] = useState(0);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+
+  const scrollByCard = useCallback((dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>("[data-teacher-card]");
+    const gap = 16;
+    const step = (card?.offsetWidth ?? 320) + gap;
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  }, []);
+
+  /* Desktop mouse drag-to-scroll con momentum.
+     Listener su window (non pointer capture) → eventi garantiti anche
+     se il cursore esce dal carosello durante il trascinamento. */
+  const velocityRef = useRef(0);
+  const momentumRafRef = useRef<number | null>(null);
+
+  const stopMomentum = useCallback(() => {
+    if (momentumRafRef.current != null) {
+      cancelAnimationFrame(momentumRafRef.current);
+      momentumRafRef.current = null;
+    }
+  }, []);
+
+  const startMomentum = useCallback(() => {
+    const DECAY = 0.93;
+    const MIN_V = 0.02;
+    const tick = () => {
+      const el = scrollerRef.current;
+      if (!el) {
+        momentumRafRef.current = null;
+        return;
+      }
+      const v = velocityRef.current;
+      if (Math.abs(v) < MIN_V) {
+        momentumRafRef.current = null;
+        return;
+      }
+      el.scrollLeft += v * 16;
+      velocityRef.current *= DECAY;
+      momentumRafRef.current = requestAnimationFrame(tick);
+    };
+    momentumRafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      const el = scrollerRef.current;
+      if (!el) return;
+      const target = e.target as HTMLElement;
+      if (target.closest("button, a, [data-no-drag]")) return;
+
+      /* preventDefault evita la text selection durante il drag e garantisce
+         che onMouseMove globali arrivino fluidamente. */
+      e.preventDefault();
+      stopMomentum();
+
+      const startX = e.clientX;
+      const startScroll = el.scrollLeft;
+      let lastX = startX;
+      let lastTime = performance.now();
+      velocityRef.current = 0;
+
+      el.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+
+      const onMove = (ev: MouseEvent) => {
+        const node = scrollerRef.current;
+        if (!node) return;
+        const dx = ev.clientX - startX;
+        node.scrollLeft = startScroll - dx;
+        const now = performance.now();
+        const dt = now - lastTime;
+        if (dt > 0) {
+          velocityRef.current = (lastX - ev.clientX) / dt;
+        }
+        lastX = ev.clientX;
+        lastTime = now;
+      };
+
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        const node = scrollerRef.current;
+        if (node) node.style.cursor = "grab";
+        document.body.style.userSelect = "";
+
+        const fresh = performance.now() - lastTime < 80;
+        if (fresh && Math.abs(velocityRef.current) > 0.05) {
+          startMomentum();
+        } else {
+          velocityRef.current = 0;
+        }
+      };
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [stopMomentum, startMomentum],
+  );
+
+  /* Cleanup momentum on unmount */
+  useEffect(() => {
+    return () => stopMomentum();
+  }, [stopMomentum]);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      const p = max > 0 ? Math.max(0, Math.min(1, el.scrollLeft / max)) : 0;
+      setCarouselProgress(p);
+      setCanPrev(el.scrollLeft > 4);
+      setCanNext(el.scrollLeft < max - 4);
+    };
+    onScroll();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) return;
+
+    const ctx = gsap.context(() => {
+      const fadeUp = (target: Element | null, opts?: gsap.TweenVars) => {
+        if (!target) return;
+        gsap.from(target, {
+          scrollTrigger: { trigger: target, start: "top 86%", once: true },
+          opacity: 0,
+          y: 32,
+          duration: 0.8,
+          ease: "power3.out",
+          ...opts,
+        });
+      };
+
+      fadeUp(m1HeaderRef.current);
+      fadeUp(titleRef.current, { y: 40, duration: 0.9 });
+      fadeUp(m2HeaderRef.current);
+      fadeUp(m3HeaderRef.current);
+      fadeUp(teachersTitleRef.current, { y: 40, duration: 0.9 });
+      fadeUp(carouselRef.current, { y: 40 });
+
+      /* §01 Problemi + strike */
+      const problemItems =
+        problemsRef.current?.querySelectorAll("[data-problem]");
+      if (problemItems?.length) {
+        gsap.from(problemItems, {
+          scrollTrigger: {
+            trigger: problemsRef.current,
+            start: "top 82%",
+            once: true,
+          },
+          opacity: 0,
+          x: -24,
+          duration: 0.55,
+          stagger: 0.1,
+          ease: "power2.out",
+        });
+        const strikes = problemsRef.current?.querySelectorAll("[data-strike]");
+        if (strikes?.length) {
+          gsap.set(strikes, { scaleX: 0, transformOrigin: "left center" });
+          gsap.to(strikes, {
+            scrollTrigger: {
+              trigger: problemsRef.current,
+              start: "top 72%",
+              once: true,
+            },
+            scaleX: 1,
+            duration: 0.55,
+            stagger: 0.13,
+            ease: "power2.inOut",
+            delay: 0.3,
+          });
+        }
+      }
+
+      fadeUp(responseCardRef.current, { y: 40 });
+      fadeUp(fipeCardRef.current, { y: 40, duration: 0.7 });
+
+      /* §02 Cohort: SplitLine */
+      const cohortChars =
+        cohortCardRef.current?.querySelectorAll("[data-cohort-char]");
+      if (cohortChars?.length) {
+        gsap.from(cohortChars, {
+          scrollTrigger: {
+            trigger: cohortCardRef.current,
+            start: "top 80%",
+            once: true,
+          },
+          opacity: 0,
+          y: 30,
+          duration: 0.5,
+          stagger: 0.04,
+          ease: "power3.out",
+        });
+      }
+      fadeUp(cohortCardRef.current, { y: 40 });
+
+      /* §02 Counter 30 */
+      if (counter30Ref.current && stat30Ref.current) {
+        const obj = { v: 0 };
+        gsap.to(obj, {
+          scrollTrigger: {
+            trigger: stat30Ref.current,
+            start: "top 80%",
+            once: true,
+          },
+          v: 30,
+          duration: 1.2,
+          ease: "power2.out",
+          onUpdate() {
+            if (counter30Ref.current)
+              counter30Ref.current.textContent = String(Math.round(obj.v));
+          },
+        });
+      }
+      fadeUp(stat30Ref.current, { y: 40 });
+
+      /* §02 Perks 3 card */
+      const perkCards = perksRef.current?.querySelectorAll("[data-perk]");
+      if (perkCards?.length) {
+        gsap.from(perkCards, {
+          scrollTrigger: {
+            trigger: perksRef.current,
+            start: "top 84%",
+            once: true,
+          },
+          opacity: 0,
+          y: 40,
+          duration: 0.65,
+          stagger: 0.12,
+          ease: "power3.out",
+        });
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  /* --section-bg allinea il transition layer di chiusura della hero
+     al bg light di questa sezione (transizione seamless). */
+  const sectionStyle = {
+    background: BG_SECTION,
+    "--section-bg": BG_SECTION,
+  } as React.CSSProperties;
+
+  return (
+    <section
+      ref={sectionRef}
+      id="perche"
+      className="relative overflow-hidden"
+      style={sectionStyle}
+    >
+      <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] py-24 md:px-10 md:py-32">
+        {/* ───────────── §01 · IL SETTORE ───────────── */}
+        <MovementHeader num="01" title="Il Settore" headerRef={m1HeaderRef} />
+
+        <h2
+          ref={titleRef}
+          className="mb-10 max-w-3xl text-[clamp(2rem,4.5vw,3.8rem)] font-black leading-[1.05] tracking-tight"
+          style={{ color: TEXT_PRIMARY }}
+        >
+          Pieno di corsi.{" "}
+          <span className="text-academy-orange">Non di professionisti.</span>
+        </h2>
+
+        <div className="mb-24 grid gap-3 md:gap-4 lg:grid-cols-12">
+          {/* PROBLEMA */}
+          <div
+            ref={problemsRef}
+            className="relative flex flex-col justify-between overflow-hidden p-7 md:p-8 lg:col-span-7 lg:row-span-2"
+            style={{
+              background: CARD_BG,
+              border: `1px solid ${CARD_BORDER}`,
+            }}
+          >
+            <div>
+              <p className="mb-7 text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
+                ✕&ensp;Patologie del settore · ×05
+              </p>
+              <ul className="space-y-5">
+                {PROBLEMS.map((p, i) => (
+                  <li key={i} data-problem className="flex items-start gap-3.5">
+                    <span
+                      className="mt-[3px] shrink-0 font-mono text-[0.65rem] font-black text-academy-orange"
+                      style={{ opacity: 0.75 }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className="relative text-[0.9rem] leading-snug"
+                      style={{ color: "rgba(17,17,17,0.78)" }}
+                    >
+                      {p}
+                      <span
+                        data-strike
+                        className="absolute left-0 right-0"
+                        style={{
+                          top: "50%",
+                          height: "1px",
+                          background: STRIKE_ORANGE,
+                          transformOrigin: "left center",
+                        }}
+                      />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div
+              className="mt-10 pt-6"
+              style={{ borderTop: `1px solid ${DIVIDER}` }}
+            >
+              <p
+                className="font-mono text-[0.65rem] font-bold tracking-[0.28em] uppercase"
+                style={{ color: TEXT_TERTIARY }}
+              >
+                Fonte: mercato formativo italiano 2025
+              </p>
+            </div>
+          </div>
+
+          {/* RISPOSTA */}
+          <div
+            ref={responseCardRef}
+            className="flex flex-col justify-between p-7 md:p-8 lg:col-span-5"
+            style={{
+              background: ACCENT_CARD_BG,
+              border: `1px solid ${ACCENT_CARD_BORDER}`,
+            }}
+          >
+            <p className="text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
+              ✓&ensp;La Risposta
+            </p>
+            <div className="mt-6">
+              <p
+                className="text-[clamp(1.3rem,2.2vw,1.9rem)] font-black leading-[1.15]"
+                style={{ color: TEXT_PRIMARY }}
+              >
+                Un percorso unico che unisce{" "}
+                <span className="text-academy-orange">
+                  tecnica, pratica, business, network
+                </span>
+                .
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {RESPONSE_TAGS.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1.5 text-[0.7rem] font-bold tracking-[0.2em] uppercase"
+                    style={{
+                      background: "rgba(17,17,17,0.04)",
+                      border: "1px solid rgba(17,17,17,0.1)",
+                      color: TEXT_PRIMARY,
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* FIPE STRIP */}
+          <div
+            ref={fipeCardRef}
+            className="flex items-center gap-5 p-7 md:p-8 lg:col-span-5"
+            style={{
+              background: CARD_BG,
+              border: `1px solid ${CARD_BORDER}`,
+            }}
+          >
+            <div
+              className="flex h-12 w-12 shrink-0 items-center justify-center"
+              style={{
+                background: "rgba(240,146,38,0.1)",
+                border: "1px solid rgba(240,146,38,0.35)",
+              }}
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#F09226"
+                strokeWidth="1.8"
+              >
+                <path
+                  d="M12 2L4 5v6.5c0 5 3.5 9 8 10.5 4.5-1.5 8-5.5 8-10.5V5l-8-3z"
+                  strokeLinejoin="miter"
+                />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[0.65rem] font-bold tracking-[0.28em] uppercase text-academy-orange">
+                Certificazione ufficiale
+              </p>
+              <p
+                className="mt-1 text-[0.95rem] font-black"
+                style={{ color: TEXT_PRIMARY }}
+              >
+                FIPE × Lacertosus
+              </p>
+              <p
+                className="mt-1 text-[0.78rem]"
+                style={{ color: TEXT_SECONDARY }}
+              >
+                Doppia certificazione nazionale e internazionale — inclusa.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ───────────── §02 · LA COHORT ───────────── */}
+        <MovementHeader num="02" title="La Cohort" headerRef={m2HeaderRef} />
+
+        <div className="mb-4 grid gap-3 md:gap-4 lg:grid-cols-12">
+          {/* COHORT 001 HERO */}
+          <div
+            ref={cohortCardRef}
+            className="relative flex flex-col justify-between overflow-hidden p-7 md:p-10 lg:col-span-8 lg:row-span-2"
+            style={{
+              background: ACCENT_CARD_BG,
+              border: `1px solid ${ACCENT_CARD_BORDER}`,
+              minHeight: "380px",
+            }}
+          >
+            <p className="font-mono text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
+              Founding Edition · 2026 / 2027
+            </p>
+
+            <div>
+              <div
+                className="text-[clamp(3.2rem,9vw,7rem)] font-black leading-[0.95] tracking-tight tabular-nums text-academy-orange"
+                aria-label="COHORT 001"
+              >
+                <SplitLine text="COHORT 001" />
+              </div>
+              <p
+                className="mt-6 max-w-xl text-[clamp(1rem,1.5vw,1.2rem)] font-bold leading-snug"
+                style={{ color: TEXT_PRIMARY }}
+              >
+                Non stai acquistando un corso. Stai entrando in qualcosa di
+                irripetibile.
+              </p>
+              <p
+                className="mt-3 max-w-xl text-[0.85rem] leading-relaxed"
+                style={{ color: TEXT_SECONDARY }}
+              >
+                I fondatori della prima edizione non saranno semplici alumni —
+                porteranno con sé il privilegio di aver aperto la strada e
+                contribuito a definire lo standard della formazione fitness
+                italiana.
+              </p>
+            </div>
+
+            {/* Corner brackets arancio */}
+            <span
+              aria-hidden
+              className="absolute top-4 left-4 h-4 w-4 border-t border-l border-academy-orange"
+              style={{ opacity: 0.5 }}
+            />
+            <span
+              aria-hidden
+              className="absolute top-4 right-4 h-4 w-4 border-t border-r border-academy-orange"
+              style={{ opacity: 0.5 }}
+            />
+            <span
+              aria-hidden
+              className="absolute bottom-4 left-4 h-4 w-4 border-b border-l border-academy-orange"
+              style={{ opacity: 0.5 }}
+            />
+            <span
+              aria-hidden
+              className="absolute bottom-4 right-4 h-4 w-4 border-b border-r border-academy-orange"
+              style={{ opacity: 0.5 }}
+            />
+          </div>
+
+          {/* ACCESSO ESCLUSIVO — minimal, counter focale + status live */}
+          <div
+            ref={stat30Ref}
+            className="relative flex flex-col justify-between gap-7 p-7 md:p-8 lg:col-span-4 lg:row-span-2"
+            style={{
+              background: CARD_BG,
+              border: `1px solid ${CARD_BORDER}`,
+            }}
+          >
+            <p className="text-[0.7rem] font-black tracking-[0.3em] uppercase text-academy-orange">
+              Accesso Esclusivo
+            </p>
+
+            <div>
+              <div
+                className="text-[clamp(6rem,14vw,10rem)] font-black leading-[0.85] tabular-nums text-academy-orange"
+                aria-label={`${SLOT_COUNT} posti per edizione`}
+              >
+                <span ref={counter30Ref}>0</span>
+              </div>
+              <p
+                className="mt-3 font-mono text-[0.68rem] font-bold tracking-[0.32em] uppercase"
+                style={{ color: TEXT_TERTIARY }}
+              >
+                Posti · per edizione
+              </p>
+            </div>
+
+            <div className="h-px" style={{ background: DIVIDER }} />
+
+            <p
+              className="text-[0.85rem] leading-relaxed"
+              style={{ color: TEXT_SECONDARY }}
+            >
+              Ogni posto è riservato a chi dimostra la determinazione giusta.
+              Non si entra per caso.
+            </p>
+
+            <div className="flex items-center gap-2.5">
+              <span
+                className="relative inline-flex h-2 w-2 shrink-0"
+                aria-hidden
+              >
+                <span
+                  className="absolute inset-0 animate-ping"
+                  style={{
+                    background: "#F09226",
+                    opacity: 0.55,
+                  }}
+                />
+                <span
+                  className="relative inline-flex h-2 w-2"
+                  style={{ background: "#F09226" }}
+                />
+              </span>
+              <span
+                className="font-mono text-[0.64rem] font-bold tracking-[0.24em] uppercase"
+                style={{ color: TEXT_PRIMARY }}
+              >
+                Iscrizioni aperte · chiusura a esaurimento
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* PERKS 3 card */}
+        <div ref={perksRef} className="grid gap-3 md:gap-4 lg:grid-cols-3">
+          {FOUNDER_PERKS.map((p) => (
+            <div
+              key={p.label}
+              data-perk
+              className="flex flex-col p-7 md:p-8"
+              style={{
+                background: CARD_BG,
+                border: `1px solid ${CARD_BORDER}`,
+              }}
+            >
+              <p className="mb-6 text-[0.7rem] font-black tracking-[0.3em] uppercase text-academy-orange">
+                {p.label}
+              </p>
+              <div
+                className="text-[2.6rem] font-black leading-none text-academy-orange select-none"
+                style={{ opacity: 0.35 }}
+              >
+                {p.icon}
+              </div>
+              <p
+                className="mt-3 text-[1.05rem] font-black leading-tight"
+                style={{ color: TEXT_PRIMARY }}
+              >
+                {p.title}
+              </p>
+              <p className="mt-1 text-[0.78rem] font-bold tracking-[0.2em] uppercase text-academy-orange">
+                {p.sub}
+              </p>
+              <p
+                className="mt-3 text-[0.8rem] leading-relaxed"
+                style={{ color: TEXT_SECONDARY }}
+              >
+                {p.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* ───────────── §03 · I DOCENTI ───────────── */}
+        <div className="mt-24 md:mt-32">
+          <MovementHeader num="03" title="I Docenti" headerRef={m3HeaderRef} />
+
+          {/* Title row: headline + arrows top-right */}
+          <div className="mb-10 flex items-end justify-between gap-6">
+            <h2
+              ref={teachersTitleRef}
+              className="max-w-3xl text-[clamp(2rem,4.5vw,3.8rem)] font-black leading-[1.05] tracking-tight"
+              style={{ color: TEXT_PRIMARY }}
+            >
+              <span className="text-academy-orange tabular-nums">
+                {TEACHERS.length}
+              </span>{" "}
+              professionisti.{" "}
+              <span className="text-academy-orange">Zero compromessi.</span>
+            </h2>
+            <div className="flex shrink-0 items-center gap-2">
+              <CarouselArrow
+                direction="prev"
+                onClick={() => scrollByCard(-1)}
+                disabled={!canPrev}
+              />
+              <CarouselArrow
+                direction="next"
+                onClick={() => scrollByCard(1)}
+                disabled={!canNext}
+              />
+            </div>
+          </div>
+
+          <div ref={carouselRef} className="relative">
+            {/* Scroller: prima card allineata a sx del wrapper, bleed solo a dx */}
+            <div
+              ref={scrollerRef}
+              className="-mr-[5%] flex gap-3 overflow-x-auto pr-[5%] md:-mr-10 md:gap-4 md:pr-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{ cursor: "grab" }}
+              aria-label="Carosello docenti"
+              onMouseDown={handleMouseDown}
+            >
+              {TEACHERS.map((teacher, i) => (
+                <TeacherCard
+                  key={teacher.slug}
+                  teacher={teacher}
+                  index={i}
+                  total={TEACHERS.length}
+                />
+              ))}
+            </div>
+
+            {/* Progress bar sotto */}
+            <div
+              className="relative mt-8 h-px"
+              style={{ background: "rgba(0,0,0,0.1)" }}
+              aria-hidden
+            >
+              <div
+                className="absolute left-0 top-0 h-full bg-academy-orange transition-[width] duration-200 ease-out"
+                style={{
+                  width: `${Math.max(6, carouselProgress * 100)}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

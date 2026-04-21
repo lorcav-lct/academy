@@ -8,13 +8,14 @@ const C = 2 * Math.PI * R;
 
 export function ScrollProgress() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const circleRef    = useRef<SVGCircleElement>(null);
+  const circleRef = useRef<SVGCircleElement>(null);
   const [pct, setPct] = useState(0);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const update = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll <= 0) return;
       const progress = Math.min(1, window.scrollY / maxScroll);
       const p = Math.round(progress * 100);
@@ -22,12 +23,25 @@ export function ScrollProgress() {
       if (circleRef.current) {
         circleRef.current.style.strokeDashoffset = String(C * (1 - progress));
       }
-      setVisible(progress > 0.008);
+      // Show only once "Perché Lacertosus" (#perche) has entered the viewport.
+      // Hide again when it has scrolled past.
+      const perche = document.getElementById("perche");
+      if (perche) {
+        const rect = perche.getBoundingClientRect();
+        const vh = window.innerHeight;
+        setVisible(rect.top < vh * 0.65 && rect.bottom > 0);
+      } else {
+        setVisible(false);
+      }
     };
 
     window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
     update();
-    return () => window.removeEventListener("scroll", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   return (
@@ -42,7 +56,10 @@ export function ScrollProgress() {
       }}
       aria-label={`Scroll: ${pct}%`}
     >
-      <div className="relative flex items-center justify-center" style={{ width: SIZE, height: SIZE }}>
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: SIZE, height: SIZE }}
+      >
         {/* Light bg disc */}
         <div
           className="absolute inset-0 rounded-full"
@@ -63,7 +80,9 @@ export function ScrollProgress() {
         >
           {/* Track */}
           <circle
-            cx={SIZE / 2} cy={SIZE / 2} r={R}
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={R}
             fill="none"
             stroke="rgba(0,0,0,0.1)"
             strokeWidth="1.8"
@@ -71,7 +90,9 @@ export function ScrollProgress() {
           {/* Progress */}
           <circle
             ref={circleRef}
-            cx={SIZE / 2} cy={SIZE / 2} r={R}
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={R}
             fill="none"
             stroke="#F09226"
             strokeWidth="1.8"

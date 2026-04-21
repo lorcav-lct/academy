@@ -1,8 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_HERO_SLIDES } from "@/lib/constants/hero-slides";
 import { HeroSection } from "@/components/home/hero-section";
-import { SocialProofBar } from "@/components/home/social-proof-bar";
-import { ValueProposition } from "@/components/home/value-proposition";
+import { WhyLacertosus } from "@/components/home/why-lacertosus";
 import { PackPreview } from "@/components/home/pack-preview";
 import { PathOverview } from "@/components/home/path-overview";
 import { FaqSection } from "@/components/home/faq-section";
@@ -27,10 +26,8 @@ export default async function HomePage() {
     <>
       {/* #1  Hero */}
       <HeroSection slides={slides} />
-      {/* #2  Perché Lacertosus */}
-      <ValueProposition />
-      {/* #3  I Numeri — Social Proof Bento */}
-      <SocialProofBar />
+      {/* #2  Perché Lacertosus + Prima Edizione (unificate) */}
+      <WhyLacertosus />
       {/* #4  Pack / Pricing */}
       <PackPreview />
       {/* #5  I 3 Blocchi Formativi */}
