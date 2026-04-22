@@ -13,7 +13,7 @@ const PROBLEMS = [
   "Nessuna rete professionale dopo il corso",
 ];
 
-const RESPONSE_TAGS = [];
+const RESPONSE_TAGS: string[] = [];
 
 const FOUNDER_PERKS = [
   {
