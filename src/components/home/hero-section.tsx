@@ -284,6 +284,31 @@ export function HeroSection({
     if (typeof window === "undefined") return;
     gsap.registerPlugin(ScrollTrigger);
 
+    /* Hydration/navigation robustness:
+       1. Silenzia gli avvisi "GSAP target not found" durante mount (refs
+          temporaneamente null nelle bundle minified con fast refresh/bfcache).
+       2. Monkey-patch one-shot di ScrollTrigger.refresh per intercettare
+          race "insertBefore on Node" quando React ha già mosso il pin
+          wrapper. Il prossimo scroll/resize farà un refresh pulito. */
+    gsap.config({ nullTargetWarn: false });
+    const STg = ScrollTrigger as typeof ScrollTrigger & {
+      __refreshPatched?: boolean;
+    };
+    if (!STg.__refreshPatched) {
+      const orig = STg.refresh.bind(STg);
+      STg.refresh = ((...args: Parameters<typeof STg.refresh>) => {
+        try {
+          return orig(...args);
+        } catch (e) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[ScrollTrigger] refresh skipped (DOM race)", e);
+          }
+          return undefined as unknown as ReturnType<typeof STg.refresh>;
+        }
+      }) as typeof STg.refresh;
+      STg.__refreshPatched = true;
+    }
+
     const shouldPin = isDesktop && !isReducedMotion;
     countFiredRef.current = false;
 
@@ -335,6 +360,34 @@ export function HeroSection({
       gsap.set(videoLayerRef.current, { opacity: 0 });
       gsap.set(slideBgRef.current, { opacity: 1 });
 
+      /* Hide panel children by default → reveal on panel arrival */
+      const allReveals = [
+        ...(s1Ref.current?.querySelectorAll("[data-reveal]") ?? []),
+        ...(s2Ref.current?.querySelectorAll("[data-reveal]") ?? []),
+        ...(s3Ref.current?.querySelectorAll("[data-reveal]") ?? []),
+      ];
+      if (allReveals.length) {
+        gsap.set(allReveals, { opacity: 0, y: 24 });
+      }
+
+      const revealPanel = (el: HTMLDivElement | null) => {
+        if (!el) return;
+        const targets = el.querySelectorAll("[data-reveal]");
+        if (!targets.length) return;
+        gsap.fromTo(
+          targets,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.06,
+            duration: 0.55,
+            ease: "power3.out",
+            overwrite: "auto",
+          },
+        );
+      };
+
       /* ── Master scroll timeline ─────────────────────────── */
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -343,6 +396,16 @@ export function HeroSection({
           end: "+=580%",
           pin: stageRef.current,
           scrub: 0.9,
+          /* Snap ai centri degli hold (P1/P2/P3/P4) + inizio/fine.
+             Se l'utente si ferma a metà di una transizione, viene portato
+             al pannello più vicino — meno artefatti "incastrati". */
+          snap: {
+            snapTo: [0, 0.11, 0.41, 0.69, 0.89, 1],
+            duration: { min: 0.25, max: 0.7 },
+            delay: 0.12,
+            ease: "power2.inOut",
+            inertia: false,
+          },
           onUpdate: (self) => {
             const p = self.progress;
             sliderActive.current = p < 0.22;
@@ -356,6 +419,17 @@ export function HeroSection({
             if (idx !== stageIdxRef.current) {
               stageIdxRef.current = idx;
               setStageIdx(idx);
+              /* Rifai entrance animation degli elementi interni ogni volta
+                 che si entra in un nuovo pannello (anche in navigazione
+                 avanti/indietro). */
+              const panelMap = [
+                null,
+                s1Ref.current,
+                s2Ref.current,
+                s3Ref.current,
+              ];
+              const entering = panelMap[idx];
+              if (entering) revealPanel(entering);
             }
           },
         },
@@ -791,6 +865,7 @@ export function HeroSection({
           className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1440px] mx-auto pointer-events-none"
         >
           <span
+            data-reveal
             className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-8"
             style={{ color: "#F09226" }}
           >
@@ -798,18 +873,21 @@ export function HeroSection({
           </span>
           <div className="text-center max-w-5xl">
             <div
+              data-reveal
               className="text-[clamp(2.6rem,6.2vw,6.8rem)] font-black tracking-[-0.035em] leading-[0.96]"
               style={{ color: "#ffffff" }}
             >
               FORMIAMO CHI
             </div>
             <div
+              data-reveal
               className="text-[clamp(2.6rem,6.2vw,6.8rem)] font-black tracking-[-0.035em] leading-[0.96] mt-1"
               style={{ color: "#F09226" }}
             >
               CAMBIA IL FITNESS.
             </div>
             <p
+              data-reveal
               className="mx-auto mt-10 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
@@ -826,6 +904,7 @@ export function HeroSection({
           className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1600px] mx-auto pointer-events-none"
         >
           <span
+            data-reveal
             className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-10"
             style={{ color: "#F09226" }}
           >
@@ -834,7 +913,7 @@ export function HeroSection({
 
           <div className="grid grid-cols-3 gap-10 w-full items-center">
             {/* 9 MESI */}
-            <div className="flex flex-col items-center text-center">
+            <div data-reveal className="flex flex-col items-center text-center">
               <div className="relative">
                 <CountUp
                   to={9}
@@ -869,7 +948,7 @@ export function HeroSection({
             </div>
 
             {/* 100% */}
-            <div className="flex flex-col items-center text-center">
+            <div data-reveal className="flex flex-col items-center text-center">
               <div className="relative flex items-baseline">
                 <CountUp
                   to={100}
@@ -913,7 +992,7 @@ export function HeroSection({
             </div>
 
             {/* 8 MASTERCLASS */}
-            <div className="flex flex-col items-center text-center">
+            <div data-reveal className="flex flex-col items-center text-center">
               <div className="relative">
                 <CountUp
                   to={8}
@@ -955,6 +1034,7 @@ export function HeroSection({
           className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1440px] mx-auto pointer-events-none"
         >
           <span
+            data-reveal
             className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-8"
             style={{ color: "rgba(212,175,55,0.85)" }}
           >
@@ -964,6 +1044,7 @@ export function HeroSection({
           {/* Title */}
           <div className="text-center">
             <div
+              data-reveal
               className="text-[clamp(3rem,7vw,7.5rem)] font-black tracking-[-0.03em] leading-[0.92]"
               style={{ color: "#D4AF37" }}
             >
@@ -971,6 +1052,7 @@ export function HeroSection({
               <span style={{ color: "#ffffff" }}>LACERTOSUS</span>
             </div>
             <p
+              data-reveal
               className="mx-auto mt-8 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
               style={{ color: "#ffffff" }}
             >
@@ -980,7 +1062,7 @@ export function HeroSection({
           </div>
 
           {/* Progression track */}
-          <div className="mt-12 flex items-center gap-0">
+          <div data-reveal className="mt-12 flex items-center gap-0">
             {[
               { n: "I", after: "CORPUS" },
               { n: "II", after: "VIS" },
@@ -1229,7 +1311,7 @@ export function HeroSection({
                   <path d="M3 1.5L10 6L3 10.5V1.5Z" />
                 </svg>
               </span>
-              <span>Guarda il Video</span>
+              <span>Guarda la presentazione</span>
             </button>
 
             {/* Prosegui — progress is the button's own top fill bar

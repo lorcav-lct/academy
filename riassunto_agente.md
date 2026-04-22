@@ -516,6 +516,16 @@ Concept: 4 pannelli pinned desktop, stack mobile lineare. Ogni pannello ha una s
 
 Pin: `ScrollTrigger({ start: "top top", end: "+=580%", pin: stageRef, scrub: 0.9 })` con singolo trigger su `sectionRef` che guida una timeline unica per tutti i pannelli. (Aggiornato da 420% → 580% ad aprile 2026 per dare tempo di lettura al pannello certificato P4.)
 
+**Snap ai centri dei pannelli** (aprile 2026): la scrollTrigger include `snap: { snapTo: [0, 0.11, 0.41, 0.69, 0.89, 1], duration: { min: 0.25, max: 0.7 }, delay: 0.12, ease: "power2.inOut", inertia: false }`. Se l'utente si ferma a metà di una transizione fra pannelli, viene portato automaticamente al pannello più vicino (centro hold P1/P2/P3/P4 o estremi 0/1). Elimina il problema degli artefatti grafici visibili quando ci si "incastra" nelle transizioni intermedie.
+
+**Entrance animations on panel arrival** (aprile 2026): con lo snap attivo, le animazioni scrub-based degli elementi interni completavano il loro arco durante il transito fra pannelli; arrivati al centro hold gli elementi erano già a stato finale, senza alcun reveal visibile. Fix:
+
+- Elementi chiave di S1/S2/S3 marcati con `data-reveal` (label micro, titoli massivi, descrizioni, KPI container, progression track)
+- `gsap.set` iniziale porta tutti i reveal a `opacity: 0, y: 24`
+- Helper `revealPanel(el)` esegue `gsap.fromTo` con stagger 0.06, duration 0.55, ease power3.out, `overwrite: "auto"`
+- Nell'`onUpdate` della scrollTrigger, ogni volta che `stageIdx` cambia viene chiamato `revealPanel` sul nuovo pannello — animazione "fresca" sia avanti sia indietro
+- Il container s1/s2/s3 continua a essere mostrato via scrub (opacity 0→1); solo gli elementi interni ricevono il reveal evento-based. Nessun FOUC perché i container sono nascosti finché non si attivano.
+
 **Layer di sfondo**:
 
 - `stageRef` base `background: #111111`
@@ -586,6 +596,13 @@ Handler Pointer Events (mouse + touch) condivisi tra desktop e mobile:
 ### ScrollTrigger refresh globale
 
 Effect separato che chiama `ScrollTrigger.refresh()` a 300ms e 1200ms dal mount + su `window load`, ogni volta che `isDesktop`/`isReducedMotion` cambiano. Necessario per evitare posizioni stale che impedivano alla sezione `#perche` di firare i propri trigger dopo il cambio viewport.
+
+Il refresh helper usa `requestAnimationFrame` + mount guard per evitare race con React reconciliation (v1 del fix, aprile 2026).
+
+**Difesa aggiuntiva per Vercel prod** (aprile 2026): nel useEffect principale (dopo `gsap.registerPlugin(ScrollTrigger)`) c'è:
+
+- `gsap.config({ nullTargetWarn: false })` — silenzia i warning "GSAP target null not found" che comparivano nei bundle minified con bfcache/fast refresh (refs momentaneamente null durante hydration)
+- Monkey-patch one-shot di `ScrollTrigger.refresh` con try/catch — intercetta `NotFoundError: insertBefore` quando il refresh automatico di ScrollTrigger (es. visibilitychange, resize, hydration) entra in race con mutation React del pin wrapper. L'app continua, il prossimo scroll/resize rifà un refresh pulito. Guardia `STg.__refreshPatched` previene doppia patch.
 
 ### Accessibilità
 
