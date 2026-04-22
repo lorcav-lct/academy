@@ -13,7 +13,7 @@ const PROBLEMS = [
   "Nessuna rete professionale dopo il corso",
 ];
 
-const RESPONSE_TAGS = ["Tecnica", "Pratica", "Business", "Network"];
+const RESPONSE_TAGS = [];
 
 const FOUNDER_PERKS = [
   {
@@ -60,18 +60,26 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-/* Palette light minimal-luxury */
-const BG_SECTION = "#F5F3EF"; // warm off-white
+/* Palette light minimal-luxury + dark anchor cards */
+const BG_SECTION = "#ededed"; // warm off-white più saturato per carattere
 const CARD_BG = "#FFFFFF";
-const CARD_BORDER = "rgba(0,0,0,0.07)";
-const ACCENT_CARD_BG =
-  "linear-gradient(145deg, rgba(240,146,38,0.09), #FFFFFF 70%)";
-const ACCENT_CARD_BORDER = "rgba(240,146,38,0.28)";
+const CARD_BORDER = "rgba(0,0,0,0.08)";
+const CARD_SHADOW = "0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)";
 const TEXT_PRIMARY = "#111111";
 const TEXT_SECONDARY = "rgba(17,17,17,0.62)";
 const TEXT_TERTIARY = "rgba(17,17,17,0.42)";
 const DIVIDER = "rgba(0,0,0,0.08)";
 const STRIKE_ORANGE = "rgba(240,146,38,0.7)";
+
+/* Dark anchor tokens — usati per "La Risposta" (§01) e "COHORT 001" (§02).
+   Gradient diagonale grigio scuro → scurissimo per dare profondità
+   senza il "flat feeling" del colore pieno. */
+const DARK_CARD_BG = "linear-gradient(145deg,#434343 0%, #0a0a0a 100%)";
+const DARK_CARD_BG_BRAND = "linear-gradient(145deg, #434343 0%, #0a0a0a 100%)";
+const DARK_TEXT_PRIMARY = "#FFFFFF";
+const DARK_TEXT_SECONDARY = "rgba(255,255,255,0.72)";
+const DARK_TAG_BG = "rgba(255,255,255,0.05)";
+const DARK_TAG_BORDER = "rgba(255,255,255,0.15)";
 
 function SplitLine({
   text,
@@ -545,69 +553,54 @@ export function WhyLacertosus() {
           <span className="text-academy-orange">Non di professionisti.</span>
         </h2>
 
-        <div className="mb-24 grid gap-3 md:gap-4 lg:grid-cols-12">
+        <div className="mb-24 grid gap-4 md:gap-5 lg:grid-cols-12">
           {/* PROBLEMA */}
           <div
             ref={problemsRef}
-            className="relative flex flex-col justify-between overflow-hidden p-7 md:p-8 lg:col-span-7 lg:row-span-2"
+            className="relative flex flex-col overflow-hidden p-7 md:p-8 lg:col-span-7 lg:row-span-2"
             style={{
               background: CARD_BG,
               border: `1px solid ${CARD_BORDER}`,
+              boxShadow: CARD_SHADOW,
             }}
           >
-            <div>
-              <p className="mb-7 text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
-                ✕&ensp;Patologie del settore · ×05
-              </p>
-              <ul className="space-y-5">
-                {PROBLEMS.map((p, i) => (
-                  <li key={i} data-problem className="flex items-start gap-3.5">
+            <p className="mb-7 text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
+              Problemi comuni reali
+            </p>
+            <ul className="space-y-5">
+              {PROBLEMS.map((p, i) => (
+                <li key={i} data-problem className="flex items-start gap-3.5">
+                  <span className="mt-[3px] shrink-0 font-mono text-[0.68rem] font-black text-academy-orange">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className="relative text-[0.9rem] leading-snug"
+                    style={{ color: "rgba(17,17,17,0.8)" }}
+                  >
+                    {p}
                     <span
-                      className="mt-[3px] shrink-0 font-mono text-[0.65rem] font-black text-academy-orange"
-                      style={{ opacity: 0.75 }}
-                    >
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      className="relative text-[0.9rem] leading-snug"
-                      style={{ color: "rgba(17,17,17,0.78)" }}
-                    >
-                      {p}
-                      <span
-                        data-strike
-                        className="absolute left-0 right-0"
-                        style={{
-                          top: "50%",
-                          height: "1px",
-                          background: STRIKE_ORANGE,
-                          transformOrigin: "left center",
-                        }}
-                      />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div
-              className="mt-10 pt-6"
-              style={{ borderTop: `1px solid ${DIVIDER}` }}
-            >
-              <p
-                className="font-mono text-[0.65rem] font-bold tracking-[0.28em] uppercase"
-                style={{ color: TEXT_TERTIARY }}
-              >
-                Fonte: mercato formativo italiano 2025
-              </p>
-            </div>
+                      data-strike
+                      className="absolute left-0 right-0"
+                      style={{
+                        top: "50%",
+                        height: "1px",
+                        background: STRIKE_ORANGE,
+                        transformOrigin: "left center",
+                      }}
+                    />
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* RISPOSTA */}
+          {/* RISPOSTA — DARK anchor card */}
           <div
             ref={responseCardRef}
             className="flex flex-col justify-between p-7 md:p-8 lg:col-span-5"
             style={{
-              background: ACCENT_CARD_BG,
-              border: `1px solid ${ACCENT_CARD_BORDER}`,
+              background: DARK_CARD_BG,
+              border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
             <p className="text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
@@ -616,11 +609,11 @@ export function WhyLacertosus() {
             <div className="mt-6">
               <p
                 className="text-[clamp(1.3rem,2.2vw,1.9rem)] font-black leading-[1.15]"
-                style={{ color: TEXT_PRIMARY }}
+                style={{ color: DARK_TEXT_PRIMARY }}
               >
-                Un percorso unico che unisce{" "}
+                Un percorso unico e pluricertificato che unisce{" "}
                 <span className="text-academy-orange">
-                  tecnica, pratica, business, network
+                  tecnica, pratica, business e network
                 </span>
                 .
               </p>
@@ -630,9 +623,9 @@ export function WhyLacertosus() {
                     key={tag}
                     className="px-3 py-1.5 text-[0.7rem] font-bold tracking-[0.2em] uppercase"
                     style={{
-                      background: "rgba(17,17,17,0.04)",
-                      border: "1px solid rgba(17,17,17,0.1)",
-                      color: TEXT_PRIMARY,
+                      background: DARK_TAG_BG,
+                      border: `1px solid ${DARK_TAG_BORDER}`,
+                      color: DARK_TEXT_PRIMARY,
                     }}
                   >
                     {tag}
@@ -649,6 +642,7 @@ export function WhyLacertosus() {
             style={{
               background: CARD_BG,
               border: `1px solid ${CARD_BORDER}`,
+              boxShadow: CARD_SHADOW,
             }}
           >
             <div
@@ -695,14 +689,14 @@ export function WhyLacertosus() {
         {/* ───────────── §02 · LA COHORT ───────────── */}
         <MovementHeader num="02" title="La Cohort" headerRef={m2HeaderRef} />
 
-        <div className="mb-4 grid gap-3 md:gap-4 lg:grid-cols-12">
-          {/* COHORT 001 HERO */}
+        <div className="mb-5 grid gap-4 md:gap-5 lg:grid-cols-12">
+          {/* COHORT 001 HERO — DARK anchor card (navy brand) */}
           <div
             ref={cohortCardRef}
             className="relative flex flex-col justify-between overflow-hidden p-7 md:p-10 lg:col-span-8 lg:row-span-2"
             style={{
-              background: ACCENT_CARD_BG,
-              border: `1px solid ${ACCENT_CARD_BORDER}`,
+              background: DARK_CARD_BG_BRAND,
+              border: "1px solid rgba(255,255,255,0.06)",
               minHeight: "380px",
             }}
           >
@@ -719,14 +713,14 @@ export function WhyLacertosus() {
               </div>
               <p
                 className="mt-6 max-w-xl text-[clamp(1rem,1.5vw,1.2rem)] font-bold leading-snug"
-                style={{ color: TEXT_PRIMARY }}
+                style={{ color: DARK_TEXT_PRIMARY }}
               >
                 Non stai acquistando un corso. Stai entrando in qualcosa di
                 irripetibile.
               </p>
               <p
                 className="mt-3 max-w-xl text-[0.85rem] leading-relaxed"
-                style={{ color: TEXT_SECONDARY }}
+                style={{ color: DARK_TEXT_SECONDARY }}
               >
                 I fondatori della prima edizione non saranno semplici alumni —
                 porteranno con sé il privilegio di aver aperto la strada e
@@ -739,22 +733,22 @@ export function WhyLacertosus() {
             <span
               aria-hidden
               className="absolute top-4 left-4 h-4 w-4 border-t border-l border-academy-orange"
-              style={{ opacity: 0.5 }}
+              style={{ opacity: 0.55 }}
             />
             <span
               aria-hidden
               className="absolute top-4 right-4 h-4 w-4 border-t border-r border-academy-orange"
-              style={{ opacity: 0.5 }}
+              style={{ opacity: 0.55 }}
             />
             <span
               aria-hidden
               className="absolute bottom-4 left-4 h-4 w-4 border-b border-l border-academy-orange"
-              style={{ opacity: 0.5 }}
+              style={{ opacity: 0.55 }}
             />
             <span
               aria-hidden
               className="absolute bottom-4 right-4 h-4 w-4 border-b border-r border-academy-orange"
-              style={{ opacity: 0.5 }}
+              style={{ opacity: 0.55 }}
             />
           </div>
 
@@ -765,6 +759,7 @@ export function WhyLacertosus() {
             style={{
               background: CARD_BG,
               border: `1px solid ${CARD_BORDER}`,
+              boxShadow: CARD_SHADOW,
             }}
           >
             <p className="text-[0.7rem] font-black tracking-[0.3em] uppercase text-academy-orange">
@@ -824,7 +819,7 @@ export function WhyLacertosus() {
         </div>
 
         {/* PERKS 3 card */}
-        <div ref={perksRef} className="grid gap-3 md:gap-4 lg:grid-cols-3">
+        <div ref={perksRef} className="grid gap-4 md:gap-5 lg:grid-cols-3">
           {FOUNDER_PERKS.map((p) => (
             <div
               key={p.label}
@@ -833,28 +828,32 @@ export function WhyLacertosus() {
               style={{
                 background: CARD_BG,
                 border: `1px solid ${CARD_BORDER}`,
+                boxShadow: CARD_SHADOW,
               }}
             >
-              <p className="mb-6 text-[0.7rem] font-black tracking-[0.3em] uppercase text-academy-orange">
-                {p.label}
-              </p>
-              <div
-                className="text-[2.6rem] font-black leading-none text-academy-orange select-none"
-                style={{ opacity: 0.35 }}
-              >
-                {p.icon}
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-[0.7rem] font-black tracking-[0.3em] uppercase text-academy-orange">
+                  {p.label}
+                </p>
+                <span
+                  className="text-[1.8rem] font-black leading-none text-academy-orange select-none"
+                  style={{ opacity: 0.4 }}
+                  aria-hidden
+                >
+                  {p.icon}
+                </span>
               </div>
               <p
-                className="mt-3 text-[1.05rem] font-black leading-tight"
+                className="text-[1.05rem] font-black leading-tight"
                 style={{ color: TEXT_PRIMARY }}
               >
                 {p.title}
               </p>
-              <p className="mt-1 text-[0.78rem] font-bold tracking-[0.2em] uppercase text-academy-orange">
+              <p className="mt-1 text-[0.7rem] font-bold tracking-[0.22em] uppercase text-academy-orange">
                 {p.sub}
               </p>
               <p
-                className="mt-3 text-[0.8rem] leading-relaxed"
+                className="mt-4 text-[0.8rem] leading-relaxed"
                 style={{ color: TEXT_SECONDARY }}
               >
                 {p.body}

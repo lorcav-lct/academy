@@ -490,6 +490,75 @@ Se il task riguarda teaser landing:
 - `teaser-website/index.html`
 - `supabase/migrations/009_teaser_leads.sql`
 
+## 11c. PathOverview — desktop struttura a 3 panels (aprile 2026)
+
+File: `src/components/home/path-overview.tsx`. Desktop ridisegnato da 5 pannelli → **3 pannelli** (mobile invariato).
+
+### Struttura desktop
+
+- **`NUM_PANELS = 3`**, snap e `goToPanel` si auto-adattano via `NUM_PANELS - 1`
+- **Panel 0** — intro con titoli/stat a sinistra + 3 folder cards 3D a destra (ref `folderCardsRef`). Aggiunta **idle float animation**: ogni card ha un `<div data-idle-float>` interno (inner face) che oscilla `y: 0 → -12` con `yoyo + repeat: -1`, delay + duration staggered per-card. Non clasha con le transform outer perché il float agisce sull'inner div (opacity/hover/click agiscono su outer).
+- **Panel 1** — **3-Column Overview** (ex `Panels 1-3` per-block rimossi). Una riga di 3 big-cards `ref={bigCardsRef[idx]}` ciascuna con: step dots, roman massivo, area, titolo, tagline, objective, curriculum preview (primi 4 + "+ N argomenti"), season badge, CTA "Scopri il programma →" (apre `BlockModal`), FIPE season note.
+- **Panel 2** — certificate FIPE (stesso contenuto dell'ex Panel 4, ora shift-down in indice)
+
+### Transizione verticale Panel 0 ↔ Panel 1 ↔ Panel 2 (aprile 2026)
+
+Due ScrollTrigger scrubbed che sincronizzano con lo scroll orizzontale della pinned section. Le folder cards escono verso il basso; le big cards entrano dal basso; in uscita dalla slide 2 le big cards salgono verso l'alto.
+
+**Costante condivisa**: `VERTICAL_DRIFT = 260` px.
+
+**Entry** (trigger: `overviewPanelRef`, start: `left right`, end: `left left`) — **2 fasi sequenziali, nessuna sovrapposizione**:
+
+- _Fase A_ (p 0 → 0.5): folder cards scendono e **spariscono completamente** (`opacity: 1 - lp`, `y: def.y + lp * 260`). Stagger `cIdx * 0.08`.
+- _Fase B_ (p 0.5 → 1): big cards **ricompaiono dal basso** (`opacity: lp`, `y: 260 - lp * 260`). Stagger `cIdx * 0.08`.
+- I blocchi non si sovrappongono visivamente: prima escono i primi, poi entrano i secondi.
+- Seed iniziale: `gsap.set(bigCardsRef, { opacity: 0, y: 260 })`.
+
+**Exit** (trigger: `certPanelRef`, start: `left right`, end: `left left`):
+
+- Big cards salgono e **spariscono entro p ~0.55** (`ep = p / 0.55`): `opacity: 1 - lp`, `y: -lp * 260`.
+- Stagger `cIdx * 0.08`. Il resto dello scroll lascia spazio a Panel 2 (certificate) che entra dal lato.
+
+**`onCardClick`**: semplificato — click su qualsiasi folder card chiama `goToPanel(1)` (overview). Niente più fly-up/fade, è la transizione verticale scrub a far morphing visivo delle cards.
+
+### Cleanup
+
+- Folder cards inner `[data-idle-float]` ricevono `gsap.killTweensOf(inner)` nel cleanup (previene leak del yoyo infinito)
+- Big cards: `gsap.set(c, { clearProps: "all" })`
+
+### Mobile (non toccato)
+
+- Restano i 4 dots (intro + 3 block cards) — mobile usa layout/flow differente da desktop
+- Nessun impatto sul path mobile
+
+## 11b. PathOverview — sfondo silk flow-field (aprile 2026)
+
+File: `src/components/home/path-overview.tsx`, funzione `initParticles(canvas)` righe 60-250 circa.
+
+**Bg sezione**: `radial-gradient(ellipse at 18% 55%, rgba(240,146,38,0.09)...) , radial-gradient(ellipse at 82% 25%, rgba(240,146,38,0.05)...), linear-gradient(145deg, #434343 0%, #1a1a1a 55%, #0a0a0a 100%)`. Gli header card interni usano `#1a1a1a` (più `#020026` è stato rimosso dalla sezione).
+
+**Animazione sfondo** (sostituita aprile 2026, via gli 90 dot arancio con wrap-around):
+
+- **50 filamenti "silk"** che seguono un curl-noise field 2D
+- Ogni filamento: `Float32Array` ring-buffer di 24 punti (trail), zero GC churn
+- **Pseudo-simplex via 2 sinusoidi sommate** (`flowAngle(x,y,t)`): prima ottava `sin(x*0.0042)*cos(y*0.0051)` (fold grande ~520px), seconda ottava ruotata 37° con frequenza ~4× maggiore (ripple ~180px). Il tempo entra anche nella formula → il field stesso "respira" su periodo ~60s
+- Velocity: `vx=cos(angle)*speed`, `vy=sin(angle)*speed`, speed randomizzato 0.55-1.1 px/frame per filamento
+- **Render**: `lineTo` polyline per-segmento con `globalAlpha = base * pow(s/TRAIL_LEN, 1.4)` per comet taper (più opaco verso head)
+- **Blend mode `lighter`** (additive) → soft glow arancio nei crossings senza artefatti scuri. No `shadowBlur` (era costo principale della vecchia impl)
+- Palette: `hsla(32±12, 85%, 54%, ...)` → range hue 20-44 (deep amber → pale gold), colore base precomputato su `p._color` al respawn
+- Respawn quando fuori margine 40 o `life > maxLife` (260-520 frame), con pre-fill del ring alla spawn position (la scia cresce dal punto, niente garbage iniziale)
+
+**Performance hooks**:
+
+- DPR capped a 2 (no over-rendering 4K)
+- Resize debounced 150ms
+- `document.visibilityState` pause/resume: `cancelAnimationFrame` su hidden, resume con `lastT = performance.now()` per evitare dt burst
+- dt clampato a 33ms
+- `prefers-reduced-motion` → snapshot statico (80 frame pre-calcolati, 1 render, stop rAF)
+- Mobile: già escluso via `window.innerWidth < 1024` nel useEffect di init
+
+**No nuove dipendenze** (three resta installato ma non usato). Canvas 2D raw + math trigonometrica custom.
+
 ## 12. File pesanti da NON rileggere sempre
 
 Questi file sono costosi in token e pieni di animazioni / markup:
@@ -745,9 +814,14 @@ Componenti home esistenti ma non montati nella home attuale:
 File: `src/components/home/why-lacertosus.tsx` (nuovo).
 Sostituisce e rimpiazza `value-proposition.tsx` + `social-proof-bar.tsx` (entrambi eliminati dal worktree).
 
-Sezione unica su `id="perche"`, **tema light minimal-luxury**. Bg sezione `#F5F3EF` (warm off-white). Arancio `#F09226` usato esclusivamente per punti focali: label `§`, numeri problema, strike, accent card (risposta + cohort), shield FIPE, brackets, card full-orange "30 posti", dots scarsità, perk label/icon/sub. Nessuna vignetta né pattern di fondo — bento pulito.
+Sezione unica su `id="perche"`, **tema light minimal-luxury con dark anchor cards** (ridesign aprile 2026). Bg sezione `#F2EFE9` (warm off-white saturato). Arancio `#F09226` usato esclusivamente per punti focali. Due card chiave sono **dark** come ancore editoriali per creare gerarchia visiva forte (prima le card bianche "galleggiavano" sullo stesso piano del bg → aspetto confusionario):
 
-Setta `--section-bg: #F5F3EF` inline così il `transitionLayer` della hero chiude in seamless su questo bg light.
+- **"La Risposta" §01** → DARK `#111111` (accento: è la soluzione che interrompe il problema)
+- **"COHORT 001" hero §02** → DARK `#020026` navy brand (membership premium / invito black-tie)
+
+Le card bianche ricevono `CARD_SHADOW = "0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)"` per staccarsi dal piano cream senza appesantire. Gap bento `gap-4 md:gap-5` (da 3/4) per respiro.
+
+Setta `--section-bg: #F2EFE9` inline così il `transitionLayer` della hero chiude in seamless su questo bg light.
 
 ### Struttura: 3 movimenti scroll-driven (no pin, ScrollTrigger on-enter `once: true`)
 
@@ -798,16 +872,27 @@ Separatori tipografici `§ 01 — Il Settore` · `§ 02 — La Cohort` · `§ 03
 - 30-slot: `scale 0.75→1, opacity 0→1`, stagger 0.035
 - `prefers-reduced-motion` → skip completo dell'intero context (stato finale naturale)
 
-### Palette (light, tokens in testa al file)
+### Palette (light + dark anchor, tokens in testa al file)
 
-- `BG_SECTION = "#F5F3EF"` — bg sezione warm off-white
-- `CARD_BG = "#FFFFFF"` + `CARD_BORDER = "rgba(0,0,0,0.07)"` — card neutre
-- `ACCENT_CARD_BG = "linear-gradient(145deg, rgba(240,146,38,0.09), #FFFFFF 70%)"` + `ACCENT_CARD_BORDER = "rgba(240,146,38,0.28)"` — card focali arancio (risposta, cohort)
-- Full arancio: `#F09226` + testo `#020026` (card "30 posti")
+Light:
+
+- `BG_SECTION = "#F2EFE9"` — bg sezione warm off-white saturato
+- `CARD_BG = "#FFFFFF"` + `CARD_BORDER = "rgba(0,0,0,0.08)"` — card neutre
+- `CARD_SHADOW` — shadow delicata per stacco dal bg (`0 1px 2px + 0 4px 16px` a rgba 0.04)
 - `TEXT_PRIMARY = "#111111"`, `TEXT_SECONDARY = "rgba(17,17,17,0.62)"`, `TEXT_TERTIARY = "rgba(17,17,17,0.42)"`
+- `DIVIDER = "rgba(0,0,0,0.08)"`
 - `STRIKE_ORANGE = "rgba(240,146,38,0.7)"` — più saturo per visibilità su bianco
 
-La sezione non usa `useTheme()`: palette light hardcoded via token (decisione editoriale, non soggetta al global theme).
+Dark anchor (per card Risposta §01 + Cohort hero §02):
+
+- `DARK_CARD_BG` e `DARK_CARD_BG_BRAND` entrambi = `linear-gradient(145deg, #1c1c1c 0%, #0a0a0a 100%)` — gradient diagonale grigio scuro → grigio scurissimo, dà profondità e rompe il "flat feeling" del colore pieno. Entrambe le dark anchor cards condividono lo stesso gradient per coerenza visiva.
+- `DARK_TEXT_PRIMARY = "#FFFFFF"`, `DARK_TEXT_SECONDARY = "rgba(255,255,255,0.72)"`
+- `DARK_TAG_BG = "rgba(255,255,255,0.05)"` + `DARK_TAG_BORDER = "rgba(255,255,255,0.15)"` — tag pill dentro le card dark
+- Border card dark: `rgba(255,255,255,0.06)` (sottilissimo, più per texture che per definizione)
+
+Full arancio: `#F09226` + testo `#020026` (card "30 posti" Accesso Esclusivo).
+
+La sezione non usa `useTheme()`: palette hardcoded via token (decisione editoriale, non soggetta al global theme).
 
 ### Note
 

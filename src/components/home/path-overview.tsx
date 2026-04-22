@@ -48,7 +48,7 @@ const CERT_ITEMS = [
   },
 ];
 
-const NUM_PANELS = 5;
+const NUM_PANELS = 3;
 
 // Default 3D positions for folder cards: left / center / right
 const CARD_DEFAULTS = [
@@ -57,56 +57,212 @@ const CARD_DEFAULTS = [
   { rotateZ: 12, rotateY: 14, x: 170, y: 50, z: -70 },
 ] as const;
 
-// ── Particles ─────────────────────────────────────────────────────────────────
-function initParticles(canvas: HTMLCanvasElement) {
-  const dpr = window.devicePixelRatio || 1;
-  const ctx = canvas.getContext("2d")!;
+// ── Silk Filaments (flow-field) ──────────────────────────────────────────────
+const TAU = Math.PI * 2;
+const FILAMENT_COUNT = 50;
+const TRAIL_LEN = 24;
 
-  const resize = () => {
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  resize();
-  window.addEventListener("resize", resize);
+type Filament = {
+  x: number;
+  y: number;
+  trail: Float32Array;
+  head: number;
+  life: number;
+  maxLife: number;
+  hueShift: number;
+  alpha: number;
+  speed: number;
+  width: number;
+  _color: string;
+};
+
+/* Pseudo-simplex via 2-ottave sommate: grande fold + piccolo ripple ruotato.
+   Il tempo entra anche nella formula → il campo stesso "respira" (silk). */
+function flowAngle(x: number, y: number, t: number): number {
+  const n1 =
+    Math.sin(x * 0.0042 + t * 0.00018) * Math.cos(y * 0.0051 - t * 0.00022);
+  const cs = 0.7986;
+  const sn = 0.6018; // cos/sin 37°
+  const xr = x * cs - y * sn;
+  const yr = x * sn + y * cs;
+  const n2 =
+    Math.sin(xr * 0.011 + t * 0.00031) *
+    Math.cos(yr * 0.013 + t * 0.00027) *
+    0.45;
+  return (n1 + n2) * TAU;
+}
+
+function colorFor(hueShift: number, alpha: number): string {
+  return `hsla(${32 + hueShift}, 85%, 54%, ${alpha.toFixed(3)})`;
+}
+
+function initParticles(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d", { alpha: true })!;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const prefersReducedMotion =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
   const W = () => window.innerWidth;
   const H = () => window.innerHeight;
 
-  const pts = Array.from({ length: 90 }, () => ({
-    x: Math.random() * W(),
-    y: Math.random() * H(),
-    vx: (Math.random() - 0.5) * 0.35,
-    vy: (Math.random() - 0.5) * 0.35,
-    r: Math.random() * 2.5 + 1.2,
-    a: Math.random() * 0.55 + 0.25,
-  }));
+  const sizeCanvas = () => {
+    canvas.width = W() * dpr;
+    canvas.height = H() * dpr;
+    canvas.style.width = W() + "px";
+    canvas.style.height = H() + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  sizeCanvas();
+
+  let resizeTimer: number | undefined;
+  const onResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(sizeCanvas, 150);
+  };
+  window.addEventListener("resize", onResize);
+
+  function respawn(p: Filament, w: number, h: number) {
+    p.x = Math.random() * w;
+    p.y = Math.random() * h;
+    p.life = 0;
+    p.maxLife = 260 + Math.random() * 260;
+    p.alpha = 0.15 + Math.random() * 0.23;
+    p.speed = 0.55 + Math.random() * 0.55;
+    p.width = 0.6 + Math.random() * 0.6;
+    p.hueShift = (Math.random() - 0.5) * 24;
+    p._color = colorFor(p.hueShift, 1);
+    // Pre-fill ring con spawn position → la scia cresce dal punto
+    for (let k = 0; k < TRAIL_LEN * 2; k += 2) {
+      p.trail[k] = p.x;
+      p.trail[k + 1] = p.y;
+    }
+    p.head = 0;
+  }
+
+  function step(p: Filament, t: number, w: number, h: number) {
+    const a = flowAngle(p.x, p.y, t);
+    const vx = Math.cos(a) * p.speed;
+    const vy = Math.sin(a) * p.speed;
+    const i = p.head * 2;
+    p.trail[i] = p.x;
+    p.trail[i + 1] = p.y;
+    p.head = (p.head + 1) % TRAIL_LEN;
+    p.x += vx;
+    p.y += vy;
+    p.life++;
+    const margin = 40;
+    if (
+      p.x < -margin ||
+      p.x > w + margin ||
+      p.y < -margin ||
+      p.y > h + margin ||
+      p.life > p.maxLife
+    ) {
+      respawn(p, w, h);
+    }
+  }
+
+  const pts: Filament[] = Array.from({ length: FILAMENT_COUNT }, () => {
+    const f: Filament = {
+      x: 0,
+      y: 0,
+      trail: new Float32Array(TRAIL_LEN * 2),
+      head: 0,
+      life: 0,
+      maxLife: 0,
+      hueShift: 0,
+      alpha: 0,
+      speed: 0,
+      width: 0.8,
+      _color: "",
+    };
+    respawn(f, W(), H());
+    return f;
+  });
+
+  function render() {
+    const w = W();
+    const h = H();
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "lighter"; // additive glow su bg scuro
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    for (const p of pts) {
+      ctx.strokeStyle = p._color;
+      ctx.lineWidth = p.width;
+
+      let prevX = p.trail[p.head * 2];
+      let prevY = p.trail[p.head * 2 + 1];
+
+      for (let s = 1; s < TRAIL_LEN; s++) {
+        const idx = ((p.head + s) % TRAIL_LEN) * 2;
+        const nx = p.trail[idx];
+        const ny = p.trail[idx + 1];
+        // Fade power 1.4 → comet taper (più opacità verso la testa)
+        ctx.globalAlpha = p.alpha * Math.pow(s / TRAIL_LEN, 1.4);
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+        prevX = nx;
+        prevY = ny;
+      }
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  if (prefersReducedMotion) {
+    // Snapshot statico: pre-calcola 80 frame per far crescere le scie, poi render unico
+    for (let f = 0; f < 80; f++) {
+      const t = f * 16.67;
+      for (const p of pts) step(p, t, W(), H());
+    }
+    render();
+    return () => {
+      window.removeEventListener("resize", onResize);
+      clearTimeout(resizeTimer);
+    };
+  }
 
   let raf = 0;
-  const draw = () => {
-    ctx.clearRect(0, 0, W(), H());
-    ctx.shadowColor = "rgba(240,146,38,0.9)";
-    ctx.shadowBlur = 8;
-    for (const p of pts) {
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0) p.x = W();
-      else if (p.x > W()) p.x = 0;
-      if (p.y < 0) p.y = H();
-      else if (p.y > H()) p.y = 0;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(240,146,38,${p.a})`;
-      ctx.fill();
-    }
-    raf = requestAnimationFrame(draw);
+  let paused = false;
+  let lastT = performance.now();
+  const loop = (now: number) => {
+    // dt clamped → no burst al tab-resume
+    const dt = Math.min(now - lastT, 33);
+    void dt;
+    lastT = now;
+    for (const p of pts) step(p, now, W(), H());
+    render();
+    raf = requestAnimationFrame(loop);
   };
-  draw();
+  raf = requestAnimationFrame(loop);
+
+  const onVis = () => {
+    const hidden = document.visibilityState === "hidden";
+    if (hidden && !paused) {
+      paused = true;
+      cancelAnimationFrame(raf);
+    } else if (!hidden && paused) {
+      paused = false;
+      lastT = performance.now();
+      raf = requestAnimationFrame(loop);
+    }
+  };
+  document.addEventListener("visibilitychange", onVis);
+
   return () => {
     cancelAnimationFrame(raf);
-    window.removeEventListener("resize", resize);
+    window.removeEventListener("resize", onResize);
+    document.removeEventListener("visibilitychange", onVis);
+    clearTimeout(resizeTimer);
   };
 }
 
@@ -142,6 +298,9 @@ export function PathOverview() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollTweenRef = useRef<gsap.core.Tween | null>(null);
   const folderCardsRef = useRef<(HTMLDivElement | null)[]>([null, null, null]);
+  const bigCardsRef = useRef<(HTMLDivElement | null)[]>([null, null, null]);
+  const overviewPanelRef = useRef<HTMLDivElement>(null);
+  const certPanelRef = useRef<HTMLDivElement>(null);
   const [openBlock, setOpenBlock] = useState<BlockSlug | null>(null);
 
   // Navigate to a specific panel by index (smooth GSAP-powered scroll)
@@ -194,48 +353,12 @@ export function PathOverview() {
     });
   }, []);
 
-  // Folder card click → fly up → fade → scroll to panel
-  const onCardClick = useCallback(
-    (idx: number) => {
-      const card = folderCardsRef.current[idx];
-      if (!card) return;
-      const def = CARD_DEFAULTS[idx];
-      const panelIndex = idx + 1; // panels: 1=CORPUS, 2=VIS, 3=VICTOR
-
-      const tl = gsap.timeline({
-        onComplete: () => {
-          goToPanel(panelIndex);
-          // Restore card after nav completes
-          setTimeout(() => {
-            gsap.set(card, {
-              opacity: 1,
-              scale: 1,
-              y: def.y,
-              z: def.z,
-              rotateZ: def.rotateZ,
-              rotateY: def.rotateY,
-              rotateX: 0,
-              x: def.x,
-            });
-          }, 1600);
-        },
-      });
-      tl.to(card, {
-        y: -80,
-        z: 140,
-        scale: 1.1,
-        duration: 0.22,
-        ease: "power2.out",
-      });
-      tl.to(card, {
-        opacity: 0,
-        scale: 0.92,
-        duration: 0.28,
-        ease: "power3.in",
-      });
-    },
-    [goToPanel],
-  );
+  // Folder card click → scroll al Panel 1 (3-column overview).
+  // La transizione verticale dei blocchi è gestita dal ScrollTrigger scrub,
+  // niente più fly-up/fade qui: la stessa card diventa la big card di Panel 1.
+  const onCardClick = useCallback(() => {
+    goToPanel(1);
+  }, [goToPanel]);
 
   // ── Particles (desktop only)
   useEffect(() => {
@@ -377,7 +500,7 @@ export function PathOverview() {
                   ease: "power3.out",
                 });
               }
-              // Intro panel: animate folder cards in with 3D flip
+              // Intro panel: animate folder cards in + start idle float
               if (pIdx === 0) {
                 folderCardsRef.current.forEach((card, cIdx) => {
                   if (!card) return;
@@ -394,17 +517,122 @@ export function PathOverview() {
                     delay: 0.25 + cIdx * 0.12,
                     ease: "power3.out",
                   });
+                  // Idle float on the inner card face (doesn't clash
+                  // with outer transform used by hover/click). Yoyo loop.
+                  const inner = card.querySelector("[data-idle-float]");
+                  if (inner) {
+                    gsap.to(inner, {
+                      y: -12,
+                      duration: 2.4 + cIdx * 0.3,
+                      ease: "sine.inOut",
+                      yoyo: true,
+                      repeat: -1,
+                      delay: 1.4 + cIdx * 0.2,
+                    });
+                  }
                 });
               }
             },
           });
         });
 
+        // Seed hidden state for big cards of Panel 1 (3-col overview)
+        // Partono spinti verso il basso, invisibili
+        bigCardsRef.current.forEach((card) => {
+          if (card) gsap.set(card, { opacity: 0, y: 260 });
+        });
+
+        const VERTICAL_DRIFT = 260; // px — distanza di uscita/entrata
+
+        /* Entry: Panel 0 → Panel 1 (scrubbed) — in 2 fasi sequenziali:
+           Fase A (p 0 → 0.5): folder cards scendono e spariscono COMPLETAMENTE
+           Fase B (p 0.5 → 1): big cards ricompaiono dal basso e salgono */
+        if (overviewPanelRef.current) {
+          ScrollTrigger.create({
+            trigger: overviewPanelRef.current,
+            containerAnimation: scrollTween,
+            start: "left right",
+            end: "left left",
+            scrub: true,
+            onUpdate: (self) => {
+              const p = self.progress;
+
+              // Fase A — folder cards exit verso il basso (0 → 0.5)
+              const fp = Math.max(0, Math.min(1, p / 0.5));
+              folderCardsRef.current.forEach((card, cIdx) => {
+                if (!card) return;
+                const def = CARD_DEFAULTS[cIdx];
+                const d = cIdx * 0.08;
+                const lp = Math.max(
+                  0,
+                  Math.min(1, (fp - d) / Math.max(0.01, 1 - d)),
+                );
+                gsap.set(card, {
+                  opacity: 1 - lp,
+                  y: def.y + lp * VERTICAL_DRIFT,
+                });
+              });
+
+              // Fase B — big cards enter dal basso (0.5 → 1)
+              const bp = Math.max(0, Math.min(1, (p - 0.5) / 0.5));
+              bigCardsRef.current.forEach((card, cIdx) => {
+                if (!card) return;
+                const d = cIdx * 0.08;
+                const lp = Math.max(
+                  0,
+                  Math.min(1, (bp - d) / Math.max(0.01, 1 - d)),
+                );
+                gsap.set(card, {
+                  opacity: lp,
+                  y: VERTICAL_DRIFT - lp * VERTICAL_DRIFT,
+                });
+              });
+            },
+          });
+        }
+
+        /* Exit: Panel 1 → Panel 2 (scrubbed) — in 1 fase:
+           big cards salgono e spariscono COMPLETAMENTE (0 → ~0.55).
+           Il resto dello scroll lascia il viewport vuoto per
+           l'ingresso di Panel 2 dal lato. */
+        if (certPanelRef.current) {
+          ScrollTrigger.create({
+            trigger: certPanelRef.current,
+            containerAnimation: scrollTween,
+            start: "left right",
+            end: "left left",
+            scrub: true,
+            onUpdate: (self) => {
+              const p = self.progress;
+              // Big cards exit verso l'alto, accelerate so they vanish early
+              const ep = Math.max(0, Math.min(1, p / 0.55));
+              bigCardsRef.current.forEach((card, cIdx) => {
+                if (!card) return;
+                const d = cIdx * 0.08;
+                const lp = Math.max(
+                  0,
+                  Math.min(1, (ep - d) / Math.max(0.01, 1 - d)),
+                );
+                gsap.set(card, {
+                  opacity: 1 - lp,
+                  y: -lp * VERTICAL_DRIFT,
+                });
+              });
+            },
+          });
+        }
+
         return () => {
           section.style.overflow = "";
           scrollTweenRef.current = null;
           if (header) gsap.set(header, { clearProps: "all" });
           folderCardsRef.current.forEach((c) => {
+            if (!c) return;
+            const inner = c.querySelector("[data-idle-float]");
+            if (inner) gsap.killTweensOf(inner);
+            gsap.set(c, { clearProps: "all" });
+          });
+          bigCardsRef.current.forEach((c) => {
             if (c) gsap.set(c, { clearProps: "all" });
           });
         };
@@ -491,7 +719,7 @@ export function PathOverview() {
       className="relative"
       style={{
         background:
-          "radial-gradient(ellipse at 18% 55%, rgba(240,146,38,0.09) 0%, transparent 58%), radial-gradient(ellipse at 82% 25%, rgba(240,146,38,0.05) 0%, transparent 45%), #020026",
+          "radial-gradient(ellipse at 18% 55%, rgba(240,146,38,0.09) 0%, transparent 58%), radial-gradient(ellipse at 82% 25%, rgba(240,146,38,0.05) 0%, transparent 45%), linear-gradient(145deg, #434343 0%, #1a1a1a 55%, #0a0a0a 100%)",
       }}
     >
       {/* Canvas particles */}
@@ -604,7 +832,7 @@ export function PathOverview() {
                   </span>
                   <span
                     className="text-[0.7rem] font-bold tracking-[0.3em] uppercase"
-                    style={{ color: "rgba(255,255,255,0.38)" }}
+                    style={{ color: "rgba(255, 255, 255, 0.84)38)" }}
                   >
                     Esplora le card per navigare
                   </span>
@@ -624,7 +852,7 @@ export function PathOverview() {
                 {COURSES.map((course, idx) => {
                   const meta = META[course.slug as keyof typeof META];
                   if (!meta) return null;
-                  const { roman, color, tagline, season } = meta;
+                  const { roman, color, tagline } = meta;
 
                   return (
                     <div
@@ -632,33 +860,33 @@ export function PathOverview() {
                       ref={(el) => {
                         folderCardsRef.current[idx] = el;
                       }}
-                      onClick={() => onCardClick(idx)}
+                      onClick={onCardClick}
                       onMouseEnter={() => onCardEnter(idx)}
                       onMouseLeave={() => onCardLeave(idx)}
                       className="absolute"
                       style={{
                         top: "50%",
                         left: "50%",
-                        width: "260px",
-                        marginLeft: "-130px",
-                        marginTop: "-175px",
+                        width: "300px",
+                        marginLeft: "-150px",
+                        marginTop: "-140px",
                         cursor: "pointer",
                         transformStyle: "preserve-3d",
                       }}
                     >
                       {/* Card face */}
                       <div
+                        data-idle-float
                         style={{
                           background: "#f8f8fc",
                           border: "1px solid rgba(0,0,0,0.07)",
                           overflow: "hidden",
                           boxShadow:
                             "0 28px 70px rgba(0,0,0,0.4), 0 4px 18px rgba(0,0,0,0.18)",
-                          height: "350px",
+                          height: "280px",
                           display: "flex",
                           flexDirection: "column",
-                          justifyContent: "space-between",
-                          padding: "1.75rem 1.5rem 1.5rem",
+                          padding: "1.75rem 1.6rem 1.6rem",
                           position: "relative",
                         }}
                       >
@@ -686,7 +914,7 @@ export function PathOverview() {
                             <div
                               className="font-black leading-none tabular-nums"
                               style={{
-                                fontSize: "5rem",
+                                fontSize: "6.2rem",
                                 color,
                                 lineHeight: 0.85,
                               }}
@@ -731,111 +959,38 @@ export function PathOverview() {
                           </div>
                           <span
                             style={{
-                              fontSize: "0.58rem",
+                              fontSize: "0.65rem",
                               fontWeight: 900,
-                              letterSpacing: "0.28em",
+                              letterSpacing: "0.3em",
                               textTransform: "uppercase",
-                              color: "rgba(240,146,38,0.65)",
+                              color: "rgba(240,146,38,0.7)",
                               display: "block",
-                              marginTop: "0.5rem",
+                              marginTop: "0.85rem",
                             }}
                           >
                             {course.area}
                           </span>
                           <h3
                             style={{
-                              fontSize: "1.5rem",
+                              fontSize: "1.8rem",
                               fontWeight: 900,
                               color: "#111",
                               lineHeight: 0.95,
-                              marginTop: "0.25rem",
+                              marginTop: "0.35rem",
                             }}
                           >
                             {course.title}
                           </h3>
                           <p
                             style={{
-                              fontSize: "0.875rem",
+                              fontSize: "1rem",
                               fontWeight: 700,
                               color,
-                              marginTop: "0.25rem",
+                              marginTop: "0.4rem",
                             }}
                           >
                             {tagline}
                           </p>
-                        </div>
-
-                        {/* Objective */}
-                        <div
-                          style={{
-                            borderTop: "1px solid rgba(0,0,0,0.07)",
-                            paddingTop: "1rem",
-                          }}
-                        >
-                          <p
-                            style={{
-                              fontSize: "0.8rem",
-                              lineHeight: 1.55,
-                              color: "#555",
-                              marginBottom: "0.9rem",
-                            }}
-                          >
-                            {course.objective}
-                          </p>
-                          {/* Duration + season */}
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 8,
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: "0.62rem",
-                                fontWeight: 800,
-                                letterSpacing: "0.18em",
-                                textTransform: "uppercase",
-                                color: "#C06A0A",
-                                background: "rgba(240,146,38,0.08)",
-                                border: "1px solid rgba(240,146,38,0.2)",
-                                padding: "2px 8px",
-                              }}
-                            >
-                              {season}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: "0.62rem",
-                                color: "rgba(0,0,0,0.28)",
-                                fontWeight: 700,
-                                letterSpacing: "0.12em",
-                              }}
-                            >
-                              {course.duration}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* CTA hint */}
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            paddingTop: "0.5rem",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "0.72rem",
-                              fontWeight: 900,
-                              color,
-                              letterSpacing: "0.1em",
-                            }}
-                          >
-                            Scopri il blocco →
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -846,169 +1001,180 @@ export function PathOverview() {
           </div>
         </div>
 
-        {/* ━━━ Panels 1–3 — CORPUS / VIS / VICTOR ━━━ */}
-        {COURSES.map((course, idx) => {
-          const meta = META[course.slug as keyof typeof META];
-          if (!meta) return null;
-          const { roman, color, tagline, season, fipeSeason } = meta;
-
-          return (
+        {/* ━━━ Panel 1 — 3-Column Overview (tutti i blocchi in un colpo) ━━━ */}
+        <div
+          ref={overviewPanelRef}
+          data-panel
+          className="relative flex flex-col justify-center"
+          style={{
+            width: "100vw",
+            minHeight: "100vh",
+            flexShrink: 0,
+            padding: "6rem 5%",
+          }}
+        >
+          <div className="mx-auto w-full max-w-[1500px]">
             <div
-              key={course.slug}
-              data-panel
-              className="relative flex flex-col justify-center"
-              style={{
-                width: "100vw",
-                minHeight: "100vh",
-                flexShrink: 0,
-                padding: "4rem 5%",
-              }}
+              data-anim
+              className="mb-10 flex items-end justify-between gap-6"
             >
-              <div className="mx-auto w-full max-w-[1400px]">
-                <div
-                  className="grid grid-cols-2 gap-5"
-                  style={{ minHeight: "calc(100vh - 8rem)" }}
+              <div>
+                <span className="label-tag mb-3 block">
+                  I 3 Blocchi · In Dettaglio
+                </span>
+                <h2
+                  className="font-black leading-[0.95] tracking-tight text-white"
+                  style={{ fontSize: "clamp(2.5rem, 4.5vw, 4.5rem)" }}
                 >
-                  {/* LEFT — light card with tilt */}
+                  Nove mesi.{" "}
+                  <span style={{ color: "#F09226" }}>Tre tappe.</span>
+                </h2>
+              </div>
+              <p
+                className="max-w-md text-right text-[0.95rem] leading-relaxed"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                Ogni blocco si costruisce sul precedente.
+                <br />
+                Clicca per scoprire il programma completo.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-5">
+              {COURSES.map((course, idx) => {
+                const meta = META[course.slug as keyof typeof META];
+                if (!meta) return null;
+                const { roman, color, tagline, season, fipeSeason } = meta;
+                return (
                   <div
-                    data-anim
+                    key={course.slug}
+                    ref={(el) => {
+                      bigCardsRef.current[idx] = el;
+                    }}
+                    data-big-card
                     className="flex flex-col justify-between"
                     style={{
                       background: "#f8f8fc",
-                      border: "1px solid rgba(0,0,0,0.06)",
-                      padding: "3rem 3.5rem",
-                      willChange: "transform",
+                      border: "1px solid rgba(0,0,0,0.07)",
+                      boxShadow:
+                        "0 28px 70px rgba(0,0,0,0.32), 0 4px 18px rgba(0,0,0,0.14)",
+                      padding: "2.25rem 2rem",
+                      minHeight: "72vh",
                     }}
-                    onMouseMove={onTiltMove}
-                    onMouseLeave={onTiltLeave}
                   >
-                    <div className="flex items-center gap-1.5">
-                      {COURSES.map((_, di) => (
-                        <span
-                          key={di}
-                          className="block"
-                          style={{
-                            width: di === idx ? 28 : 8,
-                            height: 2,
-                            background: di === idx ? color : "rgba(0,0,0,0.15)",
-                          }}
-                        />
-                      ))}
-                      <span
-                        className="ml-3 text-[0.65rem] font-bold tracking-[0.28em] uppercase"
-                        style={{ color: "rgba(0,0,0,0.35)" }}
-                      >
-                        {roman} / III
-                      </span>
-                    </div>
-
+                    {/* Header: step indicator */}
                     <div>
+                      <div className="mb-6 flex items-center gap-1.5">
+                        {COURSES.map((_, di) => (
+                          <span
+                            key={di}
+                            className="block"
+                            style={{
+                              width: di === idx ? 28 : 8,
+                              height: 2,
+                              background:
+                                di === idx ? color : "rgba(0,0,0,0.15)",
+                            }}
+                          />
+                        ))}
+                        <span
+                          className="ml-2 text-[0.62rem] font-bold tracking-[0.28em] uppercase"
+                          style={{ color: "rgba(0,0,0,0.4)" }}
+                        >
+                          {roman} / III
+                        </span>
+                      </div>
+
+                      {/* Roman numeral massive */}
                       <div
                         className="font-black leading-none tabular-nums"
                         style={{
-                          fontSize: "clamp(5rem,9vw,10rem)",
+                          fontSize: "clamp(4.5rem, 7vw, 7.5rem)",
                           color,
-                          lineHeight: 0.9,
+                          lineHeight: 0.88,
                         }}
                       >
                         {roman}
                       </div>
                       <span
-                        className="mt-4 block text-[0.72rem] font-black tracking-[0.32em] uppercase"
+                        className="mt-3 block text-[0.68rem] font-black tracking-[0.32em] uppercase"
                         style={{ color: "rgba(240,146,38,0.75)" }}
                       >
                         {course.area}
                       </span>
-                      <h2
-                        className="font-black leading-none tracking-tight"
+                      <h3
+                        className="mt-1 font-black leading-tight tracking-tight"
                         style={{
-                          fontSize: "clamp(2.5rem,4.5vw,5rem)",
+                          fontSize: "clamp(1.6rem, 2vw, 2.1rem)",
                           color: "#111111",
-                          marginTop: "0.25rem",
                         }}
                       >
                         {course.title}
-                      </h2>
+                      </h3>
                       <p
-                        className="text-[1.1rem] font-black"
-                        style={{ color, marginTop: "0.25rem" }}
+                        className="mt-1 text-[0.95rem] font-bold"
+                        style={{ color }}
                       >
                         {tagline}
                       </p>
+
                       <p
-                        className="text-[1rem] leading-relaxed"
-                        style={{ color: "#444444", marginTop: "0.75rem" }}
+                        className="mt-5 text-[0.88rem] leading-relaxed"
+                        style={{ color: "#555555" }}
                       >
                         {course.objective}
                       </p>
-                    </div>
 
-                    <div className="flex items-center gap-2 mt-4">
-                      <span
-                        className="text-[0.68rem] font-bold tracking-[0.2em] uppercase"
-                        style={{ color: "rgba(0,0,0,0.3)" }}
-                      >
-                        Periodo
-                      </span>
-                      <span
-                        className="px-3 py-1 text-[0.75rem] font-bold"
-                        style={{
-                          border: "1px solid rgba(240,146,38,0.3)",
-                          color: "#C06A0A",
-                          background: "rgba(240,146,38,0.06)",
-                        }}
-                      >
-                        {season}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* RIGHT — dark card */}
-                  <div
-                    data-anim
-                    className="flex flex-col justify-between"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      padding: "3rem",
-                    }}
-                  >
-                    <div>
-                      <p
-                        className="mb-5 text-[0.68rem] font-black tracking-[0.28em] uppercase"
-                        style={{ color: "rgba(255,255,255,0.5)" }}
-                      >
-                        Programma
-                      </p>
-                      <ul className="space-y-3">
-                        {course.curriculum.slice(0, 5).map((item) => (
+                      {/* Curriculum preview */}
+                      <ul className="mt-6 space-y-2">
+                        {course.curriculum.slice(0, 4).map((item) => (
                           <li
                             key={item}
-                            className="flex items-start gap-3 text-[0.9375rem]"
-                            style={{ color: "rgba(255,255,255,0.82)" }}
+                            className="flex items-start gap-2.5 text-[0.82rem]"
+                            style={{ color: "rgba(17,17,17,0.78)" }}
                           >
                             <span
-                              className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full"
+                              className="mt-[0.5em] h-1 w-1 shrink-0"
                               style={{ background: color }}
                             />
                             {item}
                           </li>
                         ))}
-                        {course.curriculum.length > 5 && (
+                        {course.curriculum.length > 4 && (
                           <li
-                            className="pl-[18px] text-[0.85rem]"
-                            style={{ color: "rgba(255,255,255,0.4)" }}
+                            className="pl-[14px] text-[0.75rem]"
+                            style={{ color: "rgba(0,0,0,0.38)" }}
                           >
-                            + {course.curriculum.length - 5} argomenti
+                            + {course.curriculum.length - 4} altri argomenti
                           </li>
                         )}
                       </ul>
                     </div>
-                    <div className="mt-6 space-y-3">
+
+                    {/* Footer: season + CTA */}
+                    <div className="mt-6">
+                      <div className="mb-4 flex items-center gap-2">
+                        <span
+                          className="text-[0.62rem] font-bold tracking-[0.2em] uppercase"
+                          style={{ color: "rgba(0,0,0,0.4)" }}
+                        >
+                          Periodo
+                        </span>
+                        <span
+                          className="px-2.5 py-0.5 text-[0.7rem] font-bold"
+                          style={{
+                            border: "1px solid rgba(240,146,38,0.35)",
+                            color: "#C06A0A",
+                            background: "rgba(240,146,38,0.08)",
+                          }}
+                        >
+                          {season}
+                        </span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setOpenBlock(course.slug as BlockSlug)}
-                        className="block w-full py-4 text-center text-[0.875rem] font-black tracking-[0.18em] uppercase transition-opacity duration-200 cursor-pointer"
+                        className="block w-full py-3.5 text-center text-[0.8rem] font-black tracking-[0.18em] uppercase transition-opacity duration-200 cursor-pointer"
                         style={{ background: "#F09226", color: "#010015" }}
                         onMouseEnter={(e) => {
                           (e.currentTarget as HTMLButtonElement).style.opacity =
@@ -1022,22 +1188,23 @@ export function PathOverview() {
                         Scopri il programma →
                       </button>
                       <p
-                        className="text-[0.75rem]"
-                        style={{ color: "rgba(255,255,255,0.45)" }}
+                        className="mt-3 text-[0.7rem]"
+                        style={{ color: "rgba(0,0,0,0.42)" }}
                       >
-                        <span style={{ color }}>✦</span> Sessione FIPE inclusa —{" "}
+                        <span style={{ color }}>✦</span> Sessione FIPE —{" "}
                         {fipeSeason}
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+        </div>
 
-        {/* ━━━ Panel 4 — FIPE Certificate ━━━ */}
+        {/* ━━━ Panel 2 — FIPE Certificate ━━━ */}
         <div
+          ref={certPanelRef}
           data-panel
           className="flex flex-col justify-center"
           style={{
@@ -1064,7 +1231,7 @@ export function PathOverview() {
                 >
                   <div
                     style={{
-                      background: "#020026",
+                      background: "#1a1a1a",
                       padding: "0.9rem 1.5rem",
                       display: "flex",
                       alignItems: "center",
@@ -1486,7 +1653,7 @@ export function PathOverview() {
           >
             <div
               style={{
-                background: "#020026",
+                background: "#1a1a1a",
                 padding: "0.75rem 1.25rem",
                 display: "flex",
                 alignItems: "center",
