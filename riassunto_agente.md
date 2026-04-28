@@ -1045,6 +1045,22 @@ La pagina `/pack` e stata ridisegnata. File principale: `src/components/packs/pa
 - Rimossi: `getEmphasisStyle()`, type `Emphasis`, interface `EmphasisStyle`, costanti `BRAND_ORANGE`/`BRAND_ORANGE_RGB`, `MASTERCLASS_SHORT` (sostituito con `MASTERCLASS_PILLS` con label piu lunghi nello stesso schema)
 - `TIER` semplificato: solo `{label: string}` per slug
 
+### Home Pack Preview (rev. 2026-04-28f — mirror /pack senza prezzo)
+
+`src/components/home/pack-preview.tsx` riscritto integralmente per riprendere grafica e struttura di `pack-comparison.tsx` (cards + modale) ma SENZA il prezzo.
+
+- **PackCard home**: identica a `/pack` (split head/body, blocchi sempre visibili, ELITE `heroExtra` Vitto/Alloggio luxury, masterclass inline, CTA full-width). Differenze:
+  - **NESSUN price block** (rimossa la sezione "A partire da {prezzo}")
+  - **NESSUN scarcity ribbon / strip "Solo 30 posti"** (la home e preview, non conversion)
+  - **CTA label**: `"Scopri {TIER}"` invece di `"Scegli {TIER}"` per tono soft
+- **PackModal home**: identica struttura (sticky top/bottom, mix dark/light, ELITE EXCLUSIVE section, MODAL_COPY narrativo, faculty showcase). Differenze:
+  - Hero: rimosso il blocco prezzo + IVA + "Pagamento rateale". CTA "Scegli {TIER}" senza prezzo.
+  - Final CTA: rimosso `· {prezzo}` dal button
+  - Sticky bottom bar: mostra solo `Pack {TIER}` (no price) + button "Scegli {TIER}"
+  - `MODAL_COPY.eyebrow` semplificato a `"Edizione 2026/27"` (rimosso "Solo 30 posti")
+- Comportamento `onBuy` invariato (auth → masterclass selector → checkout)
+- Token modal identici a /pack (modalBg conditional `#0a0a14` ELITE / `rgb(43 43 43 / 94%)` START/PRO, overlay trasparente con blur)
+
 ### File chiave
 
 - `src/components/packs/pack-comparison.tsx` — tutte le sezioni + modal (BlockModal, PackModal). Importa anche `COURSES` da `lib/constants/courses` per stats dinamiche nei pannelli journey

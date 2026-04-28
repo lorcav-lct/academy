@@ -2065,7 +2065,7 @@ function PackCard({
               ))}
             </div>
 
-            {/* Masterclass — minimal horizontal list, no frames (PRO + ELITE) */}
+            {/* Masterclass — minimal horizontal list, wraps on overflow (PRO + ELITE) */}
             {(isPro || isElite) && (
               <div className="mt-4">
                 <span
@@ -2074,25 +2074,21 @@ function PackCard({
                 >
                   Le 8 masterclass disponibili
                 </span>
-                <p
-                  className="text-[0.72rem] leading-[1.7] font-semibold"
+                <div
+                  className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[0.72rem] leading-[1.6] font-semibold"
                   style={{ color: bodyTextSecondary }}
                 >
                   {MASTERCLASS_PILLS.map((m, i) => (
-                    <span key={m.slug}>
+                    <span key={m.slug} className="contents">
                       {i > 0 && (
-                        <span
-                          aria-hidden
-                          className="mx-1.5"
-                          style={{ color: bodyTextMuted }}
-                        >
+                        <span aria-hidden style={{ color: bodyTextMuted }}>
                           ·
                         </span>
                       )}
-                      {m.label}
+                      <span>{m.label}</span>
                     </span>
                   ))}
-                </p>
+                </div>
               </div>
             )}
           </div>

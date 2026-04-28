@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
@@ -11,111 +12,20 @@ import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import { createClient } from "@/lib/supabase/client";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const BRAND_ORANGE = "#F09226";
-const BRAND_ORANGE_RGB = "240,146,38";
-
-type Emphasis = "minimal" | "hero" | "premium";
-
-interface EmphasisStyle {
-  background: string;
-  textPrimary: string;
-  textSecondary: string;
-  textMuted: string;
-  accent: string;
-  border: string;
-  boxShadow?: string;
-  numeralColor: string;
-  numeralBorder: string;
-  ctaBg: string;
-  ctaText: string;
-  ctaBorder?: string;
-}
+// ─── Constants (mirror /pack page, simplified — no price) ───────────────────
 
 const BRUSHED_STEEL_OVERLAY =
   "repeating-linear-gradient(90deg, transparent 0px, transparent 1px, rgba(255,255,255,0.035) 1px, rgba(255,255,255,0.035) 2px)";
 
-function getEmphasisStyle(emphasis: Emphasis): EmphasisStyle {
-  if (emphasis === "hero") {
-    /* PRO — solid brand orange, dark text */
-    return {
-      background: "#F09226",
-      textPrimary: "#111111",
-      textSecondary: "rgba(17,17,17,0.78)",
-      textMuted: "rgba(17,17,17,0.55)",
-      accent: "#111111",
-      border: "2px solid rgba(17,17,17,0.18)",
-      boxShadow: "0 0 60px rgba(240,146,38,0.2), 0 24px 80px rgba(0,0,0,0.18)",
-      numeralColor: "#111111",
-      numeralBorder: "rgba(17,17,17,0.45)",
-      ctaBg: "#111111",
-      ctaText: "#F09226",
-    };
-  }
-  if (emphasis === "premium") {
-    /* ELITE — dark anchor gradient + brushed steel overlay */
-    return {
-      background: `${BRUSHED_STEEL_OVERLAY}, linear-gradient(145deg, #434343 0%, #1a1a1a 55%, #0a0a0a 100%)`,
-      textPrimary: "#ffffff",
-      textSecondary: "rgba(255,255,255,0.72)",
-      textMuted: "rgba(255,255,255,0.5)",
-      accent: "#F09226",
-      border: "1px solid rgba(255,255,255,0.1)",
-      boxShadow:
-        "0 0 60px rgba(0,0,0,0.4), 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-      numeralColor: "#F09226",
-      numeralBorder: "rgba(240,146,38,0.5)",
-      ctaBg: "#F09226",
-      ctaText: "#111111",
-    };
-  }
-  /* START — clean white minimal */
-  return {
-    background: "#ffffff",
-    textPrimary: "#111111",
-    textSecondary: "rgba(17,17,17,0.62)",
-    textMuted: "rgba(17,17,17,0.42)",
-    accent: "#F09226",
-    border: "1px solid rgba(0,0,0,0.1)",
-    numeralColor: "#F09226",
-    numeralBorder: "rgba(240,146,38,0.5)",
-    ctaBg: "#111111",
-    ctaText: "#ffffff",
-  };
-}
-
 const TIER: Record<
   string,
   {
-    color: string;
-    rgb: string;
     label: string;
-    roman: string;
-    emphasis: Emphasis;
   }
 > = {
-  start: {
-    color: BRAND_ORANGE,
-    rgb: BRAND_ORANGE_RGB,
-    label: "START",
-    roman: "I",
-    emphasis: "minimal",
-  },
-  pro: {
-    color: BRAND_ORANGE,
-    rgb: BRAND_ORANGE_RGB,
-    label: "PRO",
-    roman: "II",
-    emphasis: "hero",
-  },
-  elite: {
-    color: BRAND_ORANGE,
-    rgb: BRAND_ORANGE_RGB,
-    label: "ELITE",
-    roman: "III",
-    emphasis: "premium",
-  },
+  start: { label: "START" },
+  pro: { label: "PRO" },
+  elite: { label: "ELITE" },
 };
 
 const BLOCK_SLUGS = ["function", "strength", "science"] as const;
@@ -125,8 +35,7 @@ const BLOCK_LABELS: Record<string, string> = {
   science: "SCIENCE",
 };
 
-/* Nomi corti per le 8 masterclass disponibili come pillole nei pack PRO/ELITE */
-const MASTERCLASS_SHORT: { slug: string; label: string }[] = [
+const MASTERCLASS_PILLS: { slug: string; label: string }[] = [
   { slug: "master-functional-bulgarian", label: "Bulgarian" },
   { slug: "master-strength", label: "Strength" },
   { slug: "master-calcio", label: "Calcio" },
@@ -145,8 +54,6 @@ function getBundleTeachers(): Record<string, Teacher[]> {
   };
 }
 
-// ─── Initials ─────────────────────────────────────────────────────────────────
-
 function initials(name: string) {
   return name
     .split(/\s+/)
@@ -156,7 +63,117 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-// ─── Pack Modal ───────────────────────────────────────────────────────────────
+// ─── Card copy ───────────────────────────────────────────────────────────────
+
+type CardCopy = {
+  badge?: string;
+  tagline: string;
+  audience: string;
+  /** Hero extra — luxury callout above the regular extras list */
+  heroExtra?: { eyebrow: string; text: string; sub: string };
+  extras: { text: string; sub?: string }[];
+  ctaLabel: string;
+};
+
+const CARD_COPY: Record<string, CardCopy> = {
+  start: {
+    tagline:
+      "Accedi al metodo Lacertosus nella sua forma più pura. Tre blocchi formativi guidati dai migliori docenti del settore.",
+    audience: "Per chi vuole entrare nell'Academy.",
+    extras: [],
+    ctaLabel: "Scopri START",
+  },
+  pro: {
+    tagline: "Il percorso completo + la certificazione che fa la differenza.",
+    audience: "Per chi vuole costruire una carriera riconosciuta.",
+    extras: [
+      {
+        text: "Certificazione FIPE × Lacertosus",
+        sub: "Riconoscimento professionale nazionale",
+      },
+      {
+        text: "2 Masterclass a scelta su 8",
+        sub: "Specialisti di caratura internazionale",
+      },
+    ],
+    ctaLabel: "Scopri PRO",
+  },
+  elite: {
+    badge: "Full Experience",
+    tagline:
+      "Vivi i 6 weekend di formazione da insider. Vitto e alloggio inclusi, niente di operativo a cui pensare.",
+    audience: "Per chi sceglie di concentrarsi solo sulla formazione.",
+    heroExtra: {
+      eyebrow: "L'Esperienza Esclusiva",
+      text: "Vitto & Alloggio inclusi",
+      sub: "Struttura premium e ristorazione curata per tutti i 6 weekend formativi. Zero pensieri operativi: dorma, mangia, formati.",
+    },
+    extras: [
+      {
+        text: "Certificazione FIPE × Lacertosus",
+        sub: "Riconoscimento professionale nazionale",
+      },
+      {
+        text: "2 Masterclass a scelta su 8",
+        sub: "Specialisti di caratura internazionale",
+      },
+      {
+        text: "Accesso prioritario alla community",
+        sub: "Eventi riservati e network esclusivo",
+      },
+    ],
+    ctaLabel: "Scopri ELITE",
+  },
+};
+
+// ─── Modal copy ──────────────────────────────────────────────────────────────
+
+type ModalCopy = {
+  eyebrow: string;
+  headline: string;
+  promise: string;
+  guarantees: { label: string; sub: string }[];
+};
+
+const MODAL_COPY: Record<string, ModalCopy> = {
+  start: {
+    eyebrow: "Edizione 2026/27",
+    headline: "Costruisci le fondamenta di un vero professionista del fitness.",
+    promise:
+      "9 mesi di formazione in presenza con i migliori docenti italiani. Tre blocchi progressivi, niente extra. Il percorso essenziale che funziona.",
+    guarantees: [
+      { label: "100% in presenza", sub: "Zero DAD, zero scuse" },
+      { label: "33+ docenti", sub: "Tutti professionisti attivi" },
+      { label: "Materiale a vita", sub: "Slide, registrazioni, schede" },
+    ],
+  },
+  pro: {
+    eyebrow: "Edizione 2026/27",
+    headline:
+      "La certificazione FIPE che fa la differenza nel mercato professionale.",
+    promise:
+      "Il percorso completo + la doppia certificazione FIPE × Lacertosus + 2 Masterclass a scelta tra 8 sessioni esclusive. Il pack scelto da chi punta in alto.",
+    guarantees: [
+      { label: "FIPE × Lacertosus", sub: "Doppia certificazione ufficiale" },
+      { label: "33+ docenti", sub: "Specialisti di caratura nazionale" },
+      { label: "2 Masterclass", sub: "A scelta su 8 sessioni esclusive" },
+    ],
+  },
+  elite: {
+    eyebrow: "Edizione 2026/27",
+    headline:
+      "L'esperienza più completa. Senza distrazioni operative, da insider.",
+    promise:
+      "Tutto del pack PRO + vitto e alloggio inclusi per i 6 weekend formativi. Accesso prioritario alla community e agli eventi riservati. Vivi il percorso a 360°.",
+    guarantees: [
+      { label: "Vitto & Alloggio", sub: "Inclusi per tutti i 6 weekend" },
+      { label: "FIPE × Lacertosus", sub: "Doppia certificazione ufficiale" },
+      { label: "Accesso prioritario", sub: "Eventi riservati e network" },
+    ],
+  },
+};
+
+// ─── Pack Modal — mirror /pack modal, without price ─────────────────────────
 
 function PackModal({
   pack,
@@ -174,22 +191,68 @@ function PackModal({
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const copy = MODAL_COPY[pack.slug] ?? MODAL_COPY.start;
+  const totalTeachers = BLOCK_SLUGS.reduce(
+    (acc, s) => acc + teachers[s].length,
+    0,
+  );
 
-  // Theme tokens
-  const panelLBg = isDark ? "rgba(2,0,32,0.97)" : "rgba(255,255,255,0.99)";
-  const panelRBg = isDark ? "rgba(1,0,20,0.98)" : "rgba(244,244,250,0.99)";
-  const textH = isDark ? "#ffffff" : "#111111";
-  const textB = isDark ? "rgba(180,180,200,0.7)" : "#666666";
-  const textSub = isDark ? "rgba(120,120,140,0.7)" : "#aaaaaa";
-  const tileBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
-  const tileBdr = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
-  const statBdr = isDark ? `rgba(${tier.rgb},0.12)` : `rgba(${tier.rgb},0.18)`;
-  const closeCl = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)";
-  const closHov = isDark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)";
-  const inclTxt = isDark ? "rgba(200,200,220,0.8)" : "#444444";
-  const overlayBg = isDark ? "rgba(1,0,18,0.88)" : "rgba(0,0,0,0.55)";
+  // ── Mixed theme palette (mirror /pack modal) ────────────────────────
+  const isProSlug = pack.slug === "pro";
+  const isEliteSlug = pack.slug === "elite";
 
-  // Entrance animation + load video after mount
+  const modalBg = isEliteSlug ? "#0a0a14" : "rgb(43 43 43 / 94%)";
+  const stickyBarBg = isEliteSlug
+    ? "rgba(10,10,20,0.92)"
+    : "rgb(43 43 43 / 92%)";
+
+  const surfaceBorder = isEliteSlug
+    ? "rgba(255,255,255,0.08)"
+    : "rgba(255,255,255,0.12)";
+  const surfaceBorderStrong = "rgba(255,255,255,0.16)";
+  const textH = "#ffffff";
+  const textB = isEliteSlug
+    ? "rgba(220,220,235,0.78)"
+    : "rgba(255,255,255,0.82)";
+  const textMuted = isEliteSlug
+    ? "rgba(180,180,200,0.55)"
+    : "rgba(255,255,255,0.6)";
+
+  // Light tokens (value stack, guarantees, faculty)
+  const lightBg = "#F8F8FA";
+  const lightSurface = "#ffffff";
+  const lightBorder = "rgba(17,17,17,0.09)";
+  const lightTextH = "#111111";
+  const lightTextB = "rgba(17,17,17,0.66)";
+  const lightTextMuted = "rgba(17,17,17,0.45)";
+
+  const ORANGE = "#F09226";
+  const ORANGE_RGB = "240,146,38";
+
+  void isProSlug;
+  void isDark;
+
+  const isPro = isProSlug;
+  const isElite = isEliteSlug;
+
+  const valueStackExtras: { label: string; sub: string }[] = [];
+  if (isPro || isElite) {
+    valueStackExtras.push({
+      label: "Certificazione FIPE × Lacertosus",
+      sub: "Riconoscimento professionale nazionale ufficiale",
+    });
+    valueStackExtras.push({
+      label: "2 Masterclass a scelta su 8",
+      sub: "Specialisti di caratura internazionale",
+    });
+  }
+  if (isElite) {
+    valueStackExtras.push({
+      label: "Accesso prioritario alla community",
+      sub: "Eventi riservati e network esclusivo Lacertosus",
+    });
+  }
+
   useEffect(() => {
     const tl = gsap.timeline();
     tl.fromTo(
@@ -215,13 +278,12 @@ function PackModal({
     };
   }, []);
 
-  // ESC to close
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+    const h = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [onClose]);
 
   function close() {
@@ -239,72 +301,431 @@ function PackModal({
     <div
       ref={overlayRef}
       className="fixed inset-0 z-[300] flex items-stretch justify-center"
-      style={{ background: overlayBg, backdropFilter: "blur(16px)" }}
+      style={{
+        background: "transparent",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
       onClick={close}
     >
       <div
         ref={panelRef}
-        className="relative flex w-full max-w-[1180px] m-auto flex-col lg:flex-row overflow-hidden rounded-sm h-dvh max-h-dvh md:h-auto md:max-h-[90vh]"
-        style={{ border: `1px solid ${tier.color}28` }}
+        className="relative flex flex-col w-full max-w-[1080px] m-auto rounded-sm overflow-hidden h-dvh max-h-dvh md:h-auto md:max-h-[92vh]"
+        style={{
+          background: modalBg,
+          border: `1px solid ${surfaceBorder}`,
+          boxShadow: "0 40px 120px rgba(0,0,0,0.7)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── LEFT: Info ─────────────────────────────────────────────── */}
+        {/* ════ STICKY TOP BAR ════ */}
         <div
-          className="flex flex-col gap-6 overflow-y-auto p-8 lg:w-[44%] lg:p-10"
-          style={{ background: panelLBg }}
+          className="shrink-0 flex items-center justify-between px-5 md:px-8 py-3.5 md:py-4 z-30"
+          style={{
+            background: stickyBarBg,
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderBottom: `1px solid ${surfaceBorder}`,
+          }}
         >
-          {/* Tier badge */}
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-9 w-9 items-center justify-center text-sm font-black"
-              style={{ border: `2px solid ${tier.color}60`, color: tier.color }}
-            >
-              {tier.roman}
-            </div>
+          <div className="flex items-center gap-3 min-w-0">
             <span
-              className="text-xs font-black tracking-[0.32em] uppercase"
-              style={{ color: tier.color }}
+              className="text-[0.58rem] font-black tracking-[0.32em] uppercase"
+              style={{ color: ORANGE }}
             >
-              Pack {tier.label}
+              Pack
             </span>
-          </div>
-
-          {/* Name + subtitle */}
-          <div>
-            <h2
-              className="text-[clamp(1.8rem,3vw,2.6rem)] font-black leading-[0.95] tracking-tight"
+            <span
+              className="text-[1.05rem] md:text-[1.2rem] font-black tracking-[-0.01em] truncate"
               style={{ color: textH }}
             >
-              {pack.name}
+              {tier.label}
+            </span>
+          </div>
+          <button
+            onClick={close}
+            className="shrink-0 inline-flex items-center gap-1.5 text-[0.66rem] font-bold tracking-[0.22em] uppercase transition-opacity hover:opacity-65"
+            style={{ color: textMuted }}
+            aria-label="Chiudi"
+          >
+            <span className="hidden sm:inline">Chiudi</span>
+            <span className="text-lg leading-none">×</span>
+          </button>
+        </div>
+
+        {/* ════ SCROLLABLE BODY ════ */}
+        <div className="overflow-y-auto flex-1">
+          {/* ── 1. HERO — eyebrow + headline + promise + CTA (no price) ── */}
+          <section
+            className="relative px-6 md:px-10 pt-8 pb-9 md:pt-10 md:pb-12"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 0%, rgba(240,146,38,0.07) 0%, transparent 60%)",
+            }}
+          >
+            <div
+              className="inline-flex items-center gap-2 px-2.5 py-1 mb-5"
+              style={{
+                background: "rgba(240,146,38,0.12)",
+                border: "1px solid rgba(240,146,38,0.45)",
+              }}
+            >
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{
+                  background: ORANGE,
+                  boxShadow: "0 0 8px rgba(240,146,38,0.8)",
+                }}
+              />
+              <span
+                className="text-[0.6rem] font-black tracking-[0.18em] uppercase"
+                style={{ color: ORANGE }}
+              >
+                {copy.eyebrow}
+              </span>
+            </div>
+
+            <h2
+              className="font-black tracking-[-0.025em] leading-[1.02] text-[clamp(1.7rem,3.4vw,2.6rem)] max-w-[24ch]"
+              style={{ color: textH }}
+            >
+              {copy.headline}
             </h2>
+
             <p
-              className="mt-2 text-sm leading-relaxed"
+              className="mt-5 text-[0.95rem] md:text-[1rem] leading-[1.65] max-w-[58ch]"
               style={{ color: textB }}
             >
-              {pack.subtitle}
+              {copy.promise}
             </p>
-          </div>
 
-          {/* Includes */}
-          <div>
+            {/* CTA — no price */}
+            <div className="mt-7">
+              <button
+                onClick={() => onBuy(pack)}
+                className="inline-flex items-center justify-between gap-3 px-6 py-4 text-[0.78rem] font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-90"
+                style={{ background: ORANGE, color: "#111111" }}
+              >
+                <span>Scegli {tier.label}</span>
+                <span aria-hidden className="text-base">
+                  →
+                </span>
+              </button>
+            </div>
+          </section>
+
+          {/* ── 2. VIDEO inline ─────────────────────────────────── */}
+          <section
+            className="px-6 md:px-10 pb-9 md:pb-12"
+            style={{ borderTop: `1px solid ${surfaceBorder}` }}
+          >
+            <div className="pt-7 md:pt-9">
+              <p
+                className="mb-4 text-[0.6rem] font-black tracking-[0.3em] uppercase"
+                style={{ color: ORANGE }}
+              >
+                — L&apos;Academy in 2 minuti
+              </p>
+              <div
+                className="relative w-full overflow-hidden"
+                style={{
+                  paddingBottom: "56.25%",
+                  background: "#000",
+                  border: `1px solid ${surfaceBorderStrong}`,
+                  boxShadow: `0 0 60px rgba(${ORANGE_RGB},0.06)`,
+                }}
+              >
+                {videoSrc ? (
+                  <iframe
+                    src={videoSrc}
+                    className="absolute inset-0 h-full w-full"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className="flex h-14 w-14 items-center justify-center rounded-full"
+                      style={{
+                        background: `rgba(${ORANGE_RGB},0.14)`,
+                        border: `1.5px solid rgba(${ORANGE_RGB},0.45)`,
+                      }}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill={ORANGE}
+                      >
+                        <path d="M8 5.14v14l11-7-11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* ── 3. VALUE STACK — LIGHT ─────────────────────────── */}
+          <section
+            className="px-6 md:px-10 py-10 md:py-14"
+            style={{ background: lightBg }}
+          >
             <p
-              className="mb-3 text-[0.7rem] font-black tracking-[0.3em] uppercase"
-              style={{ color: `${tier.color}80` }}
+              className="mb-2 text-[0.6rem] font-black tracking-[0.3em] uppercase"
+              style={{ color: ORANGE }}
             >
-              Cosa include
+              — Cosa Ottieni
             </p>
-            <ul className="space-y-2.5">
-              {pack.includes.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-3 text-sm"
-                  style={{ color: inclTxt }}
+            <h3
+              className="font-black tracking-[-0.02em] leading-[1.05] text-[clamp(1.3rem,2.4vw,1.9rem)]"
+              style={{ color: lightTextH }}
+            >
+              Il percorso, in dettaglio.
+            </h3>
+
+            <div className="mt-7">
+              <span
+                className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
+                style={{ color: lightTextMuted }}
+              >
+                Il Percorso · 9 mesi · 6 weekend in presenza
+              </span>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {BLOCK_SLUGS.map((slug, i) => (
+                  <div
+                    key={slug}
+                    className="flex items-start gap-3 p-4"
+                    style={{
+                      background: lightSurface,
+                      border: `1px solid ${lightBorder}`,
+                    }}
+                  >
+                    <span
+                      className="shrink-0 flex h-8 w-8 items-center justify-center text-[0.7rem] font-black tabular-nums"
+                      style={{
+                        border: `1.5px solid rgba(${ORANGE_RGB},0.55)`,
+                        color: ORANGE,
+                        background: `rgba(${ORANGE_RGB},0.07)`,
+                      }}
+                    >
+                      0{i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div
+                        className="text-[0.95rem] font-black leading-tight tracking-[0.02em]"
+                        style={{ color: lightTextH }}
+                      >
+                        {BLOCK_LABELS[slug]}
+                      </div>
+                      <div
+                        className="mt-1 text-[0.65rem] font-bold tracking-[0.18em] uppercase"
+                        style={{ color: lightTextMuted }}
+                      >
+                        2 weekend
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {valueStackExtras.length > 0 && (
+              <div className="mt-8">
+                <span
+                  className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
+                  style={{ color: ORANGE }}
+                >
+                  In più
+                </span>
+                <div className="flex flex-col gap-2.5">
+                  {valueStackExtras.map((e, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 p-4"
+                      style={{
+                        background: lightSurface,
+                        border: `1px solid rgba(${ORANGE_RGB},0.28)`,
+                        borderLeft: `3px solid ${ORANGE}`,
+                      }}
+                    >
+                      <span
+                        className="shrink-0 mt-0.5 flex h-5 w-5 items-center justify-center text-[0.95rem] font-black leading-none"
+                        style={{ color: ORANGE }}
+                      >
+                        +
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="text-[0.95rem] font-black leading-tight tracking-[0.02em]"
+                          style={{ color: lightTextH }}
+                        >
+                          {e.label}
+                        </p>
+                        <p
+                          className="mt-1 text-[0.78rem] leading-relaxed"
+                          style={{ color: lightTextB }}
+                        >
+                          {e.sub}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* ── 3b. ELITE EXCLUSIVE — Vitto & Alloggio luxury ── */}
+          {isElite && (
+            <section
+              className="relative overflow-hidden px-6 md:px-10 py-14 md:py-20"
+              style={{
+                background: `${BRUSHED_STEEL_OVERLAY}, linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 60%, #1a1a1a 100%)`,
+                borderTop: `1px solid ${surfaceBorderStrong}`,
+                borderBottom: `1px solid ${surfaceBorderStrong}`,
+              }}
+            >
+              <div
+                className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(240,146,38,0.18) 0%, transparent 70%)",
+                  filter: "blur(8px)",
+                }}
+              />
+              <div
+                className="pointer-events-none absolute -bottom-32 -left-32 h-80 w-80 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(240,146,38,0.1) 0%, transparent 70%)",
+                  filter: "blur(8px)",
+                }}
+              />
+
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
+                <div>
+                  <span
+                    className="inline-flex items-center gap-2 text-[0.58rem] font-black tracking-[0.32em] uppercase mb-4"
+                    style={{ color: ORANGE }}
+                  >
+                    ★ — L&apos;Esperienza Esclusiva
+                  </span>
+                  <h3
+                    className="font-black tracking-[-0.025em] leading-[1.02] text-[clamp(1.7rem,3.6vw,2.8rem)]"
+                    style={{ color: textH }}
+                  >
+                    Vitto &amp; Alloggio
+                    <br />
+                    <span style={{ color: ORANGE }}>inclusi.</span>
+                  </h3>
+                  <p
+                    className="mt-5 text-[0.95rem] md:text-[1rem] leading-[1.65] max-w-[58ch]"
+                    style={{ color: textB }}
+                  >
+                    Per tutti i 6 weekend formativi dormi in struttura premium e
+                    mangi con ristorazione curata. Niente prenotazioni,
+                    spostamenti o logistica: ti dedichi solo alla formazione e
+                    al network.
+                  </p>
+
+                  <div className="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      {
+                        icon: "★",
+                        label: "Struttura premium",
+                        sub: "Camere singole / doppie",
+                      },
+                      {
+                        icon: "✦",
+                        label: "Ristorazione curata",
+                        sub: "Cucina sportiva inclusa",
+                      },
+                      {
+                        icon: "↺",
+                        label: "Zero logistica",
+                        sub: "Tutto già organizzato",
+                      },
+                    ].map((f) => (
+                      <div
+                        key={f.label}
+                        className="flex flex-col gap-1 px-4 py-3"
+                        style={{
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(240,146,38,0.22)",
+                        }}
+                      >
+                        <span
+                          className="text-[1rem] leading-none"
+                          style={{ color: ORANGE }}
+                        >
+                          {f.icon}
+                        </span>
+                        <p
+                          className="mt-1.5 text-[0.78rem] font-black leading-tight"
+                          style={{ color: textH }}
+                        >
+                          {f.label}
+                        </p>
+                        <p
+                          className="text-[0.62rem] leading-snug"
+                          style={{ color: textB }}
+                        >
+                          {f.sub}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="hidden lg:flex shrink-0 items-center justify-center">
+                  <div
+                    className="relative flex h-44 w-44 items-center justify-center"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(240,146,38,0.16) 0%, rgba(240,146,38,0.02) 100%)",
+                      border: "1.5px solid rgba(240,146,38,0.55)",
+                      boxShadow: "0 0 60px rgba(240,146,38,0.18)",
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="80"
+                      height="80"
+                      fill="none"
+                      stroke={ORANGE}
+                      strokeWidth="1.5"
+                      strokeLinecap="square"
+                    >
+                      <path d="M3 18v-7m0 7h18m-18 0v-3h18v3M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
+                      <circle cx="9" cy="11.5" r="1.5" fill={ORANGE} />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── 4. GUARANTEES — LIGHT ────────────────────────── */}
+          <section
+            className="px-6 md:px-10 py-9 md:py-11"
+            style={{ background: lightBg }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {copy.guarantees.map((g, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-4"
+                  style={{
+                    background: lightSurface,
+                    border: `1px solid ${lightBorder}`,
+                  }}
                 >
                   <svg
                     viewBox="0 0 16 16"
                     fill="none"
-                    className="mt-0.5 h-4 w-4 shrink-0"
-                    style={{ color: tier.color }}
+                    className="shrink-0 h-5 w-5"
+                    style={{ color: ORANGE }}
                   >
                     <path
                       d="M13.5 4.5L6 12L2.5 8.5"
@@ -313,92 +734,99 @@ function PackModal({
                       strokeLinecap="square"
                     />
                   </svg>
-                  {item}
-                </li>
+                  <div className="min-w-0">
+                    <p
+                      className="text-[0.78rem] font-black leading-tight tracking-[0.02em]"
+                      style={{ color: lightTextH }}
+                    >
+                      {g.label}
+                    </p>
+                    <p
+                      className="mt-0.5 text-[0.62rem] leading-snug"
+                      style={{ color: lightTextMuted }}
+                    >
+                      {g.sub}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
+          </section>
 
-          {/* ── CTA — above teachers ── */}
-          <div>
-            <button
-              onClick={() => onBuy(pack)}
-              className="w-full py-3.5 text-center text-sm font-black tracking-[0.18em] uppercase transition-all duration-200"
-              style={{
-                background: tier.color,
-                color: "#111111",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.opacity = "0.88";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.opacity = "1";
-              }}
-            >
-              Scegli {tier.label} →
-            </button>
-            <p
-              className="mt-2 text-center text-[0.68rem]"
-              style={{ color: textSub }}
-            >
-              Nessun pagamento richiesto ora · Completa il profilo per procedere
-            </p>
-          </div>
+          {/* ── 5. FACULTY — LIGHT ────────────────────────── */}
+          <section
+            className="px-6 md:px-10 py-10 md:py-14"
+            style={{
+              background: lightSurface,
+              borderTop: `1px solid ${lightBorder}`,
+            }}
+          >
+            <div className="flex items-end justify-between gap-4 mb-7">
+              <div>
+                <p
+                  className="mb-2 text-[0.6rem] font-black tracking-[0.3em] uppercase"
+                  style={{ color: ORANGE }}
+                >
+                  — La Faculty
+                </p>
+                <h3
+                  className="font-black tracking-[-0.02em] leading-[1.05] text-[clamp(1.3rem,2.4vw,1.9rem)]"
+                  style={{ color: lightTextH }}
+                >
+                  {totalTeachers}+ docenti professionisti.
+                </h3>
+              </div>
+            </div>
 
-          {/* ── Teachers — bento grid ── */}
-          <div>
-            <p
-              className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase"
-              style={{ color: `${tier.color}80` }}
-            >
-              I Docenti
-            </p>
             <div className="space-y-5">
               {BLOCK_SLUGS.map((slug) => (
                 <div key={slug}>
                   <p
-                    className="mb-2.5 text-[0.65rem] font-black tracking-[0.3em] uppercase"
-                    style={{ color: textSub }}
+                    className="mb-2.5 text-[0.62rem] font-black tracking-[0.3em] uppercase"
+                    style={{ color: lightTextMuted }}
                   >
-                    {BLOCK_LABELS[slug]}
+                    Docenti — {BLOCK_LABELS[slug]}
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                     {teachers[slug].map((t) => (
                       <div
                         key={t.slug}
-                        className="flex flex-col items-center gap-2 p-3 text-center"
+                        className="flex items-center gap-2.5 p-2.5"
                         style={{
-                          background: tileBg,
-                          border: `1px solid ${tileBdr}`,
+                          background: lightBg,
+                          border: `1px solid ${lightBorder}`,
                         }}
                         title={t.role}
                       >
-                        {/* Avatar */}
                         <div
-                          className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.7rem] font-black"
-                          style={{ background: `${t.color}20`, color: t.color }}
+                          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.66rem] font-black"
+                          style={{
+                            background: `${t.color}26`,
+                            color: t.color,
+                          }}
                         >
                           {t.image_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Image
                               src={t.image_url}
                               alt={t.name}
+                              width={40}
+                              height={40}
                               className="h-full w-full object-cover"
                             />
                           ) : (
                             initials(t.name)
                           )}
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p
-                            className="text-[0.72rem] font-bold leading-tight"
-                            style={{ color: textH }}
+                            className="text-[0.7rem] font-black leading-tight truncate"
+                            style={{ color: lightTextH }}
                           >
                             {t.name}
                           </p>
                           <p
-                            className="mt-0.5 text-[0.6rem] leading-snug line-clamp-2"
-                            style={{ color: textSub }}
+                            className="mt-0.5 text-[0.55rem] leading-snug line-clamp-1"
+                            style={{ color: lightTextMuted }}
                           >
                             {t.role}
                           </p>
@@ -409,108 +837,85 @@ function PackModal({
                 </div>
               ))}
             </div>
-          </div>
-        </div>
+          </section>
 
-        {/* ── RIGHT: Video ────────────────────────────────────────────── */}
-        <div
-          className="relative flex flex-col justify-center lg:w-[56%]"
-          style={{ background: panelRBg }}
-        >
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: `radial-gradient(ellipse at 60% 40%, rgba(${tier.rgb},0.07) 0%, transparent 65%)`,
-            }}
-          />
-          <div className="relative z-10 p-6 lg:p-10">
+          {/* ── 6. FINAL CTA — DARK (no price) ─────────────── */}
+          <section className="px-6 md:px-10 py-10 md:py-14 text-center">
             <p
-              className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase"
-              style={{ color: `${tier.color}80` }}
+              className="mb-3 text-[0.62rem] font-black tracking-[0.3em] uppercase"
+              style={{ color: ORANGE }}
             >
-              L&apos;Academy in 2 minuti
+              — {copy.eyebrow}
             </p>
-            <div
-              className="relative w-full overflow-hidden"
-              style={{
-                paddingBottom: "56.25%",
-                background: "#000",
-                border: `1px solid ${tier.color}20`,
-                boxShadow: `0 0 60px rgba(${tier.rgb},0.08)`,
-              }}
+            <h3
+              className="font-black tracking-[-0.025em] leading-[1.05] text-[clamp(1.5rem,3vw,2.4rem)] mx-auto max-w-[22ch]"
+              style={{ color: textH }}
             >
-              {videoSrc ? (
-                <iframe
-                  src={videoSrc}
-                  className="absolute inset-0 h-full w-full"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div
-                    className="flex h-14 w-14 items-center justify-center rounded-full"
-                    style={{
-                      background: `rgba(${tier.rgb},0.14)`,
-                      border: `1.5px solid rgba(${tier.rgb},0.4)`,
-                      boxShadow: `0 0 24px rgba(${tier.rgb},0.15)`,
-                    }}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="20"
-                      height="20"
-                      fill={tier.color}
-                    >
-                      <path d="M8 5.14v14l11-7-11-7z" />
-                    </svg>
-                  </div>
-                </div>
-              )}
+              Inizia il percorso{" "}
+              <span style={{ color: ORANGE }}>{tier.label}</span>.
+            </h3>
+            <p
+              className="mt-4 mx-auto max-w-[44ch] text-[0.85rem] leading-[1.6]"
+              style={{ color: textB }}
+            >
+              Una decisione. 9 mesi di formazione in presenza con i migliori
+              docenti del settore.
+            </p>
+            <div className="mt-7 flex flex-col items-center gap-2.5">
+              <button
+                onClick={() => onBuy(pack)}
+                className="inline-flex items-center justify-between gap-3 px-7 py-4 text-[0.78rem] font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-90 min-w-[280px]"
+                style={{ background: ORANGE, color: "#111111" }}
+              >
+                <span>Scegli {tier.label}</span>
+                <span aria-hidden className="text-base">
+                  →
+                </span>
+              </button>
+              <p
+                className="text-[0.62rem] font-semibold tracking-[0.04em]"
+                style={{ color: textMuted }}
+              >
+                Nessun pagamento richiesto ora · Completa il profilo per
+                procedere
+              </p>
             </div>
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              {[
-                { val: "9", label: "mesi" },
-                { val: "100%", label: "in presenza" },
-                { val: "33+", label: "docenti" },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="flex flex-col items-center gap-1 p-3 text-center"
-                  style={{ border: `1px solid ${statBdr}` }}
-                >
-                  <span
-                    className="text-xl font-black"
-                    style={{ color: tier.color }}
-                  >
-                    {s.val}
-                  </span>
-                  <span
-                    className="text-[0.65rem] font-semibold uppercase tracking-wider"
-                    style={{ color: textSub }}
-                  >
-                    {s.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          </section>
         </div>
 
-        {/* Close */}
-        <button
-          onClick={close}
-          className="absolute right-5 top-5 z-20 flex items-center gap-1.5 text-[0.7rem] font-bold tracking-[0.22em] uppercase transition-colors"
-          style={{ color: closeCl }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = closHov;
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = closeCl;
+        {/* ════ STICKY BOTTOM BAR (no price) ════ */}
+        <div
+          className="shrink-0 flex items-center justify-between gap-3 px-4 md:px-8 py-3 z-30"
+          style={{
+            background: stickyBarBg,
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderTop: `1px solid ${surfaceBorder}`,
           }}
         >
-          Chiudi <span className="text-lg font-light">×</span>
-        </button>
+          <div className="min-w-0 flex flex-col">
+            <span
+              className="text-[0.55rem] font-bold tracking-[0.18em] uppercase"
+              style={{ color: textMuted }}
+            >
+              Pack
+            </span>
+            <span
+              className="text-[1.05rem] font-black leading-none tracking-[-0.01em]"
+              style={{ color: textH }}
+            >
+              {tier.label}
+            </span>
+          </div>
+          <button
+            onClick={() => onBuy(pack)}
+            className="shrink-0 inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-[0.7rem] font-black tracking-[0.14em] uppercase transition-opacity hover:opacity-90"
+            style={{ background: ORANGE, color: "#111111" }}
+          >
+            <span>Scegli {tier.label}</span>
+            <span aria-hidden>→</span>
+          </button>
+        </div>
       </div>
     </div>,
     document.body,
@@ -521,14 +926,6 @@ function PackModal({
 
 function onMove(e: React.MouseEvent<HTMLDivElement>) {
   const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty(
-    "--mx",
-    `${((e.clientX - rect.left) / rect.width) * 100}%`,
-  );
-  e.currentTarget.style.setProperty(
-    "--my",
-    `${((e.clientY - rect.top) / rect.height) * 100}%`,
-  );
   const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
   const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
   gsap.to(e.currentTarget, {
@@ -548,7 +945,7 @@ function onLeave(e: React.MouseEvent<HTMLDivElement>) {
   });
 }
 
-// ─── Pack Card ────────────────────────────────────────────────────────────────
+// ─── Pack Card — mirror /pack card, NO PRICE ────────────────────────────────
 
 function PackCard({
   pack,
@@ -559,236 +956,353 @@ function PackCard({
   isDark: boolean;
   onClick: () => void;
 }) {
-  /* isDark intentionally unused — emphasis-based theming overrides theme */
   void isDark;
   const tier = TIER[pack.slug] ?? TIER.start;
-  const style = getEmphasisStyle(tier.emphasis);
-  const teachers = getBundleTeachers();
-  // Count total teachers across all blocks
-  const totalTeachers = BLOCK_SLUGS.reduce(
-    (acc, s) => acc + teachers[s].length,
-    0,
-  );
-  // Take first 5 teacher avatars to show as a strip
-  const avatarTeachers = BLOCK_SLUGS.flatMap((s) => teachers[s]).slice(0, 5);
-
   const isHighlighted = pack.highlighted;
-  const avatarRing =
-    tier.emphasis === "premium"
-      ? "rgba(0,0,0,0.4)"
-      : tier.emphasis === "hero"
-        ? "rgba(255,255,255,0.6)"
-        : "#ffffff";
+  const copy = CARD_COPY[pack.slug] ?? CARD_COPY.start;
+  const isPro = pack.slug === "pro";
+  const isElite = pack.slug === "elite";
+  const isStart = pack.slug === "start";
+
+  /* ── Theme tokens per tier (mirror /pack) ─────────────────────── */
+  const headBg = isStart
+    ? "#ffffff"
+    : isPro
+      ? "#F09226"
+      : `${BRUSHED_STEEL_OVERLAY}, linear-gradient(145deg, #434343 0%, #1a1a1a 55%, #0a0a0a 100%)`;
+
+  const bodyBg = isStart
+    ? "#ffffff"
+    : isPro
+      ? "#F5F5F7"
+      : `${BRUSHED_STEEL_OVERLAY}, linear-gradient(145deg, #434343 0%, #1a1a1a 55%, #0a0a0a 100%)`;
+
+  const headText = isPro || isStart ? "#111111" : "#ffffff";
+  const headTextMuted = isPro
+    ? "rgba(17,17,17,0.72)"
+    : isStart
+      ? "rgba(17,17,17,0.55)"
+      : "rgba(255,255,255,0.65)";
+  const headTagBg = isPro
+    ? "rgba(17,17,17,0.08)"
+    : isStart
+      ? "rgba(240,146,38,0.08)"
+      : "rgba(240,146,38,0.12)";
+  const headTagText = isPro
+    ? "rgba(17,17,17,0.85)"
+    : isStart
+      ? "rgba(180,80,0,0.85)"
+      : "rgba(240,146,38,0.85)";
+
+  const bodyText = isElite ? "#ffffff" : "#111111";
+  const bodyTextSecondary = isElite
+    ? "rgba(255,255,255,0.72)"
+    : "rgba(17,17,17,0.62)";
+  const bodyTextMuted = isElite
+    ? "rgba(255,255,255,0.45)"
+    : "rgba(17,17,17,0.42)";
+  const bodyDivider = isElite ? "rgba(255,255,255,0.1)" : "rgba(17,17,17,0.08)";
+  const bodyAccent = "#F09226";
+  const blockTileBg = isElite
+    ? "rgba(255,255,255,0.04)"
+    : "rgba(17,17,17,0.03)";
+  const blockTileBorder = isElite
+    ? "rgba(255,255,255,0.08)"
+    : "rgba(17,17,17,0.08)";
+
+  const outerBorder = isStart
+    ? "1px solid rgba(0,0,0,0.1)"
+    : isPro
+      ? "1px solid rgba(240,146,38,0.4)"
+      : "1px solid rgba(255,255,255,0.1)";
+  const outerShadow = isPro
+    ? "0 0 60px rgba(240,146,38,0.18), 0 24px 80px rgba(0,0,0,0.18)"
+    : isElite
+      ? "0 0 60px rgba(0,0,0,0.4), 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)"
+      : undefined;
 
   return (
     <div
       data-pack-card
-      className="bento-interactive relative flex cursor-pointer flex-col overflow-hidden rounded-sm"
+      className="relative flex cursor-pointer flex-col overflow-hidden rounded-sm"
       style={{
-        background: style.background,
-        border: style.border,
-        boxShadow: style.boxShadow,
+        border: outerBorder,
+        boxShadow: outerShadow,
         transform: isHighlighted ? "scale(1.025)" : undefined,
+        transformStyle: "preserve-3d",
+        background: bodyBg,
       }}
       onClick={onClick}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
-      {/* Top accent bar */}
-      <div
-        className="h-0.5 w-full"
-        style={{
-          background: `linear-gradient(90deg, ${style.accent}, ${style.accent}00)`,
-        }}
-      />
+      {!isPro && (
+        <div
+          className="h-0.5 w-full"
+          style={{
+            background: `linear-gradient(90deg, ${bodyAccent}, ${bodyAccent}00)`,
+          }}
+        />
+      )}
 
+      {copy.badge && (
+        <div
+          className="absolute right-5 top-5 px-2.5 py-1 text-[0.55rem] font-black tracking-[0.28em] uppercase z-10"
+          style={{
+            background: "rgba(17,17,17,0.92)",
+            color: "#F09226",
+            border: "1px solid rgba(240,146,38,0.4)",
+          }}
+        >
+          {copy.badge}
+        </div>
+      )}
+
+      {/* ═══════════ HEAD ════════════ */}
+      <div
+        className="px-7 lg:px-8 pt-7 lg:pt-8 pb-6"
+        style={{ background: headBg }}
+      >
+        <span
+          className="text-[0.6rem] font-black tracking-[0.34em] uppercase block"
+          style={{ color: headTextMuted }}
+        >
+          Pack
+        </span>
+        <div
+          className="mt-1 text-[clamp(2.2rem,3.5vw,3.3rem)] font-black leading-[0.92] tracking-[-0.025em]"
+          style={{ color: headText }}
+        >
+          {tier.label}
+        </div>
+        <p
+          className="mt-3.5 text-[0.92rem] leading-[1.5] font-medium max-w-[34ch]"
+          style={{ color: headText, opacity: 0.92 }}
+        >
+          {copy.tagline}
+        </p>
+
+        <div
+          className="mt-4 inline-flex items-center gap-2 px-2.5 py-1.5"
+          style={{
+            background: headTagBg,
+            border: `1px solid ${
+              isPro
+                ? "rgba(17,17,17,0.12)"
+                : isStart
+                  ? "rgba(240,146,38,0.18)"
+                  : "rgba(240,146,38,0.25)"
+            }`,
+          }}
+        >
+          <span
+            className="text-[0.6rem] font-bold tracking-[0.04em]"
+            style={{ color: headTagText }}
+          >
+            {copy.audience}
+          </span>
+        </div>
+      </div>
+
+      {/* ═══════════ BODY (NO PRICE) ════════════ */}
       <div className="flex flex-1 flex-col gap-5 p-7 lg:p-8">
-        {/* Tier label */}
+        {/* ── BLOCKS — always shown, prominent ───────────────── */}
         <div>
           <span
-            className="text-[0.65rem] font-black tracking-[0.35em] uppercase"
-            style={{ color: style.textMuted }}
+            className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
+            style={{ color: bodyTextMuted }}
           >
-            Pack
+            Il Percorso · 9 mesi · 6 weekend
           </span>
-          <div
-            className="mt-1 text-[clamp(2.6rem,3.8vw,4rem)] font-black leading-none tracking-tight"
-            style={{ color: style.textPrimary }}
-          >
-            {tier.label}
+          <div className="flex flex-col gap-2">
+            {BLOCK_SLUGS.map((slug, i) => (
+              <div
+                key={slug}
+                className="flex items-center gap-3 px-3 py-2.5"
+                style={{
+                  background: blockTileBg,
+                  border: `1px solid ${blockTileBorder}`,
+                }}
+              >
+                <span
+                  className="shrink-0 flex h-7 w-7 items-center justify-center text-[0.62rem] font-black tabular-nums"
+                  style={{
+                    border: `1.5px solid rgba(240,146,38,0.55)`,
+                    color: bodyAccent,
+                    background: isElite
+                      ? "rgba(240,146,38,0.06)"
+                      : "rgba(240,146,38,0.05)",
+                  }}
+                >
+                  0{i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div
+                    className="text-[0.82rem] font-black tracking-[0.04em]"
+                    style={{ color: bodyText }}
+                  >
+                    {BLOCK_LABELS[slug]}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Subtitle */}
-        <p
-          className="text-sm leading-relaxed"
-          style={{ color: style.textSecondary }}
-        >
-          {pack.subtitle}
-        </p>
-
-        {/* Includes — base (blocks) */}
-        <div className="flex flex-col gap-2">
-          {BLOCK_SLUGS.map((slug) => (
-            <div key={slug} className="flex items-center gap-2.5">
-              <span
-                className="h-1 w-1 shrink-0"
-                style={{ background: style.accent }}
-              />
-              <span
-                className="text-xs font-bold tracking-[0.18em] uppercase"
-                style={{ color: style.textSecondary }}
-              >
-                {BLOCK_LABELS[slug]}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Tier extras — visualmente distinti come "in più" */}
-        {((pack.masterclassSelectionCount ?? 0) > 0 ||
-          pack.includesAccommodation) && (
+        {/* ── HERO EXTRA — luxury callout (ELITE) ───────────── */}
+        {copy.heroExtra && (
           <div
-            className="flex flex-col gap-3 pt-3"
+            className="relative overflow-hidden p-5"
             style={{
-              borderTop: `1px dashed ${
-                tier.emphasis === "premium"
-                  ? "rgba(255,255,255,0.15)"
-                  : tier.emphasis === "hero"
-                    ? "rgba(17,17,17,0.2)"
-                    : "rgba(0,0,0,0.1)"
-              }`,
+              background:
+                "linear-gradient(135deg, rgba(240,146,38,0.22) 0%, rgba(240,146,38,0.06) 60%, rgba(240,146,38,0.12) 100%)",
+              border: "1.5px solid rgba(240,146,38,0.55)",
+              boxShadow: "0 0 32px rgba(240,146,38,0.12)",
             }}
           >
-            <span
-              className="text-[0.55rem] font-black tracking-[0.32em] uppercase"
-              style={{ color: style.textMuted }}
-            >
-              In più rispetto a Start
-            </span>
+            <div
+              className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(240,146,38,0.32) 0%, transparent 70%)",
+              }}
+            />
 
-            {(pack.masterclassSelectionCount ?? 0) > 0 && (
-              <>
-                <div className="flex items-center gap-2.5">
+            <div className="relative flex items-start gap-4">
+              <div
+                className="shrink-0 flex h-11 w-11 items-center justify-center"
+                style={{
+                  background: "rgba(240,146,38,0.18)",
+                  border: "1.5px solid rgba(240,146,38,0.65)",
+                }}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="#F09226"
+                  strokeWidth="2"
+                  strokeLinecap="square"
+                >
+                  <path d="M3 18v-7m0 7h18m-18 0v-3h18v3M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
+                </svg>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div
+                  className="text-[0.55rem] font-black tracking-[0.34em] uppercase"
+                  style={{ color: "#F09226" }}
+                >
+                  ★ {copy.heroExtra.eyebrow}
+                </div>
+                <div
+                  className="mt-1.5 text-[1.15rem] font-black leading-tight tracking-[-0.01em]"
+                  style={{ color: bodyText }}
+                >
+                  {copy.heroExtra.text}
+                </div>
+                <p
+                  className="mt-2 text-[0.74rem] leading-[1.55]"
+                  style={{ color: bodyTextSecondary }}
+                >
+                  {copy.heroExtra.sub}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Tier extras (PRO + ELITE) ────────────────────── */}
+        {copy.extras.length > 0 && (
+          <div>
+            <span
+              className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
+              style={{ color: bodyAccent }}
+            >
+              {copy.heroExtra ? "Inoltre" : "In più"}
+            </span>
+            <div className="flex flex-col gap-2.5">
+              {copy.extras.map((e, i) => (
+                <div key={i} className="flex items-start gap-2.5">
                   <span
-                    className="flex h-4 w-4 shrink-0 items-center justify-center text-[0.7rem] font-black leading-none"
-                    style={{ color: style.accent }}
+                    className="shrink-0 mt-0.5 flex h-4 w-4 items-center justify-center text-[0.85rem] font-black leading-none"
+                    style={{ color: bodyAccent }}
                   >
                     +
                   </span>
-                  <span
-                    className="text-xs font-bold tracking-[0.18em] uppercase"
-                    style={{ color: style.textPrimary }}
-                  >
-                    Certificazione FIPE
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="flex h-4 w-4 shrink-0 items-center justify-center text-[0.7rem] font-black leading-none"
-                      style={{ color: style.accent }}
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="text-[0.8rem] font-black leading-tight tracking-[0.02em]"
+                      style={{ color: bodyText }}
                     >
-                      +
-                    </span>
-                    <span
-                      className="text-xs font-bold tracking-[0.18em] uppercase"
-                      style={{ color: style.textPrimary }}
-                    >
-                      {pack.masterclassSelectionCount} Masterclass a scelta su 8
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 pl-6">
-                    {MASTERCLASS_SHORT.map((m) => (
-                      <span
-                        key={m.slug}
-                        className="px-2 py-0.5 text-[0.6rem] font-bold tracking-[0.12em] uppercase"
-                        style={{
-                          border: `1px solid ${style.accent}55`,
-                          color: style.textSecondary,
-                          background:
-                            tier.emphasis === "hero"
-                              ? "rgba(17,17,17,0.08)"
-                              : tier.emphasis === "premium"
-                                ? "rgba(240,146,38,0.08)"
-                                : "rgba(240,146,38,0.05)",
-                        }}
+                      {e.text}
+                    </p>
+                    {e.sub && (
+                      <p
+                        className="mt-0.5 text-[0.68rem] leading-snug"
+                        style={{ color: bodyTextSecondary }}
                       >
-                        {m.label}
-                      </span>
-                    ))}
+                        {e.sub}
+                      </p>
+                    )}
                   </div>
                 </div>
-              </>
-            )}
+              ))}
+            </div>
 
-            {pack.includesAccommodation && (
-              <div className="flex items-center gap-2.5">
+            {/* Masterclass — minimal horizontal list, wraps on overflow (PRO + ELITE) */}
+            {(isPro || isElite) && (
+              <div className="mt-4">
                 <span
-                  className="flex h-4 w-4 shrink-0 items-center justify-center text-[0.7rem] font-black leading-none"
-                  style={{ color: style.accent }}
+                  className="text-[0.55rem] font-bold tracking-[0.22em] uppercase block mb-2"
+                  style={{ color: bodyTextMuted }}
                 >
-                  +
+                  Le 8 masterclass disponibili
                 </span>
-                <span
-                  className="text-xs font-bold tracking-[0.18em] uppercase"
-                  style={{ color: style.textPrimary }}
+                <div
+                  className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[0.72rem] leading-[1.6] font-semibold"
+                  style={{ color: bodyTextSecondary }}
                 >
-                  Vitto &amp; Alloggio
-                </span>
+                  {MASTERCLASS_PILLS.map((m, i) => (
+                    <span key={m.slug} className="contents">
+                      {i > 0 && (
+                        <span aria-hidden style={{ color: bodyTextMuted }}>
+                          ·
+                        </span>
+                      )}
+                      <span>{m.label}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between">
-          {/* Teacher avatars strip */}
-          <div className="flex items-center">
-            {avatarTeachers.map((t, i) => (
-              <div
-                key={t.slug}
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[0.55rem] font-black"
-                style={{
-                  background: `${t.color}22`,
-                  border: `1.5px solid ${avatarRing}`,
-                  color: t.color,
-                  marginLeft: i === 0 ? 0 : "-8px",
-                  zIndex: avatarTeachers.length - i,
-                  position: "relative",
-                }}
-                title={t.name}
-              >
-                {t.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={t.image_url}
-                    alt={t.name}
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                ) : (
-                  initials(t.name)
-                )}
-              </div>
-            ))}
-            <span
-              className="ml-2 text-[0.7rem] font-semibold"
-              style={{ color: style.textMuted }}
-            >
-              +{totalTeachers - avatarTeachers.length} docenti
-            </span>
-          </div>
-
-          {/* Arrow CTA */}
-          <div
-            className="flex items-center gap-1.5 text-[0.75rem] font-black tracking-[0.15em] uppercase transition-all duration-200"
-            style={{ color: style.accent }}
+        {/* ── CTA full-width (no price) ────────────────────── */}
+        <div
+          className="mt-auto pt-2"
+          style={{ borderTop: `1px solid ${bodyDivider}` }}
+        >
+          <button
+            type="button"
+            className="mt-5 w-full inline-flex items-center justify-between gap-2 px-5 py-3.5 text-[0.78rem] font-black tracking-[0.14em] uppercase transition-opacity duration-200 hover:opacity-88"
+            style={{
+              background: isElite ? bodyAccent : isPro ? "#111111" : bodyAccent,
+              color: isElite ? "#111111" : isPro ? "#F09226" : "#111111",
+              border: isPro ? "1px solid #111111" : "none",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
           >
-            Esplora
-            <span className="transition-transform duration-200 group-hover:translate-x-1">
+            <span>{copy.ctaLabel}</span>
+            <span aria-hidden className="text-[0.95rem]">
               →
             </span>
-          </div>
+          </button>
         </div>
       </div>
     </div>
@@ -827,7 +1341,6 @@ export function PackPreview() {
         ease: "power3.out",
       });
 
-      // ── Card deal animation ─────────────────────────────────────────────────
       const cardEls = Array.from(
         cardsRef.current?.querySelectorAll("[data-pack-card]") ?? [],
       ) as HTMLElement[];
@@ -835,19 +1348,16 @@ export function PackPreview() {
       if (cardEls.length === 3) {
         const [c0, c1, c2] = cardEls; // START · PRO · ELITE
 
-        // Hide all cards until trigger fires
         gsap.set(cardEls, { opacity: 0 });
 
         ScrollTrigger.create({
           trigger: cardsRef.current,
-          // Fire early so animation is fully in view when section arrives
           start: "top 92%",
           once: true,
           onEnter: () => {
             const isMobile = window.innerWidth < 981;
 
             if (isMobile) {
-              // Mobile: cards rise from below one by one — PRO (middle) first
               const order = [c1, c0, c2];
               order.forEach((el, i) => {
                 gsap.fromTo(
@@ -870,15 +1380,12 @@ export function PackPreview() {
                 );
               });
             } else {
-              // Desktop: cards start as a near-stacked fan near PRO's position,
-              // then deal out smoothly. Each card has its own timeline slot.
               const tl = gsap.timeline({
                 onComplete: () => {
                   gsap.set(cardEls, { clearProps: "zIndex" });
                 },
               });
 
-              // PRO stays at its position but emerges from thin air (scale up)
               tl.fromTo(
                 c1,
                 {
@@ -898,7 +1405,6 @@ export function PackPreview() {
                 },
                 0.05,
               )
-                // START starts near PRO (shifted right), fans left to its cell
                 .fromTo(
                   c0,
                   {
@@ -918,7 +1424,6 @@ export function PackPreview() {
                   },
                   0.35,
                 )
-                // ELITE starts near PRO (shifted left), fans right to its cell
                 .fromTo(
                   c2,
                   {
