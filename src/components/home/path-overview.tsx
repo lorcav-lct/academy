@@ -7,21 +7,21 @@ import { COURSES } from "@/lib/constants/courses";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
 
 const META = {
-  corpus: {
+  function: {
     roman: "I",
     color: "#F09226",
     tagline: "Le Fondamenta",
     season: "Autunno 2026",
     fipeSeason: "Novembre",
   },
-  vis: {
+  strength: {
     roman: "II",
     color: "#F09226",
     tagline: "La Forza",
     season: "Inverno 2026/27",
     fipeSeason: "Febbraio",
   },
-  victor: {
+  science: {
     roman: "III",
     color: "#F09226",
     tagline: "La Vittoria",
@@ -1175,7 +1175,7 @@ export function PathOverview() {
                         type="button"
                         onClick={() => setOpenBlock(course.slug as BlockSlug)}
                         className="block w-full py-3.5 text-center text-[0.8rem] font-black tracking-[0.18em] uppercase transition-opacity duration-200 cursor-pointer"
-                        style={{ background: "#F09226", color: "#010015" }}
+                        style={{ background: "#F09226", color: "#111111" }}
                         onMouseEnter={(e) => {
                           (e.currentTarget as HTMLButtonElement).style.opacity =
                             "0.85";
@@ -1318,8 +1318,8 @@ export function PathOverview() {
                       <strong style={{ color: "#111" }}>
                         Percorso Formativo Lacertosus Academy
                       </strong>{" "}
-                      (CORPUS · VIS · VICTOR) e ottiene il titolo professionale
-                      di
+                      (FUNCTION · STRENGTH · SCIENCE) e ottiene il titolo
+                      professionale di
                     </p>
                     <div
                       style={{
@@ -1630,7 +1630,7 @@ export function PathOverview() {
                     type="button"
                     onClick={() => setOpenBlock(course.slug as BlockSlug)}
                     className="block w-full py-3 text-center text-[0.8rem] font-black tracking-[0.18em] uppercase cursor-pointer"
-                    style={{ background: "#F09226", color: "#010015" }}
+                    style={{ background: "#F09226", color: "#111111" }}
                   >
                     Scopri il programma →
                   </button>

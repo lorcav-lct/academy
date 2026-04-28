@@ -13,32 +13,135 @@ import { createClient } from "@/lib/supabase/client";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+const BRAND_ORANGE = "#F09226";
+const BRAND_ORANGE_RGB = "240,146,38";
+
+type Emphasis = "minimal" | "hero" | "premium";
+
+interface EmphasisStyle {
+  background: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  accent: string;
+  border: string;
+  boxShadow?: string;
+  numeralColor: string;
+  numeralBorder: string;
+  ctaBg: string;
+  ctaText: string;
+  ctaBorder?: string;
+}
+
+const BRUSHED_STEEL_OVERLAY =
+  "repeating-linear-gradient(90deg, transparent 0px, transparent 1px, rgba(255,255,255,0.035) 1px, rgba(255,255,255,0.035) 2px)";
+
+function getEmphasisStyle(emphasis: Emphasis): EmphasisStyle {
+  if (emphasis === "hero") {
+    /* PRO — solid brand orange, dark text */
+    return {
+      background: "#F09226",
+      textPrimary: "#111111",
+      textSecondary: "rgba(17,17,17,0.78)",
+      textMuted: "rgba(17,17,17,0.55)",
+      accent: "#111111",
+      border: "2px solid rgba(17,17,17,0.18)",
+      boxShadow: "0 0 60px rgba(240,146,38,0.2), 0 24px 80px rgba(0,0,0,0.18)",
+      numeralColor: "#111111",
+      numeralBorder: "rgba(17,17,17,0.45)",
+      ctaBg: "#111111",
+      ctaText: "#F09226",
+    };
+  }
+  if (emphasis === "premium") {
+    /* ELITE — dark anchor gradient + brushed steel overlay */
+    return {
+      background: `${BRUSHED_STEEL_OVERLAY}, linear-gradient(145deg, #434343 0%, #1a1a1a 55%, #0a0a0a 100%)`,
+      textPrimary: "#ffffff",
+      textSecondary: "rgba(255,255,255,0.72)",
+      textMuted: "rgba(255,255,255,0.5)",
+      accent: "#F09226",
+      border: "1px solid rgba(255,255,255,0.1)",
+      boxShadow:
+        "0 0 60px rgba(0,0,0,0.4), 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
+      numeralColor: "#F09226",
+      numeralBorder: "rgba(240,146,38,0.5)",
+      ctaBg: "#F09226",
+      ctaText: "#111111",
+    };
+  }
+  /* START — clean white minimal */
+  return {
+    background: "#ffffff",
+    textPrimary: "#111111",
+    textSecondary: "rgba(17,17,17,0.62)",
+    textMuted: "rgba(17,17,17,0.42)",
+    accent: "#F09226",
+    border: "1px solid rgba(0,0,0,0.1)",
+    numeralColor: "#F09226",
+    numeralBorder: "rgba(240,146,38,0.5)",
+    ctaBg: "#111111",
+    ctaText: "#ffffff",
+  };
+}
+
 const TIER: Record<
   string,
-  { color: string; rgb: string; label: string; roman: string }
+  {
+    color: string;
+    rgb: string;
+    label: string;
+    roman: string;
+    emphasis: Emphasis;
+  }
 > = {
-  bronzo: { color: "#CD7F32", rgb: "205,127,50", label: "BRONZO", roman: "I" },
-  argento: {
-    color: "#C0C0C0",
-    rgb: "192,192,192",
-    label: "ARGENTO",
-    roman: "II",
+  start: {
+    color: BRAND_ORANGE,
+    rgb: BRAND_ORANGE_RGB,
+    label: "START",
+    roman: "I",
+    emphasis: "minimal",
   },
-  oro: { color: "#D4AF37", rgb: "212,175,55", label: "ORO", roman: "III" },
+  pro: {
+    color: BRAND_ORANGE,
+    rgb: BRAND_ORANGE_RGB,
+    label: "PRO",
+    roman: "II",
+    emphasis: "hero",
+  },
+  elite: {
+    color: BRAND_ORANGE,
+    rgb: BRAND_ORANGE_RGB,
+    label: "ELITE",
+    roman: "III",
+    emphasis: "premium",
+  },
 };
 
-const BLOCK_SLUGS = ["corpus", "vis", "victor"] as const;
+const BLOCK_SLUGS = ["function", "strength", "science"] as const;
 const BLOCK_LABELS: Record<string, string> = {
-  corpus: "CORPUS",
-  vis: "VIS",
-  victor: "VICTOR",
+  function: "FUNCTION",
+  strength: "STRENGTH",
+  science: "SCIENCE",
 };
+
+/* Nomi corti per le 8 masterclass disponibili come pillole nei pack PRO/ELITE */
+const MASTERCLASS_SHORT: { slug: string; label: string }[] = [
+  { slug: "master-functional-bulgarian", label: "Bulgarian" },
+  { slug: "master-strength", label: "Strength" },
+  { slug: "master-calcio", label: "Calcio" },
+  { slug: "master-volley", label: "Pallavolo" },
+  { slug: "master-hyrox", label: "Hyrox" },
+  { slug: "master-rugby", label: "Rugby" },
+  { slug: "master-running", label: "Running" },
+  { slug: "master-sport-combattimento", label: "Combat" },
+];
 
 function getBundleTeachers(): Record<string, Teacher[]> {
   return {
-    corpus: getTeachersByCourse("corpus"),
-    vis: getTeachersByCourse("vis"),
-    victor: getTeachersByCourse("victor"),
+    function: getTeachersByCourse("function"),
+    strength: getTeachersByCourse("strength"),
+    science: getTeachersByCourse("science"),
   };
 }
 
@@ -66,7 +169,7 @@ function PackModal({
   onClose: () => void;
   onBuy: (pack: AcademyProduct) => void;
 }) {
-  const tier = TIER[pack.slug] ?? TIER.bronzo;
+  const tier = TIER[pack.slug] ?? TIER.start;
   const teachers = getBundleTeachers();
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -223,7 +326,7 @@ function PackModal({
               className="w-full py-3.5 text-center text-sm font-black tracking-[0.18em] uppercase transition-all duration-200"
               style={{
                 background: tier.color,
-                color: pack.slug === "argento" ? "#111111" : "#010015",
+                color: "#111111",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.opacity = "0.88";
@@ -456,7 +559,10 @@ function PackCard({
   isDark: boolean;
   onClick: () => void;
 }) {
-  const tier = TIER[pack.slug] ?? TIER.bronzo;
+  /* isDark intentionally unused — emphasis-based theming overrides theme */
+  void isDark;
+  const tier = TIER[pack.slug] ?? TIER.start;
+  const style = getEmphasisStyle(tier.emphasis);
   const teachers = getBundleTeachers();
   // Count total teachers across all blocks
   const totalTeachers = BLOCK_SLUGS.reduce(
@@ -467,21 +573,21 @@ function PackCard({
   const avatarTeachers = BLOCK_SLUGS.flatMap((s) => teachers[s]).slice(0, 5);
 
   const isHighlighted = pack.highlighted;
+  const avatarRing =
+    tier.emphasis === "premium"
+      ? "rgba(0,0,0,0.4)"
+      : tier.emphasis === "hero"
+        ? "rgba(255,255,255,0.6)"
+        : "#ffffff";
 
   return (
     <div
       data-pack-card
       className="bento-interactive relative flex cursor-pointer flex-col overflow-hidden rounded-sm"
       style={{
-        background: isDark
-          ? `linear-gradient(160deg, rgba(${tier.rgb},0.06) 0%, rgba(2,0,32,0.95) 100%)`
-          : `linear-gradient(160deg, rgba(${tier.rgb},0.08) 0%, rgba(255,255,255,0.98) 100%)`,
-        border: isHighlighted
-          ? `2px solid ${tier.color}55`
-          : `1px solid rgba(${tier.rgb},0.18)`,
-        boxShadow: isHighlighted
-          ? `0 0 60px rgba(${tier.rgb},0.1), 0 20px 80px rgba(0,0,0,0.3)`
-          : undefined,
+        background: style.background,
+        border: style.border,
+        boxShadow: style.boxShadow,
         transform: isHighlighted ? "scale(1.025)" : undefined,
       }}
       onClick={onClick}
@@ -492,97 +598,149 @@ function PackCard({
       <div
         className="h-0.5 w-full"
         style={{
-          background: `linear-gradient(90deg, ${tier.color}, ${tier.color}00)`,
+          background: `linear-gradient(90deg, ${style.accent}, ${style.accent}00)`,
         }}
       />
 
-      {isHighlighted && (
-        <div
-          className="py-1.5 text-center text-[0.65rem] font-black tracking-[0.25em] uppercase"
-          style={{ background: `${tier.color}18`, color: tier.color }}
-        >
-          Più scelto
-        </div>
-      )}
-
       <div className="flex flex-1 flex-col gap-5 p-7 lg:p-8">
-        {/* Roman numeral + tier */}
-        <div className="flex items-start justify-between">
-          <div>
-            <span
-              className="text-[0.65rem] font-black tracking-[0.35em] uppercase"
-              style={{ color: `${tier.color}80` }}
-            >
-              Pack
-            </span>
-            <div
-              className="mt-1 text-[clamp(2.6rem,3.8vw,4rem)] font-black leading-none tracking-tight"
-              style={{ color: tier.color }}
-            >
-              {tier.label}
-            </div>
-          </div>
-          <div
-            className="flex h-10 w-10 items-center justify-center text-xl font-black opacity-25"
-            style={{ border: `1px solid ${tier.color}`, color: tier.color }}
+        {/* Tier label */}
+        <div>
+          <span
+            className="text-[0.65rem] font-black tracking-[0.35em] uppercase"
+            style={{ color: style.textMuted }}
           >
-            {tier.roman}
+            Pack
+          </span>
+          <div
+            className="mt-1 text-[clamp(2.6rem,3.8vw,4rem)] font-black leading-none tracking-tight"
+            style={{ color: style.textPrimary }}
+          >
+            {tier.label}
           </div>
         </div>
 
         {/* Subtitle */}
         <p
           className="text-sm leading-relaxed"
-          style={{ color: isDark ? "rgba(180,180,190,0.65)" : "#666666" }}
+          style={{ color: style.textSecondary }}
         >
           {pack.subtitle}
         </p>
 
-        {/* Blocks included */}
+        {/* Includes — base (blocks) */}
         <div className="flex flex-col gap-2">
           {BLOCK_SLUGS.map((slug) => (
             <div key={slug} className="flex items-center gap-2.5">
               <span
                 className="h-1 w-1 shrink-0"
-                style={{ background: tier.color }}
+                style={{ background: style.accent }}
               />
               <span
                 className="text-xs font-bold tracking-[0.18em] uppercase"
-                style={{ color: isDark ? "rgba(255,255,255,0.7)" : "#444" }}
+                style={{ color: style.textSecondary }}
               >
                 {BLOCK_LABELS[slug]}
               </span>
             </div>
           ))}
-          {(pack.masterclassSelectionCount ?? 0) > 0 && (
-            <div className="flex items-center gap-2.5">
-              <span
-                className="h-1 w-1 shrink-0"
-                style={{ background: tier.color }}
-              />
-              <span
-                className="text-xs font-bold tracking-[0.18em] uppercase"
-                style={{ color: `${tier.color}cc` }}
-              >
-                {pack.masterclassSelectionCount} Masterclass a scelta
-              </span>
-            </div>
-          )}
-          {pack.includesAccommodation && (
-            <div className="flex items-center gap-2.5">
-              <span
-                className="h-1 w-1 shrink-0"
-                style={{ background: tier.color }}
-              />
-              <span
-                className="text-xs font-bold tracking-[0.18em] uppercase"
-                style={{ color: `${tier.color}cc` }}
-              >
-                Vitto &amp; Alloggio
-              </span>
-            </div>
-          )}
         </div>
+
+        {/* Tier extras — visualmente distinti come "in più" */}
+        {((pack.masterclassSelectionCount ?? 0) > 0 ||
+          pack.includesAccommodation) && (
+          <div
+            className="flex flex-col gap-3 pt-3"
+            style={{
+              borderTop: `1px dashed ${
+                tier.emphasis === "premium"
+                  ? "rgba(255,255,255,0.15)"
+                  : tier.emphasis === "hero"
+                    ? "rgba(17,17,17,0.2)"
+                    : "rgba(0,0,0,0.1)"
+              }`,
+            }}
+          >
+            <span
+              className="text-[0.55rem] font-black tracking-[0.32em] uppercase"
+              style={{ color: style.textMuted }}
+            >
+              In più rispetto a Start
+            </span>
+
+            {(pack.masterclassSelectionCount ?? 0) > 0 && (
+              <>
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="flex h-4 w-4 shrink-0 items-center justify-center text-[0.7rem] font-black leading-none"
+                    style={{ color: style.accent }}
+                  >
+                    +
+                  </span>
+                  <span
+                    className="text-xs font-bold tracking-[0.18em] uppercase"
+                    style={{ color: style.textPrimary }}
+                  >
+                    Certificazione FIPE
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className="flex h-4 w-4 shrink-0 items-center justify-center text-[0.7rem] font-black leading-none"
+                      style={{ color: style.accent }}
+                    >
+                      +
+                    </span>
+                    <span
+                      className="text-xs font-bold tracking-[0.18em] uppercase"
+                      style={{ color: style.textPrimary }}
+                    >
+                      {pack.masterclassSelectionCount} Masterclass a scelta su 8
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 pl-6">
+                    {MASTERCLASS_SHORT.map((m) => (
+                      <span
+                        key={m.slug}
+                        className="px-2 py-0.5 text-[0.6rem] font-bold tracking-[0.12em] uppercase"
+                        style={{
+                          border: `1px solid ${style.accent}55`,
+                          color: style.textSecondary,
+                          background:
+                            tier.emphasis === "hero"
+                              ? "rgba(17,17,17,0.08)"
+                              : tier.emphasis === "premium"
+                                ? "rgba(240,146,38,0.08)"
+                                : "rgba(240,146,38,0.05)",
+                        }}
+                      >
+                        {m.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {pack.includesAccommodation && (
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="flex h-4 w-4 shrink-0 items-center justify-center text-[0.7rem] font-black leading-none"
+                  style={{ color: style.accent }}
+                >
+                  +
+                </span>
+                <span
+                  className="text-xs font-bold tracking-[0.18em] uppercase"
+                  style={{ color: style.textPrimary }}
+                >
+                  Vitto &amp; Alloggio
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-auto flex items-center justify-between">
           {/* Teacher avatars strip */}
@@ -593,7 +751,7 @@ function PackCard({
                 className="flex h-7 w-7 items-center justify-center rounded-full text-[0.55rem] font-black"
                 style={{
                   background: `${t.color}22`,
-                  border: `1.5px solid ${isDark ? "rgba(1,0,18,0.8)" : "#fff"}`,
+                  border: `1.5px solid ${avatarRing}`,
                   color: t.color,
                   marginLeft: i === 0 ? 0 : "-8px",
                   zIndex: avatarTeachers.length - i,
@@ -615,7 +773,7 @@ function PackCard({
             ))}
             <span
               className="ml-2 text-[0.7rem] font-semibold"
-              style={{ color: isDark ? "rgba(180,180,190,0.5)" : "#999" }}
+              style={{ color: style.textMuted }}
             >
               +{totalTeachers - avatarTeachers.length} docenti
             </span>
@@ -624,7 +782,7 @@ function PackCard({
           {/* Arrow CTA */}
           <div
             className="flex items-center gap-1.5 text-[0.75rem] font-black tracking-[0.15em] uppercase transition-all duration-200"
-            style={{ color: tier.color }}
+            style={{ color: style.accent }}
           >
             Esplora
             <span className="transition-transform duration-200 group-hover:translate-x-1">
@@ -675,7 +833,7 @@ export function PackPreview() {
       ) as HTMLElement[];
 
       if (cardEls.length === 3) {
-        const [c0, c1, c2] = cardEls; // BRONZO · ARGENTO · ORO
+        const [c0, c1, c2] = cardEls; // START · PRO · ELITE
 
         // Hide all cards until trigger fires
         gsap.set(cardEls, { opacity: 0 });
@@ -689,7 +847,7 @@ export function PackPreview() {
             const isMobile = window.innerWidth < 981;
 
             if (isMobile) {
-              // Mobile: cards rise from below one by one — ARGENTO (middle) first
+              // Mobile: cards rise from below one by one — PRO (middle) first
               const order = [c1, c0, c2];
               order.forEach((el, i) => {
                 gsap.fromTo(
@@ -712,7 +870,7 @@ export function PackPreview() {
                 );
               });
             } else {
-              // Desktop: cards start as a near-stacked fan near ARGENTO's position,
+              // Desktop: cards start as a near-stacked fan near PRO's position,
               // then deal out smoothly. Each card has its own timeline slot.
               const tl = gsap.timeline({
                 onComplete: () => {
@@ -720,7 +878,7 @@ export function PackPreview() {
                 },
               });
 
-              // ARGENTO stays at its position but emerges from thin air (scale up)
+              // PRO stays at its position but emerges from thin air (scale up)
               tl.fromTo(
                 c1,
                 {
@@ -740,7 +898,7 @@ export function PackPreview() {
                 },
                 0.05,
               )
-                // BRONZO starts near ARGENTO (shifted right), fans left to its cell
+                // START starts near PRO (shifted right), fans left to its cell
                 .fromTo(
                   c0,
                   {
@@ -760,7 +918,7 @@ export function PackPreview() {
                   },
                   0.35,
                 )
-                // ORO starts near ARGENTO (shifted left), fans right to its cell
+                // ELITE starts near PRO (shifted left), fans right to its cell
                 .fromTo(
                   c2,
                   {
@@ -880,16 +1038,16 @@ export function PackPreview() {
           <div
             className="mt-6 flex items-center gap-3 p-4"
             style={{
-              border: "1px solid rgba(212,175,55,0.12)",
-              background: d ? "rgba(212,175,55,0.03)" : "rgba(212,175,55,0.04)",
+              border: "1px solid rgba(240,146,38,0.18)",
+              background: d ? "rgba(240,146,38,0.05)" : "rgba(240,146,38,0.06)",
             }}
           >
-            <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-academy-gold" />
+            <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-academy-orange" />
             <p className="text-xs text-academy-gray-500" style={{ color: tb }}>
-              <span className="font-bold text-academy-gold">
+              <span className="font-bold text-academy-orange">
                 Certificazione FipexLacertosus
               </span>
-              {" — "}inclusa nei pack Argento e Oro. Riconosciuta
+              {" — "}inclusa nei pack PRO ed ELITE. Riconosciuta
               professionalmente a livello nazionale.
             </p>
           </div>
@@ -906,7 +1064,7 @@ export function PackPreview() {
         />
       )}
 
-      {/* Masterclass selector (for Argento/Oro) */}
+      {/* Masterclass selector (for PRO/ELITE) */}
       {selectorOpen && selectedPack && (
         <MasterclassSelector
           packSlug={selectedPack.slug}

@@ -33,7 +33,6 @@ export function OrderConfirmationEmail({
       <Head />
       <Body style={styles.body}>
         <Container style={styles.container}>
-
           {/* Header */}
           <Section style={{ textAlign: "center", paddingBottom: "24px" }}>
             <Text style={styles.brand}>LACERTOSUS ACADEMY</Text>
@@ -51,7 +50,9 @@ export function OrderConfirmationEmail({
             <Text style={styles.productName}>{packName}</Text>
             <Hr style={styles.innerDivider} />
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <Text style={styles.meta}>Ordine #{orderId.slice(0, 8).toUpperCase()}</Text>
+              <Text style={styles.meta}>
+                Ordine #{orderId.slice(0, 8).toUpperCase()}
+              </Text>
               <Text style={styles.price}>{orderTotal}</Text>
             </div>
           </Section>
@@ -63,13 +64,10 @@ export function OrderConfirmationEmail({
               <Text style={styles.bodyText}>
                 {ticketCount === 1
                   ? "Il tuo ticket con QR code è disponibile nel tuo account."
-                  : `I tuoi ${ticketCount} ticket con QR code sono disponibili nel tuo account.`}
-                {" "}Presentali al check-in per accedere ai corsi e workshop.
+                  : `I tuoi ${ticketCount} ticket con QR code sono disponibili nel tuo account.`}{" "}
+                Presentali al check-in per accedere ai corsi e workshop.
               </Text>
-              <Button
-                href={`${appUrl}/account/tickets`}
-                style={styles.button}
-              >
+              <Button href={`${appUrl}/account/tickets`} style={styles.button}>
                 Vedi i miei Ticket →
               </Button>
             </Section>
@@ -78,7 +76,8 @@ export function OrderConfirmationEmail({
           {/* CTA */}
           <Section style={{ textAlign: "center", padding: "8px 0 24px" }}>
             <Text style={styles.bodyText}>
-              Tieni d&apos;occhio il tuo account per tutti gli aggiornamenti sul percorso.
+              Tieni d&apos;occhio il tuo account per tutti gli aggiornamenti sul
+              percorso.
             </Text>
             <Button href={`${appUrl}/account`} style={styles.buttonSecondary}>
               Il mio Account
@@ -97,10 +96,10 @@ export function OrderConfirmationEmail({
               oppure rispondi a questa email.
             </Text>
             <Text style={styles.footer}>
-              © {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti riservati.
+              © {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti
+              riservati.
             </Text>
           </Section>
-
         </Container>
       </Body>
     </Html>
@@ -109,7 +108,7 @@ export function OrderConfirmationEmail({
 
 const styles = {
   body: {
-    backgroundColor: "#020026",
+    backgroundColor: "#1a1a1a",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     margin: "0",
     padding: "0",
@@ -185,7 +184,7 @@ const styles = {
   },
   button: {
     backgroundColor: "#F09226",
-    color: "#020026",
+    color: "#1a1a1a",
     fontSize: "13px",
     fontWeight: "bold",
     padding: "12px 24px",

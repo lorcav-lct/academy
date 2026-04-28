@@ -28,7 +28,7 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
     title_white: "UN PERCORSO",
     title_orange: "UNICO.",
     description:
-      "Tre blocchi formativi progressivi: CORPUS, VIS, VICTOR. Dal fondamento tecnico all'eccellenza imprenditoriale.",
+      "Tre blocchi formativi progressivi: FUNCTION, STRENGTH, SCIENCE. Dal fondamento tecnico all'eccellenza imprenditoriale.",
     cta_label: "Scopri il Percorso",
     cta_href: "/percorso",
     bg_image_url: null,

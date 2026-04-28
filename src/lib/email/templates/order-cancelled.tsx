@@ -29,7 +29,6 @@ export function OrderCancelledEmail({
       <Head />
       <Body style={styles.body}>
         <Container style={styles.container}>
-
           {/* Header */}
           <Section style={{ textAlign: "center", paddingBottom: "24px" }}>
             <Text style={styles.brand}>LACERTOSUS ACADEMY</Text>
@@ -46,14 +45,17 @@ export function OrderCancelledEmail({
             <Text style={styles.label}>Ordine Annullato</Text>
             <Text style={styles.productName}>{packName}</Text>
             <Hr style={styles.innerDivider} />
-            <Text style={styles.meta}>Ordine #{orderId.slice(0, 8).toUpperCase()}</Text>
+            <Text style={styles.meta}>
+              Ordine #{orderId.slice(0, 8).toUpperCase()}
+            </Text>
           </Section>
 
           {/* Info */}
           <Section style={styles.infoCard}>
             <Text style={styles.infoText}>
-              I ticket associati a questo ordine sono stati invalidati.
-              Se ritieni che si tratti di un errore, contattaci rispondendo a questa email.
+              I ticket associati a questo ordine sono stati invalidati. Se
+              ritieni che si tratti di un errore, contattaci rispondendo a
+              questa email.
             </Text>
           </Section>
 
@@ -79,10 +81,10 @@ export function OrderCancelledEmail({
               oppure rispondi a questa email.
             </Text>
             <Text style={styles.footer}>
-              © {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti riservati.
+              © {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti
+              riservati.
             </Text>
           </Section>
-
         </Container>
       </Body>
     </Html>
@@ -91,7 +93,7 @@ export function OrderCancelledEmail({
 
 const styles = {
   body: {
-    backgroundColor: "#020026",
+    backgroundColor: "#1a1a1a",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     margin: "0",
     padding: "0",
@@ -174,7 +176,7 @@ const styles = {
   },
   button: {
     backgroundColor: "#F09226",
-    color: "#020026",
+    color: "#1a1a1a",
     fontSize: "13px",
     fontWeight: "bold",
     padding: "12px 24px",

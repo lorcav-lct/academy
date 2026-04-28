@@ -1,22 +1,22 @@
 /**
  * Lacertosus Academy — Prodotti acquistabili.
- * Bundle (Bronzo/Argento/Oro) come offerta principale + singoli blocchi e masterclass.
+ * Bundle (Start/Pro/Elite) come offerta principale + singoli blocchi e masterclass.
  */
 export interface AcademyProduct {
   slug: string;
   name: string;
   subtitle: string;
   type: "course" | "certification" | "workshop" | "bundle";
-  priceCents: number;          // 0 = prezzo da definire
-  stripePriceId: string;       // ID Stripe Price — da collegare dopo setup prodotti
+  priceCents: number; // 0 = prezzo da definire
+  stripePriceId: string; // ID Stripe Price — da collegare dopo setup prodotti
   includes: string[];
   /** Corso/blocco corrispondente (solo per type=course) */
   courseSlug?: string;
   /** Workshop corrispondente (solo per type=workshop) */
   workshopSlug?: string;
-  /** Numero di masterclass selezionabili (bundle Argento/Oro = 2, Bronzo = 0) */
+  /** Numero di masterclass selezionabili (bundle Pro/Elite = 2, Start = 0) */
   masterclassSelectionCount?: number;
-  /** Vitto e alloggio inclusi (solo bundle Oro) */
+  /** Vitto e alloggio inclusi (solo bundle Elite) */
   includesAccommodation?: boolean;
   highlighted?: boolean;
   sortOrder: number;
@@ -25,16 +25,16 @@ export interface AcademyProduct {
 export const PRODUCTS: AcademyProduct[] = [
   // ─── Bundle ──────────────────────────────────────────────────────────────
   {
-    slug: "bronzo",
-    name: "BRONZO",
+    slug: "start",
+    name: "START",
     subtitle: "Il percorso completo — 3 blocchi formativi",
     type: "bundle",
     priceCents: 0,
     stripePriceId: "",
     includes: [
-      "CORPUS — Blocco I: Functional Training (2 weekend)",
-      "VIS — Blocco II: Strength & Conditioning (2 weekend)",
-      "VICTOR — Blocco III: Business & Performance (2 weekend)",
+      "FUNCTION — Blocco I: Functional Training (2 weekend)",
+      "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
+      "SCIENCE — Blocco III: Business & Performance (2 weekend)",
       "9 mesi di formazione in presenza",
       "Materiale didattico digitale",
       "Accesso alla community Lacertosus",
@@ -43,16 +43,16 @@ export const PRODUCTS: AcademyProduct[] = [
     sortOrder: 1,
   },
   {
-    slug: "argento",
-    name: "ARGENTO",
+    slug: "pro",
+    name: "PRO",
     subtitle: "Il percorso completo + Certificazione + 2 Masterclass",
     type: "bundle",
     priceCents: 0,
     stripePriceId: "",
     includes: [
-      "CORPUS — Blocco I: Functional Training (2 weekend)",
-      "VIS — Blocco II: Strength & Conditioning (2 weekend)",
-      "VICTOR — Blocco III: Business & Performance (2 weekend)",
+      "FUNCTION — Blocco I: Functional Training (2 weekend)",
+      "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
+      "SCIENCE — Blocco III: Business & Performance (2 weekend)",
       "Certificazione FIPE × Lacertosus",
       "2 Masterclass a scelta tra le 8 disponibili",
       "9 mesi di formazione in presenza",
@@ -64,16 +64,16 @@ export const PRODUCTS: AcademyProduct[] = [
     sortOrder: 2,
   },
   {
-    slug: "oro",
-    name: "ORO",
+    slug: "elite",
+    name: "ELITE",
     subtitle: "L'esperienza completa — con vitto e alloggio inclusi",
     type: "bundle",
     priceCents: 0,
     stripePriceId: "",
     includes: [
-      "CORPUS — Blocco I: Functional Training (2 weekend)",
-      "VIS — Blocco II: Strength & Conditioning (2 weekend)",
-      "VICTOR — Blocco III: Business & Performance (2 weekend)",
+      "FUNCTION — Blocco I: Functional Training (2 weekend)",
+      "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
+      "SCIENCE — Blocco III: Business & Performance (2 weekend)",
       "Certificazione FIPE × Lacertosus",
       "2 Masterclass a scelta tra le 8 disponibili",
       "Vitto e alloggio inclusi per tutta la durata",
@@ -88,13 +88,13 @@ export const PRODUCTS: AcademyProduct[] = [
 
   // ─── Blocchi formativi (acquistabili separatamente) ───────────────────────
   {
-    slug: "corpus",
-    name: "CORPUS",
+    slug: "function",
+    name: "FUNCTION",
     subtitle: "Blocco I — Functional Training",
     type: "course",
     priceCents: 150000,
     stripePriceId: "price_1T7tseCGgXzYzpRp7P4QCO5G",
-    courseSlug: "corpus",
+    courseSlug: "function",
     includes: [
       "2 weekend di formazione in presenza",
       "Anatomia e biomeccanica applicata",
@@ -105,13 +105,13 @@ export const PRODUCTS: AcademyProduct[] = [
     sortOrder: 10,
   },
   {
-    slug: "vis",
-    name: "VIS",
+    slug: "strength",
+    name: "STRENGTH",
     subtitle: "Blocco II — Strength & Conditioning",
     type: "course",
     priceCents: 250000,
     stripePriceId: "price_1T7txACGgXzYzpRppAoYRDE5",
-    courseSlug: "vis",
+    courseSlug: "strength",
     includes: [
       "2 weekend di formazione in presenza",
       "Fisiologia della forza e S&C",
@@ -123,13 +123,13 @@ export const PRODUCTS: AcademyProduct[] = [
     sortOrder: 11,
   },
   {
-    slug: "victor",
-    name: "VICTOR",
+    slug: "science",
+    name: "SCIENCE",
     subtitle: "Blocco III — Business & Performance",
     type: "course",
     priceCents: 500000,
     stripePriceId: "price_1T7tz9CGgXzYzpRpHDJ3UpuO",
-    courseSlug: "victor",
+    courseSlug: "science",
     includes: [
       "2 weekend di formazione in presenza",
       "Alimentazione e performance",

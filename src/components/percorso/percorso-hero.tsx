@@ -27,11 +27,11 @@ const MONTH_ABBRS = [
 
 // Phase spans for phase-label row (flex proportions)
 const MONTH_PHASES = [
-  { label: "CORPUS", span: 2 },
+  { label: "FUNCTION", span: 2 },
   { label: "FIPE I", span: 1 },
-  { label: "VIS", span: 2 },
+  { label: "STRENGTH", span: 2 },
   { label: "FIPE II", span: 1 },
-  { label: "VICTOR", span: 2 },
+  { label: "SCIENCE", span: 2 },
   { label: "FIPE III", span: 1 },
 ] as const;
 
@@ -674,7 +674,7 @@ export function PercorsoHero() {
                   className="group mt-9 inline-flex items-center justify-between gap-4 px-6 py-3.5 w-fit transition-opacity duration-200 hover:opacity-85"
                   style={{
                     background: "#F09226",
-                    color: "#010015",
+                    color: "#111111",
                   }}
                 >
                   <span className="text-[0.82rem] font-black tracking-[0.16em] uppercase">
@@ -683,8 +683,8 @@ export function PercorsoHero() {
                   <span
                     className="flex h-8 w-8 shrink-0 items-center justify-center font-black transition-transform duration-300 group-hover:translate-x-0.5"
                     style={{
-                      border: "1.5px solid rgba(1,0,21,0.25)",
-                      color: "#010015",
+                      border: "1.5px solid rgba(17,17,17,0.25)",
+                      color: "#111111",
                     }}
                   >
                     ↓

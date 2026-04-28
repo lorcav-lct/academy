@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/providers/theme-provider";
+import { Logo } from "@/components/layout/logo";
 import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
@@ -41,7 +42,7 @@ function WhatsAppButton({
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.background = "#F09226";
-        (e.currentTarget as HTMLElement).style.color = "#010015";
+        (e.currentTarget as HTMLElement).style.color = "#111111";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = onDarkBg
@@ -465,29 +466,24 @@ export function Navbar() {
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-[5%] py-5 md:px-10">
           {/* Logo */}
           <div className="flex items-center gap-4 shrink-0">
-            <Link href="/" className="group flex items-center gap-3">
-              <div className="relative flex h-11 w-11 items-center justify-center border border-academy-orange/50 bg-academy-orange/10 transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20 group-hover:shadow-[0_0_24px_rgba(240,146,38,0.25)]">
-                <span className="text-lg font-black text-academy-orange">
-                  L
-                </span>
-              </div>
-              <div className="hidden sm:flex sm:flex-col leading-none">
-                <span
-                  className={cn(
-                    "text-[12px] font-black tracking-[0.22em] uppercase transition-colors duration-300",
-                    onDarkBg
-                      ? "text-white"
-                      : isDark
-                        ? "text-academy-gray-100"
-                        : "text-[#111]",
-                  )}
-                >
-                  Lacertosus
-                </span>
-                <span className="text-[12px] font-light tracking-[0.22em] text-academy-orange uppercase">
-                  Academy
-                </span>
-              </div>
+            <Link
+              href="/"
+              className={cn(
+                "group inline-flex items-center transition-opacity duration-300 hover:opacity-80",
+                /* Logo color follows the actual header background, not the drawer:
+                   - over hero (home above fold): dark bg → white logo
+                   - mobile non-hero: bg is hardcoded white-translucent → dark logo
+                   - desktop non-hero: .navbar-scrolled-bg adapts to theme */
+                overHeroDark
+                  ? "text-white"
+                  : isMobileViewport
+                    ? "text-[#111]"
+                    : theme === "dark"
+                      ? "text-academy-gray-100"
+                      : "text-[#111]",
+              )}
+            >
+              <Logo width={170} />
             </Link>
           </div>
 
@@ -608,7 +604,7 @@ export function Navbar() {
                   width="18"
                   height="14"
                   fill="none"
-                  stroke="#010015"
+                  stroke="#111111"
                   strokeWidth="2"
                   strokeLinecap="square"
                 >

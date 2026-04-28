@@ -29,7 +29,9 @@ const emptySlide = (): Omit<SlideRow, "id"> => ({
 
 export default function AdminHeroPage() {
   const [slides, setSlides] = useState<SlideRow[]>([]);
-  const [editing, setEditing] = useState<(SlideRow | Omit<SlideRow, "id">) | null>(null);
+  const [editing, setEditing] = useState<
+    (SlideRow | Omit<SlideRow, "id">) | null
+  >(null);
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,20 +42,31 @@ export default function AdminHeroPage() {
       .from("hero_slides")
       .select("*")
       .order("sort_order", { ascending: true });
-    if (err) { setError(err.message); return; }
+    if (err) {
+      setError(err.message);
+      return;
+    }
     if (data) setSlides(data);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function toggleActive(slide: SlideRow) {
     const supabase = createClient();
-    await supabase.from("hero_slides").update({ active: !slide.active }).eq("id", slide.id);
-    setSlides((prev) => prev.map((s) => s.id === slide.id ? { ...s, active: !s.active } : s));
+    await supabase
+      .from("hero_slides")
+      .update({ active: !slide.active })
+      .eq("id", slide.id);
+    setSlides((prev) =>
+      prev.map((s) => (s.id === slide.id ? { ...s, active: !s.active } : s)),
+    );
   }
 
   async function deleteSlide(id: string) {
-    if (!confirm("Eliminare questa slide? L'operazione non è reversibile.")) return;
+    if (!confirm("Eliminare questa slide? L'operazione non è reversibile."))
+      return;
     const supabase = createClient();
     await supabase.from("hero_slides").delete().eq("id", id);
     setSlides((prev) => prev.filter((s) => s.id !== id));
@@ -65,15 +78,23 @@ export default function AdminHeroPage() {
     if (!other) return;
     const supabase = createClient();
     await Promise.all([
-      supabase.from("hero_slides").update({ sort_order: newOrder }).eq("id", slide.id),
-      supabase.from("hero_slides").update({ sort_order: slide.sort_order }).eq("id", other.id),
+      supabase
+        .from("hero_slides")
+        .update({ sort_order: newOrder })
+        .eq("id", slide.id),
+      supabase
+        .from("hero_slides")
+        .update({ sort_order: slide.sort_order })
+        .eq("id", other.id),
     ]);
     setSlides((prev) =>
-      prev.map((s) => {
-        if (s.id === slide.id) return { ...s, sort_order: newOrder };
-        if (s.id === other.id) return { ...s, sort_order: slide.sort_order };
-        return s;
-      }).sort((a, b) => a.sort_order - b.sort_order)
+      prev
+        .map((s) => {
+          if (s.id === slide.id) return { ...s, sort_order: newOrder };
+          if (s.id === other.id) return { ...s, sort_order: slide.sort_order };
+          return s;
+        })
+        .sort((a, b) => a.sort_order - b.sort_order),
     );
   }
 
@@ -86,16 +107,32 @@ export default function AdminHeroPage() {
     if (isNew) {
       const { data, error: err } = await supabase
         .from("hero_slides")
-        .insert({ ...(editing as Omit<SlideRow, "id">), sort_order: slides.length })
+        .insert({
+          ...(editing as Omit<SlideRow, "id">),
+          sort_order: slides.length,
+        })
         .select()
         .single();
-      if (err) { setError(err.message); setSaving(false); return; }
+      if (err) {
+        setError(err.message);
+        setSaving(false);
+        return;
+      }
       if (data) setSlides((prev) => [...prev, data]);
     } else {
       const { id, ...fields } = editing as SlideRow;
-      const { error: err } = await supabase.from("hero_slides").update(fields).eq("id", id);
-      if (err) { setError(err.message); setSaving(false); return; }
-      setSlides((prev) => prev.map((s) => s.id === id ? (editing as SlideRow) : s));
+      const { error: err } = await supabase
+        .from("hero_slides")
+        .update(fields)
+        .eq("id", id);
+      if (err) {
+        setError(err.message);
+        setSaving(false);
+        return;
+      }
+      setSlides((prev) =>
+        prev.map((s) => (s.id === id ? (editing as SlideRow) : s)),
+      );
     }
 
     setSaving(false);
@@ -103,28 +140,37 @@ export default function AdminHeroPage() {
     setIsNew(false);
   }
 
-  const inputCls = "w-full bg-[#0a0a3a] border border-white/10 px-3 py-2 text-sm text-white placeholder-academy-gray-600 focus:outline-none focus:border-academy-orange/50";
-  const labelCls = "block text-[0.65rem] font-bold tracking-[0.2em] text-academy-gray-500 uppercase mb-1";
+  const inputCls =
+    "w-full bg-[#0a0a3a] border border-white/10 px-3 py-2 text-sm text-white placeholder-academy-gray-600 focus:outline-none focus:border-academy-orange/50";
+  const labelCls =
+    "block text-[0.65rem] font-bold tracking-[0.2em] text-academy-gray-500 uppercase mb-1";
 
   return (
     <section className="min-h-screen pt-32 pb-20">
       <div className="mx-auto max-w-4xl px-6">
-
         {/* Header */}
         <div className="mb-10 flex items-center justify-between">
           <div>
-            <Link href="/admin" className="text-[0.62rem] text-academy-gray-500 hover:text-academy-orange uppercase tracking-[0.2em] mb-3 block">
+            <Link
+              href="/admin"
+              className="text-[0.62rem] text-academy-gray-500 hover:text-academy-orange uppercase tracking-[0.2em] mb-3 block"
+            >
               ← Admin
             </Link>
             <h1 className="text-3xl font-black text-white">
               Hero <span className="text-academy-orange">Slides</span>
             </h1>
-            <p className="text-sm text-academy-gray-400 mt-1">Gestisci le slide dello slider principale nella home.</p>
+            <p className="text-sm text-academy-gray-400 mt-1">
+              Gestisci le slide dello slider principale nella home.
+            </p>
           </div>
           <button
-            onClick={() => { setEditing(emptySlide()); setIsNew(true); }}
+            onClick={() => {
+              setEditing(emptySlide());
+              setIsNew(true);
+            }}
             className="font-black text-[0.72rem] tracking-[0.2em] uppercase px-6 py-3 transition-colors"
-            style={{ background: "#F09226", color: "#010015" }}
+            style={{ background: "#F09226", color: "#111111" }}
           >
             + Nuova Slide
           </button>
@@ -151,7 +197,9 @@ export default function AdminHeroPage() {
             >
               {/* Order indicator */}
               <div className="flex-shrink-0 text-center">
-                <div className="text-xl font-black text-academy-gray-700 tabular-nums leading-none">{idx + 1}</div>
+                <div className="text-xl font-black text-academy-gray-700 tabular-nums leading-none">
+                  {idx + 1}
+                </div>
                 <div className="flex flex-col gap-1 mt-1.5">
                   <button
                     onClick={() => moveSlide(slide, -1)}
@@ -173,10 +221,16 @@ export default function AdminHeroPage() {
               {/* Preview */}
               <div className="flex-1 min-w-0">
                 <div className="text-base font-black leading-tight">
-                  <span className="text-white">{slide.title_white || "—"} </span>
-                  <span className="text-academy-orange">{slide.title_orange || ""}</span>
+                  <span className="text-white">
+                    {slide.title_white || "—"}{" "}
+                  </span>
+                  <span className="text-academy-orange">
+                    {slide.title_orange || ""}
+                  </span>
                 </div>
-                <p className="text-[0.65rem] text-academy-gray-500 mt-1 line-clamp-1">{slide.description}</p>
+                <p className="text-[0.65rem] text-academy-gray-500 mt-1 line-clamp-1">
+                  {slide.description}
+                </p>
                 {(slide.cta_label || slide.bg_image_url) && (
                   <div className="flex items-center gap-3 mt-1.5">
                     {slide.cta_label && (
@@ -199,15 +253,25 @@ export default function AdminHeroPage() {
                 <button
                   onClick={() => toggleActive(slide)}
                   className="text-[0.5rem] font-bold tracking-[0.18em] uppercase px-2.5 py-1 border transition-colors"
-                  style={slide.active
-                    ? { color: "#F09226", borderColor: "rgba(240,146,38,0.4)" }
-                    : { color: "#48484a", borderColor: "rgba(255,255,255,0.08)" }
+                  style={
+                    slide.active
+                      ? {
+                          color: "#F09226",
+                          borderColor: "rgba(240,146,38,0.4)",
+                        }
+                      : {
+                          color: "#48484a",
+                          borderColor: "rgba(255,255,255,0.08)",
+                        }
                   }
                 >
                   {slide.active ? "Attiva" : "Inattiva"}
                 </button>
                 <button
-                  onClick={() => { setEditing({ ...slide }); setIsNew(false); }}
+                  onClick={() => {
+                    setEditing({ ...slide });
+                    setIsNew(false);
+                  }}
                   className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-academy-gray-400 hover:text-white transition-colors"
                 >
                   Modifica
@@ -227,7 +291,10 @@ export default function AdminHeroPage() {
         {editing && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-6"
-            style={{ background: "rgba(1,0,18,0.88)", backdropFilter: "blur(8px)" }}
+            style={{
+              background: "rgba(1,0,18,0.88)",
+              backdropFilter: "blur(8px)",
+            }}
           >
             <div className="w-full max-w-lg card-squared p-8 overflow-y-auto max-h-[90vh]">
               <h2 className="text-xl font-black text-white mb-6">
@@ -242,7 +309,9 @@ export default function AdminHeroPage() {
                       className={inputCls}
                       placeholder="NON FORMIAMO"
                       value={editing.title_white}
-                      onChange={(e) => setEditing({ ...editing, title_white: e.target.value })}
+                      onChange={(e) =>
+                        setEditing({ ...editing, title_white: e.target.value })
+                      }
                     />
                   </div>
                   <div>
@@ -251,7 +320,9 @@ export default function AdminHeroPage() {
                       className={inputCls}
                       placeholder="ISTRUTTORI."
                       value={editing.title_orange}
-                      onChange={(e) => setEditing({ ...editing, title_orange: e.target.value })}
+                      onChange={(e) =>
+                        setEditing({ ...editing, title_orange: e.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -263,7 +334,9 @@ export default function AdminHeroPage() {
                     rows={3}
                     placeholder="Descrizione della slide..."
                     value={editing.description}
-                    onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                    onChange={(e) =>
+                      setEditing({ ...editing, description: e.target.value })
+                    }
                   />
                 </div>
 
@@ -274,7 +347,12 @@ export default function AdminHeroPage() {
                       className={inputCls}
                       placeholder="Scopri il Percorso"
                       value={editing.cta_label ?? ""}
-                      onChange={(e) => setEditing({ ...editing, cta_label: e.target.value || null })}
+                      onChange={(e) =>
+                        setEditing({
+                          ...editing,
+                          cta_label: e.target.value || null,
+                        })
+                      }
                     />
                   </div>
                   <div>
@@ -283,37 +361,61 @@ export default function AdminHeroPage() {
                       className={inputCls}
                       placeholder="/percorso"
                       value={editing.cta_href ?? ""}
-                      onChange={(e) => setEditing({ ...editing, cta_href: e.target.value || null })}
+                      onChange={(e) =>
+                        setEditing({
+                          ...editing,
+                          cta_href: e.target.value || null,
+                        })
+                      }
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className={labelCls}>Immagine di sfondo URL (opzionale)</label>
+                  <label className={labelCls}>
+                    Immagine di sfondo URL (opzionale)
+                  </label>
                   <input
                     className={inputCls}
                     placeholder="https://..."
                     value={editing.bg_image_url ?? ""}
-                    onChange={(e) => setEditing({ ...editing, bg_image_url: e.target.value || null })}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        bg_image_url: e.target.value || null,
+                      })
+                    }
                   />
                   <p className="text-[0.5rem] text-academy-gray-600 mt-1 tracking-wide">
-                    L&apos;immagine verrà ridimensionata per coprire l&apos;intera area. Usa immagini ad alta risoluzione.
+                    L&apos;immagine verrà ridimensionata per coprire
+                    l&apos;intera area. Usa immagini ad alta risoluzione.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setEditing({ ...editing, active: !editing.active })}
+                    onClick={() =>
+                      setEditing({ ...editing, active: !editing.active })
+                    }
                     className="text-[0.55rem] font-bold tracking-[0.2em] uppercase px-3 py-1.5 border transition-colors"
-                    style={editing.active
-                      ? { color: "#F09226", borderColor: "rgba(240,146,38,0.4)" }
-                      : { color: "#48484a", borderColor: "rgba(255,255,255,0.1)" }
+                    style={
+                      editing.active
+                        ? {
+                            color: "#F09226",
+                            borderColor: "rgba(240,146,38,0.4)",
+                          }
+                        : {
+                            color: "#48484a",
+                            borderColor: "rgba(255,255,255,0.1)",
+                          }
                     }
                   >
                     {editing.active ? "Attiva" : "Inattiva"}
                   </button>
                   <span className="text-[0.52rem] text-academy-gray-600">
-                    {editing.active ? "La slide sarà visibile nella home." : "La slide non sarà visibile."}
+                    {editing.active
+                      ? "La slide sarà visibile nella home."
+                      : "La slide non sarà visibile."}
                   </span>
                 </div>
               </div>
@@ -327,12 +429,16 @@ export default function AdminHeroPage() {
                   onClick={save}
                   disabled={saving}
                   className="font-black text-[0.72rem] tracking-[0.2em] uppercase px-6 py-3 transition-all disabled:opacity-50"
-                  style={{ background: "#F09226", color: "#010015" }}
+                  style={{ background: "#F09226", color: "#111111" }}
                 >
                   {saving ? "Salvando..." : "Salva"}
                 </button>
                 <button
-                  onClick={() => { setEditing(null); setIsNew(false); setError(null); }}
+                  onClick={() => {
+                    setEditing(null);
+                    setIsNew(false);
+                    setError(null);
+                  }}
                   className="text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-academy-gray-500 hover:text-white transition-colors"
                 >
                   Annulla

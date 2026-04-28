@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export function CheckoutContent() {
   const searchParams = useSearchParams();
-  const packSlug = searchParams.get("pack") || "corpus";
+  const packSlug = searchParams.get("pack") || "function";
   const mc1 = searchParams.get("mc1") ?? "";
   const mc2 = searchParams.get("mc2") ?? "";
   const pack = getPackBySlug(packSlug);
@@ -113,7 +113,10 @@ export function CheckoutContent() {
             </h2>
             <ul className="space-y-2">
               {pack.includes.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-academy-gray-300">
+                <li
+                  key={item}
+                  className="flex items-center gap-2 text-sm text-academy-gray-300"
+                >
                   <span className="h-1 w-1 bg-academy-orange" />
                   {item}
                 </li>
@@ -147,7 +150,9 @@ export function CheckoutContent() {
                       <span>
                         <span className="font-semibold">{w!.title}</span>
                         {w!.trainerLabel && (
-                          <span className="ml-1 text-academy-gray-500">— {w!.trainerLabel}</span>
+                          <span className="ml-1 text-academy-gray-500">
+                            — {w!.trainerLabel}
+                          </span>
                         )}
                       </span>
                     </li>
@@ -186,8 +191,8 @@ export function CheckoutContent() {
               {loading
                 ? "Caricamento..."
                 : pack.priceCents === 0
-                ? "Prossimamente"
-                : "Procedi al Pagamento"}
+                  ? "Prossimamente"
+                  : "Procedi al Pagamento"}
             </Button>
           </div>
         </div>

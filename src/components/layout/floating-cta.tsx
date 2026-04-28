@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const DEFAULTS = {
-  phone:    "+390521607870",
-  label:    "Chiamaci ora",
+  phone: "+390521607870",
+  label: "Chiamaci ora",
   sublabel: "Siamo qui per aiutarti",
 };
 
@@ -23,10 +23,10 @@ function isAvailableNow(): boolean {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function FloatingCTA() {
-  const [config, setConfig]       = useState(DEFAULTS);
-  const [visible, setVisible]     = useState(false);
+  const [config, setConfig] = useState(DEFAULTS);
+  const [visible, setVisible] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [available]               = useState(isAvailableNow);
+  const [available] = useState(isAvailableNow);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   // Not in availability window — render nothing
@@ -44,12 +44,14 @@ export function FloatingCTA() {
         if (data?.length) {
           const map = Object.fromEntries(data.map((r) => [r.key, r.value]));
           setConfig({
-            phone:    map["cta_phone"]    ?? DEFAULTS.phone,
-            label:    map["cta_label"]    ?? DEFAULTS.label,
+            phone: map["cta_phone"] ?? DEFAULTS.phone,
+            label: map["cta_label"] ?? DEFAULTS.label,
             sublabel: map["cta_sublabel"] ?? DEFAULTS.sublabel,
           });
         }
-      } catch { /* table not yet migrated */ }
+      } catch {
+        /* table not yet migrated */
+      }
     })();
   }, []);
 
@@ -65,8 +67,13 @@ export function FloatingCTA() {
       const el = document.getElementById("perche");
       if (!el) return;
       const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-        { threshold: 0.25 }
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.25 },
       );
       obs.observe(el);
       return () => obs.disconnect();
@@ -83,7 +90,7 @@ export function FloatingCTA() {
     gsap.fromTo(
       wrapRef.current,
       { y: 36, opacity: 0, scale: 0.9 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.6)" }
+      { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.6)" },
     );
   }, [visible]);
 
@@ -98,7 +105,9 @@ export function FloatingCTA() {
     } else {
       root.style.setProperty("--sp-bottom", "178px");
     }
-    return () => { root.style.removeProperty("--sp-bottom"); };
+    return () => {
+      root.style.removeProperty("--sp-bottom");
+    };
   }, [visible, minimized]);
 
   function dismiss(e: React.MouseEvent) {
@@ -106,7 +115,11 @@ export function FloatingCTA() {
     e.stopPropagation();
     sessionStorage.setItem(DISMISS_KEY, "1");
     gsap.to(wrapRef.current, {
-      y: 20, opacity: 0, scale: 0.9, duration: 0.28, ease: "power2.in",
+      y: 20,
+      opacity: 0,
+      scale: 0.9,
+      duration: 0.28,
+      ease: "power2.in",
       onComplete: () => setVisible(false),
     });
   }
@@ -186,7 +199,8 @@ export function FloatingCTA() {
             style={{
               background: "#ffffff",
               border: "1px solid rgba(0,0,0,0.09)",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08)",
+              boxShadow:
+                "0 12px 40px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08)",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.boxShadow =
@@ -198,14 +212,21 @@ export function FloatingCTA() {
             }}
           >
             {/* Orange top accent */}
-            <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #F09226, #D4AF3780)" }} />
+            <div
+              className="h-0.5 w-full"
+              style={{
+                background:
+                  "linear-gradient(90deg, #F09226, rgba(240,146,38,0.5))",
+              }}
+            />
 
             <div className="flex items-center gap-4 p-4 pb-3">
               {/* Avatar */}
               <div
                 className="relative flex h-11 w-11 shrink-0 items-end justify-center overflow-hidden rounded-full"
                 style={{
-                  background: "radial-gradient(circle at 50% 35%, rgba(240,146,38,0.2) 0%, rgba(240,146,38,0.07) 70%)",
+                  background:
+                    "radial-gradient(circle at 50% 35%, rgba(240,146,38,0.2) 0%, rgba(240,146,38,0.07) 70%)",
                   border: "1.5px solid rgba(240,146,38,0.3)",
                 }}
               >
@@ -236,14 +257,27 @@ export function FloatingCTA() {
             {/* CTA strip */}
             <div
               className="flex items-center justify-between px-4 py-2.5 transition-colors duration-200 group-hover:bg-[#F09226]"
-              style={{ background: "rgba(240,146,38,0.1)", borderTop: "1px solid rgba(240,146,38,0.12)" }}
+              style={{
+                background: "rgba(240,146,38,0.1)",
+                borderTop: "1px solid rgba(240,146,38,0.12)",
+              }}
             >
               <span className="text-[0.72rem] font-black tracking-[0.12em] text-[#D4830A] transition-colors duration-200 group-hover:text-white">
                 {config.phone}
               </span>
-              <svg viewBox="0 0 16 16" width="13" height="13" fill="none"
-                className="shrink-0 text-[#D4830A] transition-colors duration-200 group-hover:text-white">
-                <path d="M3 13L13 3M13 3H5M13 3v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <svg
+                viewBox="0 0 16 16"
+                width="13"
+                height="13"
+                fill="none"
+                className="shrink-0 text-[#D4830A] transition-colors duration-200 group-hover:text-white"
+              >
+                <path
+                  d="M3 13L13 3M13 3H5M13 3v8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
           </a>
@@ -257,9 +291,18 @@ export function FloatingCTA() {
 
 function PersonSVG() {
   return (
-    <svg viewBox="0 0 40 44" width="34" height="38" fill="none" style={{ marginBottom: "-2px" }}>
+    <svg
+      viewBox="0 0 40 44"
+      width="34"
+      height="38"
+      fill="none"
+      style={{ marginBottom: "-2px" }}
+    >
       <circle cx="20" cy="13" r="7" fill="rgba(240,146,38,0.6)" />
-      <path d="M4 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(240,146,38,0.45)" />
+      <path
+        d="M4 40c0-8.837 7.163-16 16-16s16 7.163 16 16"
+        fill="rgba(240,146,38,0.45)"
+      />
     </svg>
   );
 }

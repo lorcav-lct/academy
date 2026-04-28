@@ -35,7 +35,11 @@ export function PercorsoTirocinio() {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.from(headRef.current, {
-        scrollTrigger: { trigger: headRef.current, start: "top 85%", once: true },
+        scrollTrigger: {
+          trigger: headRef.current,
+          start: "top 85%",
+          once: true,
+        },
         opacity: 0,
         y: 28,
         duration: 0.7,
@@ -45,7 +49,11 @@ export function PercorsoTirocinio() {
       const cards = gridRef.current?.querySelectorAll("[data-partner-card]");
       if (cards) {
         gsap.from(cards, {
-          scrollTrigger: { trigger: gridRef.current, start: "top 78%", once: true },
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: "top 78%",
+            once: true,
+          },
           opacity: 0,
           y: 35,
           scale: 0.96,
@@ -56,7 +64,11 @@ export function PercorsoTirocinio() {
       }
 
       gsap.from(calloutRef.current, {
-        scrollTrigger: { trigger: calloutRef.current, start: "top 88%", once: true },
+        scrollTrigger: {
+          trigger: calloutRef.current,
+          start: "top 88%",
+          once: true,
+        },
         opacity: 0,
         y: 20,
         duration: 0.6,
@@ -86,8 +98,9 @@ export function PercorsoTirocinio() {
             className="mx-auto max-w-2xl text-sm leading-relaxed text-academy-gray-400"
             style={{ color: isDark ? undefined : "#666666" }}
           >
-            Al termine del percorso, i partecipanti certificati possono accedere a un tirocinio
-            garantito presso una delle strutture partner selezionate da Lacertosus Academy.
+            Al termine del percorso, i partecipanti certificati possono accedere
+            a un tirocinio garantito presso una delle strutture partner
+            selezionate da Lacertosus Academy.
           </p>
         </div>
 
@@ -102,7 +115,7 @@ export function PercorsoTirocinio() {
               data-partner-card
               className="group relative overflow-hidden p-5 transition-all duration-400 hover:glow-orange"
               style={{
-                background: isDark ? "rgba(10,8,28,0.7)" : "#ffffff",
+                background: isDark ? "rgba(67,67,67,0.7)" : "#ffffff",
                 border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)"}`,
                 backdropFilter: "blur(12px)",
               }}
@@ -142,8 +155,11 @@ export function PercorsoTirocinio() {
             style={{ color: isDark ? "#c8c4d8" : "#555555" }}
           >
             Il tirocinio è un&apos;opportunità riservata agli alumni certificati{" "}
-            <span className="font-bold text-academy-orange">FIPE × Lacertosus</span>. I posti
-            sono limitati e assegnati in base al percorso e alla disponibilità.
+            <span className="font-bold text-academy-orange">
+              FIPE × Lacertosus
+            </span>
+            . I posti sono limitati e assegnati in base al percorso e alla
+            disponibilità.
           </span>
         </div>
       </div>

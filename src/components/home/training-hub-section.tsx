@@ -295,7 +295,7 @@ export function TrainingHubSection() {
           style={{
             border: "1px solid rgba(240,146,38,0.2)",
             background: d
-              ? "linear-gradient(145deg, rgba(240,146,38,0.06), rgba(2,0,38,0.95))"
+              ? "linear-gradient(145deg, rgba(240,146,38,0.06), rgba(26,26,26,0.95))"
               : "linear-gradient(145deg, rgba(240,146,38,0.05), rgba(255,255,255,0.98))",
           }}
         >
@@ -323,7 +323,7 @@ export function TrainingHubSection() {
           <a
             href="/pack"
             className="shrink-0 inline-flex items-center gap-3 px-8 py-4 text-sm font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-85"
-            style={{ background: "#F09226", color: "#010015" }}
+            style={{ background: "#F09226", color: "#111111" }}
           >
             Inizia il Percorso
             <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">

@@ -26,7 +26,7 @@ INSERT INTO public.hero_slides (title_white, title_orange, description, sort_ord
   (
     'UN PERCORSO',
     'UNICO.',
-    'Tre blocchi formativi progressivi: PRIMAL, VIS, VICTOR. Dal fondamento tecnico all''eccellenza imprenditoriale.',
+    'Tre blocchi formativi progressivi: FUNCTION, STRENGTH, SCIENCE. Dal fondamento tecnico all''eccellenza imprenditoriale.',
     1
   ),
   (

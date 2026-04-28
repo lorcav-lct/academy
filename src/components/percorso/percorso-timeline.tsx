@@ -54,7 +54,7 @@ const SORTED_FIPE = [...FIPE_SESSIONS].sort(
   (a, b) => a.sortOrder - b.sortOrder,
 );
 
-// Interleaved: CORPUS, FIPE-I, VIS, FIPE-II, VICTOR, FIPE-III
+// Interleaved: FUNCTION, FIPE-I, STRENGTH, FIPE-II, SCIENCE, FIPE-III
 const ITEMS: CalItem[] = SORTED_COURSES.flatMap((course, i) => [
   {
     type: "block" as const,

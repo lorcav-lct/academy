@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORKSHOPS } from "@/lib/constants/workshops";
 import { getBundles } from "@/lib/constants/packs";
@@ -20,9 +21,19 @@ export function MasterclassSelector({
   onClose,
 }: MasterclassSelectorProps) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   const pack = getBundles().find((p) => p.slug === packSlug);
   const packName = pack?.name ?? packSlug.toUpperCase();
+
+  useEffect(() => {
+    setMounted(true);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
 
   function toggle(slug: string) {
     setSelected((prev) => {
@@ -34,7 +45,9 @@ export function MasterclassSelector({
 
   const maxReached = selected.length >= count;
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       <motion.div
         key="overlay"
@@ -42,8 +55,13 @@ export function MasterclassSelector({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ backdropFilter: "blur(12px)", backgroundColor: "rgba(2,0,38,0.85)" }}
-        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        style={{
+          backdropFilter: "blur(12px)",
+          backgroundColor: "rgba(26,26,26,0.85)",
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
       >
         <motion.div
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -62,7 +80,9 @@ export function MasterclassSelector({
               </h2>
               <p className="mt-1 text-sm text-academy-gray-400">
                 Incluse nel tuo pack{" "}
-                <span className="font-bold text-academy-orange">{packName}</span>
+                <span className="font-bold text-academy-orange">
+                  {packName}
+                </span>
               </p>
             </div>
             <button
@@ -99,17 +119,21 @@ export function MasterclassSelector({
                       isSelected
                         ? "border-academy-orange bg-academy-orange/10"
                         : "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]",
-                      isDimmed && "opacity-40 cursor-not-allowed"
+                      isDimmed && "opacity-40 cursor-not-allowed",
                     )}
                     disabled={isDimmed}
                   >
                     {/* Selected checkmark */}
                     {isSelected && (
                       <span className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center bg-academy-orange">
-                        <svg viewBox="0 0 12 12" fill="none" className="h-3 w-3">
+                        <svg
+                          viewBox="0 0 12 12"
+                          fill="none"
+                          className="h-3 w-3"
+                        >
                           <path
                             d="M10 3L5 9L2 6"
-                            stroke="#020026"
+                            stroke="#1a1a1a"
                             strokeWidth={2}
                             strokeLinecap="square"
                           />
@@ -127,8 +151,12 @@ export function MasterclassSelector({
                     <h3 className="mb-1 text-sm font-black leading-tight">
                       Masterclass {w.title}
                     </h3>
-                    <p className="mb-2 text-xs text-academy-orange">{w.trainerLabel}</p>
-                    <p className="text-xs leading-relaxed text-academy-gray-400">{w.focus}</p>
+                    <p className="mb-2 text-xs text-academy-orange">
+                      {w.trainerLabel}
+                    </p>
+                    <p className="text-xs leading-relaxed text-academy-gray-400">
+                      {w.focus}
+                    </p>
                   </button>
                 );
               })}
@@ -141,7 +169,9 @@ export function MasterclassSelector({
               <span
                 className={cn(
                   "font-bold tabular-nums",
-                  selected.length === count ? "text-academy-orange" : "text-white"
+                  selected.length === count
+                    ? "text-academy-orange"
+                    : "text-white",
                 )}
               >
                 {selected.length}/{count}
@@ -156,7 +186,7 @@ export function MasterclassSelector({
                 "inline-flex items-center gap-2 px-6 py-3 text-sm font-bold tracking-wide transition-all duration-200",
                 selected.length === count
                   ? "bg-academy-orange text-academy-dark hover:bg-amber-400 glow-orange cursor-pointer"
-                  : "cursor-not-allowed bg-white/5 text-academy-gray-500"
+                  : "cursor-not-allowed bg-white/5 text-academy-gray-500",
               )}
             >
               Conferma e Procedi →
@@ -164,6 +194,7 @@ export function MasterclassSelector({
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

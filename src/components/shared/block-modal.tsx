@@ -7,7 +7,7 @@ import { COURSES } from "@/lib/constants/courses";
 import { getTeachersByCourse } from "@/lib/constants/teachers";
 import { useTheme } from "@/components/providers/theme-provider";
 
-export type BlockSlug = "corpus" | "vis" | "victor";
+export type BlockSlug = "function" | "strength" | "science";
 
 function initials(name: string) {
   return name
@@ -21,9 +21,12 @@ function initials(name: string) {
 export function BlockModal({
   slug,
   onClose,
+  ctaHref = "/pack",
 }: {
   slug: BlockSlug;
   onClose: () => void;
+  /** CTA destination. Pass an in-page anchor (e.g. "#section-packs") to scroll without navigation. */
+  ctaHref?: string;
 }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -80,7 +83,7 @@ export function BlockModal({
     tl.to(overlayRef.current, { opacity: 0, duration: 0.14 }, "-=0.06");
   }
 
-  const blockNum = { corpus: "01", vis: "02", victor: "03" }[slug];
+  const blockNum = { function: "01", strength: "02", science: "03" }[slug];
 
   return createPortal(
     <div
@@ -149,10 +152,25 @@ export function BlockModal({
 
           {/* CTA */}
           <a
-            href="/pack"
+            href={ctaHref}
             className="shrink-0 inline-flex items-center gap-2.5 px-5 py-2.5 text-[0.72rem] font-black tracking-[0.14em] uppercase transition-opacity duration-200 hover:opacity-85"
-            style={{ background: "#F09226", color: "#010015" }}
-            onClick={close}
+            style={{ background: "#F09226", color: "#111111" }}
+            onClick={(e) => {
+              if (ctaHref.startsWith("#")) {
+                e.preventDefault();
+                const target = document.querySelector(ctaHref);
+                close();
+                // Defer the scroll until the close animation finishes
+                window.setTimeout(() => {
+                  target?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }, 380);
+                return;
+              }
+              close();
+            }}
           >
             <span className="hidden sm:inline">Inizia il Percorso</span>
             <span className="sm:hidden">Inizia</span>
@@ -394,7 +412,7 @@ export function BlockModal({
                 style={{ color: tb }}
               >
                 <span className="font-bold" style={{ color: accentColor }}>
-                  Pack Argento e Oro
+                  Pack PRO ed ELITE
                 </span>{" "}
                 includono 2 Masterclass a scelta tra le 8 disponibili — sessioni
                 intensive in presenza con specialisti di caratura

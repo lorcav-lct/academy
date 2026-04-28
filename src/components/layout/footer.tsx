@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { Logo } from "@/components/layout/logo";
 
 const footerLinks = {
   percorso: [
     { href: "/percorso", label: "Il Percorso" },
-    { href: "/corsi/corpus", label: "CORPUS" },
-    { href: "/corsi/vis", label: "VIS" },
-    { href: "/corsi/victor", label: "VICTOR" },
+    { href: "/corsi/function", label: "FUNCTION" },
+    { href: "/corsi/strength", label: "STRENGTH" },
+    { href: "/corsi/science", label: "SCIENCE" },
   ],
   workshop: [
     { href: "/masterclass/master-hyrox", label: "Master Hyrox" },
@@ -27,16 +28,12 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-4">
           {/* Brand */}
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center border-2 border-academy-orange bg-academy-orange/10">
-                <span className="text-sm font-black text-academy-orange">L</span>
-              </div>
-              <span className="text-sm font-bold tracking-[0.15em] text-academy-gray-100 uppercase">
-                Academy
-              </span>
+            <div className="mb-5 inline-flex text-academy-gray-100">
+              <Logo width={180} />
             </div>
             <p className="text-sm leading-relaxed text-academy-gray-400">
-              Formiamo professionisti. Formiamo imprenditori. Formiamo il tuo futuro.
+              Formiamo professionisti. Formiamo imprenditori. Formiamo il tuo
+              futuro.
             </p>
           </div>
 
@@ -101,11 +98,14 @@ export function Footer() {
         <div className="mt-12 border-t border-white/5 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-xs text-academy-gray-400">
-              &copy; {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti riservati.
+              &copy; {new Date().getFullYear()} Lacertosus Academy. Tutti i
+              diritti riservati.
             </p>
             <p className="text-xs text-academy-gray-400">
               Un progetto{" "}
-              <span className="font-semibold text-academy-orange">Lacertosus</span>
+              <span className="font-semibold text-academy-orange">
+                Lacertosus
+              </span>
             </p>
           </div>
         </div>

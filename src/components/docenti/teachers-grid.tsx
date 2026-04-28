@@ -22,9 +22,9 @@ interface CourseRef {
 
 const FILTERS = [
   { key: "all", label: "Tutti" },
-  { key: "corpus", label: "CORPUS" },
-  { key: "vis", label: "VIS" },
-  { key: "victor", label: "VICTOR" },
+  { key: "function", label: "FUNCTION" },
+  { key: "strength", label: "STRENGTH" },
+  { key: "science", label: "SCIENCE" },
   { key: "masterclass", label: "Masterclass" },
 ] as const;
 
@@ -39,30 +39,47 @@ function isMasterclassOnly(teacher: Teacher): boolean {
 
 function matchesFilter(teacher: Teacher, filter: FilterKey): boolean {
   if (filter === "all") return true;
-  if (filter === "masterclass") return teacher.courses.some((c) => WORKSHOP_SLUGS.has(c));
+  if (filter === "masterclass")
+    return teacher.courses.some((c) => WORKSHOP_SLUGS.has(c));
   return teacher.courses.includes(filter);
 }
 
 // ─── getCourseRef helper ──────────────────────────────────────────────────────
 
 function getCourseRef(slug: string): CourseRef {
-  if (slug === "corpus") return { label: "CORPUS", href: "/corsi/corpus", type: "Blocco Formativo" };
-  if (slug === "vis") return { label: "VIS", href: "/corsi/vis", type: "Blocco Formativo" };
-  if (slug === "victor") return { label: "VICTOR", href: "/corsi/victor", type: "Blocco Formativo" };
+  if (slug === "function")
+    return {
+      label: "FUNCTION",
+      href: "/corsi/function",
+      type: "Blocco Formativo",
+    };
+  if (slug === "strength")
+    return {
+      label: "STRENGTH",
+      href: "/corsi/strength",
+      type: "Blocco Formativo",
+    };
+  if (slug === "science")
+    return {
+      label: "SCIENCE",
+      href: "/corsi/science",
+      type: "Blocco Formativo",
+    };
   const workshop = WORKSHOPS.find((w) => w.slug === slug);
   if (workshop) {
-    return { label: workshop.title, href: `/masterclass/${slug}`, type: "Masterclass" };
+    return {
+      label: workshop.title,
+      href: `/masterclass/${slug}`,
+      type: "Masterclass",
+    };
   }
   return { label: slug, href: "#", type: "Corso" };
 }
 
 // ─── Course label badge colors ────────────────────────────────────────────────
 
-function getCourseColor(slug: string): string {
-  if (slug === "corpus") return "#F09226";
-  if (slug === "vis") return "#D4AF37";
-  if (slug === "victor") return "#C0C0C0";
-  return "#CD7F32"; // masterclass = bronze
+function getCourseColor(_slug: string): string {
+  return "#F09226";
 }
 
 // ─── Initials helper ──────────────────────────────────────────────────────────
@@ -99,7 +116,7 @@ function TeacherCard({ teacher, onClick, isDark }: TeacherCardProps) {
         className="relative flex h-full flex-col overflow-hidden transition-all duration-500"
         style={{
           background: isDark
-            ? "linear-gradient(135deg, rgba(10,8,28,0.85) 0%, rgba(2,0,38,0.95) 100%)"
+            ? "linear-gradient(135deg, rgba(67,67,67,0.85) 0%, rgba(26,26,26,0.95) 100%)"
             : "#ffffff",
           border: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)"}`,
           borderRadius: 0,
@@ -122,7 +139,7 @@ function TeacherCard({ teacher, onClick, isDark }: TeacherCardProps) {
             style={{
               paddingTop: "45%",
               background: isDark
-                ? `linear-gradient(135deg, ${accentColor}14 0%, rgba(2,0,38,0.6) 100%)`
+                ? `linear-gradient(135deg, ${accentColor}14 0%, rgba(26,26,26,0.6) 100%)`
                 : `linear-gradient(135deg, ${accentColor}18 0%, ${accentColor}08 100%)`,
               borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)"}`,
             }}
@@ -153,9 +170,9 @@ function TeacherCard({ teacher, onClick, isDark }: TeacherCardProps) {
               <div
                 className="absolute top-3 right-3 px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase"
                 style={{
-                  background: "rgba(205,127,50,0.15)",
-                  border: "1px solid rgba(205,127,50,0.35)",
-                  color: "#CD7F32",
+                  background: "rgba(240,146,38,0.15)",
+                  border: "1px solid rgba(240,146,38,0.35)",
+                  color: "#F09226",
                 }}
               >
                 Masterclass
@@ -217,7 +234,9 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
   // Close on ESC
   useEffect(() => {
     if (!teacher) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [teacher, onClose]);
@@ -229,7 +248,9 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [teacher]);
 
   return (
@@ -244,7 +265,10 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-50 cursor-pointer"
-            style={{ backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.65)" }}
+            style={{
+              backdropFilter: "blur(8px)",
+              background: "rgba(0,0,0,0.65)",
+            }}
             onClick={onClose}
             aria-hidden="true"
           />
@@ -268,7 +292,7 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
                 pointerEvents: "all",
                 maxHeight: "90vh",
                 background: isDark
-                  ? "linear-gradient(135deg, rgba(10,8,28,0.97) 0%, rgba(2,0,38,0.99) 100%)"
+                  ? "linear-gradient(135deg, rgba(67,67,67,0.97) 0%, rgba(26,26,26,0.99) 100%)"
                   : "#ffffff",
                 border: `1px solid ${isDark ? "rgba(240,146,38,0.2)" : "rgba(0,0,0,0.1)"}`,
                 boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
@@ -282,7 +306,12 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
                 aria-label="Chiudi"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path
+                    d="M1 1l14 14M15 1L1 15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
 
@@ -300,7 +329,7 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
                     width: 80,
                     height: 80,
                     background: isDark
-                      ? `linear-gradient(135deg, ${teacher.color}18, rgba(2,0,38,0.8))`
+                      ? `linear-gradient(135deg, ${teacher.color}18, rgba(26,26,26,0.8))`
                       : `linear-gradient(135deg, ${teacher.color}20, ${teacher.color}08)`,
                     border: `2px solid ${teacher.color}40`,
                   }}
@@ -470,7 +499,10 @@ export function TeachersGrid() {
   return (
     <>
       {/* ── Header ── */}
-      <div ref={headRef} className="mx-auto max-w-[1440px] px-[5%] md:px-10 pb-12">
+      <div
+        ref={headRef}
+        className="mx-auto max-w-[1440px] px-[5%] md:px-10 pb-12"
+      >
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -483,16 +515,16 @@ export function TeachersGrid() {
             variants={fadeUp}
             className="mb-4 text-4xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl"
           >
-            I Nostri{" "}
-            <span className="gradient-text">Docenti</span>
+            I Nostri <span className="gradient-text">Docenti</span>
           </motion.h1>
           <motion.p
             variants={fadeUp}
             className="max-w-2xl text-lg leading-relaxed"
             style={{ color: d ? "#8e8e93" : "#636366" }}
           >
-            Ricercatori universitari, professionisti d&apos;élite e campioni internazionali.
-            Ogni docente è selezionato per eccellenza nel proprio campo.
+            Ricercatori universitari, professionisti d&apos;élite e campioni
+            internazionali. Ogni docente è selezionato per eccellenza nel
+            proprio campo.
           </motion.p>
         </motion.div>
 
@@ -513,7 +545,9 @@ export function TeachersGrid() {
                 style={{
                   background: isActive
                     ? "rgba(240,146,38,0.15)"
-                    : d ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+                    : d
+                      ? "rgba(255,255,255,0.04)"
+                      : "rgba(0,0,0,0.04)",
                   border: `1px solid ${isActive ? "rgba(240,146,38,0.5)" : d ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)"}`,
                   color: isActive ? "#F09226" : d ? "#8e8e93" : "#636366",
                 }}

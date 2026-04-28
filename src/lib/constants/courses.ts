@@ -4,7 +4,7 @@ export interface Course {
   subtitle: string;
   type: "block" | "fipe_session";
   blockNumber: number;
-  blockName: "CORPUS" | "VIS" | "VICTOR";
+  blockName: "FUNCTION" | "STRENGTH" | "SCIENCE";
   curriculumLabel: string;
   area: string;
   duration: string;
@@ -20,13 +20,13 @@ export interface Course {
 
 export const COURSES: Course[] = [
   {
-    slug: "corpus",
-    title: "CORPUS",
+    slug: "function",
+    title: "FUNCTION",
     subtitle: "Blocco I — Le Fondamenta",
     type: "block",
     blockNumber: 1,
-    blockName: "CORPUS",
-    curriculumLabel: "CORPUS",
+    blockName: "FUNCTION",
+    curriculumLabel: "FUNCTION",
     area: "Functional Training",
     duration: "2 weekend",
     objective:
@@ -64,13 +64,13 @@ export const COURSES: Course[] = [
     sortOrder: 1,
   },
   {
-    slug: "vis",
-    title: "VIS",
+    slug: "strength",
+    title: "STRENGTH",
     subtitle: "Blocco II — La Forza",
     type: "block",
     blockNumber: 2,
-    blockName: "VIS",
-    curriculumLabel: "VIS",
+    blockName: "STRENGTH",
+    curriculumLabel: "STRENGTH",
     area: "Strength & Conditioning",
     duration: "2 weekend",
     objective: "Sviluppo di forza, potenza e condizionamento.",
@@ -107,13 +107,13 @@ export const COURSES: Course[] = [
     sortOrder: 3,
   },
   {
-    slug: "victor",
-    title: "VICTOR",
+    slug: "science",
+    title: "SCIENCE",
     subtitle: "Blocco III — La Vittoria",
     type: "block",
     blockNumber: 3,
-    blockName: "VICTOR",
-    curriculumLabel: "VICTOR",
+    blockName: "SCIENCE",
+    curriculumLabel: "SCIENCE",
     area: "Integrazione Professionale, Performance e Business",
     duration: "2 weekend",
     objective: "Formazione completa del professionista e imprenditore.",
@@ -162,21 +162,21 @@ export const FIPE_SESSIONS = [
     slug: "fipe-1",
     title: "Sessione FIPE I",
     dates: ["13-14 Novembre"],
-    afterBlock: "CORPUS",
+    afterBlock: "FUNCTION",
     sortOrder: 2,
   },
   {
     slug: "fipe-2",
     title: "Sessione FIPE II",
     dates: ["12-13 Febbraio"],
-    afterBlock: "VIS",
+    afterBlock: "STRENGTH",
     sortOrder: 4,
   },
   {
     slug: "fipe-3",
     title: "Sessione FIPE III",
     dates: ["14-15 Maggio"],
-    afterBlock: "VICTOR",
+    afterBlock: "SCIENCE",
     sortOrder: 6,
   },
 ];

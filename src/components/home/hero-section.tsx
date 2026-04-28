@@ -1036,7 +1036,7 @@ export function HeroSection({
           <span
             data-reveal
             className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-8"
-            style={{ color: "rgba(212,175,55,0.85)" }}
+            style={{ color: "rgba(240,146,38,0.85)" }}
           >
             — Certificazione Ufficiale
           </span>
@@ -1046,9 +1046,9 @@ export function HeroSection({
             <div
               data-reveal
               className="text-[clamp(3rem,7vw,7.5rem)] font-black tracking-[-0.03em] leading-[0.92]"
-              style={{ color: "#D4AF37" }}
+              style={{ color: "#F09226" }}
             >
-              FIPE <span style={{ color: "rgba(212,175,55,0.45)" }}>×</span>{" "}
+              FIPE <span style={{ color: "rgba(240,146,38,0.45)" }}>×</span>{" "}
               <span style={{ color: "#ffffff" }}>LACERTOSUS</span>
             </div>
             <p
@@ -1064,22 +1064,22 @@ export function HeroSection({
           {/* Progression track */}
           <div data-reveal className="mt-12 flex items-center gap-0">
             {[
-              { n: "I", after: "CORPUS" },
-              { n: "II", after: "VIS" },
-              { n: "III", after: "VICTOR" },
+              { n: "I", after: "FUNCTION" },
+              { n: "II", after: "STRENGTH" },
+              { n: "III", after: "SCIENCE" },
             ].map((node, i) => (
               <div key={node.n} className="flex items-center">
                 <div className="flex flex-col items-center gap-2">
                   <div
                     className="w-12 h-12 flex items-center justify-center"
                     style={{
-                      background: "rgba(212,175,55,0.08)",
-                      border: "1.5px solid rgba(212,175,55,0.45)",
+                      background: "rgba(240,146,38,0.08)",
+                      border: "1.5px solid rgba(240,146,38,0.45)",
                     }}
                   >
                     <span
                       className="text-[0.85rem] font-black tracking-[0.1em]"
-                      style={{ color: "#D4AF37" }}
+                      style={{ color: "#F09226" }}
                     >
                       {node.n}
                     </span>
@@ -1096,7 +1096,7 @@ export function HeroSection({
                     className="h-px w-16 mx-3 mb-5"
                     style={{
                       background:
-                        "linear-gradient(90deg, rgba(212,175,55,0.45), rgba(212,175,55,0.45))",
+                        "linear-gradient(90deg, rgba(240,146,38,0.45), rgba(240,146,38,0.45))",
                     }}
                   />
                 )}
@@ -1106,7 +1106,7 @@ export function HeroSection({
                       className="h-px w-16 mx-3 mb-5"
                       style={{
                         background:
-                          "linear-gradient(90deg, rgba(212,175,55,0.45), rgba(212,175,55,0.75))",
+                          "linear-gradient(90deg, rgba(240,146,38,0.45), rgba(240,146,38,0.75))",
                       }}
                     />
                     <div className="flex flex-col items-center gap-2 mb-0">
@@ -1114,21 +1114,21 @@ export function HeroSection({
                         className="px-4 h-12 flex items-center justify-center"
                         style={{
                           background:
-                            "linear-gradient(135deg, rgba(212,175,55,0.22) 0%, rgba(212,175,55,0.08) 100%)",
-                          border: "2px solid rgba(212,175,55,0.7)",
-                          boxShadow: "0 0 24px rgba(212,175,55,0.2)",
+                            "linear-gradient(135deg, rgba(240,146,38,0.22) 0%, rgba(240,146,38,0.08) 100%)",
+                          border: "2px solid rgba(240,146,38,0.7)",
+                          boxShadow: "0 0 24px rgba(240,146,38,0.2)",
                         }}
                       >
                         <span
                           className="text-[0.8rem] font-black tracking-[0.25em]"
-                          style={{ color: "#D4AF37" }}
+                          style={{ color: "#F09226" }}
                         >
                           CERT.
                         </span>
                       </div>
                       <span
                         className="text-[0.62rem] font-black tracking-[0.25em] uppercase"
-                        style={{ color: "rgba(212,175,55,0.7)" }}
+                        style={{ color: "rgba(240,146,38,0.7)" }}
                       >
                         Ufficiale
                       </span>
@@ -1147,7 +1147,7 @@ export function HeroSection({
         className="absolute bottom-0 left-0 right-0 z-20"
         style={{
           background:
-            "linear-gradient(to top, rgba(1,0,21,0.97) 0%, rgba(1,0,21,0.85) 55%, rgba(1,0,21,0.3) 90%, transparent 100%)",
+            "linear-gradient(to top, rgba(17,17,17,0.97) 0%, rgba(17,17,17,0.85) 55%, rgba(17,17,17,0.3) 90%, transparent 100%)",
           paddingTop: "48px",
           paddingBottom: "32px",
         }}
@@ -1181,7 +1181,7 @@ export function HeroSection({
               className="group relative inline-flex items-center justify-between gap-5 font-black tracking-[0.2em] uppercase transition-opacity duration-200 hover:opacity-90"
               style={{
                 background: "#F09226",
-                color: "#010015",
+                color: "#111111",
                 fontSize: "clamp(0.95rem, 1.05vw, 1.05rem)",
                 padding: "22px 32px",
                 flex: "1 1 0",
@@ -1195,7 +1195,7 @@ export function HeroSection({
                 style={{
                   width: "36px",
                   height: "36px",
-                  border: "1.5px solid rgba(1,0,21,0.3)",
+                  border: "1.5px solid rgba(17,17,17,0.3)",
                 }}
                 aria-hidden="true"
               >
@@ -1307,7 +1307,7 @@ export function HeroSection({
                   background: "#F09226",
                 }}
               >
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="#010015">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="#111111">
                   <path d="M3 1.5L10 6L3 10.5V1.5Z" />
                 </svg>
               </span>
@@ -1552,7 +1552,7 @@ export function HeroSection({
             className="group w-full flex items-center justify-between gap-4 font-black text-[0.9rem] tracking-[0.2em] uppercase transition-opacity duration-200 hover:opacity-90"
             style={{
               background: "#F09226",
-              color: "#010015",
+              color: "#111111",
               padding: "20px 22px",
               boxShadow:
                 "0 0 0 1px rgba(240,146,38,0.5), 0 0 40px rgba(240,146,38,0.3)",
@@ -1564,7 +1564,7 @@ export function HeroSection({
               style={{
                 width: "30px",
                 height: "30px",
-                border: "1.5px solid rgba(1,0,21,0.3)",
+                border: "1.5px solid rgba(17,17,17,0.3)",
               }}
               aria-hidden="true"
             >
@@ -1690,7 +1690,7 @@ export function HeroSection({
                   background: "#F09226",
                 }}
               >
-                <svg viewBox="0 0 12 12" width="8" height="8" fill="#010015">
+                <svg viewBox="0 0 12 12" width="8" height="8" fill="#111111">
                   <path d="M3 1.5L10 6L3 10.5V1.5Z" />
                 </svg>
               </span>
@@ -1811,20 +1811,20 @@ export function HeroSection({
         <div className="relative px-6 py-14" style={{ background: "#111111" }}>
           <span
             className="text-[0.6rem] font-black tracking-[0.32em] uppercase mb-6 block"
-            style={{ color: "rgba(212,175,55,0.85)" }}
+            style={{ color: "rgba(240,146,38,0.85)" }}
           >
             — Certificazione Ufficiale
           </span>
 
           <div
             className="text-[clamp(2rem,9vw,3.4rem)] font-black tracking-[-0.028em] leading-[0.95]"
-            style={{ color: "#D4AF37" }}
+            style={{ color: "#F09226" }}
           >
             FIPE
           </div>
           <div
             className="text-[clamp(1.4rem,6vw,2.2rem)] font-black tracking-[-0.02em] leading-[1] mt-1"
-            style={{ color: "rgba(212,175,55,0.5)" }}
+            style={{ color: "rgba(240,146,38,0.5)" }}
           >
             × LACERTOSUS
           </div>
@@ -1839,22 +1839,22 @@ export function HeroSection({
           {/* Progression track */}
           <div className="mt-7 mb-10 flex items-center gap-0 flex-wrap">
             {[
-              { n: "I", after: "CORPUS" },
-              { n: "II", after: "VIS" },
-              { n: "III", after: "VICTOR" },
+              { n: "I", after: "FUNCTION" },
+              { n: "II", after: "STRENGTH" },
+              { n: "III", after: "SCIENCE" },
             ].map((node, i) => (
               <div key={node.n} className="flex items-center">
                 <div className="flex flex-col items-center gap-3">
                   <div
                     className="w-9 h-9 flex items-center justify-center"
                     style={{
-                      background: "rgba(212,175,55,0.08)",
-                      border: "1.5px solid rgba(212,175,55,0.45)",
+                      background: "rgba(240,146,38,0.08)",
+                      border: "1.5px solid rgba(240,146,38,0.45)",
                     }}
                   >
                     <span
                       className="text-[0.7rem] font-black"
-                      style={{ color: "#D4AF37" }}
+                      style={{ color: "#F09226" }}
                     >
                       {node.n}
                     </span>
@@ -1869,26 +1869,26 @@ export function HeroSection({
                 {i < 2 && (
                   <div
                     className="h-px w-5 mx-2 mb-7"
-                    style={{ background: "rgba(212,175,55,0.45)" }}
+                    style={{ background: "rgba(240,146,38,0.45)" }}
                   />
                 )}
               </div>
             ))}
             <div
               className="h-px w-5 mx-2 mb-7"
-              style={{ background: "rgba(212,175,55,0.75)" }}
+              style={{ background: "rgba(240,146,38,0.75)" }}
             />
             <div
               className="px-3 h-9 flex items-center justify-center mb-4"
               style={{
-                background: "rgba(212,175,55,0.18)",
-                border: "2px solid rgba(212,175,55,0.7)",
-                boxShadow: "0 0 18px rgba(212,175,55,0.22)",
+                background: "rgba(240,146,38,0.18)",
+                border: "2px solid rgba(240,146,38,0.7)",
+                boxShadow: "0 0 18px rgba(240,146,38,0.22)",
               }}
             >
               <span
                 className="text-[0.68rem] font-black tracking-[0.22em]"
-                style={{ color: "#D4AF37" }}
+                style={{ color: "#F09226" }}
               >
                 CERT.
               </span>
@@ -1908,7 +1908,7 @@ export function HeroSection({
           <div
             className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-10"
             style={{
-              background: "rgba(1,0,21,0.94)",
+              background: "rgba(17,17,17,0.94)",
               backdropFilter: "blur(14px)",
             }}
             onClick={() => setVideoModalOpen(false)}

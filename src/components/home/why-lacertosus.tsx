@@ -43,9 +43,9 @@ const SLOT_COUNT = 30;
 
 function getCourseLabel(courses: string[]): string {
   const first = courses[0] ?? "";
-  if (first === "corpus") return "CORPUS";
-  if (first === "vis") return "VIS";
-  if (first === "victor") return "VICTOR";
+  if (first === "function") return "FUNCTION";
+  if (first === "strength") return "STRENGTH";
+  if (first === "science") return "SCIENCE";
   if (first.startsWith("master-")) return "MASTERCLASS";
   return "ACADEMY";
 }

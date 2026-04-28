@@ -177,7 +177,7 @@ export function WorkshopGrid() {
       >
         {/* Ambient blobs */}
         <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-academy-orange/[0.04] blur-[140px]" />
-        <div className="pointer-events-none absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/3 rounded-full bg-academy-gold/[0.03] blur-[120px]" />
+        <div className="pointer-events-none absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/3 rounded-full bg-academy-orange/[0.03] blur-[120px]" />
 
         <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10">
           {/* Section header */}

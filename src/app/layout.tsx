@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | Lacertosus Academy",
   },
   description:
-    "Percorso formativo unico per professionisti e imprenditori del fitness. CORPUS, VIS, VICTOR: 9 mesi di formazione in presenza con certificazione FipexLacertosus.",
+    "Percorso formativo unico per professionisti e imprenditori del fitness. FUNCTION, STRENGTH, SCIENCE: 9 mesi di formazione in presenza con certificazione FipexLacertosus.",
   keywords: [
     "fitness academy",
     "formazione fitness",

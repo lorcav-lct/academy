@@ -7,7 +7,7 @@ import { TrainingHubSection } from "@/components/home/training-hub-section";
 export const metadata: Metadata = {
   title: "Il Percorso Formativo",
   description:
-    "Scopri il percorso CORPUS → VIS → VICTOR: 9 mesi di formazione in presenza per diventare un professionista del fitness completo.",
+    "Scopri il percorso FUNCTION → STRENGTH → SCIENCE: 9 mesi di formazione in presenza per diventare un professionista del fitness completo.",
 };
 
 export default function PercorsoPage() {

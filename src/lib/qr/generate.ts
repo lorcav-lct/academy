@@ -8,7 +8,7 @@ export async function generateQRCodeBuffer(data: string): Promise<Buffer> {
     margin: 2,
     color: {
       dark: "#F09226",
-      light: "#020026",
+      light: "#1a1a1a",
     },
   });
 }
@@ -20,7 +20,7 @@ export async function generateQRCodeDataURL(data: string): Promise<string> {
     margin: 2,
     color: {
       dark: "#F09226",
-      light: "#020026",
+      light: "#1a1a1a",
     },
   });
 }

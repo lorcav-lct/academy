@@ -12,6 +12,34 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0. Rebrand sistemico 2026-04-27
+
+Cambio terminologico e cromatico applicato a tutto il sito. Lo schema vecchio NON e piu valido.
+
+| Vecchio             | Nuovo                 |
+| ------------------- | --------------------- |
+| `corpus` / CORPUS   | `function` / FUNCTION |
+| `vis` / VIS         | `strength` / STRENGTH |
+| `victor` / VICTOR   | `science` / SCIENCE   |
+| `bronzo` / BRONZO   | `start` / START       |
+| `argento` / ARGENTO | `pro` / PRO           |
+| `oro` / ORO         | `elite` / ELITE       |
+
+Palette:
+
+- abbandonati `#D4AF37` (oro), `#C0C0C0` (argento), `#CD7F32` (bronzo) ovunque
+- abbandonato il blu primario `#020026` e affini (`#010018`, `#010015`)
+- nuova base scura: `#1a1a1a` (academy-dark), `#0a0a0a` (academy-darker), `#434343` (anchor gradient start)
+- gradient anchor di lusso (es. card ELITE, card "La Risposta" in why-lacertosus): `linear-gradient(145deg, #434343 0%, #0a0a0a 100%)`
+- accento brand unico: `#F09226` (academy-orange) — anche per i 3 blocchi corso e per i 3 tier (la differenziazione tier passa via gerarchia: PRO con ring/glow + badge "CONSIGLIATO", ELITE con dark anchor)
+
+Note:
+
+- DB pre-launch → nessuna migration dati, nessun legacy alias in `getProductBySlug`
+- Stripe `stripePriceId` invariati → l'utente aggiorna i nomi prodotto su Stripe Dashboard manualmente
+- migration `014_hero_slides.sql` aveva un bug pre-esistente "PRIMAL" → corretto a "FUNCTION" nel seed; se gia applicata in prod servira nuova migration
+- variabili CSS rimosse da `@theme`: `--color-academy-gold`, `--color-academy-silver`, `--color-academy-bronze`
+
 ## 1. Snapshot rapido
 
 - Progetto principale: `lacertosus-academy`
@@ -183,6 +211,11 @@ Nota importante:
 - `register` salva `phone` nei `user_metadata`
 - il trigger `handle_new_user()` crea `profiles` con `email` e `full_name`, ma non salva `phone`
 - quindi il telefono dopo la registrazione iniziale non e persistito subito in `profiles`
+
+UI delle pagine auth (login, register, email-changed):
+
+- riskinnate con il linguaggio editoriale dell'home: `MovementHeader` `§ NN`, dark anchor card con corner brackets arancio, label monospace tracked `tabular-nums`, CTA full-width arancio con freccia, side panel editoriale con perks Founding Edition
+- non condividono ancora un componente comune: i 3 file ridefiniscono localmente `MovementHeader`, `CornerBrackets`, `Field` e la grid vignette → candidato refactor in `src/components/auth/` se aggiungi altre pagine
 
 ### 7.2 Checkout Stripe
 
@@ -933,59 +966,99 @@ Ultima area toccata in sessione (2026-04-09): `SocialProofBar` — redesign card
 - Per cambiamenti ticket/QR: ricordare la differenza fra UUID ticket e payload cifrato
 - Per cambiamenti teaser: verificare se si sta lavorando sul server Node (`server.js`) o sul fallback PHP (`submit.php`)
 
-## 17. Pagina Pack (`/pack`) — redesign aprile 2026
+## 17. Pagina Pack (`/pack`) — redesign aprile 2026 (rev. 2026-04-28)
 
-La pagina `/pack` e stata completamente ridisegnata. File principale: `src/components/packs/pack-comparison.tsx` + `src/components/packs/hero-scene.tsx`.
+La pagina `/pack` e stata ridisegnata. File principale: `src/components/packs/pack-comparison.tsx` + `src/components/packs/hero-scene.tsx`.
 
 ### Architettura sezioni (dall'alto verso il basso)
 
-1. **HeroSection** — scroll-driven sticky (280vh wrapper, 100vh sticky viewport)
+1. **HeroSection** — scroll-driven sticky
 
+   - Wrapper height responsivo: `h-[180vh] lg:h-[280vh]` (mobile piu corto perche la nuova animazione mobile e minimal)
    - Sinistra: titolo, descrizione, stats pills (stile identico a percorso-hero)
-   - Destra: `HeroScene` — 4 blocchi bento (CORPUS, VIS, VICTOR, FIPE) in 2x2 con glow pulsante
-   - Scroll animation (GSAP ScrollTrigger, scrub):
-     - Mobile: stats scompaiono una alla volta, descrizione fade, scena sale al centro, blocchi si impilano uno alla volta (full-size, testo centrato, slide da destra/sinistra), stack shrink, deck 3 pack in S inversa
-     - Desktop: dettagli fade, blocchi si spostano al centro (stessa dimensione, impilamento), stack shrink, deck 3 pack a ventaglio
-   - I 4 blocchi sono cliccabili → aprono `BlockModal` (bento layout con curriculum, docenti, date, stats)
-   - I 3 pack finali al click scrollano a `#section-packs`
+   - Destra: `HeroScene` — branca interna mobile vs desktop:
+     - **Desktop (`window.innerWidth >= 1024`)**: 4 blocchi bento (FUNCTION, STRENGTH, SCIENCE, FIPE) in 2x2, scroll-driven stack al centro poi shrink → deck 3 pack a ventaglio. INVARIATA.
+     - **Mobile**: solo 3 card pack (START / PRO / ELITE) in fan layout statico. Entrance staggered (PRO prima), idle float per card, scroll-driven spread + fade. NESSUN blocco visibile.
+   - I 4 blocchi (desktop) sono cliccabili → aprono `BlockModal` con `ctaHref="#section-packs"`
+   - Le card pack al click scrollano a `#section-packs`
 
-2. **JourneySection** — percorso formativo
+2. **JourneySection** — percorso formativo (REDESIGN)
 
-   - 3 righe cliccabili (CORPUS, VIS, VICTOR) → aprono `BlockModal`
-   - Strip bento compatta 3 colonne: Masterclass (8 dispo, 2 in Argento/Oro) | 9 mesi | FIPE certif.
-   - Periodo: 2026-2027
+   - Header in stile home hero: tag arancio `— Il Percorso Formativo`, h2 split "Tre blocchi. / Una progressione precisa." con `gradient-text`
+   - **Progression rail desktop** (hidden md:flex): 3 nodi numerati (01/02/03) + connettori orizzontali + nodo finale `CERT. FIPE` con glow (riprende esattamente il pattern S3 della home hero)
+   - **3 pannelli blocco** full-width: massive numeral (numFaint), label HUGE, area arancia tracked, objective, stats inline (argomenti, docenti, weekend, periodo) presi da `COURSES` + `getTeachersByCourse`
+   - Click sul pannello → apre `BlockModal`
+   - Bottom strip 3 colonne (8 Masterclass | 9 Mesi | FIPE) preservata
 
-3. **PacksSection** — i pacchetti formativi
+3. **PacksSection** — i pacchetti formativi (rev. 2026-04-28c)
 
-   - 3 `PackCard` (BRONZO, ARGENTO, ORO) con animazione GSAP deal (fan da centro)
-   - Ogni card mostra: prezzo esempio, durata, include, avatar docenti, CTA
-   - Click → `PackModal` (video, docenti per blocco, includes, CTA acquisto)
-   - `PACK_PRICE_DISPLAY` in costanti per prezzi placeholder
+   - 3 `PackCard` (START, PRO, ELITE) con animazione GSAP deal invariata (fan da centro)
+   - **Scarcity strip** posizionato tra header e grid: banner full-width orange-bordered con dot pulsante (`animate-ping` Tailwind) "Solo 30 posti disponibili · Edizione 2026/27 · Iscrizioni aperte". Source: constante top-level `SEATS_TOTAL = 30`. RIMOSSO dalla card.
+   - **Struttura split head/body**: ogni card e divisa in due sezioni
+     - START: head + body entrambi bianchi
+     - PRO: head ARANCIO `#F09226` → body OFF-WHITE `#F5F5F7`
+     - ELITE: head + body entrambi premium dark (BRUSHED_STEEL_OVERLAY + gradient)
+   - **START copy**: tagline incentrata sul valore brand Lacertosus ("Accedi al metodo Lacertosus nella sua forma più pura..."), audience aspirazionale ("Per chi vuole entrare nell'Academy.")
+   - **Niente roman numeral** nell'header
+   - **Niente badge "Consigliato"** su PRO. ELITE conserva ribbon "Full Experience" top-right
+   - **Blocchi sempre visibili e prominenti**: 3 tile FUNCTION/STRENGTH/SCIENCE in tutte le card
+   - **ELITE `heroExtra`**: nuovo campo in `CardCopy` per callout luxury "Vitto & Alloggio inclusi" — renderizzato PRIMA della lista extras con icona bed-svg, gradient arancio + corner ornament radiale, eyebrow "★ L'Esperienza Esclusiva", title big + sub descrittivo
+   - **Tier extras**: header "In più" (o "Inoltre" se c'e heroExtra) con `+ Certificazione FIPE`, `+ 2 Masterclass`, etc. Vitto/Alloggio rimosso dalla lista extras ELITE perche promosso a heroExtra
+   - **Masterclass minimal pills**: 8 pillole sotto extras (PRO + ELITE)
+   - **Footer**: SOLO CTA full-width "Scegli {TIER} →". RIMOSSI gli avatar docenti.
+   - **Hover (rev. 2026-04-28d)**: rimossa la classe `bento-interactive` (eliminato l'overlay arancio + border highlight). Il **3D tilt** GSAP `onMove`/`onLeave` resta attivo (con `transformStyle: "preserve-3d"` inline).
+   - **Cursor (rev. 2026-04-28e)**: cursore nativo `pointer` (la versione precedente con custom cursor follower CTA via portal e stata rimossa — non funzionava bene).
+   - **Masterclass list (rev. 2026-04-28e)**: nelle card PRO/ELITE le 8 masterclass disponibili sono ora una semplice frase inline `Bulgarian · Strength · Calcio · ...` (separatore `·`), nessun riquadro/border/background sui singoli nomi.
 
-4. **MasterclassSection** — bento minimal
-   - Grid 4 colonne, ogni masterclass con numero, trainer, prezzo, CTA
-   - TBD opacizzate con "Prossimamente"
+4. **MasterclassSection** — horizontal minimal list (rev. 2026-04-28c)
+
+   - **NESSUN bento/grid/box**. Layout: lista verticale di righe con solo border-top/bottom orizzontali subtili
+   - Grid per riga: `[num][title][trainer][price][cta]` desktop, `[num][title][cta]` mobile + secondaria con trainer/price
+   - Title rimuove prefisso "Masterclass" (regex `/^Masterclass\s+/i`)
+   - Trainer in arancio, price in nero, CTA "Acquista →" arancio (TBD: "Prossimamente" muted)
+   - Hover: opacity-70 sull'intera riga
+
+### PackModal (rev. 2026-04-28d — mix dark/light + dark variabile per tier)
+
+`PackModal` long-form sales modal con scroll unico. **Theme misto** — sezioni alternano dark e light per dare ritmo visivo. File: `pack-comparison.tsx` lines ~830-1450.
+
+- **Layout**: scrollable single column (mobile + desktop), `max-w-[1080px]`
+- **Tier-conditional dark bg (rev. 2026-04-28e)**:
+  - ELITE: `modalBg = "#0a0a14"` (dark profondo classico) + sticky bars `rgba(10,10,20,0.92)`
+  - START / PRO: `modalBg = "rgb(43 43 43 / 94%)"` (antracite trasparente) + sticky bars `rgb(43 43 43 / 92%)`. Token derivati (`surfaceBorder`, `textB`, `textMuted`) ricalibrati per il nuovo bg.
+- **Overlay esterno (rev. 2026-04-28e)**: completamente trasparente con `backdropFilter: blur(20px)` (prima era `rgba(0,0,0,0.85)` + blur). La pagina sotto resta visibile sfocata.
+- **Sticky top bar**: dark variabile per tier
+- **Sezioni in ordine**:
+  1. **Hero — DARK variabile**: eyebrow scarcity + headline narrativo + promise + price + CTA inline
+  2. **Video Vimeo — DARK variabile** (inline, NON sticky)
+  3. **Value stack — LIGHT** (`#F8F8FA` con cards `#ffffff`): 3 blocchi + extras "In più" con borderLeft `3px solid #F09226`. Per ELITE: Vitto/Alloggio NON e qui, e nella sezione 3b dedicata
+  4. **3b. ELITE EXCLUSIVE — DARK premium** (solo ELITE): sezione dedicata Vitto&Alloggio con BRUSHED_STEEL_OVERLAY + gradient + glow ornaments radiali. Headline split white/orange "Vitto & Alloggio / inclusi.", 3 sub-features, grande icona bed-svg decorativa (lg only)
+  5. **Guarantees — LIGHT**: 3 trust items con checkmark
+  6. **Faculty — LIGHT**: docenti raggruppati per blocco
+  7. **Final CTA — DARK variabile** (eredita modalBg): scarcity + headline + button "Scegli {TIER} · {prezzo}"
+- **Sticky bottom bar**: dark variabile con price + "Riserva ora →"
+- Constante `MODAL_COPY` con `eyebrow`, `headline`, `promise`, `guarantees[]` per tier
+- Prezzo sempre visibile
+
+### Cleanup
+
+- Rimossi: `getEmphasisStyle()`, type `Emphasis`, interface `EmphasisStyle`, costanti `BRAND_ORANGE`/`BRAND_ORANGE_RGB`, `MASTERCLASS_SHORT` (sostituito con `MASTERCLASS_PILLS` con label piu lunghi nello stesso schema)
+- `TIER` semplificato: solo `{label: string}` per slug
 
 ### File chiave
 
-- `src/components/packs/pack-comparison.tsx` — tutte le sezioni + modal (BlockModal, PackModal)
-- `src/components/packs/hero-scene.tsx` — animazione scroll-driven blocchi→pack (GSAP, position absolute)
-- `src/components/packs/masterclass-selector.tsx` — modal selezione masterclass per Argento/Oro
+- `src/components/packs/pack-comparison.tsx` — tutte le sezioni + modal (BlockModal, PackModal). Importa anche `COURSES` da `lib/constants/courses` per stats dinamiche nei pannelli journey
+- `src/components/packs/hero-scene.tsx` — split in 3 funzioni: `MobilePackScene`, `DesktopScene`, `HeroScene` (branch dopo mount via `useState`/`useEffect` per evitare layout shift)
+- `src/components/shared/block-modal.tsx` — accetta prop opzionale `ctaHref` (default `/pack`). Se inizia con `#`, fa `preventDefault` + chiude modal + `scrollIntoView` dopo 380ms (durata animazione close)
+- `src/components/packs/masterclass-selector.tsx` — modal selezione masterclass per PRO/ELITE
 - `src/lib/constants/packs.ts` — catalogo prodotti (bundle priceCents=0, singoli con Stripe price ID)
-- `src/lib/constants/courses.ts` — dati blocchi (curriculum, date, docenti)
-- `src/lib/constants/workshops.ts` — dati masterclass
-- `src/lib/constants/teachers.ts` — docenti con ruolo, bio, colore
-
-### Dipendenze aggiunte
-
-- `three` + `@types/three` — installate ma non usate nella versione finale (hero-scene usa GSAP puro)
-- `HeroScene` e caricato con `next/dynamic` SSR=false
 
 ### Pattern importanti
 
 - **ScrollTrigger cleanup**: mai usare `ScrollTrigger.getAll().forEach(t => t.kill())` — uccide trigger di altre sezioni. Salvare il proprio trigger e killare solo quello.
 - **gsap.fromTo vs gsap.from**: usare `fromTo` per entrance animation — `from` puo lasciare elementi a opacity 0 se la timeline viene killata prima del completamento.
-- **Mobile vs Desktop**: il flag `isMobile = window.innerWidth < 1024` e usato sia in HeroSection che in HeroScene per differenziare le animazioni scroll.
+- **HeroScene mobile/desktop split**: usa `useState<"mobile"|"desktop"|null>(null)` con default `null` per riservare lo spazio in placeholder finche `window.innerWidth` non e disponibile. Evita layout shift e permette animazioni distinte.
+- **BlockModal `ctaHref`**: usato `"#section-packs"` SOLO nella pagina `/pack`; le altre pagine (percorso, home, percorso-timeline) lasciano il default `/pack` per navigazione cross-page.
 
 ## 18. Riassunto decisionale in una frase
 

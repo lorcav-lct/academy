@@ -2,16 +2,13 @@
 
 @theme {
   /* Brand Colors */
-  --color-academy-dark: #020026;
-  --color-academy-darker: #010018;
-  --color-academy-navy: #0a0a3a;
-  --color-academy-navy-light: #12124a;
+  --color-academy-dark: #1a1a1a;
+  --color-academy-darker: #0a0a0a;
+  --color-academy-navy: #2a2a2a;
+  --color-academy-navy-light: #434343;
   --color-academy-orange: #f09226;
   --color-academy-orange-light: #f5a84d;
   --color-academy-orange-dark: #d47d1a;
-  --color-academy-gold: #d4af37;
-  --color-academy-silver: #c0c0c0;
-  --color-academy-bronze: #cd7f32;
 
   /* Neutrals */
   --color-academy-gray-100: #f5f5f7;
@@ -309,8 +306,8 @@ body {
 /* ─── CSS vars: dark defaults ─── */
 :root,
 [data-theme="dark"] {
-  --section-bg: #020026;
-  --section-bg-alt: #010018;
+  --section-bg: #1a1a1a;
+  --section-bg-alt: #0a0a0a;
 }
 
 /* ─── CSS vars: light overrides ─── */
@@ -341,7 +338,7 @@ body {
 
 /* ─── Navbar scrolled bg (theme-aware) ─── */
 .navbar-scrolled-bg {
-  background: rgba(2, 0, 38, 0.88);
+  background: rgba(26, 26, 26, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -355,17 +352,17 @@ body {
 
 /* ─── Social proof bar backgrounds ─── */
 .spb-bg {
-  background: linear-gradient(180deg, #010015 0%, #010018 60%, #010020 100%);
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 60%, #0a0a0a 100%);
 }
 [data-theme="light"] .spb-bg {
   background: #f2f2f2;
 }
 
 .spb-fade-l {
-  background: linear-gradient(90deg, #010015 0%, transparent 100%);
+  background: linear-gradient(90deg, #0a0a0a 0%, transparent 100%);
 }
 .spb-fade-r {
-  background: linear-gradient(270deg, #010015 0%, transparent 100%);
+  background: linear-gradient(270deg, #0a0a0a 0%, transparent 100%);
 }
 [data-theme="light"] .spb-fade-l {
   background: linear-gradient(90deg, #f2f2f2 0%, transparent 100%);

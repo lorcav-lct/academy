@@ -185,7 +185,7 @@ export function PercorsoOutcome() {
               <Link
                 href="/pack"
                 className="inline-flex items-center gap-3 px-8 py-4 text-sm font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-85"
-                style={{ background: "#F09226", color: "#010015" }}
+                style={{ background: "#F09226", color: "#111111" }}
               >
                 Inizia il Percorso
                 <svg
