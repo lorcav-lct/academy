@@ -183,8 +183,7 @@ Area admin:
 
 Route duplicate/legacy:
 
-- `/workshop` e `/masterclass` mostrano lo stesso indice
-- `/workshop/[slug]` e `/masterclass/[slug]` mostrano lo stesso dettaglio
+- `/workshop` e `/workshop/[slug]` ora rimossi: redirect 301 → `/masterclass` e `/masterclass/[slug]` (vedi `next.config.ts`)
 - `/admin/hero` duplica la UI di `/admin/contenuti/hero`
 
 ## 7. Flussi principali
@@ -444,8 +443,6 @@ Osservazioni:
 - Ruolo `staff` puo entrare in `/admin` via middleware, ma `hero_slides` e `site_settings` sono scrivibili solo da `admin` nelle policy SQL.
 
 - `src/app/admin/hero/page.tsx` duplica quasi 1:1 `src/app/admin/contenuti/hero/page.tsx`.
-
-- `src/app/workshop/*` duplica `src/app/masterclass/*`.
 
 - `src/app/pack/page.tsx` metadata cita `Oro Plus`, ma nel catalogo reale non esiste.
 
