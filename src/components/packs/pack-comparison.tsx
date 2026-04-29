@@ -758,44 +758,6 @@ function JourneySection({
             </div>
           </div>
         </motion.div>
-
-        {/* ─── Certificazioni — prominent dual cards ─────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.75 }}
-          className="mt-16 md:mt-20"
-        >
-          <div className="mb-8 max-w-3xl">
-            <span
-              className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-4 block"
-              style={{ color: "#F09226" }}
-            >
-              — Le Certificazioni Incluse
-            </span>
-            <h3
-              className="font-black tracking-[-0.025em] leading-[0.95]"
-              style={{
-                fontSize: "clamp(1.9rem, 3.8vw, 3rem)",
-                color: th,
-              }}
-            >
-              Due titoli <span className="gradient-text">riconosciuti</span>.
-              <br />
-              Una carriera reale.
-            </h3>
-            <p
-              className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed"
-              style={{ color: tb }}
-            >
-              Al termine del percorso ricevi due certificazioni distinte. Una è
-              inclusa in qualunque pack, l&apos;altra è riservata ai pack PRO ed
-              ELITE per chi vuole il riconoscimento FIPE ufficiale.
-            </p>
-          </div>
-
-          <CertificationsCards isDark={isDark} />
-        </motion.div>
       </div>
     </section>
   );
@@ -2128,7 +2090,7 @@ function PacksSection({
   const headRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const bundles = getBundles();
-  const th = isDark ? undefined : "#111111";
+  const th = isDark ? "#f5f5fa" : "#111111";
   const tb = isDark ? "#c7c7cc" : "#555555";
 
   useEffect(() => {
@@ -2348,23 +2310,36 @@ function PacksSection({
             />
           ))}
         </div>
-        <div
-          className="mt-6 flex items-center gap-3 p-4"
-          style={{
-            border: "1px solid rgba(240,146,38,0.18)",
-            background: isDark
-              ? "rgba(240,146,38,0.05)"
-              : "rgba(240,146,38,0.06)",
-          }}
-        >
-          <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-academy-orange" />
-          <p className="text-xs" style={{ color: tb }}>
-            <span className="font-bold text-academy-orange">
-              Certificazione FipexLacertosus
+        {/* ─── Certificazioni — prominent dual cards (mirror home + percorso) ── */}
+        <div className="mt-16 md:mt-20">
+          <div className="mb-8 max-w-3xl">
+            <span
+              className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-3 block"
+              style={{ color: "#F09226" }}
+            >
+              — Le Due Certificazioni
             </span>
-            {" — "}inclusa nei pack PRO ed ELITE. Riconosciuta professionalmente
-            a livello nazionale.
-          </p>
+            <h3
+              className="font-black tracking-[-0.025em] leading-[0.95]"
+              style={{
+                fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
+                color: th,
+              }}
+            >
+              Due titoli <span className="gradient-text">riconosciuti</span>.
+              <br />
+              Una carriera reale.
+            </h3>
+            <p
+              className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed"
+              style={{ color: tb }}
+            >
+              Al termine del percorso ricevi due certificazioni distinte. Una è
+              inclusa in qualunque pack, l&apos;altra è riservata ai pack PRO ed
+              ELITE per chi vuole il riconoscimento FIPE ufficiale.
+            </p>
+          </div>
+          <CertificationsCards isDark={isDark} />
         </div>
       </div>
     </section>
