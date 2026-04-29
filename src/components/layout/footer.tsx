@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
+import { WORKSHOPS } from "@/lib/constants/workshops";
 
 const footerLinks = {
   percorso: [
@@ -8,16 +9,20 @@ const footerLinks = {
     { href: "/percorso/strength", label: "STRENGTH" },
     { href: "/percorso/science", label: "SCIENCE" },
   ],
-  workshop: [
-    { href: "/masterclass/master-hyrox", label: "Master Hyrox" },
-    { href: "/masterclass/master-calcio", label: "Master Calcio" },
-    { href: "/masterclass/master-functional", label: "Master Functional" },
-    { href: "/masterclass/master-endurance", label: "Master Endurance" },
-  ],
+  workshop: WORKSHOPS.map((w) => ({
+    href: `/masterclass/${w.slug}`,
+    label: w.title,
+  })),
   info: [
     { href: "/pack", label: "Pack & Prezzi" },
     { href: "/auth/login", label: "Accedi" },
     { href: "/auth/register", label: "Registrati" },
+  ],
+  legal: [
+    { href: "#", label: "Privacy Policy" },
+    { href: "#", label: "Cookie Policy" },
+    { href: "#", label: "Condizioni di vendita" },
+    { href: "#", label: "Diritto di recesso" },
   ],
 };
 
@@ -25,7 +30,7 @@ export function Footer() {
   return (
     <footer className="themed-section section-bg-alt border-t border-academy-orange/10">
       <div className="mx-auto max-w-[1440px] px-[5%] md:px-10 py-16">
-        <div className="grid gap-12 md:grid-cols-4">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div>
             <div className="mb-5 inline-flex text-academy-gray-100">
@@ -83,6 +88,25 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.info.map((link) => (
                 <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-academy-gray-400 transition-colors hover:text-academy-orange"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legali */}
+          <div>
+            <h4 className="mb-4 text-xs font-bold tracking-[0.2em] text-academy-orange uppercase">
+              Legali
+            </h4>
+            <ul className="space-y-2">
+              {footerLinks.legal.map((link) => (
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="text-sm text-academy-gray-400 transition-colors hover:text-academy-orange"

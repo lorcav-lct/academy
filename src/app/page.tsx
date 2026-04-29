@@ -5,7 +5,6 @@ import { WhyLacertosus } from "@/components/home/why-lacertosus";
 import { PackPreview } from "@/components/home/pack-preview";
 import { PathOverview } from "@/components/home/path-overview";
 import { FaqSection } from "@/components/home/faq-section";
-import { CTASection } from "@/components/home/cta-section";
 
 export default async function HomePage() {
   /* Fetch hero slides from DB, fall back to static defaults */
@@ -34,8 +33,6 @@ export default async function HomePage() {
       <PathOverview />
       {/* #6  FAQ */}
       <FaqSection />
-      {/* #12 CTA Finale */}
-      <CTASection />
     </>
   );
 }

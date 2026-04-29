@@ -1028,115 +1028,130 @@ export function HeroSection({
           </div>
         </div>
 
-        {/* ══ S3 — FIPE CERT (hero-level) ══ */}
+        {/* ══ S3 — DUE CERTIFICAZIONI (hero-level) ══ */}
         <div
           ref={s3Ref}
           className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1440px] mx-auto pointer-events-none"
         >
           <span
             data-reveal
-            className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-8"
+            className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-6"
             style={{ color: "rgba(240,146,38,0.85)" }}
           >
-            — Certificazione Ufficiale
+            — Due Certificazioni
           </span>
 
           {/* Title */}
           <div className="text-center">
             <div
               data-reveal
-              className="text-[clamp(3rem,7vw,7.5rem)] font-black tracking-[-0.03em] leading-[0.92]"
-              style={{ color: "#F09226" }}
+              className="text-[clamp(2.4rem,5.4vw,5.6rem)] font-black tracking-[-0.03em] leading-[0.95]"
+              style={{ color: "#ffffff" }}
             >
-              FIPE <span style={{ color: "rgba(240,146,38,0.45)" }}>×</span>{" "}
-              <span style={{ color: "#ffffff" }}>LACERTOSUS</span>
+              Esci dal percorso{" "}
+              <span style={{ color: "#F09226" }}>certificato.</span>
             </div>
             <p
               data-reveal
-              className="mx-auto mt-8 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
-              style={{ color: "#ffffff" }}
+              className="mx-auto mt-6 max-w-2xl text-[clamp(0.95rem,1.1vw,1.05rem)] leading-[1.7]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
             >
-              L&apos;unica certificazione che combina riconoscimento federale e
-              metodologia Lacertosus. Costruita in tre momenti progressivi.
+              Due riconoscimenti distinti — uno interno, uno federale — pensati
+              per dare valore reale alla tua professione.
             </p>
           </div>
 
-          {/* Progression track */}
-          <div data-reveal className="mt-12 flex items-center gap-0">
-            {[
-              { n: "I", after: "FUNCTION" },
-              { n: "II", after: "STRENGTH" },
-              { n: "III", after: "SCIENCE" },
-            ].map((node, i) => (
-              <div key={node.n} className="flex items-center">
-                <div className="flex flex-col items-center gap-2">
-                  <div
-                    className="w-12 h-12 flex items-center justify-center"
-                    style={{
-                      background: "rgba(240,146,38,0.08)",
-                      border: "1.5px solid rgba(240,146,38,0.45)",
-                    }}
-                  >
-                    <span
-                      className="text-[0.85rem] font-black tracking-[0.1em]"
-                      style={{ color: "#F09226" }}
-                    >
-                      {node.n}
-                    </span>
-                  </div>
-                  <span
-                    className="text-[0.62rem] font-black tracking-[0.25em] uppercase"
-                    style={{ color: "#ffffff" }}
-                  >
-                    {node.after}
-                  </span>
-                </div>
-                {i < 2 && (
-                  <div
-                    className="h-px w-16 mx-3 mb-5"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, rgba(240,146,38,0.45), rgba(240,146,38,0.45))",
-                    }}
-                  />
-                )}
-                {i === 2 && (
-                  <>
-                    <div
-                      className="h-px w-16 mx-3 mb-5"
-                      style={{
-                        background:
-                          "linear-gradient(90deg, rgba(240,146,38,0.45), rgba(240,146,38,0.75))",
-                      }}
-                    />
-                    <div className="flex flex-col items-center gap-2 mb-0">
-                      <div
-                        className="px-4 h-12 flex items-center justify-center"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, rgba(240,146,38,0.22) 0%, rgba(240,146,38,0.08) 100%)",
-                          border: "2px solid rgba(240,146,38,0.7)",
-                          boxShadow: "0 0 24px rgba(240,146,38,0.2)",
-                        }}
-                      >
-                        <span
-                          className="text-[0.8rem] font-black tracking-[0.25em]"
-                          style={{ color: "#F09226" }}
-                        >
-                          CERT.
-                        </span>
-                      </div>
-                      <span
-                        className="text-[0.62rem] font-black tracking-[0.25em] uppercase"
-                        style={{ color: "rgba(240,146,38,0.7)" }}
-                      >
-                        Ufficiale
-                      </span>
-                    </div>
-                  </>
-                )}
+          {/* Two-cert grid */}
+          <div
+            data-reveal
+            className="mt-10 grid grid-cols-2 gap-5 w-full max-w-4xl"
+          >
+            {/* Cert 1 — Functional Strength Master Coach */}
+            <div
+              className="flex flex-col gap-4 p-7"
+              style={{
+                background: "rgba(255,255,255,0.025)",
+                border: "1.5px solid rgba(240,146,38,0.35)",
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-[0.6rem] font-black tracking-[0.28em] uppercase"
+                  style={{ color: "rgba(240,146,38,0.85)" }}
+                >
+                  01 · Interna
+                </span>
+                <span
+                  className="text-[0.55rem] font-black tracking-[0.22em] uppercase px-2 py-1"
+                  style={{
+                    color: "#F09226",
+                    background: "rgba(240,146,38,0.12)",
+                    border: "1px solid rgba(240,146,38,0.35)",
+                  }}
+                >
+                  Tutti i pack
+                </span>
               </div>
-            ))}
+              <div
+                className="text-[clamp(1.1rem,1.55vw,1.6rem)] font-black tracking-[-0.02em] leading-[1.05]"
+                style={{ color: "#ffffff" }}
+              >
+                Functional Strength
+                <br />
+                <span style={{ color: "#F09226" }}>Master Coach</span>
+              </div>
+              <p
+                className="text-[0.85rem] leading-[1.6]"
+                style={{ color: "rgba(255,255,255,0.75)" }}
+              >
+                Attestazione interna Lacertosus rilasciata al termine dei tre
+                blocchi. Inclusa in START, PRO ed ELITE.
+              </p>
+            </div>
+
+            {/* Cert 2 — FIPE × Lacertosus */}
+            <div
+              className="flex flex-col gap-4 p-7"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(240,146,38,0.16) 0%, rgba(240,146,38,0.04) 100%)",
+                border: "2px solid rgba(240,146,38,0.7)",
+                boxShadow: "0 0 32px rgba(240,146,38,0.18)",
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-[0.6rem] font-black tracking-[0.28em] uppercase"
+                  style={{ color: "#F09226" }}
+                >
+                  02 · Federale
+                </span>
+                <span
+                  className="text-[0.55rem] font-black tracking-[0.22em] uppercase px-2 py-1"
+                  style={{
+                    color: "#111111",
+                    background: "#F09226",
+                  }}
+                >
+                  PRO &amp; ELITE
+                </span>
+              </div>
+              <div
+                className="text-[clamp(1.1rem,1.55vw,1.6rem)] font-black tracking-[-0.02em] leading-[1.05]"
+                style={{ color: "#ffffff" }}
+              >
+                Personal Trainer
+                <br />
+                <span style={{ color: "#F09226" }}>FIPE × Lacertosus</span>
+              </div>
+              <p
+                className="text-[0.85rem] leading-[1.6]"
+                style={{ color: "rgba(255,255,255,0.85)" }}
+              >
+                Certificazione ufficiale FIPE con riconoscimento nazionale.
+                Riservata ai pack PRO ed ELITE.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -1807,91 +1822,115 @@ export function HeroSection({
           </div>
         </div>
 
-        {/* ══ P4 — CERTIFICAZIONE (dark #111 → bg-transition at the bottom) ══ */}
+        {/* ══ P4 — DUE CERTIFICAZIONI (dark #111 → bg-transition at the bottom) ══ */}
         <div className="relative px-6 py-14" style={{ background: "#111111" }}>
           <span
             className="text-[0.6rem] font-black tracking-[0.32em] uppercase mb-6 block"
             style={{ color: "rgba(240,146,38,0.85)" }}
           >
-            — Certificazione Ufficiale
+            — Due Certificazioni
           </span>
 
           <div
-            className="text-[clamp(2rem,9vw,3.4rem)] font-black tracking-[-0.028em] leading-[0.95]"
-            style={{ color: "#F09226" }}
-          >
-            FIPE
-          </div>
-          <div
-            className="text-[clamp(1.4rem,6vw,2.2rem)] font-black tracking-[-0.02em] leading-[1] mt-1"
-            style={{ color: "rgba(240,146,38,0.5)" }}
-          >
-            × LACERTOSUS
-          </div>
-          <p
-            className="mt-5 text-[0.92rem] leading-[1.65]"
+            className="text-[clamp(1.7rem,7.5vw,2.6rem)] font-black tracking-[-0.025em] leading-[1]"
             style={{ color: "#ffffff" }}
           >
-            L&apos;unica certificazione che combina riconoscimento federale e
-            metodologia Lacertosus. Costruita in tre momenti progressivi.
+            Esci dal percorso
+            <br />
+            <span style={{ color: "#F09226" }}>certificato.</span>
+          </div>
+          <p
+            className="mt-5 text-[0.9rem] leading-[1.65]"
+            style={{ color: "rgba(255,255,255,0.85)" }}
+          >
+            Due riconoscimenti distinti — uno interno, uno federale — pensati
+            per dare valore reale alla tua professione.
           </p>
 
-          {/* Progression track */}
-          <div className="mt-7 mb-10 flex items-center gap-0 flex-wrap">
-            {[
-              { n: "I", after: "FUNCTION" },
-              { n: "II", after: "STRENGTH" },
-              { n: "III", after: "SCIENCE" },
-            ].map((node, i) => (
-              <div key={node.n} className="flex items-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div
-                    className="w-9 h-9 flex items-center justify-center"
-                    style={{
-                      background: "rgba(240,146,38,0.08)",
-                      border: "1.5px solid rgba(240,146,38,0.45)",
-                    }}
-                  >
-                    <span
-                      className="text-[0.7rem] font-black"
-                      style={{ color: "#F09226" }}
-                    >
-                      {node.n}
-                    </span>
-                  </div>
-                  <span
-                    className="text-[0.5rem] font-black tracking-[0.22em] uppercase"
-                    style={{ color: "#ffffff" }}
-                  >
-                    {node.after}
-                  </span>
-                </div>
-                {i < 2 && (
-                  <div
-                    className="h-px w-5 mx-2 mb-7"
-                    style={{ background: "rgba(240,146,38,0.45)" }}
-                  />
-                )}
-              </div>
-            ))}
+          {/* Two certs stacked */}
+          <div className="mt-7 mb-4 flex flex-col gap-4">
+            {/* Cert 1 — Functional Strength Master Coach */}
             <div
-              className="h-px w-5 mx-2 mb-7"
-              style={{ background: "rgba(240,146,38,0.75)" }}
-            />
-            <div
-              className="px-3 h-9 flex items-center justify-center mb-4"
+              className="flex flex-col gap-3 p-5"
               style={{
-                background: "rgba(240,146,38,0.18)",
-                border: "2px solid rgba(240,146,38,0.7)",
-                boxShadow: "0 0 18px rgba(240,146,38,0.22)",
+                background: "rgba(255,255,255,0.025)",
+                border: "1.5px solid rgba(240,146,38,0.35)",
               }}
             >
-              <span
-                className="text-[0.68rem] font-black tracking-[0.22em]"
-                style={{ color: "#F09226" }}
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-[0.55rem] font-black tracking-[0.26em] uppercase"
+                  style={{ color: "rgba(240,146,38,0.85)" }}
+                >
+                  01 · Interna
+                </span>
+                <span
+                  className="text-[0.5rem] font-black tracking-[0.2em] uppercase px-2 py-0.5"
+                  style={{
+                    color: "#F09226",
+                    background: "rgba(240,146,38,0.12)",
+                    border: "1px solid rgba(240,146,38,0.35)",
+                  }}
+                >
+                  Tutti i pack
+                </span>
+              </div>
+              <div
+                className="text-[1.05rem] font-black tracking-[-0.015em] leading-[1.1]"
+                style={{ color: "#ffffff" }}
               >
-                CERT.
-              </span>
+                Functional Strength{" "}
+                <span style={{ color: "#F09226" }}>Master Coach</span>
+              </div>
+              <p
+                className="text-[0.8rem] leading-[1.55]"
+                style={{ color: "rgba(255,255,255,0.75)" }}
+              >
+                Attestazione interna Lacertosus rilasciata al termine dei tre
+                blocchi.
+              </p>
+            </div>
+
+            {/* Cert 2 — FIPE × Lacertosus */}
+            <div
+              className="flex flex-col gap-3 p-5"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(240,146,38,0.16) 0%, rgba(240,146,38,0.04) 100%)",
+                border: "2px solid rgba(240,146,38,0.7)",
+                boxShadow: "0 0 22px rgba(240,146,38,0.18)",
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-[0.55rem] font-black tracking-[0.26em] uppercase"
+                  style={{ color: "#F09226" }}
+                >
+                  02 · Federale
+                </span>
+                <span
+                  className="text-[0.5rem] font-black tracking-[0.2em] uppercase px-2 py-0.5"
+                  style={{
+                    color: "#111111",
+                    background: "#F09226",
+                  }}
+                >
+                  PRO &amp; ELITE
+                </span>
+              </div>
+              <div
+                className="text-[1.05rem] font-black tracking-[-0.015em] leading-[1.1]"
+                style={{ color: "#ffffff" }}
+              >
+                Personal Trainer{" "}
+                <span style={{ color: "#F09226" }}>FIPE × Lacertosus</span>
+              </div>
+              <p
+                className="text-[0.8rem] leading-[1.55]"
+                style={{ color: "rgba(255,255,255,0.85)" }}
+              >
+                Certificazione ufficiale FIPE con riconoscimento nazionale.
+              </p>
             </div>
           </div>
         </div>
