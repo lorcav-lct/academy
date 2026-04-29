@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Teaser Website
 teaser-website/
+
+# Source assets (not deployed — production WebP/SVG live in public/ root)
+public/ACADEMY-FILES/

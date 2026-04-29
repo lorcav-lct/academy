@@ -1,9 +1,0 @@
-Modifica l’immagine fornita mantenendo il volto del soggetto inalterato, riconoscibile e fedele all’originale: non modificare espressione, lineamenti, barba/capelli, incarnato, età apparente e identità visiva.
-
-Fai uno zoom out coerente e ricomponi l’immagine come ritratto professionale corporate/studio: il soggetto deve sembrare posizionato a circa 2 metri dall’inquadratura, centrato, visibile da metà busto o tre quarti, con forte focus sul soggetto. Estendi naturalmente abiti, spalle e postura, mantenendo coerenza con la foto originale.
-
-Sostituisci completamente lo sfondo con un background sfumato dark black, elegante, pulito e premium, con illuminazione morbida e realistica. Inserisci sullo sfondo, dietro al soggetto, il logo ufficiale Academy in bianco monocromatico, grande ma raffinato, leggibile e integrato con gusto. Il logo deve stare dietro al soggetto senza coprire volto, occhi o dettagli importanti. 
-
-Risultato finale: ritratto fotografico professionale, realistico, nitido sul volto, sfondo leggermente più morbido, look corporate premium coerente con il brand Lacertosus.
-
-Dimensione: 1122x1402 px
