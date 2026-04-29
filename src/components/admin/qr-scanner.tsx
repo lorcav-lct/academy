@@ -22,9 +22,16 @@ export default function QRScanner({ onScan }: QRScannerProps) {
     async function start() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: {
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
         });
-        if (stopped) { stream.getTracks().forEach(t => t.stop()); return; }
+        if (stopped) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
 
         const video = videoRef.current!;
         video.srcObject = stream;
@@ -35,12 +42,18 @@ export default function QRScanner({ onScan }: QRScannerProps) {
         const canvas = canvasRef.current!;
         const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
-        // Downscale to max 640px wide so jsQR decodes faster
         const MAX_W = 640;
 
         timer = setInterval(() => {
-          if (stopped) { clearInterval(timer); return; }
-          if (video.readyState < video.HAVE_ENOUGH_DATA || video.videoWidth === 0) return;
+          if (stopped) {
+            clearInterval(timer);
+            return;
+          }
+          if (
+            video.readyState < video.HAVE_ENOUGH_DATA ||
+            video.videoWidth === 0
+          )
+            return;
 
           const scale = video.videoWidth > MAX_W ? MAX_W / video.videoWidth : 1;
           canvas.width = Math.round(video.videoWidth * scale);
@@ -55,16 +68,17 @@ export default function QRScanner({ onScan }: QRScannerProps) {
           if (code?.data) {
             stopped = true;
             clearInterval(timer);
-            stream?.getTracks().forEach(t => t.stop());
+            stream?.getTracks().forEach((t) => t.stop());
             onScanRef.current(code.data);
           }
         }, 150);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
         setError(
-          msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("denied")
+          msg.toLowerCase().includes("permission") ||
+            msg.toLowerCase().includes("denied")
             ? "Permesso fotocamera negato"
-            : "Fotocamera non disponibile"
+            : "Fotocamera non disponibile",
         );
       }
     }
@@ -73,41 +87,54 @@ export default function QRScanner({ onScan }: QRScannerProps) {
     return () => {
       stopped = true;
       clearInterval(timer);
-      stream?.getTracks().forEach(t => t.stop());
+      stream?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
   if (error) {
     return (
-      <div className="card-squared flex h-52 items-center justify-center p-6 text-center">
+      <div className="flex h-52 items-center justify-center border border-red-500/30 bg-red-50 p-6 text-center">
         <div>
-          <p className="mb-2 font-semibold text-red-400">{error}</p>
-          <p className="text-xs text-academy-gray-500">Usa il codice manuale qui sotto</p>
+          <p className="mb-2 font-bold text-red-700">{error}</p>
+          <p className="text-xs text-red-600/80">
+            Usa il codice manuale qui sotto.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden card-squared">
+    <div className="overflow-hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
       <div className="relative bg-black">
-        <video ref={videoRef} className="w-full" muted playsInline style={{ maxHeight: 320, objectFit: "cover" }} />
+        <video
+          ref={videoRef}
+          className="w-full"
+          muted
+          playsInline
+          style={{ maxHeight: 360, objectFit: "cover" }}
+        />
         <canvas ref={canvasRef} className="hidden" />
         {active && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="relative h-52 w-52">
-              <div className="absolute inset-0 border-2 border-academy-orange/60" />
-              <div className="absolute left-0 right-0 top-0 h-0.5 animate-pulse bg-academy-orange/70" />
+            <div className="relative h-56 w-56">
+              {/* Corner brackets */}
+              <span className="absolute top-0 left-0 h-6 w-6 border-t-2 border-l-2 border-academy-orange" />
+              <span className="absolute top-0 right-0 h-6 w-6 border-t-2 border-r-2 border-academy-orange" />
+              <span className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-academy-orange" />
+              <span className="absolute right-0 bottom-0 h-6 w-6 border-r-2 border-b-2 border-academy-orange" />
+              {/* Scanning line */}
+              <div className="absolute top-0 right-0 left-0 h-0.5 animate-pulse bg-academy-orange/80" />
             </div>
           </div>
         )}
         {!active && (
-          <div className="absolute inset-0 flex items-center justify-center bg-academy-dark/80">
-            <p className="text-sm text-academy-gray-400">Avvio fotocamera...</p>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <p className="text-sm text-white/70">Avvio fotocamera...</p>
           </div>
         )}
       </div>
-      <p className="p-3 text-center text-xs text-academy-gray-500">
+      <p className="border-t border-black/[0.06] bg-black/[0.015] py-3 text-center text-[11px] font-bold tracking-wider text-academy-gray-500 uppercase">
         Centra il QR code nel riquadro
       </p>
     </div>

@@ -1,67 +1,57 @@
 "use client";
 
 import Link from "next/link";
+import { GradientText } from "@/components/shared/gradient-text";
+import { IconImage, IconArrowRight } from "../_components/icons";
 
 const CONTENT_SECTIONS = [
   {
     href: "/admin/contenuti/hero",
     label: "Hero Slides",
-    desc: "Modifica titoli, descrizioni, CTA e immagini di sfondo delle slide nella sezione hero.",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="2" y="5" width="20" height="14" rx="1" />
-        <path d="M8 12l3 3 5-5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    href: "/admin/contenuti/cta-tel",
-    label: "CTA Telefonica",
-    desc: "Modifica il numero di telefono e il testo del widget di contatto flottante in basso a destra.",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M2 6.5A1.5 1.5 0 013.5 5h3a1.5 1.5 0 011.4.97l.87 2.17a1.5 1.5 0 01-.34 1.64l-.93.93a10.02 10.02 0 004.96 4.96l.93-.93a1.5 1.5 0 011.64-.34l2.17.87A1.5 1.5 0 0119 16.5v3A1.5 1.5 0 0117.5 21C9.49 21 3 14.51 3 6.5z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
+    desc: "Modifica titoli, descrizioni, CTA e immagini di sfondo delle slide nella sezione hero della home.",
+    Icon: IconImage,
   },
 ];
 
 export default function AdminContenutiPage() {
   return (
-    <section className="min-h-screen pt-32 pb-20">
-      <div className="mx-auto max-w-4xl px-6">
+    <div className="space-y-6 lg:space-y-8">
+      <header>
+        <p className="mb-2 text-[11px] font-bold tracking-[0.3em] text-academy-orange uppercase">
+          Editor
+        </p>
+        <h1 className="text-3xl font-black text-academy-gray-800 md:text-4xl">
+          Gestione <GradientText>Contenuti</GradientText>
+        </h1>
+        <p className="mt-2 text-sm text-academy-gray-500">
+          Modifica i contenuti visibili sul sito senza toccare il codice.
+        </p>
+      </header>
 
-        <div className="mb-10">
-          <Link href="/admin" className="text-[0.62rem] text-academy-gray-500 hover:text-academy-orange uppercase tracking-[0.2em] mb-3 block">
-            ← Admin
+      <div className="grid gap-3 sm:grid-cols-2">
+        {CONTENT_SECTIONS.map((s) => (
+          <Link
+            key={s.href}
+            href={s.href}
+            className="group flex flex-col gap-4 border border-black/[0.08] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all hover:border-academy-orange/30 hover:shadow-[0_4px_16px_rgba(240,146,38,0.08)]"
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex h-12 w-12 items-center justify-center bg-academy-orange/10 text-academy-orange transition-all group-hover:bg-academy-orange/20">
+                <s.Icon className="h-6 w-6" />
+              </span>
+              <IconArrowRight className="h-4 w-4 text-academy-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-academy-orange" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-academy-gray-800 transition-colors group-hover:text-academy-orange">
+                {s.label}
+              </h2>
+              <p className="mt-1 text-[12px] leading-relaxed text-academy-gray-500">
+                {s.desc}
+              </p>
+            </div>
           </Link>
-          <h1 className="text-3xl font-black text-white">
-            Gestione <span className="text-academy-orange">Contenuti</span>
-          </h1>
-          <p className="text-sm text-academy-gray-400 mt-1">
-            Modifica i contenuti visibili sul sito senza toccare il codice.
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {CONTENT_SECTIONS.map((s) => (
-            <Link key={s.href} href={s.href} className="group">
-              <div className="card-squared p-7 h-full transition-all hover:glow-orange flex flex-col gap-4">
-                <div className="text-academy-orange/60 group-hover:text-academy-orange transition-colors">
-                  {s.icon}
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-white mb-1.5 group-hover:text-academy-orange transition-colors">
-                    {s.label}
-                  </h2>
-                  <p className="text-[0.65rem] text-academy-gray-500 leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

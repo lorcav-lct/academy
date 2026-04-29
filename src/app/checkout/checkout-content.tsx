@@ -379,7 +379,7 @@ function MobileStickyBar({
       initial={{ y: 100 }}
       animate={{ y: visible ? 0 : 100 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 md:hidden"
       style={{ pointerEvents: visible ? "auto" : "none" }}
       aria-hidden={!visible}
     >
@@ -612,11 +612,11 @@ export function CheckoutContent() {
             <span aria-hidden>←</span>
             <span>Torna indietro</span>
           </Link>
-          <div className="hidden items-center gap-2 text-[0.62rem] font-bold uppercase tracking-[0.22em] sm:flex">
+          <div className="hidden items-center gap-2 text-[0.62rem] font-bold uppercase tracking-[0.22em] md:flex">
             <span style={{ color: ORANGE }}>1.</span>
             <span style={{ color: t.th }}>Riepilogo</span>
             <span style={{ color: t.ts }}>·</span>
-            <span style={{ color: t.ts }}>2. Pagamento Stripe</span>
+            <span style={{ color: t.ts }}>2. Pagamento</span>
             <span style={{ color: t.ts }}>·</span>
             <span style={{ color: t.ts }}>3. Conferma</span>
           </div>
@@ -669,7 +669,7 @@ export function CheckoutContent() {
 
           <div ref={sentinelRef} />
 
-          <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-10">
+          <div className="grid gap-6 md:grid-cols-[1fr_320px] md:gap-8 lg:grid-cols-[1fr_400px] lg:gap-10">
             {/* ═══ LEFT — Order detail ═══════════════════════════ */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -987,7 +987,7 @@ export function CheckoutContent() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="lg:sticky lg:top-32 lg:self-start"
+              className="mx-auto w-full max-w-[480px] md:mx-0 md:max-w-none md:sticky md:top-32 md:self-start"
             >
               <OrderSummary
                 pack={pack}
