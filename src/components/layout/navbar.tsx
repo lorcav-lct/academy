@@ -220,9 +220,15 @@ export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { theme } = useTheme();
-  // Over-hero mode: home above fold forces dark-bg treatment regardless of theme,
-  // because the hero section imposes its own dark cinematic background.
-  const overHeroDark = pathname === "/" && !scrolled;
+  // Over-hero mode: routes with a hardcoded dark cinematic hero force dark-bg
+  // treatment regardless of the user's theme preference, while above the fold.
+  // - "/"                              home hero (cinematic dark)
+  // - "/percorso/[function|strength|science]"  block detail hero (dark gradient + grid)
+  const isBlockDetailRoute =
+    pathname === "/percorso/function" ||
+    pathname === "/percorso/strength" ||
+    pathname === "/percorso/science";
+  const overHeroDark = (pathname === "/" || isBlockDetailRoute) && !scrolled;
   // Mobile navbar has a dark gradient background always → nav text is white always.
   const onDarkBg = overHeroDark || isMobileViewport;
   const isDark = onDarkBg ? true : theme === "dark";

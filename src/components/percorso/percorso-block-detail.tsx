@@ -6,20 +6,9 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTheme } from "@/components/providers/theme-provider";
 import type { Course } from "@/lib/constants/courses";
-import { FIPE_SESSIONS } from "@/lib/constants/courses";
 import { getTeachersByCourse } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
-import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { PackPreview } from "@/components/home/pack-preview";
-
-const FIPE_DESC: Record<string, string> = {
-  function:
-    "Verifica delle competenze acquisite sul movimento funzionale. Prima sessione di certificazione del percorso.",
-  strength:
-    "Sessione intermedia. Verifica avanzata su strength & conditioning, programmazione e tecnica.",
-  science:
-    "Sessione conclusiva. Integrazione completa del profilo professionale e certificazione finale FIPE × Lacertosus per i pack PRO ed ELITE.",
-};
 
 interface Props {
   course: Course;
@@ -85,7 +74,6 @@ export function PercorsoBlockDetail({ course, prevCourse, nextCourse }: Props) {
   }, []);
 
   const teachers = getTeachersByCourse(course.slug);
-  const fipe = FIPE_SESSIONS.find((f) => f.afterBlock === course.title);
 
   // Light theme tokens (used after the dark hero)
   const lTh = isDark ? "#f5f5fa" : "#0a0a1a";
@@ -392,99 +380,8 @@ export function PercorsoBlockDetail({ course, prevCourse, nextCourse }: Props) {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════ */}
-      {/*  CERTIFICAZIONI + FIPE — combined band                            */}
-      {/* ══════════════════════════════════════════════════════════════ */}
-      {fipe && (
-        <section
-          data-bd-section
-          className="themed-section relative overflow-hidden"
-        >
-          <div className="absolute inset-0 section-bg" />
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: isDark
-                ? "radial-gradient(ellipse at 50% 30%, rgba(240,146,38,0.10) 0%, transparent 55%)"
-                : "radial-gradient(ellipse at 50% 30%, rgba(212,98,42,0.08) 0%, transparent 55%)",
-            }}
-          />
-          <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10 py-24 md:py-32">
-            <div className="mb-14 max-w-3xl">
-              <span data-bd-item className="label-tag mb-4 block">
-                Le Certificazioni del Percorso
-              </span>
-              <h2
-                data-bd-item
-                className="font-black tracking-[-0.025em] leading-[0.95]"
-                style={{
-                  fontSize: "clamp(2.6rem, 5.5vw, 4.4rem)",
-                  color: lTh,
-                }}
-              >
-                Due titoli <span className="gradient-text">riconosciuti</span>.
-                <br />
-                Una carriera reale.
-              </h2>
-              <p
-                data-bd-item
-                className="mt-6 text-[0.95rem] leading-[1.7] max-w-2xl"
-                style={{ color: lTb }}
-              >
-                Al termine del percorso ricevi la certificazione{" "}
-                <span className="font-bold" style={{ color: "#F09226" }}>
-                  Functional Strength Master Coach
-                </span>
-                . Con i pack PRO ed ELITE ottieni anche la certificazione FIPE
-                ufficiale, riconosciuta a livello nazionale e internazionale.
-              </p>
-            </div>
-
-            {/* Certifications — rich shared component */}
-            <div data-bd-item className="mb-12">
-              <CertificationsCards isDark={isDark} />
-            </div>
-
-            {/* FIPE session info — secondary */}
-            <div
-              data-bd-item
-              className="p-6 md:p-8"
-              style={{
-                background: isDark
-                  ? "rgba(255,255,255,0.02)"
-                  : "rgba(0,0,0,0.02)",
-                border: `1px solid ${lLine}`,
-              }}
-            >
-              <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
-                <div className="flex-1">
-                  <p
-                    className="text-[0.6rem] font-black tracking-[0.3em] uppercase mb-2"
-                    style={{ color: lTs }}
-                  >
-                    Sessione di certificazione del blocco
-                  </p>
-                  <p
-                    className="text-[1.1rem] md:text-[1.3rem] font-black tracking-tight"
-                    style={{ color: lTh }}
-                  >
-                    {fipe.title.replace("Sessione ", "Sessione ")} · dopo{" "}
-                    {course.title}
-                  </p>
-                </div>
-                <p
-                  className="text-[0.85rem] leading-relaxed max-w-lg"
-                  style={{ color: lTb }}
-                >
-                  {FIPE_DESC[course.slug]}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════ */}
-      {/*  PACK — riuso PackPreview da home (con modale)                   */}
+      {/*  PACK — riuso PackPreview da home (le 2 certificazioni vivono   */}
+      {/*  sotto la comparison dei pack — niente sezione duplicata sopra)  */}
       {/* ══════════════════════════════════════════════════════════════ */}
       <PackPreview />
 
