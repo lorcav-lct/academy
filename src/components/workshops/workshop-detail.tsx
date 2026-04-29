@@ -7,6 +7,7 @@ import { useTheme } from "@/components/providers/theme-provider";
 import type { Workshop } from "@/lib/constants/workshops";
 import { getMasterclassProducts } from "@/lib/constants/packs";
 import { getTeacherBySlug, type Teacher } from "@/lib/constants/teachers";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
 /* ──────────────────────────────────────────────────────────────
@@ -669,15 +670,6 @@ function formatPriceClean(cents: number): string {
   return `€ ${new Intl.NumberFormat("it-IT").format(v)}`;
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
-
 /* ──────────────────────────────────────────────────────────────
    HOOK — useScrollPast for sticky bottom CTA
 ─────────────────────────────────────────────────────────────── */
@@ -983,59 +975,82 @@ function TrainerSpotlight({
             variants={staggerContainer}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
-            className={`grid gap-5 ${teachers.length > 1 ? "md:grid-cols-2" : ""}`}
+            className={`grid gap-6 md:gap-8 ${teachers.length > 1 ? "md:grid-cols-2" : ""}`}
           >
             {teachers.map((t) => (
-              <motion.div
+              <motion.article
                 key={t.slug}
                 variants={fadeUp}
-                className="relative overflow-hidden p-7 md:p-8"
+                className="relative overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(220px,42%)_1fr]"
                 style={{
                   background: cardBg,
                   border: `1px solid ${borderSubtle}`,
                   backdropFilter: "blur(2px)",
                 }}
               >
-                <div
-                  className="h-[2px] w-full mb-7 -mt-7 -mx-7 md:-mt-8 md:-mx-8"
-                  style={{
-                    background: `linear-gradient(90deg, ${ORANGE}, rgba(${ORANGE_RGB},0.05))`,
-                    width: "calc(100% + 3.5rem)",
-                  }}
-                />
-                <div className="flex items-start gap-5">
+                {/* Portrait — 4:5, full height on desktop */}
+                <div className="relative w-full md:h-full">
+                  <TeacherPortrait
+                    teacher={t}
+                    sizes="(max-width: 768px) 100vw, 42vw"
+                    fallbackTheme={isDark ? "dark" : "light"}
+                  />
+                </div>
+
+                {/* Info column */}
+                <div className="relative flex flex-col justify-between p-6 md:p-8">
                   <div
-                    className="flex h-16 w-16 shrink-0 items-center justify-center text-[1.05rem] font-black"
+                    className="absolute top-0 left-0 right-0 h-[2px] md:h-full md:w-[2px] md:right-auto"
                     style={{
-                      background: `rgba(${ORANGE_RGB},0.14)`,
-                      border: `1.5px solid rgba(${ORANGE_RGB},0.4)`,
-                      color: ORANGE,
+                      background: `linear-gradient(90deg, ${ORANGE}, rgba(${ORANGE_RGB},0.05))`,
                     }}
-                  >
-                    {getInitials(t.name)}
-                  </div>
-                  <div className="min-w-0 flex-1">
+                  />
+                  <div>
                     <p
-                      className="text-[1.1rem] font-black leading-tight tracking-[-0.01em]"
+                      className="text-[1.25rem] md:text-[1.4rem] font-black leading-[1.05] tracking-[-0.015em]"
                       style={{ color: th }}
                     >
                       {t.name}
                     </p>
                     <p
-                      className="mt-1 text-[0.78rem] font-bold uppercase tracking-[0.18em]"
+                      className="mt-2 text-[0.74rem] font-bold uppercase tracking-[0.18em]"
                       style={{ color: ORANGE }}
                     >
                       {t.role}
                     </p>
+                    {t.bio && (
+                      <p
+                        className="mt-5 text-[0.92rem] md:text-[0.95rem] leading-[1.65]"
+                        style={{ color: tb }}
+                      >
+                        {t.bio}
+                      </p>
+                    )}
                   </div>
+                  {t.talkTitle && (
+                    <div
+                      className="mt-6 px-4 py-3 border-l-2"
+                      style={{
+                        background: `rgba(${ORANGE_RGB},0.06)`,
+                        borderLeftColor: ORANGE,
+                      }}
+                    >
+                      <p
+                        className="text-[0.6rem] font-black tracking-[0.28em] uppercase mb-1"
+                        style={{ color: ORANGE }}
+                      >
+                        Intervento
+                      </p>
+                      <p
+                        className="text-[0.88rem] leading-snug font-semibold"
+                        style={{ color: th }}
+                      >
+                        {t.talkTitle}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <p
-                  className="mt-5 text-[0.92rem] leading-[1.65] md:text-[0.95rem]"
-                  style={{ color: tb }}
-                >
-                  {t.bio}
-                </p>
-              </motion.div>
+              </motion.article>
             ))}
           </motion.div>
         ) : (

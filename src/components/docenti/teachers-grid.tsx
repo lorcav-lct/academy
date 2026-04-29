@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
 import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
 import { WORKSHOPS } from "@/lib/constants/workshops";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { staggerContainer, fadeUp } from "@/lib/animations/variants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -18,7 +19,10 @@ interface CourseRef {
   type: string;
 }
 
-// ─── Filter tabs ──────────────────────────────────────────────────────────────
+const ORANGE = "#F09226";
+const ORANGE_RGB = "240,146,38";
+
+// ─── Filters ─────────────────────────────────────────────────────────────────
 
 const FILTERS = [
   { key: "all", label: "Tutti" },
@@ -30,12 +34,7 @@ const FILTERS = [
 
 type FilterKey = (typeof FILTERS)[number]["key"];
 
-// Workshop slugs set for quick lookup
 const WORKSHOP_SLUGS = new Set(WORKSHOPS.map((w) => w.slug));
-
-function isMasterclassOnly(teacher: Teacher): boolean {
-  return teacher.courses.every((c) => WORKSHOP_SLUGS.has(c));
-}
 
 function matchesFilter(teacher: Teacher, filter: FilterKey): boolean {
   if (filter === "all") return true;
@@ -43,8 +42,6 @@ function matchesFilter(teacher: Teacher, filter: FilterKey): boolean {
     return teacher.courses.some((c) => WORKSHOP_SLUGS.has(c));
   return teacher.courses.includes(filter);
 }
-
-// ─── getCourseRef helper ──────────────────────────────────────────────────────
 
 function getCourseRef(slug: string): CourseRef {
   if (slug === "function")
@@ -76,162 +73,288 @@ function getCourseRef(slug: string): CourseRef {
   return { label: slug, href: "#", type: "Corso" };
 }
 
-// ─── Course label badge colors ────────────────────────────────────────────────
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 
-function getCourseColor(_slug: string): string {
-  return "#F09226";
+function DocentiHero({ isDark, total }: { isDark: boolean; total: number }) {
+  const heroRef = useRef<HTMLElement>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!counterRef.current) return;
+    const obj = { v: 0 };
+    const tween = gsap.to(obj, {
+      v: total,
+      duration: 1.6,
+      ease: "power3.out",
+      onUpdate: () => {
+        if (counterRef.current) {
+          counterRef.current.textContent = String(Math.round(obj.v)).padStart(
+            2,
+            "0",
+          );
+        }
+      },
+    });
+    return () => {
+      tween.kill();
+    };
+  }, [total]);
+
+  const subBg = isDark
+    ? "linear-gradient(180deg, rgba(67,67,67,0.4) 0%, rgba(10,10,14,0.0) 100%)"
+    : "linear-gradient(180deg, rgba(240,240,240,0.7) 0%, rgba(255,255,255,0) 100%)";
+
+  return (
+    <section
+      ref={heroRef}
+      className="relative overflow-hidden"
+      style={{ background: subBg }}
+    >
+      {/* Grid lines bg */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+          color: isDark ? "#fff" : "#000",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-[1440px] px-[5%] md:px-10 pt-12 pb-20 md:pt-20 md:pb-28">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-y-10 gap-x-10 items-end"
+        >
+          <div>
+            <motion.div
+              variants={fadeUp}
+              className="mb-6 flex items-center gap-3"
+            >
+              <span
+                className="h-px w-10"
+                style={{ background: `rgba(${ORANGE_RGB},0.6)` }}
+              />
+              <span
+                className="text-[0.7rem] font-black tracking-[0.32em] uppercase"
+                style={{ color: ORANGE }}
+              >
+                Il Corpo Docente
+              </span>
+            </motion.div>
+
+            <motion.h1
+              variants={fadeUp}
+              className="font-black leading-[0.9] tracking-[-0.035em]"
+              style={{
+                fontSize: "clamp(3.2rem, 9vw, 7.2rem)",
+                color: isDark ? "#f5f5f7" : "#0a0a14",
+              }}
+            >
+              I volti dietro
+              <br />
+              <span style={{ color: ORANGE }}>l&apos;Academy.</span>
+            </motion.h1>
+
+            <motion.p
+              variants={fadeUp}
+              className="mt-8 max-w-[44ch] text-[1.05rem] md:text-[1.15rem] leading-[1.55]"
+              style={{ color: isDark ? "rgba(245,245,247,0.7)" : "#3a3a44" }}
+            >
+              Ricercatori universitari, professionisti d&apos;élite e campioni
+              internazionali. Ognuno selezionato per autorità reale nel suo
+              campo — non per fama.
+            </motion.p>
+          </div>
+
+          {/* Counter pillar */}
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col items-start lg:items-end shrink-0"
+          >
+            <span
+              className="text-[0.62rem] font-black tracking-[0.32em] uppercase mb-2"
+              style={{
+                color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)",
+              }}
+            >
+              Cohort 2026/27
+            </span>
+            <div className="flex items-baseline gap-3">
+              <span
+                ref={counterRef}
+                className="font-black tabular-nums leading-none tracking-[-0.04em]"
+                style={{
+                  fontSize: "clamp(5rem, 12vw, 9rem)",
+                  color: ORANGE,
+                }}
+              >
+                00
+              </span>
+              <span
+                className="text-[0.66rem] font-black tracking-[0.3em] uppercase"
+                style={{
+                  color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
+                }}
+              >
+                Docenti
+                <br />
+                Selezionati
+              </span>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Stats strip */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-px"
+          style={{
+            background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)",
+            border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)"}`,
+          }}
+        >
+          {[
+            { v: "PhD", l: "Ricercatori" },
+            { v: "Pro", l: "Operativi sul campo" },
+            { v: "ITA + INT", l: "Network globale" },
+            { v: "100%", l: "In presenza" },
+          ].map((s) => (
+            <div
+              key={s.l}
+              className="flex flex-col px-5 py-5"
+              style={{ background: isDark ? "#0a0a0e" : "#ffffff" }}
+            >
+              <span
+                className="text-[1.6rem] font-black leading-none tracking-tight"
+                style={{ color: isDark ? "#f5f5f7" : "#0a0a14" }}
+              >
+                {s.v}
+              </span>
+              <span
+                className="mt-2 text-[0.6rem] font-bold tracking-[0.22em] uppercase"
+                style={{
+                  color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
+                }}
+              >
+                {s.l}
+              </span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
 }
 
-// ─── Initials helper ──────────────────────────────────────────────────────────
+// ─── TeacherCard (editorial) ──────────────────────────────────────────────────
 
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
-
-// ─── TeacherCard ─────────────────────────────────────────────────────────────
-
-interface TeacherCardProps {
+function TeacherCard({
+  teacher,
+  index,
+  onClick,
+  isDark,
+}: {
   teacher: Teacher;
-  onClick: (teacher: Teacher) => void;
+  index: number;
+  onClick: (t: Teacher) => void;
   isDark: boolean;
-}
-
-function TeacherCard({ teacher, onClick, isDark }: TeacherCardProps) {
-  const accentColor = teacher.color;
+}) {
+  const courseLabel = teacher.courses
+    .map((c) => getCourseRef(c).label)
+    .join(" · ");
 
   return (
     <button
-      data-teacher-card
       onClick={() => onClick(teacher)}
-      className="group w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange"
+      data-teacher-card
+      className="group relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange transition-transform duration-500 hover:-translate-y-1"
+      style={{
+        background: isDark ? "#0d0d12" : "#ffffff",
+        border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+      }}
       aria-label={`Apri profilo di ${teacher.name}`}
     >
-      <div
-        className="relative flex h-full flex-col overflow-hidden transition-all duration-500"
+      <TeacherPortrait
+        teacher={teacher}
+        sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 30vw"
+        priority={index < 4}
+        fallbackTheme={isDark ? "dark" : "light"}
+      />
+
+      {/* Index marker top-left */}
+      <span
+        className="absolute top-3 left-3 z-10 px-2 py-1 font-mono text-[0.6rem] font-black tracking-[0.2em]"
         style={{
-          background: isDark
-            ? "linear-gradient(135deg, rgba(67,67,67,0.85) 0%, rgba(26,26,26,0.95) 100%)"
-            : "#ffffff",
-          border: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)"}`,
-          borderRadius: 0,
+          background: "rgba(0,0,0,0.6)",
+          color: "#ffffff",
+          backdropFilter: "blur(4px)",
         }}
-        // Hover border glow via inline style transition is done with CSS class
       >
-        {/* Hover glow overlay */}
+        {String(index + 1).padStart(2, "0")}
+      </span>
+
+      {/* Course badge top-right */}
+      <span
+        className="absolute top-3 right-3 z-10 px-2 py-1 text-[0.6rem] font-black tracking-[0.2em] uppercase truncate max-w-[60%]"
+        style={{
+          background: `rgba(${ORANGE_RGB},0.92)`,
+          color: "#111",
+        }}
+      >
+        {courseLabel}
+      </span>
+
+      {/* Body */}
+      <div className="px-5 py-5 md:px-6 md:py-6">
+        <h3
+          className="text-[1.05rem] md:text-[1.15rem] font-black leading-[1.1] tracking-tight transition-colors group-hover:text-academy-orange"
+          style={{ color: isDark ? "#f5f5f7" : "#111111" }}
+        >
+          {teacher.name}
+        </h3>
+        <p
+          className="mt-2 text-[0.7rem] font-bold tracking-[0.18em] uppercase line-clamp-2"
+          style={{ color: ORANGE }}
+        >
+          {teacher.role}
+        </p>
+
+        {/* Subtle hover affordance */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          style={{
-            boxShadow: `inset 0 0 0 1px ${accentColor}44, 0 0 30px ${accentColor}18`,
-          }}
-        />
-
-        {/* Scale wrapper */}
-        <div className="transition-transform duration-500 group-hover:scale-[1.02]">
-          {/* Image area — ~45% height */}
-          <div
-            className="relative flex items-center justify-center"
-            style={{
-              paddingTop: "45%",
-              background: isDark
-                ? `linear-gradient(135deg, ${accentColor}14 0%, rgba(26,26,26,0.6) 100%)`
-                : `linear-gradient(135deg, ${accentColor}18 0%, ${accentColor}08 100%)`,
-              borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)"}`,
-            }}
-          >
-            {teacher.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={teacher.image_url}
-                alt={teacher.name}
-                className="absolute inset-0 h-full w-full object-cover object-top"
-              />
-            ) : (
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ background: "transparent" }}
-              >
-                <span
-                  className="text-3xl font-black tracking-widest"
-                  style={{ color: accentColor, opacity: 0.6 }}
-                >
-                  {getInitials(teacher.name)}
-                </span>
-              </div>
-            )}
-
-            {/* Masterclass badge */}
-            {isMasterclassOnly(teacher) && (
-              <div
-                className="absolute top-3 right-3 px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase"
-                style={{
-                  background: "rgba(240,146,38,0.15)",
-                  border: "1px solid rgba(240,146,38,0.35)",
-                  color: "#F09226",
-                }}
-              >
-                Masterclass
-              </div>
-            )}
-          </div>
-
-          {/* Content area */}
-          <div className="flex flex-1 flex-col p-5">
-            <h3
-              className="mb-1 text-base font-black leading-tight tracking-tight transition-colors duration-300 group-hover:text-academy-orange"
-              style={{ color: isDark ? "#f5f5f7" : "#111111" }}
-            >
-              {teacher.name}
-            </h3>
-            <p
-              className="mb-4 text-xs leading-relaxed"
-              style={{ color: isDark ? "#8e8e93" : "#636366" }}
-            >
-              {teacher.role}
-            </p>
-
-            {/* Course badge pills */}
-            <div className="mt-auto flex flex-wrap gap-1.5">
-              {teacher.courses.map((slug) => {
-                const ref = getCourseRef(slug);
-                const color = getCourseColor(slug);
-                return (
-                  <span
-                    key={slug}
-                    className="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
-                    style={{
-                      background: `${color}14`,
-                      border: `1px solid ${color}30`,
-                      color: color,
-                    }}
-                  >
-                    {ref.label}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
+          className="mt-4 flex items-center gap-2 text-[0.62rem] font-bold tracking-[0.24em] uppercase opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ color: ORANGE }}
+        >
+          <span>Apri profilo</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M2 6h8M6 2l4 4-4 4"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="square"
+            />
+          </svg>
         </div>
       </div>
     </button>
   );
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+// ─── Modal (premium portrait + info) ──────────────────────────────────────────
 
-interface ModalProps {
+function TeacherModal({
+  teacher,
+  onClose,
+  isDark,
+}: {
   teacher: Teacher | null;
   onClose: () => void;
   isDark: boolean;
-}
-
-function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
-  // Close on ESC
+}) {
   useEffect(() => {
     if (!teacher) return;
     const handler = (e: KeyboardEvent) => {
@@ -241,7 +364,6 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [teacher, onClose]);
 
-  // Prevent body scroll when open
   useEffect(() => {
     if (teacher) {
       document.body.style.overflow = "hidden";
@@ -257,173 +379,198 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
     <AnimatePresence>
       {teacher && (
         <>
-          {/* Backdrop */}
           <motion.div
-            key="backdrop"
+            key="bd"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 cursor-pointer"
+            className="fixed inset-0 z-[400] cursor-pointer"
             style={{
-              backdropFilter: "blur(8px)",
-              background: "rgba(0,0,0,0.65)",
+              background: "rgba(0,0,0,0.78)",
+              backdropFilter: "blur(14px)",
             }}
             onClick={onClose}
-            aria-hidden="true"
+            aria-hidden
           />
 
-          {/* Modal card */}
           <motion.div
-            key="modal"
-            initial={{ opacity: 0, scale: 0.94, y: 24 }}
+            key="md"
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            exit={{ opacity: 0, scale: 0.97, y: 12 }}
+            transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
             role="dialog"
             aria-modal="true"
             aria-label={`Profilo di ${teacher.name}`}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[401] flex items-end md:items-center justify-center md:p-6 lg:p-10"
             style={{ pointerEvents: "none" }}
           >
             <div
-              className="relative w-full max-w-lg overflow-y-auto"
+              className="relative w-full overflow-hidden flex flex-col md:grid md:grid-cols-[minmax(280px,42%)_1fr] h-dvh max-h-dvh md:h-auto md:max-h-[88vh] md:max-w-[1080px]"
               style={{
                 pointerEvents: "all",
-                maxHeight: "90vh",
-                background: isDark
-                  ? "linear-gradient(135deg, rgba(67,67,67,0.97) 0%, rgba(26,26,26,0.99) 100%)"
-                  : "#ffffff",
-                border: `1px solid ${isDark ? "rgba(240,146,38,0.2)" : "rgba(0,0,0,0.1)"}`,
-                boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+                background: isDark ? "#0a0a0e" : "#ffffff",
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+                boxShadow: "0 40px 120px rgba(0,0,0,0.7)",
               }}
             >
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center transition-colors hover:text-academy-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange"
-                style={{ color: isDark ? "#8e8e93" : "#636366" }}
-                aria-label="Chiudi"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M1 1l14 14M15 1L1 15"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-
-              {/* Header: image + name + role */}
-              <div
-                className="flex items-center gap-5 p-6 pb-5"
-                style={{
-                  borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                }}
-              >
-                {/* Avatar */}
-                <div
-                  className="relative shrink-0 overflow-hidden"
+              {/* Portrait — left full height (desktop) / top (mobile) */}
+              <div className="relative shrink-0 md:h-full">
+                <TeacherPortrait
+                  teacher={teacher}
+                  sizes="(max-width: 768px) 100vw, 42vw"
+                  priority
+                  fallbackTheme={isDark ? "dark" : "light"}
+                />
+                {/* Close on mobile (over image) */}
+                <button
+                  onClick={onClose}
+                  aria-label="Chiudi"
+                  className="md:hidden absolute top-4 right-4 z-10 flex items-center justify-center h-10 w-10 transition-opacity hover:opacity-80"
                   style={{
-                    width: 80,
-                    height: 80,
-                    background: isDark
-                      ? `linear-gradient(135deg, ${teacher.color}18, rgba(26,26,26,0.8))`
-                      : `linear-gradient(135deg, ${teacher.color}20, ${teacher.color}08)`,
-                    border: `2px solid ${teacher.color}40`,
+                    background: "rgba(0,0,0,0.65)",
+                    color: "#ffffff",
+                    backdropFilter: "blur(4px)",
                   }}
                 >
-                  {teacher.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={teacher.image_url}
-                      alt={teacher.name}
-                      className="h-full w-full object-cover"
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path
+                      d="M1 1l12 12M13 1L1 13"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="square"
                     />
-                  ) : (
-                    <span
-                      className="absolute inset-0 flex items-center justify-center text-xl font-black"
-                      style={{ color: teacher.color, opacity: 0.7 }}
-                    >
-                      {getInitials(teacher.name)}
-                    </span>
-                  )}
-                </div>
+                  </svg>
+                </button>
+              </div>
 
-                {/* Name & role */}
-                <div className="min-w-0">
-                  <h2
-                    className="text-xl font-black leading-tight tracking-tight"
-                    style={{ color: isDark ? "#f5f5f7" : "#111111" }}
-                  >
-                    {teacher.name}
-                  </h2>
+              {/* Info column */}
+              <div className="relative overflow-y-auto p-6 md:p-9 flex flex-col">
+                {/* Close on desktop */}
+                <button
+                  onClick={onClose}
+                  aria-label="Chiudi"
+                  className="hidden md:flex absolute top-5 right-5 z-10 items-center gap-2 text-[0.66rem] font-bold tracking-[0.22em] uppercase transition-opacity hover:opacity-60"
+                  style={{
+                    color: isDark
+                      ? "rgba(255,255,255,0.55)"
+                      : "rgba(0,0,0,0.55)",
+                  }}
+                >
+                  Chiudi
+                  <span className="text-base leading-none">×</span>
+                </button>
+
+                <p
+                  className="text-[0.62rem] font-black tracking-[0.32em] uppercase mb-3"
+                  style={{ color: ORANGE }}
+                >
+                  Docente Academy
+                </p>
+                <h2
+                  className="font-black leading-[0.95] tracking-[-0.025em]"
+                  style={{
+                    fontSize: "clamp(1.7rem, 4vw, 2.4rem)",
+                    color: isDark ? "#f5f5f7" : "#0a0a14",
+                  }}
+                >
+                  {teacher.name}
+                </h2>
+                <p
+                  className="mt-3 text-[0.78rem] md:text-[0.82rem] font-bold uppercase tracking-[0.2em]"
+                  style={{ color: ORANGE }}
+                >
+                  {teacher.role}
+                </p>
+
+                {teacher.bio && (
                   <p
-                    className="mt-1 text-sm font-semibold"
-                    style={{ color: "#F09226" }}
+                    className="mt-6 text-[0.92rem] md:text-[0.95rem] leading-[1.65]"
+                    style={{
+                      color: isDark ? "rgba(245,245,247,0.72)" : "#3d3d44",
+                    }}
                   >
-                    {teacher.role}
+                    {teacher.bio}
                   </p>
-                </div>
-              </div>
+                )}
 
-              {/* Bio */}
-              <div className="px-6 pt-5 pb-4">
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: isDark ? "#8e8e93" : "#636366" }}
-                >
-                  {teacher.bio}
-                </p>
-              </div>
+                {teacher.talkTitle && (
+                  <div
+                    className="mt-6 px-4 py-4 border-l-2"
+                    style={{
+                      background: `rgba(${ORANGE_RGB},${isDark ? "0.07" : "0.06"})`,
+                      borderLeftColor: ORANGE,
+                    }}
+                  >
+                    <p
+                      className="text-[0.6rem] font-black tracking-[0.28em] uppercase mb-2"
+                      style={{ color: ORANGE }}
+                    >
+                      Intervento in Academy
+                    </p>
+                    <p
+                      className="text-[0.95rem] leading-snug font-semibold"
+                      style={{ color: isDark ? "#f5f5f7" : "#111111" }}
+                    >
+                      {teacher.talkTitle}
+                    </p>
+                  </div>
+                )}
 
-              {/* Insegna in */}
-              <div className="px-6 pb-6">
-                <p
-                  className="mb-3 text-[11px] font-bold tracking-[0.25em] uppercase"
-                  style={{ color: isDark ? "#48484a" : "#8e8e93" }}
-                >
-                  Insegna in
-                </p>
-                <div className="flex flex-col gap-2">
-                  {teacher.courses.map((slug) => {
-                    const ref = getCourseRef(slug);
-                    const color = getCourseColor(slug);
-                    return (
-                      <Link
-                        key={slug}
-                        href={ref.href}
-                        onClick={onClose}
-                        className="group/link flex items-center justify-between px-4 py-3 transition-all duration-300"
-                        style={{
-                          background: isDark ? `${color}0d` : `${color}0a`,
-                          border: `1px solid ${color}25`,
-                        }}
-                      >
-                        <div>
-                          <span
-                            className="block text-sm font-bold tracking-wide transition-colors group-hover/link:text-white"
-                            style={{ color: color }}
-                          >
-                            {ref.label}
-                          </span>
-                          <span
-                            className="text-[11px] tracking-wider uppercase"
-                            style={{ color: isDark ? "#636366" : "#8e8e93" }}
-                          >
-                            {ref.type}
-                          </span>
-                        </div>
-                        <span
-                          className="text-base opacity-0 transition-all duration-300 group-hover/link:translate-x-1 group-hover/link:opacity-100"
-                          style={{ color: color }}
+                <div className="mt-8">
+                  <p
+                    className="mb-3 text-[0.6rem] font-black tracking-[0.28em] uppercase"
+                    style={{
+                      color: isDark
+                        ? "rgba(255,255,255,0.45)"
+                        : "rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    Insegna in
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {teacher.courses.map((slug) => {
+                      const ref = getCourseRef(slug);
+                      return (
+                        <Link
+                          key={slug}
+                          href={ref.href}
+                          onClick={onClose}
+                          className="group/l flex items-center justify-between px-4 py-3 transition-all"
+                          style={{
+                            background: `rgba(${ORANGE_RGB},${isDark ? "0.06" : "0.05"})`,
+                            border: `1px solid rgba(${ORANGE_RGB},0.22)`,
+                          }}
                         >
-                          →
-                        </span>
-                      </Link>
-                    );
-                  })}
+                          <div>
+                            <span
+                              className="block text-[0.85rem] font-black tracking-wide"
+                              style={{ color: ORANGE }}
+                            >
+                              {ref.label}
+                            </span>
+                            <span
+                              className="text-[0.62rem] font-bold tracking-[0.22em] uppercase"
+                              style={{
+                                color: isDark
+                                  ? "rgba(255,255,255,0.4)"
+                                  : "rgba(0,0,0,0.45)",
+                              }}
+                            >
+                              {ref.type}
+                            </span>
+                          </div>
+                          <span
+                            className="text-base opacity-0 transition-all group-hover/l:opacity-100 group-hover/l:translate-x-1"
+                            style={{ color: ORANGE }}
+                          >
+                            →
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -434,162 +581,146 @@ function TeacherModal({ teacher, onClose, isDark }: ModalProps) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────────
 
 export function TeachersGrid() {
   const { theme } = useTheme();
-  const d = theme === "dark";
+  const isDark = theme === "dark";
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 
-  const headRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
-  // GSAP animations
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      // Header scroll reveal
-      if (headRef.current) {
-        gsap.from(headRef.current, {
-          scrollTrigger: {
-            trigger: headRef.current,
-            start: "top 88%",
-            once: true,
-          },
-          opacity: 0,
-          y: 30,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
-
-      // Cards stagger on load
       const cards = cardsRef.current?.querySelectorAll("[data-teacher-card]");
       if (cards && cards.length > 0) {
         gsap.from(cards, {
           opacity: 0,
-          y: 30,
+          y: 28,
           duration: 0.6,
-          stagger: 0.06,
+          stagger: 0.05,
           ease: "power3.out",
-          delay: 0.2,
+          delay: 0.15,
         });
       }
     });
     return () => ctx.revert();
   }, []);
 
-  // Re-animate cards when filter changes
   useEffect(() => {
     const cards = cardsRef.current?.querySelectorAll("[data-teacher-card]");
     if (!cards || cards.length === 0) return;
     gsap.from(cards, {
       opacity: 0,
-      y: 20,
+      y: 18,
       duration: 0.4,
-      stagger: 0.05,
+      stagger: 0.04,
       ease: "power2.out",
     });
   }, [activeFilter]);
 
-  const filtered = TEACHERS.filter((t) => matchesFilter(t, activeFilter));
+  const filtered = useMemo(
+    () => TEACHERS.filter((t) => matchesFilter(t, activeFilter)),
+    [activeFilter],
+  );
 
   return (
     <>
-      {/* ── Header ── */}
-      <div
-        ref={headRef}
-        className="mx-auto max-w-[1440px] px-[5%] md:px-10 pb-12"
-      >
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.span variants={fadeUp} className="label-tag mb-4 block">
-            Il Corpo Docente
-          </motion.span>
-          <motion.h1
-            variants={fadeUp}
-            className="mb-4 text-4xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl"
-          >
-            I Nostri <span className="gradient-text">Docenti</span>
-          </motion.h1>
-          <motion.p
-            variants={fadeUp}
-            className="max-w-2xl text-lg leading-relaxed"
-            style={{ color: d ? "#8e8e93" : "#636366" }}
-          >
-            Ricercatori universitari, professionisti d&apos;élite e campioni
-            internazionali. Ogni docente è selezionato per eccellenza nel
-            proprio campo.
-          </motion.p>
-        </motion.div>
+      <DocentiHero isDark={isDark} total={TEACHERS.length} />
 
-        {/* ── Filter tabs ── */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mt-8 flex flex-wrap gap-2"
-        >
-          {FILTERS.map((f) => {
-            const isActive = activeFilter === f.key;
-            return (
-              <button
-                key={f.key}
-                onClick={() => setActiveFilter(f.key)}
-                className="px-4 py-2 text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange"
-                style={{
-                  background: isActive
-                    ? "rgba(240,146,38,0.15)"
-                    : d
-                      ? "rgba(255,255,255,0.04)"
-                      : "rgba(0,0,0,0.04)",
-                  border: `1px solid ${isActive ? "rgba(240,146,38,0.5)" : d ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)"}`,
-                  color: isActive ? "#F09226" : d ? "#8e8e93" : "#636366",
-                }}
-              >
-                {f.label}
-              </button>
-            );
-          })}
-        </motion.div>
+      {/* Filter bar — sticky-ish */}
+      <div
+        className="sticky top-0 z-30 -mt-1"
+        style={{
+          background: isDark ? "rgba(10,10,14,0.92)" : "rgba(255,255,255,0.92)",
+          backdropFilter: "blur(14px)",
+          borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+          borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+        }}
+      >
+        <div className="mx-auto max-w-[1440px] px-[5%] md:px-10 py-3 md:py-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div
+              className="flex flex-wrap gap-px"
+              style={{
+                background: isDark
+                  ? "rgba(255,255,255,0.08)"
+                  : "rgba(0,0,0,0.08)",
+              }}
+            >
+              {FILTERS.map((f) => {
+                const isActive = activeFilter === f.key;
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => setActiveFilter(f.key)}
+                    className="px-3 md:px-4 py-2 text-[0.62rem] md:text-[0.66rem] font-black tracking-[0.2em] uppercase transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-academy-orange"
+                    style={{
+                      background: isActive
+                        ? ORANGE
+                        : isDark
+                          ? "#0a0a0e"
+                          : "#ffffff",
+                      color: isActive
+                        ? "#111"
+                        : isDark
+                          ? "rgba(255,255,255,0.7)"
+                          : "rgba(0,0,0,0.7)",
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
+            <span
+              className="text-[0.6rem] font-bold tracking-[0.24em] uppercase tabular-nums"
+              style={{
+                color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)",
+              }}
+            >
+              {filtered.length} {filtered.length === 1 ? "docente" : "docenti"}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* ── Grid ── */}
-      <div className="mx-auto max-w-[1440px] px-[5%] md:px-10">
+      {/* Grid */}
+      <div className="mx-auto max-w-[1440px] px-[5%] md:px-10 py-12 md:py-16">
         <div
           ref={cardsRef}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
-          {filtered.map((teacher) => (
+          {filtered.map((teacher, i) => (
             <TeacherCard
               key={teacher.slug}
               teacher={teacher}
+              index={i}
               onClick={setSelectedTeacher}
-              isDark={d}
+              isDark={isDark}
             />
           ))}
         </div>
 
         {filtered.length === 0 && (
           <p
-            className="py-16 text-center text-sm"
-            style={{ color: d ? "#636366" : "#8e8e93" }}
+            className="py-20 text-center text-[0.85rem]"
+            style={{
+              color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.5)",
+            }}
           >
             Nessun docente trovato per questo filtro.
           </p>
         )}
       </div>
 
-      {/* ── Modal ── */}
       <TeacherModal
         teacher={selectedTeacher}
         onClose={() => setSelectedTeacher(null)}
-        isDark={d}
+        isDark={isDark}
       />
     </>
   );

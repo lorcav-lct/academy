@@ -5,18 +5,10 @@ import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { COURSES } from "@/lib/constants/courses";
 import { getTeachersByCourse } from "@/lib/constants/teachers";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { useTheme } from "@/components/providers/theme-provider";
 
 export type BlockSlug = "function" | "strength" | "science";
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
 
 export function BlockModal({
   slug,
@@ -328,68 +320,76 @@ export function BlockModal({
               className="p-5 md:p-6"
               style={{ background: cellBg, border: `1px solid ${cellBorder}` }}
             >
-              <p
-                className="text-[0.68rem] font-black tracking-[0.3em] uppercase mb-5"
-                style={{ color: ts }}
-              >
-                I Docenti del Blocco
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="flex items-baseline justify-between gap-3 mb-6">
+                <p
+                  className="text-[0.68rem] font-black tracking-[0.3em] uppercase"
+                  style={{ color: ts }}
+                >
+                  I Docenti del Blocco
+                </p>
+                <span
+                  className="text-[0.65rem] font-bold px-2 py-0.5 tabular-nums"
+                  style={{
+                    color: accentColor,
+                    border: `1px solid ${isDark ? "rgba(240,146,38,0.2)" : "rgba(180,80,0,0.18)"}`,
+                    background: isDark
+                      ? "rgba(240,146,38,0.06)"
+                      : "rgba(240,146,38,0.04)",
+                  }}
+                >
+                  {teachers.length} docenti
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {teachers.map((t) => (
-                  <div
+                  <article
                     key={t.slug}
-                    className="flex gap-4 p-4"
-                    style={{ border: `1px solid ${cellBorder}` }}
+                    className="flex flex-col overflow-hidden"
+                    style={{
+                      background: isDark ? "rgba(255,255,255,0.03)" : "#ffffff",
+                      border: `1px solid ${cellBorder}`,
+                    }}
                   >
-                    {/* Avatar */}
-                    <div
-                      className="shrink-0 flex items-center justify-center text-[0.75rem] font-black overflow-hidden"
-                      style={{
-                        width: "52px",
-                        height: "52px",
-                        background: isDark
-                          ? "rgba(255,255,255,0.07)"
-                          : "rgba(0,0,0,0.05)",
-                        color: ts,
-                        borderRadius: "2px",
-                      }}
-                    >
-                      {t.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={t.image_url}
-                          alt={t.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        initials(t.name)
-                      )}
-                    </div>
+                    {/* Portrait 4:5 */}
+                    <TeacherPortrait
+                      teacher={t}
+                      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
+                      fallbackTheme={isDark ? "dark" : "light"}
+                    />
 
                     {/* Info */}
-                    <div className="min-w-0 flex flex-col justify-center">
+                    <div className="px-4 py-4 flex flex-col gap-2">
                       <p
-                        className="text-[0.88rem] font-black leading-tight"
+                        className="text-[1rem] font-black leading-tight tracking-tight"
                         style={{ color: th }}
                       >
                         {t.name}
                       </p>
                       <p
-                        className="mt-0.5 text-[0.72rem] leading-snug"
-                        style={{ color: accentColor, opacity: 0.8 }}
+                        className="text-[0.7rem] font-bold uppercase tracking-[0.16em] leading-snug"
+                        style={{ color: accentColor }}
                       >
                         {t.role}
                       </p>
-                      {t.bio && (
+                      {t.talkTitle && (
                         <p
-                          className="mt-1 text-[0.72rem] leading-snug"
-                          style={{ color: tb }}
+                          className="mt-1 text-[0.78rem] leading-snug border-l-2 pl-3"
+                          style={{
+                            color: th,
+                            borderLeftColor: accentColor,
+                          }}
                         >
-                          {t.bio}
+                          <span
+                            className="block text-[0.55rem] font-black tracking-[0.24em] uppercase mb-0.5"
+                            style={{ color: accentColor }}
+                          >
+                            Intervento
+                          </span>
+                          {t.talkTitle}
                         </p>
                       )}
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             </div>

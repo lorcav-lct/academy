@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { motion, useInView } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
@@ -14,6 +13,7 @@ import {
   type AcademyProduct,
 } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
@@ -66,15 +66,6 @@ function getBundleTeachers(): Record<string, Teacher[]> {
     strength: getTeachersByCourse("strength"),
     science: getTeachersByCourse("science"),
   };
-}
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 // ─── Hero Section ─────────────────────────────────────────────────────────────
@@ -1472,60 +1463,45 @@ function PackModal({
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-8">
               {BLOCK_SLUGS.map((slug) => (
                 <div key={slug}>
                   <p
-                    className="mb-2.5 text-[0.62rem] font-black tracking-[0.3em] uppercase"
-                    style={{ color: lightTextMuted }}
+                    className="mb-4 text-[0.7rem] font-black tracking-[0.3em] uppercase"
+                    style={{ color: ORANGE }}
                   >
                     Docenti — {BLOCK_LABELS[slug]}
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {teachers[slug].map((t) => (
-                      <div
+                      <article
                         key={t.slug}
-                        className="flex items-center gap-2.5 p-2.5"
+                        className="flex flex-col overflow-hidden"
                         style={{
                           background: lightBg,
                           border: `1px solid ${lightBorder}`,
                         }}
-                        title={t.role}
                       >
-                        <div
-                          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.66rem] font-black"
-                          style={{
-                            background: `${t.color}26`,
-                            color: t.color,
-                          }}
-                        >
-                          {t.image_url ? (
-                            <Image
-                              src={t.image_url}
-                              alt={t.name}
-                              width={40}
-                              height={40}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            initials(t.name)
-                          )}
-                        </div>
-                        <div className="min-w-0">
+                        <TeacherPortrait
+                          teacher={t}
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                          fallbackTheme="light"
+                        />
+                        <div className="px-3 pt-3 pb-3.5">
                           <p
-                            className="text-[0.7rem] font-black leading-tight truncate"
+                            className="text-[0.85rem] font-black leading-tight tracking-tight"
                             style={{ color: lightTextH }}
                           >
                             {t.name}
                           </p>
                           <p
-                            className="mt-0.5 text-[0.55rem] leading-snug line-clamp-1"
-                            style={{ color: lightTextMuted }}
+                            className="mt-1.5 text-[0.65rem] font-bold tracking-[0.14em] uppercase leading-snug line-clamp-2"
+                            style={{ color: ORANGE }}
                           >
                             {t.role}
                           </p>
                         </div>
-                      </div>
+                      </article>
                     ))}
                   </div>
                 </div>

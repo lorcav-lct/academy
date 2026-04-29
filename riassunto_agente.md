@@ -120,7 +120,7 @@ Source of truth lato codice:
 - catalogo prodotti/pack: `src/lib/constants/packs.ts`
 - blocchi corso: `src/lib/constants/courses.ts`
 - masterclass/workshop: `src/lib/constants/workshops.ts`
-- docenti: `src/lib/constants/teachers.ts`
+- docenti: `src/lib/constants/teachers.ts` (32 docenti, sincronizzati con CSV master pubblico Google Sheet, ultimo aggiornamento 2026-04-29; foto WebP in `public/docenti/{slug}.webp` generate via `scripts/convert-docenti-images.mjs` da PNG sorgenti in `public/ACADEMY-FILES/docenti-edit/`)
 - fallback hero slides: `src/lib/constants/hero-slides.ts`
 
 Source of truth runtime lato DB:
@@ -873,7 +873,7 @@ Separatori tipografici `§ 01 — Il Settore` · `§ 02 — La Cohort` · `§ 03
 
 **§03 · I DOCENTI** — titolo `{TEACHERS.length} professionisti. Zero compromessi.` + **carosello orizzontale full-bleed** di tutti i docenti da `src/lib/constants/teachers.ts`:
 
-- Import `TEACHERS` array (attualmente 37 docenti) + tipo `Teacher`
+- Import `TEACHERS` array (attualmente 32 docenti, allineato a CSV master 2026-04-29) + tipo `Teacher` (nuovo campo opzionale `talkTitle: string` per il titolo dell'intervento dei docenti — viene renderizzato nel `TeacherModal` di `teachers-grid.tsx` come callout arancio tra Bio e "Insegna in")
 - Ogni card: `shrink-0`, width `clamp(280px, 78vw, 360px)`, min-height 480px, bg bianco `CARD_BG`, scroll-snap-align start
 - Layout card (uniforme per tutti — "ogni docente deve essere importante"): top row meta `01 / 37` + course label (CORPUS/VIS/VICTOR/MASTERCLASS via `getCourseLabel`), monogram centrale iniziali (via `getInitials`) in arancio su bg `rgba(240,146,38,0.07)` con 4 brackets arancio agli angoli, nome `text-[1.25rem] font-black`, ruolo uppercase tracking largo arancio, bio regolare
 - Scroller: `overflow-x-auto` con `scrollbar-width: none` + arbitrary `[&::-webkit-scrollbar]:hidden`, `scroll-snap-type: x mandatory`. **Bleed solo a destra** (`-mr-[5%] md:-mr-10` + `pr-[5%] md:pr-10`): prima card allineata all'edge sx del wrapper (stesso asse di header/titolo), le card scorrono fuori oltre il bordo destro del container.

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 
 const PROBLEMS = [
   "Corsi online senza pratica reale",
@@ -48,16 +49,6 @@ function getCourseLabel(courses: string[]): string {
   if (first === "science") return "SCIENCE";
   if (first.startsWith("master-")) return "MASTERCLASS";
   return "ACADEMY";
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(/[\s&]+/)
-    .map((s) => s[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 }
 
 /* Palette light minimal-luxury + dark anchor cards */
@@ -116,22 +107,30 @@ function TeacherCard({
   index: number;
   total: number;
 }) {
-  const initials = getInitials(teacher.name);
   const courseLabel = getCourseLabel(teacher.courses);
   return (
     <article
       data-teacher-card
-      className="relative flex shrink-0 flex-col overflow-hidden p-6 md:p-7"
+      className="relative flex shrink-0 flex-col overflow-hidden"
       style={{
         background: CARD_BG,
         border: `1px solid ${CARD_BORDER}`,
-        width: "clamp(280px, 78vw, 360px)",
-        minHeight: "480px",
+        width: "clamp(280px, 78vw, 340px)",
         scrollSnapAlign: "start",
       }}
     >
-      {/* Top meta row */}
-      <div className="mb-5 flex items-center justify-between">
+      {/* Portrait 4:5 with overlay name */}
+      <TeacherPortrait
+        teacher={teacher}
+        sizes="(max-width: 640px) 78vw, 340px"
+        fallbackTheme="dark"
+      />
+
+      {/* Bottom meta row */}
+      <div
+        className="flex items-center justify-between px-5 py-3 border-t"
+        style={{ borderColor: CARD_BORDER }}
+      >
         <span className="font-mono text-[0.62rem] font-bold tracking-[0.24em] uppercase text-academy-orange">
           {String(index + 1).padStart(2, "0")} /{" "}
           {String(total).padStart(2, "0")}
@@ -144,43 +143,21 @@ function TeacherCard({
         </span>
       </div>
 
-      {/* Monogram block */}
-      <div
-        className="relative mb-6 flex aspect-[5/4] items-center justify-center overflow-hidden"
-        style={{
-          background: "rgba(240,146,38,0.07)",
-          border: "1px solid rgba(240,146,38,0.18)",
-        }}
-        aria-hidden
-      >
-        <span className="text-[clamp(4rem,12vw,6rem)] font-black leading-none tracking-tight text-academy-orange">
-          {initials}
-        </span>
-        {/* Corner brackets arancio */}
-        <span className="absolute top-2 left-2 h-2.5 w-2.5 border-t border-l border-academy-orange opacity-60" />
-        <span className="absolute top-2 right-2 h-2.5 w-2.5 border-t border-r border-academy-orange opacity-60" />
-        <span className="absolute bottom-2 left-2 h-2.5 w-2.5 border-b border-l border-academy-orange opacity-60" />
-        <span className="absolute bottom-2 right-2 h-2.5 w-2.5 border-b border-r border-academy-orange opacity-60" />
-      </div>
-
       {/* Name + role */}
-      <h3
-        className="text-[1.15rem] md:text-[1.25rem] font-black leading-tight"
-        style={{ color: TEXT_PRIMARY }}
-      >
-        {teacher.name}
-      </h3>
-      <p className="mt-2 text-[0.68rem] font-bold tracking-[0.2em] uppercase text-academy-orange">
-        {teacher.role}
-      </p>
-
-      {/* Bio */}
-      <p
-        className="mt-4 text-[0.82rem] leading-relaxed"
-        style={{ color: TEXT_SECONDARY }}
-      >
-        {teacher.bio}
-      </p>
+      <div className="px-5 pt-3 pb-5">
+        <h3
+          className="text-[1.05rem] md:text-[1.15rem] font-black leading-tight tracking-tight"
+          style={{ color: TEXT_PRIMARY }}
+        >
+          {teacher.name}
+        </h3>
+        <p
+          className="mt-2 text-[0.66rem] font-bold tracking-[0.18em] uppercase line-clamp-2"
+          style={{ color: "#F09226" }}
+        >
+          {teacher.role}
+        </p>
+      </div>
     </article>
   );
 }

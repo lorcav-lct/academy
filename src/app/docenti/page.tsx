@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function DocentiPage() {
   return (
-    <main className="min-h-screen pt-32 pb-24">
+    <main className="min-h-screen pt-24">
       <TeachersGrid />
     </main>
   );
