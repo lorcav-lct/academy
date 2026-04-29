@@ -8,6 +8,12 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/providers/theme-provider";
 import { Logo } from "@/components/layout/logo";
+import {
+  IconHome,
+  IconBag,
+  IconTicket,
+  IconLogout,
+} from "@/app/account/_components/icons";
 import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
@@ -94,6 +100,12 @@ function UserAvatar({
     return () => document.removeEventListener("mousedown", handle);
   }, []);
 
+  const menuItems = [
+    { href: "/account", label: "Dashboard", Icon: IconHome },
+    { href: "/account/orders", label: "Ordini", Icon: IconBag },
+    { href: "/account/tickets", label: "Ticket", Icon: IconTicket },
+  ];
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -101,13 +113,13 @@ function UserAvatar({
         className="group flex items-center gap-2.5"
         aria-label="Menu utente"
       >
-        <div className="flex h-[42px] w-[42px] items-center justify-center border border-academy-orange/40 bg-academy-orange/10 text-xs font-black text-academy-orange transition-all duration-300 group-hover:border-academy-orange group-hover:bg-academy-orange/20">
+        <div className="flex h-[42px] w-[42px] items-center justify-center bg-academy-orange/15 text-xs font-bold tracking-wider text-academy-orange transition-all duration-300 group-hover:bg-academy-orange/25">
           {initials}
         </div>
         <svg
           className={cn(
             "h-3 w-3 transition-transform duration-200",
-            isDark ? "text-academy-gray-300" : "text-[#666]",
+            isDark ? "text-academy-gray-300" : "text-academy-gray-500",
             open && "rotate-180",
           )}
           viewBox="0 0 12 12"
@@ -126,68 +138,87 @@ function UserAvatar({
       {/* Dropdown */}
       <div
         className={cn(
-          "absolute right-0 top-full mt-3 w-56 shadow-2xl backdrop-blur-xl transition-all duration-200",
+          "absolute right-0 top-full mt-3 w-64 shadow-[0_10px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-200",
           isDark
-            ? "border border-white/8 bg-[#07071e]/95"
-            : "border border-black/8 bg-white/97",
+            ? "border border-white/[0.08] bg-academy-dark/95"
+            : "border border-black/[0.08] bg-white/97",
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none translate-y-2 opacity-0",
         )}
       >
+        {/* Header con avatar */}
         <div
           className={cn(
-            "px-4 py-3",
-            isDark ? "border-b border-white/5" : "border-b border-black/6",
+            "flex items-center gap-3 px-4 py-3.5",
+            isDark
+              ? "border-b border-white/[0.06]"
+              : "border-b border-black/[0.06]",
           )}
         >
-          <p
-            className={cn(
-              "text-[12px] font-semibold tracking-[0.2em] uppercase",
-              isDark ? "text-academy-gray-300" : "text-[#666]",
-            )}
-          >
-            Area Riservata
-          </p>
-          <p
-            className={cn(
-              "mt-0.5 truncate text-sm font-medium",
-              isDark ? "text-academy-gray-200" : "text-[#222]",
-            )}
-          >
-            {user.email}
-          </p>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-academy-orange/15 text-[12px] font-bold tracking-wider text-academy-orange">
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <p
+              className={cn(
+                "truncate text-[13px] font-bold leading-tight",
+                isDark ? "text-academy-gray-100" : "text-academy-gray-800",
+              )}
+            >
+              {fullName}
+            </p>
+            <p
+              className={cn(
+                "mt-0.5 truncate text-[11px] leading-tight",
+                isDark ? "text-academy-gray-400" : "text-academy-gray-500",
+              )}
+            >
+              {user.email}
+            </p>
+          </div>
         </div>
-        <div className="py-1">
-          {[
-            { href: "/account", label: "Il mio Profilo" },
-            { href: "/account/tickets", label: "I miei Ticket" },
-            { href: "/account", label: "I miei Acquisti" },
-          ].map(({ href, label }) => (
+
+        {/* Voci nav */}
+        <div className="py-2">
+          {menuItems.map(({ href, label, Icon }) => (
             <Link
               key={label}
               href={href}
               onClick={() => setOpen(false)}
               className={cn(
-                "block px-4 py-2.5 text-sm transition-colors hover:bg-academy-orange/10 hover:text-academy-orange",
-                isDark ? "text-academy-gray-300" : "text-[#444]",
+                "flex items-center gap-3 px-4 py-2.5 text-sm font-semibold transition-colors",
+                isDark
+                  ? "text-academy-gray-300 hover:bg-academy-orange/10 hover:text-academy-orange"
+                  : "text-academy-gray-600 hover:bg-academy-orange/10 hover:text-academy-orange",
               )}
             >
-              {label}
+              <Icon className="h-[18px] w-[18px] shrink-0" />
+              <span>{label}</span>
             </Link>
           ))}
         </div>
+
+        {/* Logout */}
         <div
           className={cn(
-            "py-1",
-            isDark ? "border-t border-white/5" : "border-t border-black/6",
+            "py-2",
+            isDark
+              ? "border-t border-white/[0.06]"
+              : "border-t border-black/[0.06]",
           )}
         >
           <button
             onClick={onLogout}
-            className="w-full px-4 py-2.5 text-left text-sm text-red-400/70 transition-colors hover:bg-red-400/8 hover:text-red-400"
+            className={cn(
+              "flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-semibold transition-colors",
+              isDark
+                ? "text-academy-gray-400 hover:bg-red-500/10 hover:text-red-400"
+                : "text-academy-gray-500 hover:bg-red-500/5 hover:text-red-600",
+            )}
           >
-            Esci
+            <IconLogout className="h-[18px] w-[18px] shrink-0" />
+            <span>Esci</span>
           </button>
         </div>
       </div>
