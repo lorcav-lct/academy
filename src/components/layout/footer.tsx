@@ -4,9 +4,9 @@ import { Logo } from "@/components/layout/logo";
 const footerLinks = {
   percorso: [
     { href: "/percorso", label: "Il Percorso" },
-    { href: "/corsi/function", label: "FUNCTION" },
-    { href: "/corsi/strength", label: "STRENGTH" },
-    { href: "/corsi/science", label: "SCIENCE" },
+    { href: "/percorso/function", label: "FUNCTION" },
+    { href: "/percorso/strength", label: "STRENGTH" },
+    { href: "/percorso/science", label: "SCIENCE" },
   ],
   workshop: [
     { href: "/masterclass/master-hyrox", label: "Master Hyrox" },

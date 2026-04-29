@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -345,7 +346,7 @@ export function CTASection() {
                 min-[981px]:col-start-1 min-[981px]:col-span-12 min-[981px]:row-start-3"
             >
               {/* Primary CTA */}
-              <a
+              <Link
                 href="/pack"
                 className="group relative flex items-center justify-between overflow-hidden p-8 md:p-10"
                 style={{
@@ -389,10 +390,10 @@ export function CTASection() {
                     animation: "shimmer 3s infinite",
                   }}
                 />
-              </a>
+              </Link>
 
               {/* Secondary CTA */}
-              <a
+              <Link
                 href="/percorso"
                 className="group flex items-center justify-between p-8 md:p-10 transition-colors duration-200"
                 style={{
@@ -441,7 +442,7 @@ export function CTASection() {
                 >
                   →
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -411,12 +411,16 @@ export function BlockModal({
                 className="text-[0.78rem] leading-relaxed"
                 style={{ color: tb }}
               >
+                Tutti i pack rilasciano l&apos;attestazione{" "}
                 <span className="font-bold" style={{ color: accentColor }}>
-                  Pack PRO ed ELITE
+                  Functional Strength Master Coach
+                </span>
+                . I pack{" "}
+                <span className="font-bold" style={{ color: accentColor }}>
+                  PRO ed ELITE
                 </span>{" "}
-                includono 2 Masterclass a scelta tra le 8 disponibili — sessioni
-                intensive in presenza con specialisti di caratura
-                internazionale.
+                aggiungono la certificazione ufficiale Personal Trainer FIPE ×
+                Lacertosus e 2 Masterclass a scelta tra le 8 disponibili.
               </p>
             </div>
           </div>

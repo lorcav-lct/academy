@@ -133,6 +133,8 @@ export const TEACHERS: Teacher[] = [
     courses: ["strength"],
     image_url: "/docenti/antonio-squillante.webp",
     color: BRAND,
+    talkTitle:
+      "Allenamento della forza in preparazione atletica & Principi di programmazione e periodizzazione",
   },
   {
     slug: "massimiliano-febbi",

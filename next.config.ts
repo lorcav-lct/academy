@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         destination: "/masterclass/:slug",
         permanent: true,
       },
+      {
+        source: "/corsi/:slug",
+        destination: "/percorso/:slug",
+        permanent: true,
+      },
     ];
   },
 };

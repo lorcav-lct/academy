@@ -12,6 +12,23 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0bis. Certificazioni 2026-04-29
+
+Due certificazioni distinte:
+
+- **Functional Strength Master Coach** — attestazione interna Lacertosus, inclusa in **TUTTI i pack** (START, PRO, ELITE). Si ottiene al termine del percorso.
+- **Personal Trainer FIPE × Lacertosus** — certificazione ufficiale FIPE, riconoscimento nazionale, inclusa **SOLO in PRO ed ELITE**.
+
+Riferimenti chiave nel codice:
+
+- `src/lib/constants/packs.ts` — `includes` dei bundle aggiornati
+- `src/components/home/pack-preview.tsx` — `CARD_COPY`, `MODAL_COPY`, `valueStackExtras`, footer note
+- `src/components/home/certification-section.tsx` — narrativa "due certificazioni" in home
+- `src/components/percorso/percorso-block-detail.tsx` — banda dedicata "Certificazione che chiude il blocco" con due card affiancate (Master Coach + FIPE)
+- `src/components/shared/block-modal.tsx` — copy info pack aggiornata
+
+Vecchia copy "FIPE × Lacertosus inclusa in PRO ed ELITE" → sostituita dalla narrativa a due livelli.
+
 ## 0. Rebrand sistemico 2026-04-27
 
 Cambio terminologico e cromatico applicato a tutto il sito. Lo schema vecchio NON e piu valido.
@@ -149,12 +166,12 @@ Conseguenza per agenti:
 Pagine pubbliche principali:
 
 - `/` home marketing
-- `/percorso` percorso formativo
+- `/percorso` percorso formativo (overview redesign 2026-04-29)
+- `/percorso/[slug]` dettaglio singolo blocco (SSG, function/strength/science)
 - `/pack` confronto pack e acquisto
 - `/docenti` griglia docenti
 - `/masterclass` indice masterclass
 - `/masterclass/[slug]` dettaglio masterclass
-- `/corsi/[slug]` dettaglio blocco corso
 - `/checkout` pagina di riepilogo pre-Stripe
 - `/conferma` pagina post-checkout
 
@@ -184,6 +201,7 @@ Area admin:
 Route duplicate/legacy:
 
 - `/workshop` e `/workshop/[slug]` ora rimossi: redirect 301 → `/masterclass` e `/masterclass/[slug]` (vedi `next.config.ts`)
+- `/corsi/[slug]` rimosso: redirect 301 → `/percorso/[slug]` (vedi `next.config.ts`); `src/components/courses/` cartella eliminata
 - `/admin/hero` duplica la UI di `/admin/contenuti/hero`
 
 ## 7. Flussi principali
@@ -997,7 +1015,7 @@ La pagina `/pack` e stata ridisegnata. File principale: `src/components/packs/pa
      - ELITE: head + body entrambi premium dark (BRUSHED_STEEL_OVERLAY + gradient)
    - **START copy**: tagline incentrata sul valore brand Lacertosus ("Accedi al metodo Lacertosus nella sua forma più pura..."), audience aspirazionale ("Per chi vuole entrare nell'Academy.")
    - **Niente roman numeral** nell'header
-   - **Niente badge "Consigliato"** su PRO. ELITE conserva ribbon "Full Experience" top-right
+   - **Niente badge "Consigliato"** su PRO. ELITE conserva ribbon "VIP Experience" top-right
    - **Blocchi sempre visibili e prominenti**: 3 tile FUNCTION/STRENGTH/SCIENCE in tutte le card
    - **ELITE `heroExtra`**: nuovo campo in `CardCopy` per callout luxury "Vitto & Alloggio inclusi" — renderizzato PRIMA della lista extras con icona bed-svg, gradient arancio + corner ornament radiale, eyebrow "★ L'Esperienza Esclusiva", title big + sub descrittivo
    - **Tier extras**: header "In più" (o "Inoltre" se c'e heroExtra) con `+ Certificazione FIPE`, `+ 2 Masterclass`, etc. Vitto/Alloggio rimosso dalla lista extras ELITE perche promosso a heroExtra

@@ -47,19 +47,19 @@ function getCourseRef(slug: string): CourseRef {
   if (slug === "function")
     return {
       label: "FUNCTION",
-      href: "/corsi/function",
+      href: "/percorso/function",
       type: "Blocco Formativo",
     };
   if (slug === "strength")
     return {
       label: "STRENGTH",
-      href: "/corsi/strength",
+      href: "/percorso/strength",
       type: "Blocco Formativo",
     };
   if (slug === "science")
     return {
       label: "SCIENCE",
-      href: "/corsi/science",
+      href: "/percorso/science",
       type: "Blocco Formativo",
     };
   const workshop = WORKSHOPS.find((w) => w.slug === slug);

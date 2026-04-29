@@ -327,14 +327,14 @@ export function PercorsoTimeline() {
             variants={fadeUp}
             className="text-3xl font-black tracking-tight sm:text-4xl mb-4 text-academy-gray-100"
           >
-            Calendario Formativo
+            Il Calendario Completo
           </motion.h2>
           <motion.p
             variants={fadeUp}
             className="mx-auto max-w-xl text-[0.9rem] text-academy-gray-400"
           >
-            9 mesi di formazione strutturata. Ogni blocco si costruisce sulle
-            fondamenta del precedente.
+            Naviga i 9 mesi mese per mese: 3 blocchi formativi e 3 sessioni
+            FIPE, ogni evento con date e contenuti.
           </motion.p>
         </motion.div>
 

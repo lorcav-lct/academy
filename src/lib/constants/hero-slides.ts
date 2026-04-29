@@ -37,10 +37,10 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: "default-3",
-    title_white: "CERTIFICAZIONE",
-    title_orange: "FIPE × LACERTOSUS.",
+    title_white: "DUE CERTIFICAZIONI",
+    title_orange: "RICONOSCIUTE.",
     description:
-      "L'unica certificazione che combina riconoscimento federale e metodologia Lacertosus. Inclusa nel percorso completo.",
+      "Functional Strength Master Coach in tutti i pack. Personal Trainer FIPE × Lacertosus — riconosciuta a livello nazionale e internazionale — nei pack PRO ed ELITE.",
     cta_label: "Scopri i Pack",
     cta_href: "#pack",
     bg_image_url: null,

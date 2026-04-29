@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
-import { PercorsoTimeline } from "@/components/percorso/percorso-timeline";
 import { PercorsoHero } from "@/components/percorso/percorso-hero";
+import { PercorsoBlocks } from "@/components/percorso/percorso-blocks";
 import { PercorsoOutcome } from "@/components/percorso/percorso-outcome";
+import { PercorsoTimeline } from "@/components/percorso/percorso-timeline";
 import { TrainingHubSection } from "@/components/home/training-hub-section";
 
 export const metadata: Metadata = {
-  title: "Il Percorso Formativo",
+  title: "Il Percorso — Diventa Personal Trainer FIPE × Lacertosus",
   description:
-    "Scopri il percorso FUNCTION → STRENGTH → SCIENCE: 9 mesi di formazione in presenza per diventare un professionista del fitness completo.",
+    "9 mesi di formazione in presenza con 33+ docenti specialisti: Functional Training, Strength & Conditioning, recupero, nutrizione e business del fitness. Certificazione Personal Trainer FIPE × Lacertosus inclusa nei pack PRO ed ELITE.",
 };
 
 export default function PercorsoPage() {
   return (
     <>
       <PercorsoHero />
-      <PercorsoTimeline />
+      <div id="blocchi">
+        <PercorsoBlocks />
+      </div>
       <PercorsoOutcome />
+      <PercorsoTimeline />
       <TrainingHubSection />
     </>
   );

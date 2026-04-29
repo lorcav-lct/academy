@@ -645,19 +645,20 @@ export function WhyLacertosus() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-mono text-[0.65rem] font-bold tracking-[0.28em] uppercase text-academy-orange">
-                Certificazione ufficiale
+                Le due certificazioni
               </p>
               <p
                 className="mt-1 text-[0.95rem] font-black"
                 style={{ color: TEXT_PRIMARY }}
               >
-                FIPE × Lacertosus
+                Master Coach + FIPE × Lacertosus
               </p>
               <p
                 className="mt-1 text-[0.78rem]"
                 style={{ color: TEXT_SECONDARY }}
               >
-                Doppia certificazione nazionale e internazionale — inclusa.
+                Master Coach in tutti i pack · FIPE riconosciuta nazionale e
+                internazionale.
               </p>
             </div>
           </div>

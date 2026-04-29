@@ -14,6 +14,7 @@ import {
 } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
+import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
@@ -496,12 +497,6 @@ function JourneySection({
                         CERT.
                       </span>
                     </div>
-                    <span
-                      className="text-[0.6rem] font-black tracking-[0.25em] uppercase"
-                      style={{ color: "rgba(240,146,38,0.85)" }}
-                    >
-                      FIPE
-                    </span>
                   </div>
                 </>
               )}
@@ -732,7 +727,7 @@ function JourneySection({
               </span>
             </div>
           </div>
-          {/* Certificazione */}
+          {/* Certificazioni */}
           <div
             className="flex items-center gap-3 px-5 py-4"
             style={{
@@ -742,26 +737,64 @@ function JourneySection({
             }}
           >
             <span
-              className="text-[1.7rem] font-black leading-none"
+              className="text-[1.7rem] font-black leading-none tabular-nums"
               style={{ color: "#F09226" }}
             >
-              ✦
+              2
             </span>
             <div>
               <span
                 className="text-[0.6rem] font-black tracking-[0.24em] uppercase block"
                 style={{ color: th }}
               >
-                FIPE × Lacertosus
+                Certificazioni
               </span>
               <span
                 className="text-[0.55rem] font-bold tracking-[0.15em] uppercase"
                 style={{ color: ts }}
               >
-                Certificazione ufficiale
+                Master Coach + FIPE × Lacertosus
               </span>
             </div>
           </div>
+        </motion.div>
+
+        {/* ─── Certificazioni — prominent dual cards ─────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.75 }}
+          className="mt-16 md:mt-20"
+        >
+          <div className="mb-8 max-w-3xl">
+            <span
+              className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-4 block"
+              style={{ color: "#F09226" }}
+            >
+              — Le Certificazioni Incluse
+            </span>
+            <h3
+              className="font-black tracking-[-0.025em] leading-[0.95]"
+              style={{
+                fontSize: "clamp(1.9rem, 3.8vw, 3rem)",
+                color: th,
+              }}
+            >
+              Due titoli <span className="gradient-text">riconosciuti</span>.
+              <br />
+              Una carriera reale.
+            </h3>
+            <p
+              className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed"
+              style={{ color: tb }}
+            >
+              Al termine del percorso ricevi due certificazioni distinte. Una è
+              inclusa in qualunque pack, l&apos;altra è riservata ai pack PRO ed
+              ELITE per chi vuole il riconoscimento FIPE ufficiale.
+            </p>
+          </div>
+
+          <CertificationsCards isDark={isDark} />
         </motion.div>
       </div>
     </section>
@@ -796,10 +829,13 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     headline:
       "La certificazione FIPE che fa la differenza nel mercato professionale.",
     promise:
-      "Il percorso completo + la doppia certificazione FIPE × Lacertosus + 2 Masterclass a scelta tra 8 sessioni esclusive. Il pack scelto da chi punta in alto.",
+      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE × Lacertosus (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 8 sessioni esclusive. Il pack scelto da chi punta in alto.",
     guarantees: [
-      { label: "FIPE × Lacertosus", sub: "Doppia certificazione ufficiale" },
-      { label: "33+ docenti", sub: "Specialisti di caratura nazionale" },
+      {
+        label: "Personal Trainer FIPE",
+        sub: "Riconoscimento nazionale e internazionale",
+      },
+      { label: "Master Coach", sub: "Certificazione nazionale Lacertosus" },
       { label: "2 Masterclass", sub: "A scelta su 8 sessioni esclusive" },
     ],
   },
@@ -811,7 +847,10 @@ const MODAL_COPY: Record<string, ModalCopy> = {
       "Tutto del pack PRO + vitto e alloggio inclusi per i 6 weekend formativi. Accesso prioritario alla community e agli eventi riservati. Vivi il percorso a 360°.",
     guarantees: [
       { label: "Vitto & Alloggio", sub: "Inclusi per tutti i 6 weekend" },
-      { label: "FIPE × Lacertosus", sub: "Doppia certificazione ufficiale" },
+      {
+        label: "Personal Trainer FIPE",
+        sub: "Riconoscimento nazionale e internazionale",
+      },
       { label: "Accesso prioritario", sub: "Eventi riservati e network" },
     ],
   },
@@ -929,10 +968,15 @@ function PackModal({
   const isElite = isEliteSlug;
 
   const valueStackExtras: { label: string; sub: string }[] = [];
+  // Sempre incluso (tutti i pack)
+  valueStackExtras.push({
+    label: "Functional Strength Master Coach",
+    sub: "Certificazione nazionale Lacertosus inclusa in tutti i pack",
+  });
   if (isPro || isElite) {
     valueStackExtras.push({
-      label: "Certificazione FIPE × Lacertosus",
-      sub: "Riconoscimento professionale nazionale ufficiale",
+      label: "Personal Trainer FIPE × Lacertosus",
+      sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale",
     });
     valueStackExtras.push({
       label: "2 Masterclass a scelta su 8",
@@ -1631,33 +1675,31 @@ type CardCopy = {
   ctaLabel: string;
 };
 
-/* 8 masterclass disponibili — minimal pill list, mostrato sotto il PRO/ELITE */
-const MASTERCLASS_PILLS: { slug: string; label: string }[] = [
-  { slug: "master-functional-bulgarian", label: "Bulgarian" },
-  { slug: "master-strength", label: "Strength" },
-  { slug: "master-calcio", label: "Calcio" },
-  { slug: "master-volley", label: "Pallavolo" },
-  { slug: "master-hyrox", label: "Hyrox" },
-  { slug: "master-rugby", label: "Rugby" },
-  { slug: "master-running", label: "Running" },
-  { slug: "master-sport-combattimento", label: "Combat" },
-];
-
 const CARD_COPY: Record<string, CardCopy> = {
   start: {
     tagline:
       "Accedi al metodo Lacertosus nella sua forma più pura. Tre blocchi formativi guidati dai migliori docenti del settore.",
     audience: "Per chi vuole entrare nell'Academy.",
-    extras: [],
+    extras: [
+      {
+        text: "Functional Strength Master Coach",
+        sub: "Certificazione nazionale Lacertosus inclusa",
+      },
+    ],
     ctaLabel: "Scegli START",
   },
   pro: {
-    tagline: "Il percorso completo + la certificazione che fa la differenza.",
+    tagline:
+      "Il percorso completo + la certificazione FIPE riconosciuta a livello nazionale e internazionale.",
     audience: "Per chi vuole costruire una carriera riconosciuta.",
     extras: [
       {
-        text: "Certificazione FIPE × Lacertosus",
-        sub: "Riconoscimento professionale nazionale",
+        text: "Functional Strength Master Coach",
+        sub: "Certificazione nazionale Lacertosus inclusa",
+      },
+      {
+        text: "Personal Trainer FIPE × Lacertosus",
+        sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
         text: "2 Masterclass a scelta su 8",
@@ -1667,7 +1709,7 @@ const CARD_COPY: Record<string, CardCopy> = {
     ctaLabel: "Scegli PRO",
   },
   elite: {
-    badge: "Full Experience",
+    badge: "VIP Experience",
     tagline:
       "Vivi i 6 weekend di formazione da insider. Vitto e alloggio inclusi, niente di operativo a cui pensare.",
     audience: "Per chi sceglie di concentrarsi solo sulla formazione.",
@@ -1678,8 +1720,12 @@ const CARD_COPY: Record<string, CardCopy> = {
     },
     extras: [
       {
-        text: "Certificazione FIPE × Lacertosus",
-        sub: "Riconoscimento professionale nazionale",
+        text: "Functional Strength Master Coach",
+        sub: "Certificazione nazionale Lacertosus inclusa",
+      },
+      {
+        text: "Personal Trainer FIPE × Lacertosus",
+        sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
         text: "2 Masterclass a scelta su 8",
@@ -2040,33 +2086,6 @@ function PackCard({
                 </div>
               ))}
             </div>
-
-            {/* Masterclass — minimal horizontal list, wraps on overflow (PRO + ELITE) */}
-            {(isPro || isElite) && (
-              <div className="mt-4">
-                <span
-                  className="text-[0.55rem] font-bold tracking-[0.22em] uppercase block mb-2"
-                  style={{ color: bodyTextMuted }}
-                >
-                  Le 8 masterclass disponibili
-                </span>
-                <div
-                  className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[0.72rem] leading-[1.6] font-semibold"
-                  style={{ color: bodyTextSecondary }}
-                >
-                  {MASTERCLASS_PILLS.map((m, i) => (
-                    <span key={m.slug} className="contents">
-                      {i > 0 && (
-                        <span aria-hidden style={{ color: bodyTextMuted }}>
-                          ·
-                        </span>
-                      )}
-                      <span>{m.label}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

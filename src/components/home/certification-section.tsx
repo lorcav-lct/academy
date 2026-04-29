@@ -207,59 +207,110 @@ export function CertificationSection() {
 
           {/* Text */}
           <div ref={textRef}>
-            <span className="label-tag mb-3 block">
-              Certificazione Professionale
-            </span>
+            <span className="label-tag mb-3 block">Le Due Certificazioni</span>
             <h2
               data-cert-head
               className="mb-6 text-[clamp(1.7rem,3.5vw,3rem)] font-black leading-[1.05] tracking-tight"
             >
-              Un titolo riconosciuto.{" "}
-              <span className="gradient-text">
-                Un professionista credibile.
-              </span>
+              Due titoli <span className="gradient-text">riconosciuti</span>.
+              <br />
+              Una carriera reale.
             </h2>
+            <p className="mb-8 max-w-lg text-sm leading-relaxed text-academy-gray-400">
+              Al termine del percorso ricevi due certificazioni distinte. Una è
+              inclusa in qualunque pack, l&apos;altra è riservata ai pack PRO ed
+              ELITE per chi vuole il riconoscimento FIPE ufficiale.
+            </p>
 
-            <div className="space-y-5">
-              {[
-                {
-                  n: "01",
-                  title: "Valore ufficiale nel settore",
-                  body: "La certificazione FIPE × LACERTOSUS è riconosciuta da datori di lavoro, palestre e strutture sportive in tutta Italia.",
-                },
-                {
-                  n: "02",
-                  title: "Approccio teorico-pratico",
-                  body: "La valutazione delle competenze include prove pratiche sul campo, non solo esami scritti.",
-                },
-                {
-                  n: "03",
-                  title: "Immediatamente spendibile",
-                  body: "Dal giorno del conseguimento puoi utilizzare il titolo per esercitare la professione e aprire il tuo Training Hub.",
-                },
-              ].map((item) => (
-                <div key={item.n} data-cert-item className="flex gap-5">
-                  <span className="mt-0.5 shrink-0 text-[0.75rem] font-black text-academy-orange/50">
-                    {item.n}
+            <div className="flex flex-col gap-4">
+              {/* Master Coach — included in all */}
+              <div
+                data-cert-item
+                className="relative p-5"
+                style={{
+                  background: "rgba(240,146,38,0.05)",
+                  border: "1.5px solid rgba(240,146,38,0.32)",
+                  borderLeft: "4px solid #F09226",
+                }}
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span
+                    className="text-[0.58rem] font-black tracking-[0.3em] uppercase"
+                    style={{ color: "#F09226" }}
+                  >
+                    ✦ Inclusa in tutti i pack
                   </span>
-                  <div>
-                    <p className="mb-1 text-sm font-bold text-academy-gray-200">
-                      {item.title}
-                    </p>
-                    <p className="text-xs leading-relaxed text-academy-gray-500">
-                      {item.body}
-                    </p>
-                  </div>
+                  <span
+                    className="shrink-0 px-2 py-0.5 text-[0.52rem] font-black tracking-[0.22em] uppercase"
+                    style={{
+                      color: "#F09226",
+                      background: "rgba(240,146,38,0.1)",
+                      border: "1px solid rgba(240,146,38,0.4)",
+                    }}
+                  >
+                    Start · Pro · Elite
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p className="text-[1.1rem] font-black leading-tight tracking-tight text-academy-gray-100">
+                  Functional Strength Master Coach
+                </p>
+                <p
+                  className="mt-1 text-[0.6rem] font-black tracking-[0.22em] uppercase"
+                  style={{ color: "rgba(240,146,38,0.85)" }}
+                >
+                  Riconoscimento Nazionale
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-academy-gray-400">
+                  Certificazione Lacertosus rilasciata al termine dei 9 mesi di
+                  percorso. Abilita all&apos;esercizio della professione e
+                  attesta competenza sul Functional Strength.
+                </p>
+              </div>
 
-            {/* Badge */}
-            <div className="mt-8 inline-flex items-center gap-3 border border-academy-orange/20 bg-academy-orange/5 px-5 py-3">
-              <span className="text-academy-orange">✦</span>
-              <span className="text-xs font-bold tracking-wider text-academy-orange uppercase">
-                FIPE × LACERTOSUS — Certificazione inclusa nel percorso completo
-              </span>
+              {/* FIPE × Lacertosus — Pro/Elite only */}
+              <div
+                data-cert-item
+                className="relative p-5"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(240,146,38,0.16) 0%, rgba(240,146,38,0.04) 100%)",
+                  border: "2px solid rgba(240,146,38,0.65)",
+                  boxShadow: "0 0 24px rgba(240,146,38,0.15)",
+                }}
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span
+                    className="text-[0.58rem] font-black tracking-[0.3em] uppercase"
+                    style={{ color: "#F09226" }}
+                  >
+                    ★ Solo Pack Pro &amp; Elite
+                  </span>
+                  <span
+                    className="shrink-0 px-2 py-0.5 text-[0.52rem] font-black tracking-[0.22em] uppercase"
+                    style={{
+                      color: "#111111",
+                      background: "#F09226",
+                    }}
+                  >
+                    Pro · Elite
+                  </span>
+                </div>
+                <p className="text-[1.1rem] font-black leading-tight tracking-tight text-academy-gray-100">
+                  Personal Trainer FIPE × Lacertosus
+                </p>
+                <p
+                  className="mt-1 text-[0.6rem] font-black tracking-[0.22em] uppercase"
+                  style={{ color: "#F09226" }}
+                >
+                  Riconoscimento Nazionale e Internazionale
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-academy-gray-400">
+                  Certificazione ufficiale FIPE × Lacertosus, spendibile in
+                  palestre, centri sportivi e strutture di performance in Italia
+                  e all&apos;estero. Il titolo che fa la differenza nel mercato
+                  professionale.
+                </p>
+              </div>
             </div>
           </div>
         </div>
