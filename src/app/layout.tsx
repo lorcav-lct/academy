@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Saira } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
@@ -55,6 +56,7 @@ export default function RootLayout({
           <Footer />
           <ScrollProgress />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
