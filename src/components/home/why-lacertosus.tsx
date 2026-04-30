@@ -571,19 +571,48 @@ export function WhyLacertosus() {
             </ul>
           </div>
 
-          {/* RISPOSTA — DARK anchor card */}
+          {/* RISPOSTA — Vimeo bg con blur + dark overlay */}
           <div
             ref={responseCardRef}
-            className="flex flex-col justify-between p-7 md:p-8 lg:col-span-5"
+            className="relative flex flex-col justify-between overflow-hidden p-7 md:p-8 lg:col-span-5"
             style={{
               background: DARK_CARD_BG,
               border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            <p className="text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
+            {/* Vimeo background — stesso pattern della cohort card */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+            >
+              <iframe
+                src="https://player.vimeo.com/video/1188022841?background=1&autoplay=1&loop=1&muted=1&quality=360p&dnt=1"
+                title="La Risposta background"
+                loading="lazy"
+                allow="autoplay; fullscreen"
+                suppressHydrationWarning
+                className="absolute left-1/2 top-1/2 min-h-full min-w-full"
+                style={{
+                  aspectRatio: "16 / 9",
+                  border: 0,
+                  filter: "blur(14px) brightness(1) saturate(1.05)",
+                  /* translate centra, scale nasconde i bordi sfocati */
+                  transform: "translate(-50%, -50%) scale(1.08)",
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(10,10,14,0.45) 0%, rgba(10,10,14,0.68) 100%)",
+                }}
+              />
+            </div>
+
+            <p className="relative z-10 text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
               ✓&ensp;La Risposta
             </p>
-            <div className="mt-6">
+            <div className="relative z-10 mt-6">
               <p
                 className="text-[clamp(1.3rem,2.2vw,1.9rem)] font-black leading-[1.15]"
                 style={{ color: DARK_TEXT_PRIMARY }}
