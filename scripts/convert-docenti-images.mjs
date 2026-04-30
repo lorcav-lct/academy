@@ -1,5 +1,5 @@
 import { mkdir, readdir, stat } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { join, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
@@ -8,29 +8,59 @@ const ROOT = join(__dirname, "..");
 const SRC_DIR = join(ROOT, "public", "ACADEMY-FILES", "docenti-edit");
 const OUT_DIR = join(ROOT, "public", "docenti");
 
+// Single mapping table — filenames are matched case-insensitively against keys.
 const FILE_TO_SLUG = {
-  "ANTONIOSQUILLANTE.png": "antonio-squillante",
-  "CORATELLAGIUSEPPE.png": "giuseppe-coratella",
-  "GUIDOBELLI.png": "guido-belli",
-  "SamueleMarcora.png": "samuele-marcora",
+  // Initial batch
+  "antoniosquillante.png": "antonio-squillante",
+  "coratellagiuseppe.png": "giuseppe-coratella",
+  "guidobelli.png": "guido-belli",
+  "samuelemarcora.png": "samuele-marcora",
   "pierluigimauro.png": "pierluigi-mauro",
   "marcomagnani.png": "marco-magnani",
-  "RiccardoAimini.png": "riccardo-aimini",
+  "riccardoaimini.png": "riccardo-aimini",
+  // 30-04 batch
+  "alexlodovisi.png": "alex-lodovisi",
+  "andreaquarto.png": "andrea-quarto",
+  "angelozullo.png": "angelo-zullo",
+  "fabriziobramati.png": "fabrizio-bramati",
+  "francescocampa.png": "francesco-campa",
+  "lucacerri.png": "luca-cerri",
+  "massimilianofebbi.png": "massimiliano-febbi",
+  "matteoromanazzi.png": "matteo-romanazzi",
+  "matteoseghedoni.png": "matteo-seghedoni",
+  "riccardocapello.png": "riccardo-capello",
+  "sandrobartolomei.png": "sandro-bartolomei",
+  "tommasomazzia.png": "tommaso-mazzia",
 };
 
 const fmtKB = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
 
+async function* walk(dir) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      yield* walk(full);
+    } else if (entry.isFile()) {
+      yield full;
+    }
+  }
+}
+
 await mkdir(OUT_DIR, { recursive: true });
 
-const entries = await readdir(SRC_DIR);
 let totalIn = 0;
 let totalOut = 0;
 let converted = 0;
+const skipped = [];
 
-for (const file of entries) {
-  const slug = FILE_TO_SLUG[file];
-  if (!slug) continue;
-  const input = join(SRC_DIR, file);
+for await (const input of walk(SRC_DIR)) {
+  const base = basename(input).toLowerCase();
+  const slug = FILE_TO_SLUG[base];
+  if (!slug) {
+    if (/\.(png|jpe?g)$/i.test(base)) skipped.push(input);
+    continue;
+  }
   const output = join(OUT_DIR, `${slug}.webp`);
   const inStat = await stat(input);
   await sharp(input).webp({ quality: 82, effort: 6 }).toFile(output);
@@ -39,16 +69,18 @@ for (const file of entries) {
   totalOut += outStat.size;
   converted++;
   const ratio = ((1 - outStat.size / inStat.size) * 100).toFixed(1);
+  const rel = input.replace(SRC_DIR, "").replace(/^[\\/]/, "");
   console.log(
-    `✓ ${file} → ${slug}.webp  (${fmtKB(inStat.size)} → ${fmtKB(outStat.size)}, -${ratio}%)`,
+    `✓ ${rel} → ${slug}.webp  (${fmtKB(inStat.size)} → ${fmtKB(outStat.size)}, -${ratio}%)`,
   );
 }
 
-const unmapped = entries.filter(
-  (f) => !FILE_TO_SLUG[f] && /\.(png|jpe?g)$/i.test(f),
-);
-if (unmapped.length) {
-  console.log(`\n⚠ Skipped (no slug mapping): ${unmapped.join(", ")}`);
+if (skipped.length) {
+  console.log(
+    `\n⚠ Skipped (no slug mapping):\n  ${skipped
+      .map((s) => s.replace(SRC_DIR, "").replace(/^[\\/]/, ""))
+      .join("\n  ")}`,
+  );
 }
 
 console.log(

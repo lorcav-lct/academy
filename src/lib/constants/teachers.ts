@@ -30,6 +30,7 @@ export const TEACHERS: Teacher[] = [
     role: "Professore Associato — Università degli Studi di Padova",
     bio: "Responsabile dell'insegnamento di Composizione Corporea nel Corso di Laurea in Scienze Motorie all'Università di Padova. Autore di oltre 100 pubblicazioni scientifiche internazionali, è riconosciuto tra i principali esperti a livello globale nella metodologia di valutazione della composizione corporea. La sua ricerca integra rigore scientifico e applicazione pratica con implicazioni in ambito clinico, sportivo e della performance umana.",
     courses: ["function"],
+    image_url: "/docenti/francesco-campa.webp",
     color: BRAND,
     talkTitle:
       "Metodologie avanzate per la valutazione della composizione corporea e loro applicazioni in ambito clinico e sportivo",
@@ -59,6 +60,7 @@ export const TEACHERS: Teacher[] = [
     role: "Docente presso SUISM",
     bio: "Ricercatore in biomeccanica e analisi del movimento, docente presso SUISM (Università di Torino).",
     courses: ["function"],
+    image_url: "/docenti/matteo-romanazzi.webp",
     color: BRAND,
     talkTitle:
       "Analisi biomeccanica strumentale degli esercizi per l'ottimizzazione della performance e la prevenzione degli infortuni",
@@ -69,6 +71,7 @@ export const TEACHERS: Teacher[] = [
     role: "International Performance Coach | Co-Founder FitFam Sport & Conditioning",
     bio: "Co-fondatore di FitFam Sport & Conditioning, formatore di S&C con riconoscimento internazionale.",
     courses: ["function"],
+    image_url: "/docenti/luca-cerri.webp",
     color: BRAND,
     talkTitle:
       "Teoria e applicazione dell'allenamento funzionale per la general population",
@@ -92,6 +95,7 @@ export const TEACHERS: Teacher[] = [
     role: "Assistant Professor — Università di Bologna",
     bio: "Assistant Professor in tenure track presso il Dipartimento di Scienze per la Qualità della Vita dell'Università di Bologna. PhD, MS, CPO.",
     courses: ["strength"],
+    image_url: "/docenti/sandro-bartolomei.webp",
     color: BRAND,
     talkTitle:
       "Periodizzazione dell'allenamento e cambiamenti nell'architettura muscolare conseguenti all'allenamento di forza",
@@ -112,6 +116,7 @@ export const TEACHERS: Teacher[] = [
     role: "Fitness & Sport Entrepreneur — Atleta Nazionale Italiana Para Powerlifting",
     bio: "Atleta della Nazionale Italiana di Para Powerlifting, ex Ufficiale Incursore, coach ufficiale di Stato Maggiore Marina Militare e imprenditore nel settore fitness.",
     courses: ["strength", "master-strength"],
+    image_url: "/docenti/andrea-quarto.webp",
     color: BRAND,
     talkTitle:
       "Fondamentali di Squat, Panca e Stacco: errori, schemi motori e varianti",
@@ -122,6 +127,7 @@ export const TEACHERS: Teacher[] = [
     role: "International Performance Coach | Co-Founder FitFam Sport & Conditioning",
     bio: "Co-fondatore di FitFam Sport & Conditioning, formatore di S&C con riconoscimento internazionale.",
     courses: ["strength"],
+    image_url: "/docenti/tommaso-mazzia.webp",
     color: BRAND,
     talkTitle: "Strength & Conditioning per lo sviluppo dell'atleta moderno",
   },
@@ -142,6 +148,7 @@ export const TEACHERS: Teacher[] = [
     role: "Fisioterapista • Performance Scientist • Researcher",
     bio: "Professore Ordinario di Fisioterapia, Direttore del Corso di Laurea in Fisioterapia presso ACS Asomi College of Health Sciences, Direttore della Tactical Performance Academy e Head of Performance & Rehab Services della Nazionale Italiana di Pugilato.",
     courses: ["strength"],
+    image_url: "/docenti/massimiliano-febbi.webp",
     color: BRAND,
     talkTitle:
       "Forza, condizionamento, prehab e recovery per la prontezza operativa nel lungo termine",
@@ -152,6 +159,7 @@ export const TEACHERS: Teacher[] = [
     role: "Maresciallo Paracadutisti dell'Esercito Italiano — S&C Coach Forze Speciali",
     bio: "Maresciallo Paracadutisti dell'Esercito Italiano, Strength & Conditioning Coach presso il Comando delle Forze Speciali.",
     courses: ["strength"],
+    image_url: "/docenti/angelo-zullo.webp",
     color: BRAND,
     talkTitle:
       "Forza, condizionamento, prehab e recovery per la prontezza operativa nel lungo termine",
@@ -174,6 +182,7 @@ export const TEACHERS: Teacher[] = [
     role: "Fitness Entrepreneur",
     bio: "Imprenditore nel settore fitness, fondatore di strutture di allenamento di riferimento.",
     courses: ["science"],
+    image_url: "/docenti/riccardo-capello.webp",
     color: BRAND,
   },
   {
@@ -228,6 +237,7 @@ export const TEACHERS: Teacher[] = [
     role: "Multi-Club Owner — Fitness Centers",
     bio: "Imprenditore nel settore fitness, multi-club owner di centri di allenamento.",
     courses: ["science"],
+    image_url: "/docenti/alex-lodovisi.webp",
     color: BRAND,
   },
   {
@@ -236,6 +246,7 @@ export const TEACHERS: Teacher[] = [
     role: "Founder ATT1TUD",
     bio: "Founder di ATT1TUD, esperto di metodo, relazione e precisione nell'allenamento.",
     courses: ["science"],
+    image_url: "/docenti/fabrizio-bramati.webp",
     color: BRAND,
     talkTitle: "ATT1TUD — Metodo, relazione e precisione",
   },
@@ -263,6 +274,7 @@ export const TEACHERS: Teacher[] = [
     role: "Marketing & Business Strategist",
     bio: "Esperto di marketing strategico e brand building nel settore del business.",
     courses: ["science"],
+    image_url: "/docenti/matteo-seghedoni.webp",
     color: BRAND,
     talkTitle:
       "Costruire un brand che genera valore: strategie tra marketing e business",
