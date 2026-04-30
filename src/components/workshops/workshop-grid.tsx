@@ -141,39 +141,51 @@ function formatPriceClean(cents: number): string {
 /* ──────────────────────────────────────────────────────────────
    HERO
 ─────────────────────────────────────────────────────────────── */
-function HeroSection({ isDark }: { isDark: boolean }) {
+function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-50px" });
 
-  const th = isDark ? "#f5f5fa" : "#0a0a1a";
-  const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
-  const ts = isDark ? "rgba(120,120,140,0.55)" : "#888888";
-  const borderSubtle = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
-  const ghost = isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.03)";
+  // Forced-dark hero (transparent navbar treatment with white nav text)
+  const isDark = true;
+  const th = "#f5f5fa";
+  const tb = "rgba(180,180,200,0.7)";
+  const ts = "rgba(140,140,160,0.6)";
+  const borderSubtle = "rgba(255,255,255,0.08)";
+  const ghost = "rgba(255,255,255,0.03)";
 
   return (
     <section
       ref={sectionRef}
-      className="themed-section relative flex min-h-[92vh] items-center overflow-hidden pt-24"
+      className="relative flex min-h-[92vh] items-center overflow-hidden pt-24"
+      style={{ color: th }}
     >
-      <div className="absolute inset-0 section-bg" />
-
-      {/* Soft radial wash */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="absolute inset-0"
         style={{
-          background: isDark
-            ? `radial-gradient(ellipse at 72% 48%, rgba(${ORANGE_RGB},0.06) 0%, transparent 55%)`
-            : `radial-gradient(ellipse at 72% 48%, rgba(${ORANGE_RGB},0.06) 0%, transparent 50%)`,
+          background:
+            "radial-gradient(ellipse at 70% 30%, rgba(240,146,38,0.06) 0%, transparent 55%), linear-gradient(180deg, #0a0a0e 0%, #0d0d12 60%, #0a0a0e 100%)",
         }}
       />
 
-      {/* Grid like home hero */}
+      {/* Orange chrome grid + radial vignette (matches home hero) */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.022]"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(to right, ${isDark ? "#fff" : "#000"} 1px, transparent 1px), linear-gradient(to bottom, ${isDark ? "#fff" : "#000"} 1px, transparent 1px)`,
-          backgroundSize: "80px 80px",
+          backgroundImage:
+            "linear-gradient(rgba(240,146,38,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(240,146,38,0.25) 1px, transparent 1px)",
+          backgroundSize: "88px 88px",
+          maskImage:
+            "radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)",
+        }}
+      />
+      {/* Soft orange wash on center (matches home hero) */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 55% at 50% 50%, rgba(240,146,38,0.08) 0%, transparent 60%)",
         }}
       />
 
@@ -1018,7 +1030,7 @@ export function WorkshopGrid() {
 
   return (
     <>
-      <HeroSection isDark={isDark} />
+      <HeroSection />
       <ManifestoSection isDark={isDark} />
       <MasterclassListSection isDark={isDark} />
       <FinalCTA isDark={isDark} />

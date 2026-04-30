@@ -75,7 +75,7 @@ function getCourseRef(slug: string): CourseRef {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
-function DocentiHero({ isDark, total }: { isDark: boolean; total: number }) {
+function DocentiHero({ total }: { total: number }) {
   const heroRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
 
@@ -100,28 +100,39 @@ function DocentiHero({ isDark, total }: { isDark: boolean; total: number }) {
     };
   }, [total]);
 
-  const subBg = isDark
-    ? "linear-gradient(180deg, rgba(67,67,67,0.4) 0%, rgba(10,10,14,0.0) 100%)"
-    : "linear-gradient(180deg, rgba(240,240,240,0.7) 0%, rgba(255,255,255,0) 100%)";
+  const isDark = true;
+  const subBg =
+    "radial-gradient(ellipse at 70% 30%, rgba(240,146,38,0.06) 0%, transparent 55%), linear-gradient(180deg, #0a0a0e 0%, #0d0d12 60%, rgba(13,13,18,0.96) 100%)";
 
   return (
     <section
       ref={heroRef}
       className="relative overflow-hidden"
-      style={{ background: subBg }}
+      style={{ background: subBg, color: "#f5f5f7" }}
     >
-      {/* Grid lines bg */}
+      {/* Orange chrome grid + radial vignette (matches home hero) */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-          color: isDark ? "#fff" : "#000",
+            "linear-gradient(rgba(240,146,38,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(240,146,38,0.25) 1px, transparent 1px)",
+          backgroundSize: "88px 88px",
+          maskImage:
+            "radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)",
+        }}
+      />
+      {/* Soft orange wash on center (matches home hero) */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 55% at 50% 50%, rgba(240,146,38,0.08) 0%, transparent 60%)",
         }}
       />
 
-      <div className="relative mx-auto max-w-[1440px] px-[5%] md:px-10 pt-12 pb-20 md:pt-20 md:pb-28">
+      <div className="relative mx-auto max-w-[1440px] px-[5%] md:px-10 pt-32 pb-20 md:pt-40 md:pb-28">
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -272,7 +283,7 @@ function TeacherCard({
     <button
       onClick={() => onClick(teacher)}
       data-teacher-card
-      className="group relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange transition-transform duration-500 hover:-translate-y-1"
+      className="group relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange transition-transform duration-500 hover:-translate-y-1 overflow-hidden"
       style={{
         background: isDark ? "#0d0d12" : "#ffffff",
         border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -281,8 +292,8 @@ function TeacherCard({
     >
       <TeacherPortrait
         teacher={teacher}
-        sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 30vw"
-        priority={index < 4}
+        sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 33vw"
+        priority={index < 3}
         fallbackTheme={isDark ? "dark" : "light"}
       />
 
@@ -309,37 +320,40 @@ function TeacherCard({
         {courseLabel}
       </span>
 
-      {/* Body */}
-      <div className="px-5 py-5 md:px-6 md:py-6">
+      {/* Bottom overlay: name + role over image */}
+      <div
+        className="absolute inset-x-0 bottom-0 z-10 px-4 pt-16 pb-4 md:px-5 md:pb-5"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.94) 100%)",
+        }}
+      >
         <h3
-          className="text-[1.05rem] md:text-[1.15rem] font-black leading-[1.1] tracking-tight transition-colors group-hover:text-academy-orange"
-          style={{ color: isDark ? "#f5f5f7" : "#111111" }}
+          className="text-[1.05rem] md:text-[1.18rem] font-black leading-[1.15] tracking-tight text-white transition-colors group-hover:text-academy-orange"
+          style={{
+            textShadow: "0 1px 12px rgba(0,0,0,0.55)",
+          }}
         >
           {teacher.name}
         </h3>
         <p
-          className="mt-2 text-[0.7rem] font-bold tracking-[0.18em] uppercase line-clamp-2"
-          style={{ color: ORANGE }}
+          className="mt-1.5 text-[0.7rem] md:text-[0.72rem] font-bold tracking-[0.18em] uppercase line-clamp-2"
+          style={{
+            color: ORANGE,
+            textShadow: "0 1px 10px rgba(0,0,0,0.6)",
+          }}
         >
           {teacher.role}
         </p>
-
-        {/* Subtle hover affordance */}
-        <div
-          className="mt-4 flex items-center gap-2 text-[0.62rem] font-bold tracking-[0.24em] uppercase opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ color: ORANGE }}
-        >
-          <span>Apri profilo</span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path
-              d="M2 6h8M6 2l4 4-4 4"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="square"
-            />
-          </svg>
-        </div>
       </div>
+
+      {/* Hover orange accent border */}
+      <span
+        className="pointer-events-none absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{
+          boxShadow: `inset 0 0 0 1px rgba(${ORANGE_RGB},0.6)`,
+        }}
+      />
     </button>
   );
 }
@@ -629,7 +643,7 @@ export function TeachersGrid() {
 
   return (
     <>
-      <DocentiHero isDark={isDark} total={TEACHERS.length} />
+      <DocentiHero total={TEACHERS.length} />
 
       {/* Filter bar — sticky-ish */}
       <div
@@ -692,7 +706,7 @@ export function TeachersGrid() {
       <div className="mx-auto max-w-[1440px] px-[5%] md:px-10 py-12 md:py-16">
         <div
           ref={cardsRef}
-          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
           {filtered.map((teacher, i) => (
             <TeacherCard

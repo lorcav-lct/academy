@@ -12,6 +12,52 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0quat. Aggiornamenti 2026-04-30 (PM) — Hero dark Docenti + Masterclass
+
+Allineamento visivo `/docenti`, `/masterclass`, `/masterclass/[slug]` al linguaggio dark cinematic dei block detail (`/percorso/{function|strength|science}`).
+
+### Navbar — over-hero dark esteso
+
+`src/components/layout/navbar.tsx`
+
+- Nuove flag: `isMasterclassRoute = pathname === "/masterclass" || pathname.startsWith("/masterclass/")` e `isDarkHeroRoute = isBlockDetailRoute || pathname === "/docenti" || isMasterclassRoute`.
+- `overHeroDark = (pathname === "/" || isDarkHeroRoute) && !scrolled` → su queste pagine la navbar parte trasparente con logo + link bianchi e diventa la versione standard al primo scroll (oltre soglia).
+
+### Hero `/docenti`
+
+`src/app/docenti/page.tsx` + `src/components/docenti/teachers-grid.tsx`
+
+- Rimosso `pt-24` da `<main>` per far passare l'hero sotto la navbar.
+- `DocentiHero` forzato dark (`isDark = true` interno, niente più prop), padding-top `pt-32 md:pt-40` per clearance navbar, sfondo `radial-gradient(...orange 0.06) + linear-gradient(#0a0a0e → #0d0d12)`.
+- Grid griglia card: da `sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` a `sm:grid-cols-2 lg:grid-cols-3` (max 3 colonne).
+- `TeacherCard` ridisegnata: rimosso il body sotto l'immagine; il portrait è full-card con name + main role overlaid in basso (gradient nero 0%→94% + `text-shadow` per leggibilità). Mantenuti index marker top-left (mono) e badge corso top-right (arancio). Hover: sottile bordo arancio inset.
+
+### Hero `/masterclass` (lista)
+
+`src/components/workshops/workshop-grid.tsx`
+
+- `HeroSection` non riceve più la prop `isDark`, è hardcoded dark (palette interna `th/tb/ts/borderSubtle/ghost`).
+- Rimosso `themed-section` + `<div .section-bg />`: sostituito da bg inline dark gradient.
+- Le altre sezioni della pagina (`ManifestoSection`, `MasterclassListSection`, `FinalCTA`) seguono ancora il tema utente.
+
+### Hero `/masterclass/[slug]` (dettaglio)
+
+`src/components/workshops/workshop-detail.tsx`
+
+- Stesso trattamento: `HeroSection` senza prop `isDark`, forzato dark internamente, `themed-section` + `section-bg` rimossi, bg inline dark.
+- `TrainerSpotlight`, `HookSection`, `CurriculumSection`, ecc. continuano a usare `isDark={isDark}` dal parent → seguono il tema utente.
+
+### Grid pattern condiviso (docenti + masterclass list + masterclass detail)
+
+Replica esatta della griglia dell'hero home (`StaticGrid`):
+
+- linee `linear-gradient(rgba(240,146,38,0.25) 1px, transparent 1px)` su entrambi gli assi
+- `backgroundSize: 88px 88px`
+- `maskImage: radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)` → centro pulito, griglia visibile verso bordi/angoli
+- - soft wash arancio centrale `radial-gradient(ellipse 55% 55% at 50% 50%, rgba(240,146,38,0.08) 0%, transparent 60%)`
+
+---
+
 ## 0ter. Aggiornamenti 2026-04-30
 
 Sessione di rifinitura UX home + integrazioni di terze parti. Modifiche principali:
@@ -894,7 +940,7 @@ File: `src/components/layout/navbar.tsx`.
 ### Flags di colore
 
 - `scrolled = pastHero && y > 30` dove `pastHero = document.getElementById("perche")?.getBoundingClientRect().top <= 0`
-- `overHeroDark = pathname === "/" && !scrolled` (home sopra-fold → trattamento dark-bg)
+- `overHeroDark = (pathname === "/" || isDarkHeroRoute) && !scrolled` dove `isDarkHeroRoute` copre `/percorso/{function|strength|science}`, `/docenti`, `/masterclass`, `/masterclass/[slug]` → tutte le pagine con hero cinematic dark (vedi §0quat)
 - `onDarkBg = overHeroDark || isMobileViewport` (mobile ha sempre bg dietro scuro per il blur condizionale — vedi sotto)
 - `isDark = onDarkBg ? true : (theme === "dark")` (= sempre false post-forzatura light)
 

@@ -259,7 +259,11 @@ export function Navbar() {
     pathname === "/percorso/function" ||
     pathname === "/percorso/strength" ||
     pathname === "/percorso/science";
-  const overHeroDark = (pathname === "/" || isBlockDetailRoute) && !scrolled;
+  const isMasterclassRoute =
+    pathname === "/masterclass" || pathname.startsWith("/masterclass/");
+  const isDarkHeroRoute =
+    isBlockDetailRoute || pathname === "/docenti" || isMasterclassRoute;
+  const overHeroDark = (pathname === "/" || isDarkHeroRoute) && !scrolled;
   // Mobile navbar has a dark gradient background always → nav text is white always.
   const onDarkBg = overHeroDark || isMobileViewport;
   const isDark = onDarkBg ? true : theme === "dark";
