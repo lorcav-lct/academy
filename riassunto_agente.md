@@ -12,6 +12,130 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0ter. Aggiornamenti 2026-04-30
+
+Sessione di rifinitura UX home + integrazioni di terze parti. Modifiche principali:
+
+### Hero "Due Certificazioni" (S3 desktop / P4 mobile)
+
+`src/components/home/hero-section.tsx`
+
+- Slide ridisegnato come **doppia card affiancata** (desktop) / **stacked** (mobile):
+  - card 01 "Functional Strength Master Coach" (interna, badge "Tutti i pack")
+  - card 02 "Personal Trainer FIPE × Lacertosus" (federale, badge "PRO & ELITE", bordo arancio + glow)
+- **Vimeo bg full-width** edge-to-edge (`https://player.vimeo.com/video/1188018710?background=1&autoplay=1&loop=1&muted=1&quality=360p&dnt=1`):
+  - wrapper s3Ref ora senza `max-w-[1440px]`, contenuto avvolto in `<div relative z-10 max-w-[1440px] mx-auto>`
+  - iframe con `aspect-ratio: 16/9` + `min-w-full min-h-full` + `translate(-50%,-50%) scale(1.08)` per cover senza letterbox
+  - filter `blur(14px) brightness(0.6) saturate(1.05)`
+  - layer overlay scuro `linear-gradient(135deg, rgba(10,10,14,0.6) → 0.82)`
+  - **orange chrome grid + radial vignette mask** (stesso pattern di `GridChromeBg`) sopra al video
+  - **spotlight radiale** centrale `rgba(240,146,38,0.08)` per dare risalto alle card
+  - `suppressHydrationWarning` sull'iframe (Vimeo aggiunge `data-ready` post-mount)
+- **Exit fade-out rimosso da s3Ref**: il contenuto resta visibile fino a fine pin del hero (P4 hold esteso a 0.16). Solo la grid decorativa fa fade.
+- KPI mobile: `n: 8` → `n: 9` per "Masterclass".
+
+### WhyLacertosus — video bg sulle dark anchor card
+
+`src/components/home/why-lacertosus.tsx`
+
+- **COHORT 001** (§02): Vimeo `1188010863` come bg con blur(14px) + tint scuro. Stesso pattern cover dell'hero.
+- **La Risposta** (§01): Vimeo `1188022841` come bg con `grayscale(1) blur(14px) brightness(0.85)` + tint scuro 0.55→0.78.
+- Entrambe le card hanno `relative overflow-hidden` sul wrapper, contenuto promosso a `relative z-10`, corner brackets con `z-10`. Il `DARK_CARD_BG_BRAND` resta come fallback.
+
+### Home page changes
+
+`src/app/page.tsx`
+
+- Rimosso `<CTASection />` dopo il FAQ (e relativo import). La home termina con FAQ.
+
+### Footer
+
+`src/components/layout/footer.tsx`
+
+- Colonna **Masterclass** generata dinamicamente da `WORKSHOPS` (tutte le 9 masterclass).
+- Nuova colonna **Legali** con 4 link `href="#"` placeholder: Privacy Policy, Cookie Policy, Condizioni di vendita, Diritto di recesso.
+- Grid passata da `md:grid-cols-4` a `md:grid-cols-2 lg:grid-cols-5` per ospitare la 5° colonna.
+
+### Pack modal — sezione docenti + nuova sezione masterclass
+
+`src/components/home/pack-preview.tsx`
+
+- **Docenti mobile**: nuovo grid `grid-cols-2` con `TeacherPortrait` (4:5 + overlay nome/ruolo, stesso pattern di `/docenti`). Da `sm` in su resta il layout compatto avatar 36px + nome.
+- **Nuova sezione 4b "Le Masterclass"** tra GUARANTEES e FACULTY:
+  - condizionata su `(pack.masterclassSelectionCount ?? 0) > 0` → visibile solo per PRO/ELITE, **non per START**
+  - elenca tutte le 9 masterclass da `WORKSHOPS` con indice 01..09, titolo, trainerLabel, badge `TBD` per i workshop in finalizzazione
+  - stile light coerente con sezioni adiacenti
+
+### Numero masterclass: 8 → 9 ovunque
+
+Aggiornati tutti i riferimenti hard-coded:
+
+- `src/lib/constants/packs.ts` — `includes` PRO + ELITE
+- `src/components/packs/masterclass-selector.tsx` — copy "tra 9 specializzazioni"
+- `src/components/packs/pack-comparison.tsx` — promise PRO + guarantees + valueStack
+- `src/components/home/pack-preview.tsx` — guarantees + valueStack + promise
+- `src/components/home/hero-section.tsx` — copy desktop+mobile + `CountUp to={9}` + KPI mobile `n: 9`
+- `src/components/home/stats-section.tsx` — stat "9 workshop"
+- `src/components/home/workshop-preview.tsx` — headline "9 Masterclass. 9 Specializzazioni."
+- `src/components/workshops/workshop-grid.tsx` — STATS + ELITE callout + masterclass disponibili
+- `src/components/workshops/workshop-detail.tsx` — 2 FAQ
+- `src/components/shared/block-modal.tsx` — copy info pack
+- `src/app/masterclass/page.tsx` — metadata description (con lista corretta dei 9 nomi: aggiunto Strength + Running, rimosso "Endurance" inesistente)
+
+### Navbar — user dropdown allineato all'area personale
+
+`src/components/layout/navbar.tsx`
+
+- Dropdown utente: `bg-[#07071e]/95` (vecchio blu pre-rebrand) → `bg-academy-dark/95` (`#1a1a1a`).
+- Avatar trigger: `bg-academy-orange/15` come [account-shell.tsx:83](src/app/account/_components/account-shell.tsx#L83).
+- Header del dropdown con avatar 40×40 + nome + email (pattern shell area utente).
+- Voci nav riallineate a Dashboard/Ordini/Ticket con icone da `IconHome / IconBag / IconTicket` importate da `@/app/account/_components/icons`.
+- Logout con `IconLogout` + hover red-600 (light) / red-400 (dark).
+- Bordi divisori `border-(white|black)/[0.06]`. Larghezza `w-64`.
+
+### Hydration warnings — fix
+
+- `<body suppressHydrationWarning>` in `src/app/layout.tsx` per coprire estensioni browser (ColorZilla aggiunge `cz-shortcut-listen="true"` al body prima di React).
+- `<iframe suppressHydrationWarning>` su tutti i bg Vimeo (Vimeo player aggiunge `data-ready="true"` post-mount).
+
+### Favicon — convenzione App Router
+
+- `public/favicon.png` spostato a `src/app/icon.png` (Next.js auto-injetta `<link rel="icon">`).
+- Copia in `src/app/apple-icon.png` per iOS.
+- `src/app/favicon.ico` multi-size 16/32/48 generato via `sharp` + `png-to-ico` (15 KB) per coprire la richiesta legacy `/favicon.ico` dei browser. `png-to-ico` installato con `--no-save`, non in `package.json`.
+
+### Iubenda cookie banner
+
+`src/app/layout.tsx`
+
+- Script Iubenda iniettato globalmente via `<Script src="https://embeds.iubenda.com/widgets/546d6ee3-6a15-47ee-8751-1d64465669d6.js" strategy="afterInteractive" />`.
+- Si carica dopo l'idratazione, attivo su tutte le pagine.
+
+### Pattern "Vimeo background" (riusabile)
+
+Tutti e 4 i punti (S3/P4 hero + Cohort + Risposta) usano lo stesso pattern. Se in futuro serve centralizzarlo, candidato a `<VimeoBackdrop videoId="..." filter="..." overlay="..." />`. Componente non ancora estratto.
+
+```tsx
+<div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+  <iframe
+    src="https://player.vimeo.com/video/{ID}?background=1&autoplay=1&loop=1&muted=1&quality=360p&dnt=1"
+    loading="lazy"
+    allow="autoplay; fullscreen"
+    suppressHydrationWarning
+    className="absolute left-1/2 top-1/2 min-h-full min-w-full"
+    style={{
+      aspectRatio: "16 / 9",
+      border: 0,
+      filter: "blur(14px) brightness(0.7)",
+      transform: "translate(-50%, -50%) scale(1.08)",
+    }}
+  />
+  {/* tint scuro + eventuali grid/spotlight */}
+</div>
+```
+
+---
+
 ## 0bis. Certificazioni 2026-04-29
 
 Due certificazioni distinte:
