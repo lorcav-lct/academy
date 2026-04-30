@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/providers/theme-provider";
 import { getPackBySlug, type AcademyProduct } from "@/lib/constants/packs";
 import { getWorkshopBySlug, type Workshop } from "@/lib/constants/workshops";
@@ -28,6 +28,14 @@ const TIER_LABEL: Record<string, string> = {
   pro: "PRO",
   elite: "ELITE",
 };
+
+const TIER_TAGLINE: Record<string, string> = {
+  start: "3 blocchi formativi",
+  pro: "+ FIPE + 2 Masterclass",
+  elite: "+ Vitto e alloggio",
+};
+
+const BUNDLE_SLUGS = ["start", "pro", "elite"] as const;
 
 /* ──────────────────────────────────────────────────────────────
    Helpers
@@ -54,21 +62,334 @@ function splitVat(grossCents: number): { net: number; vat: number } {
 }
 
 /* ──────────────────────────────────────────────────────────────
-   Theme tokens hook
+   Theme tokens hook — palette per tier (bundle) o tema utente
+   - START: bianco / testi scuri
+   - PRO: cream + arancio / testi scuri
+   - ELITE: brushed steel dark / testi bianchi
 ─────────────────────────────────────────────────────────────── */
-function useTokens() {
+type TierTokens = {
+  tier: "start" | "pro" | "elite" | "default";
+  isDark: boolean;
+  bg: string;
+  th: string;
+  tb: string;
+  ts: string;
+  border: string;
+  borderStrong: string;
+  surface: string;
+  surfaceSolid: string;
+  headerBg: string;
+  shadow: string;
+  chipBg: string;
+  tipBg: string;
+};
+
+function useTierTokens(packSlug: string, isBundle: boolean): TierTokens {
   const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const isDarkUser = theme === "dark";
+
+  if (!isBundle) {
+    return {
+      tier: "default",
+      isDark: isDarkUser,
+      bg: isDarkUser ? "#1a1a1a" : "#ffffff",
+      th: isDarkUser ? "#f5f5fa" : "#0a0a1a",
+      tb: isDarkUser ? "rgba(180,180,200,0.65)" : "#555555",
+      ts: isDarkUser ? "rgba(120,120,140,0.55)" : "#888888",
+      border: isDarkUser ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)",
+      borderStrong: isDarkUser ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+      surface: isDarkUser ? "rgba(6,6,16,0.55)" : "rgba(250,250,252,0.7)",
+      surfaceSolid: isDarkUser
+        ? "rgba(10,10,20,0.92)"
+        : "rgba(255,255,255,0.97)",
+      headerBg: isDarkUser ? "rgba(10,10,16,0.85)" : "rgba(255,255,255,0.92)",
+      shadow: isDarkUser
+        ? `0 0 60px rgba(${ORANGE_RGB},0.05)`
+        : "0 8px 32px rgba(0,0,0,0.04)",
+      chipBg: isDarkUser ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)",
+      tipBg: isDarkUser ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
+    };
+  }
+
+  if (packSlug === "elite") {
+    return {
+      tier: "elite",
+      isDark: true,
+      bg: "linear-gradient(165deg, #1f1f1f 0%, #141414 50%, #050505 100%)",
+      th: "#ffffff",
+      tb: "rgba(255,255,255,0.7)",
+      ts: "rgba(255,255,255,0.42)",
+      border: "rgba(255,255,255,0.1)",
+      borderStrong: "rgba(255,255,255,0.18)",
+      surface: "rgba(255,255,255,0.04)",
+      surfaceSolid: "rgba(20,20,24,0.94)",
+      headerBg: "rgba(8,8,10,0.88)",
+      shadow: "0 0 60px rgba(0,0,0,0.4), 0 24px 80px rgba(0,0,0,0.5)",
+      chipBg: "rgba(255,255,255,0.04)",
+      tipBg: "rgba(255,255,255,0.025)",
+    };
+  }
+
+  if (packSlug === "pro") {
+    return {
+      tier: "pro",
+      isDark: false,
+      bg: "#F5F5F7",
+      th: "#0a0a14",
+      tb: "#3d3d44",
+      ts: "#7a7a82",
+      border: "rgba(240,146,38,0.22)",
+      borderStrong: "rgba(240,146,38,0.45)",
+      surface: "#ffffff",
+      surfaceSolid: "#ffffff",
+      headerBg: "rgba(245,245,247,0.92)",
+      shadow: `0 0 60px rgba(${ORANGE_RGB},0.12), 0 8px 32px rgba(0,0,0,0.04)`,
+      chipBg: "rgba(17,17,17,0.03)",
+      tipBg: `rgba(${ORANGE_RGB},0.05)`,
+    };
+  }
+
+  // start
   return {
-    isDark,
-    th: isDark ? "#f5f5fa" : "#0a0a1a",
-    tb: isDark ? "rgba(180,180,200,0.65)" : "#555555",
-    ts: isDark ? "rgba(120,120,140,0.55)" : "#888888",
-    border: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)",
-    borderStrong: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
-    surface: isDark ? "rgba(6,6,16,0.55)" : "rgba(250,250,252,0.7)",
-    surfaceSolid: isDark ? "rgba(10,10,20,0.92)" : "rgba(255,255,255,0.97)",
+    tier: "start",
+    isDark: false,
+    bg: "#ffffff",
+    th: "#0a0a14",
+    tb: "#3d3d44",
+    ts: "#7a7a82",
+    border: "rgba(0,0,0,0.08)",
+    borderStrong: "rgba(0,0,0,0.14)",
+    surface: "#fafafa",
+    surfaceSolid: "#ffffff",
+    headerBg: "rgba(255,255,255,0.94)",
+    shadow: "0 8px 32px rgba(0,0,0,0.04)",
+    chipBg: "rgba(0,0,0,0.025)",
+    tipBg: "rgba(0,0,0,0.015)",
   };
+}
+
+function formatPriceClean(cents: number): string {
+  return `€ ${new Intl.NumberFormat("it-IT").format(Math.round(cents / 100))}`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Payment brand logos (compact inline SVG)
+─────────────────────────────────────────────────────────────── */
+type PaymentBrand = "visa" | "mastercard" | "amex" | "applepay" | "googlepay";
+
+function PaymentLogo({ brand }: { brand: PaymentBrand }) {
+  const baseChip =
+    "flex h-[26px] w-[42px] shrink-0 items-center justify-center";
+  const lightChip = {
+    background: "#ffffff",
+    border: "1px solid rgba(0,0,0,0.08)",
+    borderRadius: "3px",
+  };
+
+  if (brand === "visa") {
+    return (
+      <span className={baseChip} style={lightChip} role="img" aria-label="Visa">
+        <svg viewBox="0 0 38 12" width="34" height="11" aria-hidden="true">
+          <text
+            x="19"
+            y="10"
+            textAnchor="middle"
+            fontFamily="Arial, Helvetica, sans-serif"
+            fontWeight={900}
+            fontSize={11}
+            fontStyle="italic"
+            letterSpacing="0.02em"
+            fill="#1A1F71"
+          >
+            VISA
+          </text>
+        </svg>
+      </span>
+    );
+  }
+
+  if (brand === "mastercard") {
+    return (
+      <span
+        className={baseChip}
+        style={lightChip}
+        role="img"
+        aria-label="Mastercard"
+      >
+        <svg viewBox="0 0 32 20" width="26" height="16" aria-hidden="true">
+          <circle cx="12" cy="10" r="7.2" fill="#EB001B" />
+          <circle cx="20" cy="10" r="7.2" fill="#F79E1B" />
+          <path
+            d="M16 4.6c1.6 1.3 2.6 3.2 2.6 5.4S17.6 14.1 16 15.4c-1.6-1.3-2.6-3.2-2.6-5.4S14.4 5.9 16 4.6z"
+            fill="#FF5F00"
+          />
+        </svg>
+      </span>
+    );
+  }
+
+  if (brand === "amex") {
+    return (
+      <span
+        className={baseChip}
+        style={{
+          background: "#1F72CD",
+          border: "1px solid rgba(0,0,0,0.08)",
+          borderRadius: "3px",
+        }}
+        role="img"
+        aria-label="American Express"
+      >
+        <svg viewBox="0 0 38 12" width="34" height="10" aria-hidden="true">
+          <text
+            x="19"
+            y="10"
+            textAnchor="middle"
+            fontFamily="Arial, Helvetica, sans-serif"
+            fontWeight={900}
+            fontSize={9.5}
+            letterSpacing="0.05em"
+            fill="#ffffff"
+          >
+            AMEX
+          </text>
+        </svg>
+      </span>
+    );
+  }
+
+  if (brand === "applepay") {
+    return (
+      <span
+        className={baseChip}
+        style={lightChip}
+        role="img"
+        aria-label="Apple Pay"
+      >
+        <svg viewBox="0 0 36 14" width="32" height="12" aria-hidden="true">
+          {/* Apple silhouette */}
+          <path
+            fill="#000"
+            transform="translate(2 1)"
+            d="M8.4 1.43c0 .58-.21 1.13-.62 1.55-.45.5-1.16.88-1.74.84-.07-.55.2-1.13.59-1.5.43-.46 1.18-.81 1.77-.89zM10.6 9.5c-.36.55-.74 1.05-1.34 1.06-.59.01-.78-.34-1.45-.34-.67 0-.88.34-1.44.36-.58.02-1.02-.6-1.39-1.14-.74-1.07-1.31-3.04-.55-4.37.39-.66 1.07-1.07 1.81-1.08.56-.01 1.1.39 1.45.39.35 0 1.01-.48 1.7-.41.29.01 1.11.12 1.64.88-.04.03-.99.58-.98 1.72.01 1.36 1.18 1.81 1.2 1.82-.02.04-.18.65-.65 1.11z"
+          />
+          {/* "Pay" wordmark */}
+          <text
+            x="14"
+            y="10"
+            fontFamily="Arial, Helvetica, sans-serif"
+            fontWeight={700}
+            fontSize={7.5}
+            fill="#000"
+            letterSpacing="0.02em"
+          >
+            Pay
+          </text>
+        </svg>
+      </span>
+    );
+  }
+
+  // googlepay
+  return (
+    <span
+      className={baseChip}
+      style={lightChip}
+      role="img"
+      aria-label="Google Pay"
+    >
+      <svg viewBox="0 0 36 14" width="32" height="12" aria-hidden="true">
+        {/* Multicolor G + "Pay" */}
+        <text
+          x="2"
+          y="10"
+          fontFamily="Arial, Helvetica, sans-serif"
+          fontWeight={700}
+          fontSize={9}
+          letterSpacing="-0.01em"
+        >
+          <tspan fill="#4285F4">G</tspan>
+        </text>
+        <text
+          x="11"
+          y="10"
+          fontFamily="Arial, Helvetica, sans-serif"
+          fontWeight={700}
+          fontSize={7.8}
+          fill="#3C4043"
+          letterSpacing="0.01em"
+        >
+          Pay
+        </text>
+      </svg>
+    </span>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Trust icons (inline SVG)
+─────────────────────────────────────────────────────────────── */
+function IconLock({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 18 18"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="8" width="11" height="7.5" rx="1" />
+      <path d="M6 8V5.5a3 3 0 0 1 6 0V8" />
+      <circle cx="9" cy="11.5" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconRefund({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 18 18"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M3 9a6 6 0 0 1 11-3.5" />
+      <path d="M14 3v3h-3" />
+      <path d="M15 9a6 6 0 0 1-11 3.5" />
+      <path d="M4 15v-3h3" />
+    </svg>
+  );
+}
+
+function IconShieldCheck({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 18 18"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M9 1.8 2.5 4v4.5c0 4 2.8 7 6.5 7.7 3.7-.7 6.5-3.7 6.5-7.7V4L9 1.8z" />
+      <path d="m6.3 9 1.9 1.9 3.5-3.6" />
+    </svg>
+  );
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -80,14 +401,15 @@ function OrderSummary({
   loading,
   unavailable,
   onCheckout,
+  t,
 }: {
   pack: AcademyProduct;
   selectedMc: Workshop[];
   loading: boolean;
   unavailable: boolean;
   onCheckout: () => void;
+  t: TierTokens;
 }) {
-  const t = useTokens();
   const grossCents = getDisplayCents(pack);
   const { net, vat } = splitVat(grossCents);
   const tierLabel = TIER_LABEL[pack.slug] ?? pack.name;
@@ -100,9 +422,7 @@ function OrderSummary({
       style={{
         background: t.surfaceSolid,
         border: `1px solid ${t.borderStrong}`,
-        boxShadow: t.isDark
-          ? `0 0 60px rgba(${ORANGE_RGB},0.05)`
-          : "0 8px 32px rgba(0,0,0,0.04)",
+        boxShadow: t.shadow,
       }}
     >
       {/* Top accent */}
@@ -292,63 +612,79 @@ function OrderSummary({
         )}
 
         {/* Payment methods */}
-        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="mt-6 space-y-2.5">
           <span
-            className="text-[0.55rem] font-black uppercase tracking-[0.22em]"
+            className="block text-[0.55rem] font-black uppercase tracking-[0.22em]"
             style={{ color: t.ts }}
           >
             Accettiamo
           </span>
-          <div className="flex items-center gap-2">
-            {["VISA", "MC", "AMEX", "AP", "GP"].map((m) => (
-              <span
-                key={m}
-                className="px-2 py-1 text-[0.55rem] font-black tracking-[0.1em]"
-                style={{
-                  border: `1px solid ${t.border}`,
-                  color: t.tb,
-                  background: t.isDark
-                    ? "rgba(255,255,255,0.025)"
-                    : "rgba(0,0,0,0.02)",
-                }}
-              >
-                {m}
-              </span>
-            ))}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <PaymentLogo brand="visa" />
+            <PaymentLogo brand="mastercard" />
+            <PaymentLogo brand="amex" />
+            <PaymentLogo brand="applepay" />
+            <PaymentLogo brand="googlepay" />
           </div>
         </div>
       </div>
 
       {/* Trust strip */}
       <div
-        className="grid grid-cols-1 gap-[1px] border-t"
-        style={{ background: t.border, borderColor: t.border }}
+        className="border-t"
+        style={{
+          borderColor: t.border,
+          background: t.surfaceSolid,
+        }}
       >
         {[
-          { icon: "🔒", text: "Pagamento crittografato Stripe" },
-          { icon: "↺", text: "Cancellazione gratuita entro 14 giorni" },
-          { icon: "✓", text: "Nessun vincolo: rateizzazione su richiesta" },
-        ].map((b) => (
+          {
+            Icon: IconLock,
+            title: "Pagamento crittografato",
+            desc: "Stripe · standard PCI-DSS Level 1",
+          },
+          {
+            Icon: IconRefund,
+            title: "14 giorni di recesso",
+            desc: "Cancellazione gratuita prima dell'inizio",
+          },
+          {
+            Icon: IconShieldCheck,
+            title: "Pagamento flessibile",
+            desc: "Rateizzazione disponibile su richiesta",
+          },
+        ].map(({ Icon, title, desc }, i) => (
           <div
-            key={b.text}
-            className="flex items-center gap-3 px-6 py-3 md:px-7"
-            style={{ background: t.surfaceSolid }}
+            key={title}
+            className="flex items-start gap-3.5 px-6 py-4 md:px-7"
+            style={{
+              borderTop: i > 0 ? `1px solid ${t.border}` : "none",
+            }}
           >
             <span
-              className="flex h-6 w-6 shrink-0 items-center justify-center text-[0.85rem]"
+              className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center"
               style={{
-                background: `rgba(${ORANGE_RGB},0.12)`,
+                background: `rgba(${ORANGE_RGB},0.1)`,
+                border: `1px solid rgba(${ORANGE_RGB},0.22)`,
                 color: ORANGE,
               }}
             >
-              {b.icon}
+              <Icon />
             </span>
-            <span
-              className="text-[0.72rem] font-semibold leading-tight"
-              style={{ color: t.tb }}
-            >
-              {b.text}
-            </span>
+            <div className="min-w-0">
+              <p
+                className="text-[0.78rem] font-bold leading-tight"
+                style={{ color: t.th }}
+              >
+                {title}
+              </p>
+              <p
+                className="mt-1 text-[0.7rem] leading-snug"
+                style={{ color: t.ts }}
+              >
+                {desc}
+              </p>
+            </div>
           </div>
         ))}
       </div>
@@ -422,15 +758,145 @@ function MobileStickyBar({
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Pack switcher — segmented control con anteprima per tier
+─────────────────────────────────────────────────────────────── */
+function PackSwitcher({
+  currentSlug,
+  onSwitch,
+  onClose,
+  t,
+}: {
+  currentSlug: string;
+  onSwitch: (slug: string) => void;
+  onClose: () => void;
+  t: TierTokens;
+}) {
+  return (
+    <div
+      className="overflow-hidden"
+      style={{
+        background: t.surface,
+        border: `1px solid ${t.border}`,
+      }}
+    >
+      <div className="flex items-baseline justify-between gap-3 px-6 pt-5 md:px-7">
+        <p
+          className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
+          style={{ color: ORANGE }}
+        >
+          — Scegli un altro pack
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.22em] transition-opacity hover:opacity-70"
+          style={{ color: t.tb }}
+          aria-label="Chiudi selettore pack"
+        >
+          <span aria-hidden className="text-[0.85rem] leading-none">
+            ×
+          </span>
+          <span>Chiudi</span>
+        </button>
+      </div>
+      <div className="grid grid-cols-3 gap-2 p-4 md:p-5">
+        {BUNDLE_SLUGS.map((slug) => {
+          const active = slug === currentSlug;
+          const isElite = slug === "elite";
+          const isPro = slug === "pro";
+          const previewBg = isElite
+            ? "linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 55%, #0a0a0a 100%)"
+            : isPro
+              ? ORANGE
+              : "#ffffff";
+          const previewText = isElite ? "#ffffff" : "#111111";
+          const previewBorder = isElite
+            ? "rgba(255,255,255,0.12)"
+            : isPro
+              ? "rgba(240,146,38,0.55)"
+              : "rgba(0,0,0,0.12)";
+          const priceCents = BUNDLE_PRICE_DISPLAY[slug] ?? 0;
+
+          return (
+            <button
+              key={slug}
+              type="button"
+              onClick={() => !active && onSwitch(slug)}
+              aria-pressed={active}
+              className="group relative flex w-full flex-col text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-academy-orange disabled:cursor-default"
+              style={{
+                outline: active ? `2px solid ${ORANGE}` : "none",
+                outlineOffset: active ? "2px" : "0",
+                opacity: active ? 1 : 0.62,
+                cursor: active ? "default" : "pointer",
+              }}
+            >
+              <div
+                className="px-3 py-3 md:px-4"
+                style={{
+                  background: previewBg,
+                  border: `1px solid ${previewBorder}`,
+                  borderBottom: "none",
+                  color: previewText,
+                }}
+              >
+                <span
+                  className="block text-[0.5rem] font-black uppercase tracking-[0.28em]"
+                  style={{ opacity: 0.7 }}
+                >
+                  Pack
+                </span>
+                <span className="mt-0.5 block text-[1.1rem] font-black leading-none tracking-[-0.01em]">
+                  {TIER_LABEL[slug]}
+                </span>
+              </div>
+              <div
+                className="px-3 py-2.5 md:px-4 md:py-3"
+                style={{
+                  background: t.surfaceSolid,
+                  border: `1px solid ${previewBorder}`,
+                  borderTop: "none",
+                  color: t.th,
+                }}
+              >
+                <span className="block text-[0.95rem] font-black tabular-nums leading-none">
+                  {formatPriceClean(priceCents)}
+                </span>
+                <span
+                  className="mt-1 block text-[0.6rem] leading-tight"
+                  style={{ color: t.ts }}
+                >
+                  {TIER_TAGLINE[slug]}
+                </span>
+              </div>
+              {active && (
+                <span
+                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center text-[0.6rem] font-black"
+                  style={{ background: ORANGE, color: "#111" }}
+                  aria-hidden
+                >
+                  ✓
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
    Main Checkout
 ─────────────────────────────────────────────────────────────── */
 export function CheckoutContent() {
-  const t = useTokens();
   const searchParams = useSearchParams();
   const packSlug = searchParams.get("pack") || "function";
   const mc1 = searchParams.get("mc1") ?? "";
   const mc2 = searchParams.get("mc2") ?? "";
   const pack = getPackBySlug(packSlug);
+  const isBundleSlug = (BUNDLE_SLUGS as readonly string[]).includes(packSlug);
+  const t = useTierTokens(packSlug, isBundleSlug);
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -438,6 +904,7 @@ export function CheckoutContent() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -479,8 +946,8 @@ export function CheckoutContent() {
   if (!pack) {
     return (
       <section
-        className="themed-section relative flex min-h-screen items-center pt-24"
-        style={{ background: "var(--section-bg)" }}
+        className="relative flex min-h-screen items-center pt-24"
+        style={{ background: t.bg }}
       >
         <div className="mx-auto max-w-md px-[5%] text-center md:px-10">
           <span
@@ -584,15 +1051,29 @@ export function CheckoutContent() {
     router.replace(`/checkout?${params.toString()}`, { scroll: false });
   }
 
+  function handleSwitchPack(newSlug: string) {
+    if (newSlug === packSlug) return;
+    const newPack = getPackBySlug(newSlug);
+    const params = new URLSearchParams({ pack: newSlug });
+    // Preserve masterclass selections only if the new pack still requires them
+    const newRequiresMc =
+      newPack?.type === "bundle" &&
+      (newPack?.masterclassSelectionCount ?? 0) > 0;
+    if (newRequiresMc) {
+      if (mc1) params.set("mc1", mc1);
+      if (mc2) params.set("mc2", mc2);
+    }
+    router.replace(`/checkout?${params.toString()}`, { scroll: false });
+    setSwitcherOpen(false);
+  }
+
   return (
     <>
       {/* ─── Top breadcrumb bar ───────────────────────────────── */}
       <div
-        className="themed-section sticky top-0 z-30 border-b"
+        className="sticky top-0 z-30 border-b"
         style={{
-          background: t.isDark
-            ? "rgba(10,10,16,0.85)"
-            : "rgba(255,255,255,0.92)",
+          background: t.headerBg,
           borderColor: t.border,
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
@@ -631,8 +1112,8 @@ export function CheckoutContent() {
 
       {/* ─── Main grid ─────────────────────────────────────────── */}
       <section
-        className="themed-section relative pb-32 pt-12 md:pb-24 md:pt-16"
-        style={{ background: "var(--section-bg)" }}
+        className="relative pb-32 pt-12 md:pb-24 md:pt-16"
+        style={{ background: t.bg }}
       >
         <div className="mx-auto max-w-[1280px] px-[5%] md:px-10">
           {/* Page header */}
@@ -722,14 +1203,68 @@ export function CheckoutContent() {
                         {pack.subtitle}
                       </p>
                     </div>
-                    <Link
-                      href={isBundle ? "/pack" : "/masterclass"}
-                      className="shrink-0 text-[0.66rem] font-bold uppercase tracking-[0.22em] transition-opacity hover:opacity-70"
-                      style={{ color: ORANGE }}
-                    >
-                      Modifica
-                    </Link>
+                    {isBundle ? (
+                      <button
+                        type="button"
+                        onClick={() => setSwitcherOpen((v) => !v)}
+                        aria-expanded={switcherOpen}
+                        aria-controls="pack-switcher"
+                        className="inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[0.66rem] font-bold uppercase tracking-[0.22em] transition-all hover:opacity-80"
+                        style={{
+                          color: ORANGE,
+                          border: `1px solid rgba(${ORANGE_RGB},0.4)`,
+                          background: `rgba(${ORANGE_RGB},0.06)`,
+                        }}
+                      >
+                        <span>Cambia</span>
+                        <span
+                          aria-hidden
+                          className="text-[0.7rem] leading-none transition-transform"
+                          style={{
+                            transform: switcherOpen ? "rotate(180deg)" : "none",
+                          }}
+                        >
+                          ▾
+                        </span>
+                      </button>
+                    ) : (
+                      <Link
+                        href="/masterclass"
+                        className="shrink-0 text-[0.66rem] font-bold uppercase tracking-[0.22em] transition-opacity hover:opacity-70"
+                        style={{ color: ORANGE }}
+                      >
+                        Modifica
+                      </Link>
+                    )}
                   </div>
+
+                  {/* Inline pack switcher (toggled by Cambia) */}
+                  <AnimatePresence initial={false}>
+                    {isBundle && switcherOpen && (
+                      <motion.div
+                        id="pack-switcher"
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{
+                          opacity: 1,
+                          height: "auto",
+                          marginTop: 24,
+                        }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        transition={{
+                          duration: 0.28,
+                          ease: [0.25, 0.46, 0.45, 0.94],
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <PackSwitcher
+                          currentSlug={packSlug}
+                          onSwitch={handleSwitchPack}
+                          onClose={() => setSwitcherOpen(false)}
+                          t={t}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <div
                     className="my-6 h-px w-full"
@@ -995,6 +1530,7 @@ export function CheckoutContent() {
                 loading={loading}
                 unavailable={unavailable}
                 onCheckout={handleCheckout}
+                t={t}
               />
             </motion.aside>
           </div>
