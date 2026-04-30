@@ -595,7 +595,7 @@ export function WhyLacertosus() {
                 style={{
                   aspectRatio: "16 / 9",
                   border: 0,
-                  filter: "blur(14px) brightness(1) saturate(1.05)",
+                  filter: "grayscale(.45) blur(8px) brightness(.8)",
                   /* translate centra, scale nasconde i bordi sfocati */
                   transform: "translate(-50%, -50%) scale(1.08)",
                 }}
