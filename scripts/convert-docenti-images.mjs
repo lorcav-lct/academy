@@ -31,6 +31,22 @@ const FILE_TO_SLUG = {
   "riccardocapello.png": "riccardo-capello",
   "sandrobartolomei.png": "sandro-bartolomei",
   "tommasomazzia.png": "tommaso-mazzia",
+  // 31-04 batch
+  "annadesi.png": "anna-desi",
+  "elisabettaborgia.png": "elisabetta-borgia",
+  "elisasibilla.png": "elisa-sibilla",
+  "ettoredellacasa.png": "enrico-dellacasa", // filename typo: maps to Enrico Della Casa
+  "ettoremendicino.png": "ettore-mendicino",
+  "giacomozennaro.png": "giacomo-zennaro",
+  "gionataraffaelli.png": "gionata-raffaelli",
+  "ivanivanov.png": "ivan-ivanov",
+  "ivanpellizzari.png": "ivan-pellizzari",
+  "lucacollino.png": "luca-collino",
+  "luca_bondi.png": "luca-bondi",
+  "marcobani.png": "marco-bani",
+  "margheritafonsato.png": "margherita-fonsato",
+  "oscarberti.png": "oscar-berti",
+  "simonedoti.png": "simone-doti",
 };
 
 const fmtKB = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;

@@ -52,6 +52,7 @@ export const TEACHERS: Teacher[] = [
     role: "Docente Universitario",
     bio: "Docente esperto di metodologia dell'allenamento e formazione professionale nel settore del Functional Training.",
     courses: ["function", "master-functional-bulgarian"],
+    image_url: "/docenti/marco-bani.webp",
     color: BRAND,
   },
   {
@@ -172,6 +173,7 @@ export const TEACHERS: Teacher[] = [
     role: "Nutrizionista Sportivo & Performance Specialist",
     bio: "Biologo nutrizionista specializzato in nutrizione sportiva e ottimizzazione della performance. Lavora con atleti di discipline endurance, strength e sport ibridi, con un approccio basato su evidenze scientifiche e altamente applicativo. Traduce la complessità della nutrizione in strategie concrete per migliorare composizione corporea, performance e recupero.",
     courses: ["science"],
+    image_url: "/docenti/giacomo-zennaro.webp",
     color: BRAND,
     talkTitle:
       "Nutrizione applicata alla performance: come strutturare l'alimentazione per allenamento, recupero e gara",
@@ -186,11 +188,23 @@ export const TEACHERS: Teacher[] = [
     color: BRAND,
   },
   {
-    slug: "luca-bondi-elisa-sibilla",
-    name: "Luca Bondi & Elisa Sibilla",
-    role: "Psicologi — Ospedale Maggiore Policlinico di Milano",
-    bio: "Psicologi clinici dell'Ospedale Maggiore Policlinico di Milano, esperti del rapporto tra movimento, mente e alimentazione.",
+    slug: "luca-bondi",
+    name: "Luca Bondi",
+    role: "Psicologo — Ospedale Maggiore Policlinico di Milano",
+    bio: "Psicologo clinico dell'Ospedale Maggiore Policlinico di Milano, esperto del rapporto tra movimento, mente e alimentazione.",
     courses: ["science"],
+    image_url: "/docenti/luca-bondi.webp",
+    color: BRAND,
+    talkTitle:
+      "Psicologia del movimento: come l'attività fisica influenza mente e alimentazione",
+  },
+  {
+    slug: "elisa-sibilla",
+    name: "Elisa Sibilla",
+    role: "Psicologa — Ospedale Maggiore Policlinico di Milano",
+    bio: "Psicologa clinica dell'Ospedale Maggiore Policlinico di Milano, esperta del rapporto tra movimento, mente e alimentazione.",
+    courses: ["science"],
+    image_url: "/docenti/elisa-sibilla.webp",
     color: BRAND,
     talkTitle:
       "Psicologia del movimento: come l'attività fisica influenza mente e alimentazione",
@@ -201,6 +215,7 @@ export const TEACHERS: Teacher[] = [
     role: "Sport Psychologist",
     bio: "Psicologa dello sport esperta in mindset, performance e gestione mentale dell'atleta.",
     courses: ["science"],
+    image_url: "/docenti/elisabetta-borgia.webp",
     color: BRAND,
     talkTitle: "Vinci o Impari: il mindset che cambia tutto",
   },
@@ -210,6 +225,7 @@ export const TEACHERS: Teacher[] = [
     role: "Lifestyle & Longevity Coach | Cryotherapy Expert",
     bio: "Lifestyle & Longevity Coach esperto in crioterapia e protocolli di recupero avanzati.",
     courses: ["science"],
+    image_url: "/docenti/simone-doti.webp",
     color: BRAND,
     talkTitle:
       "L'importanza del recupero: strumenti potenti per velocizzare il recupero, migliorare longevità e performance",
@@ -220,15 +236,26 @@ export const TEACHERS: Teacher[] = [
     role: "Specialista in attività fisica adattata",
     bio: "Esperta dell'applicazione dell'attività fisica nei contesti delle malattie neurodegenerative.",
     courses: ["science"],
+    image_url: "/docenti/margherita-fonsato.webp",
     color: BRAND,
     talkTitle: "Attività fisica e malattie neurodegenerative",
   },
   {
-    slug: "jonata-raffaeli",
-    name: "Gionata Raffaelli & Anna Desi",
-    role: "Founders — Centro Aura",
-    bio: "Founders del Centro Aura, struttura di riferimento per il benessere integrato.",
+    slug: "gionata-raffaelli",
+    name: "Gionata Raffaelli",
+    role: "Co-Founder — Centro Aura",
+    bio: "Co-founder del Centro Aura, struttura di riferimento per il benessere integrato.",
     courses: ["science"],
+    image_url: "/docenti/gionata-raffaelli.webp",
+    color: BRAND,
+  },
+  {
+    slug: "anna-desi",
+    name: "Anna Desi",
+    role: "Co-Founder — Centro Aura",
+    bio: "Co-founder del Centro Aura, struttura di riferimento per il benessere integrato.",
+    courses: ["science"],
+    image_url: "/docenti/anna-desi.webp",
     color: BRAND,
   },
   {
@@ -256,6 +283,7 @@ export const TEACHERS: Teacher[] = [
     role: "Performance & Leadership",
     bio: "Esperto di performance, leadership e change management applicati allo sport e alle organizzazioni.",
     courses: ["science"],
+    image_url: "/docenti/ettore-mendicino.webp",
     color: BRAND,
   },
   {
@@ -264,6 +292,7 @@ export const TEACHERS: Teacher[] = [
     role: "International Business Leader | Brand Image, Positioning & Strategic Growth",
     bio: "Oltre vent'anni di esperienza internazionale nello sviluppo dell'immagine e del posizionamento strategico, nella crescita aziendale e nelle partnership internazionali. Ha lavorato in contesti di alto livello tra Europa e Stati Uniti, collaborando con realtà operative nei settori lusso, mobilità e servizi ad alto valore aggiunto, con family office internazionali a Boston e progetti immobiliari di alta gamma tra New York, Berlino, Siena, Amagansett e Ulaanbaatar.",
     courses: ["science"],
+    image_url: "/docenti/enrico-dellacasa.webp",
     color: BRAND,
     talkTitle:
       "Gestire l'immagine: strategie di posizionamento e creazione del valore",
@@ -287,6 +316,7 @@ export const TEACHERS: Teacher[] = [
     role: "Founder & President of Suples | Master Educator, Entrepreneur",
     bio: "Founder e President di Suples, master educator internazionale del Bulgarian Bag Training System.",
     courses: ["master-functional-bulgarian"],
+    image_url: "/docenti/ivan-ivanov.webp",
     color: BRAND,
     talkTitle:
       "Bulgarian Bag Training System: Strength, Power & Conditioning Masterclass",
@@ -297,6 +327,7 @@ export const TEACHERS: Teacher[] = [
     role: "Strength & Conditioning Coach — Modena Volley",
     bio: "Strength & Conditioning Coach di Modena Volley, tra i migliori preparatori nel panorama internazionale della pallavolo.",
     courses: ["master-volley"],
+    image_url: "/docenti/oscar-berti.webp",
     color: BRAND,
     talkTitle:
       "Jump Higher, Play Stronger: la preparazione atletica nella pallavolo",
@@ -307,6 +338,7 @@ export const TEACHERS: Teacher[] = [
     role: "Tecnico Allenatore F.I.T.R.I.",
     bio: "Tecnico Allenatore della Federazione Italiana Triathlon, specialista in running performance, tecnica e prevenzione infortuni.",
     courses: ["master-running"],
+    image_url: "/docenti/ivan-pellizzari.webp",
     color: BRAND,
     talkTitle:
       "Running Science Master — Tecnica, Performance e Prevenzione Infortuni",
@@ -335,6 +367,7 @@ export const TEACHERS: Teacher[] = [
     role: "Sport Therapist — Juventus",
     bio: "Sport Therapist presso la Juventus, specializzato nella prevenzione, recupero e ritorno alla massima performance dei calciatori d'élite.",
     courses: ["master-calcio"],
+    image_url: "/docenti/luca-collino.webp",
     color: BRAND,
     talkTitle:
       "Elite Football Rehab Master — Prevenzione, Recupero e Ritorno alla Massima Performance",
