@@ -48,7 +48,7 @@ export default function RootLayout({
       data-theme="light"
       suppressHydrationWarning
     >
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <Navbar />
           <main className="relative">{children}</main>

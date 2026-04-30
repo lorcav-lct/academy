@@ -668,7 +668,7 @@ export function WhyLacertosus() {
         <MovementHeader num="02" title="La Cohort" headerRef={m2HeaderRef} />
 
         <div className="mb-5 grid gap-4 md:gap-5 lg:grid-cols-12">
-          {/* COHORT 001 HERO — DARK anchor card (navy brand) */}
+          {/* COHORT 001 HERO — Vimeo bg con blur + dark overlay */}
           <div
             ref={cohortCardRef}
             className="relative flex flex-col justify-between overflow-hidden p-7 md:p-10 lg:col-span-8 lg:row-span-2"
@@ -678,11 +678,43 @@ export function WhyLacertosus() {
               minHeight: "380px",
             }}
           >
-            <p className="font-mono text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
+            {/* Vimeo background — quality bassa + lazy load per leggerezza.
+                Trick "cover": iframe min 100%×100% con aspect-ratio 16:9
+                forzato così il video copre la card senza letterbox. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+            >
+              <iframe
+                src="https://player.vimeo.com/video/1188010863?background=1&autoplay=1&loop=1&muted=1&quality=360p&dnt=1"
+                title="Cohort 001 background"
+                loading="lazy"
+                allow="autoplay; fullscreen"
+                suppressHydrationWarning
+                className="absolute left-1/2 top-1/2 min-h-full min-w-full"
+                style={{
+                  aspectRatio: "16 / 9",
+                  border: 0,
+                  filter: "blur(14px) brightness(0.7) saturate(1.05)",
+                  /* translate centra, scale nasconde i bordi sfocati */
+                  transform: "translate(-50%, -50%) scale(1.08)",
+                }}
+              />
+              {/* Tint scuro per leggibilità del testo + coerenza brand */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(10,10,14,0.55) 0%, rgba(10,10,14,0.78) 100%)",
+                }}
+              />
+            </div>
+
+            <p className="relative z-10 font-mono text-[0.7rem] font-black tracking-[0.32em] uppercase text-academy-orange">
               Founding Edition · 2026 / 2027
             </p>
 
-            <div>
+            <div className="relative z-10">
               <div
                 className="text-[clamp(3.2rem,9vw,7rem)] font-black leading-[0.95] tracking-tight tabular-nums text-academy-orange"
                 aria-label="COHORT 001"
@@ -710,22 +742,22 @@ export function WhyLacertosus() {
             {/* Corner brackets arancio */}
             <span
               aria-hidden
-              className="absolute top-4 left-4 h-4 w-4 border-t border-l border-academy-orange"
+              className="absolute top-4 left-4 z-10 h-4 w-4 border-t border-l border-academy-orange"
               style={{ opacity: 0.55 }}
             />
             <span
               aria-hidden
-              className="absolute top-4 right-4 h-4 w-4 border-t border-r border-academy-orange"
+              className="absolute top-4 right-4 z-10 h-4 w-4 border-t border-r border-academy-orange"
               style={{ opacity: 0.55 }}
             />
             <span
               aria-hidden
-              className="absolute bottom-4 left-4 h-4 w-4 border-b border-l border-academy-orange"
+              className="absolute bottom-4 left-4 z-10 h-4 w-4 border-b border-l border-academy-orange"
               style={{ opacity: 0.55 }}
             />
             <span
               aria-hidden
-              className="absolute bottom-4 right-4 h-4 w-4 border-b border-r border-academy-orange"
+              className="absolute bottom-4 right-4 z-10 h-4 w-4 border-b border-r border-academy-orange"
               style={{ opacity: 0.55 }}
             />
           </div>

@@ -1,6 +1,12 @@
 "use client";
 
-import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useTransform,
+  animate,
+} from "framer-motion";
 import { useRef, useEffect } from "react";
 import { SectionContainer } from "@/components/shared/section-container";
 
@@ -13,7 +19,7 @@ interface Stat {
 const stats: Stat[] = [
   { value: 9, suffix: " mesi", label: "Di formazione intensiva" },
   { value: 3, suffix: " blocchi", label: "Formativi progressivi" },
-  { value: 8, suffix: " workshop", label: "Specialistici opzionali" },
+  { value: 9, suffix: " workshop", label: "Specialistici opzionali" },
   { value: 1, suffix: "", label: "Certificazione professionale" },
 ];
 

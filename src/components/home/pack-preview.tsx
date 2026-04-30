@@ -11,6 +11,8 @@ import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import { CertificationsCards } from "@/components/shared/certifications-cards";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
+import { WORKSHOPS } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
 
 // ─── Constants (mirror /pack page, simplified — no price) ───────────────────
@@ -92,7 +94,7 @@ const CARD_COPY: Record<string, CardCopy> = {
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
-        text: "2 Masterclass a scelta su 8",
+        text: "2 Masterclass a scelta su 9",
         sub: "Specialisti di caratura internazionale",
       },
     ],
@@ -118,7 +120,7 @@ const CARD_COPY: Record<string, CardCopy> = {
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
-        text: "2 Masterclass a scelta su 8",
+        text: "2 Masterclass a scelta su 9",
         sub: "Specialisti di caratura internazionale",
       },
       {
@@ -156,14 +158,14 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     headline:
       "La certificazione FIPE che fa la differenza nel mercato professionale.",
     promise:
-      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE × Lacertosus (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 8 sessioni esclusive. Il pack scelto da chi punta in alto.",
+      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE × Lacertosus (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 9 sessioni esclusive. Il pack scelto da chi punta in alto.",
     guarantees: [
       {
         label: "Personal Trainer FIPE",
         sub: "Riconoscimento nazionale e internazionale",
       },
       { label: "Master Coach", sub: "Certificazione nazionale Lacertosus" },
-      { label: "2 Masterclass", sub: "A scelta su 8 sessioni esclusive" },
+      { label: "2 Masterclass", sub: "A scelta su 9 sessioni esclusive" },
     ],
   },
   elite: {
@@ -257,7 +259,7 @@ function PackModal({
       sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale",
     });
     valueStackExtras.push({
-      label: "2 Masterclass a scelta su 8",
+      label: "2 Masterclass a scelta su 9",
       sub: "Specialisti di caratura internazionale",
     });
   }
@@ -768,6 +770,91 @@ function PackModal({
             </div>
           </section>
 
+          {/* ── 4b. MASTERCLASS — LIGHT (solo PRO / ELITE) ───────────── */}
+          {(pack.masterclassSelectionCount ?? 0) > 0 && (
+            <section
+              className="px-6 md:px-10 py-10 md:py-14"
+              style={{
+                background: lightSurface,
+                borderTop: `1px solid ${lightBorder}`,
+              }}
+            >
+              <div className="mb-7">
+                <p
+                  className="mb-2 text-[0.6rem] font-black tracking-[0.3em] uppercase"
+                  style={{ color: ORANGE }}
+                >
+                  — Le Masterclass
+                </p>
+                <h3
+                  className="font-black tracking-[-0.02em] leading-[1.05] text-[clamp(1.3rem,2.4vw,1.9rem)]"
+                  style={{ color: lightTextH }}
+                >
+                  {pack.masterclassSelectionCount} a scelta su{" "}
+                  {WORKSHOPS.length} specializzazioni.
+                </h3>
+                <p
+                  className="mt-3 max-w-[58ch] text-[0.88rem] leading-[1.6]"
+                  style={{ color: lightTextMuted }}
+                >
+                  Sessioni esclusive con i top trainer della community.
+                  Personalizza il tuo percorso scegliendo le specializzazioni
+                  che disegnano la tua identità professionale.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {WORKSHOPS.map((w, i) => (
+                  <div
+                    key={w.slug}
+                    className="group relative flex items-start gap-3.5 p-4 transition-colors"
+                    style={{
+                      background: lightBg,
+                      border: `1px solid ${lightBorder}`,
+                    }}
+                  >
+                    {/* Index */}
+                    <span
+                      className="shrink-0 text-[0.62rem] font-black tracking-[0.18em] tabular-nums leading-none mt-1"
+                      style={{ color: ORANGE }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4
+                          className="text-[0.92rem] font-black leading-[1.2] tracking-[-0.01em]"
+                          style={{ color: lightTextH }}
+                        >
+                          {w.title}
+                        </h4>
+                        {w.tbd && (
+                          <span
+                            className="shrink-0 px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em] uppercase"
+                            style={{
+                              border: `1px solid ${lightBorder}`,
+                              color: lightTextMuted,
+                            }}
+                          >
+                            TBD
+                          </span>
+                        )}
+                      </div>
+                      <p
+                        className="mt-1 text-[0.72rem] leading-snug font-semibold"
+                        style={{ color: ORANGE }}
+                      >
+                        {w.trainerLabel}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* ── 5. FACULTY — LIGHT ────────────────────────── */}
           <section
             className="px-6 md:px-10 py-10 md:py-14"
@@ -802,7 +889,21 @@ function PackModal({
                   >
                     Docenti — {BLOCK_LABELS[slug]}
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {/* Mobile: due colonne con portrait full + overlay nome/ruolo. */}
+                  <div className="grid grid-cols-2 gap-2.5 sm:hidden">
+                    {teachers[slug].map((t) => (
+                      <TeacherPortrait
+                        key={t.slug}
+                        teacher={t}
+                        overlayName
+                        overlayRole={t.role}
+                        fallbackTheme="light"
+                        sizes="50vw"
+                      />
+                    ))}
+                  </div>
+                  {/* Tablet/desktop: grid compatto avatar + nome */}
+                  <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-2">
                     {teachers[slug].map((t) => (
                       <div
                         key={t.slug}

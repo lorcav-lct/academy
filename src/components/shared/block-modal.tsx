@@ -420,7 +420,7 @@ export function BlockModal({
                   PRO ed ELITE
                 </span>{" "}
                 aggiungono la certificazione ufficiale Personal Trainer FIPE ×
-                Lacertosus e 2 Masterclass a scelta tra le 8 disponibili.
+                Lacertosus e 2 Masterclass a scelta tra le 9 disponibili.
               </p>
             </div>
           </div>

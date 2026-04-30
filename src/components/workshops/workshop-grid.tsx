@@ -95,7 +95,7 @@ const CREDENTIALS: Record<string, Credential> = {
 };
 
 const STATS = [
-  { value: "8", label: "Specializzazioni" },
+  { value: "9", label: "Specializzazioni" },
   { value: "15+", label: "Professionisti" },
   { value: "1-2", label: "Giornate intensive" },
   { value: "100%", label: "In presenza" },
@@ -243,7 +243,7 @@ function HeroSection({ isDark }: { isDark: boolean }) {
             className="mt-7 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
             style={{ color: tb }}
           >
-            8 masterclass intensivi con i professionisti che vivono ogni giorno
+            9 masterclass intensivi con i professionisti che vivono ogni giorno
             ciò che insegnano. Performance Coach di Nazionali, S&amp;C di
             squadre di SuperLega, ricercatori universitari tra i più citati al
             mondo.
@@ -938,7 +938,7 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
           >
             I pack <strong style={{ color: th }}>PRO</strong> e{" "}
             <strong style={{ color: th }}>ELITE</strong> includono 2 Masterclass
-            a scelta su 8. Una scelta progettata per costruire una verticalità
+            a scelta su 9. Una scelta progettata per costruire una verticalità
             riconoscibile sul mercato.
           </p>
 
@@ -976,7 +976,7 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
             style={{ background: borderSubtle }}
           >
             {[
-              { v: "8", l: "Masterclass disponibili" },
+              { v: "9", l: "Masterclass disponibili" },
               { v: "2", l: "Inclusi in PRO &amp; ELITE" },
               { v: "€ 500", l: "Acquisto singolo (da)" },
             ].map((s) => (

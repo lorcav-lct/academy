@@ -886,7 +886,7 @@ export function HeroSection({
               className="mx-auto mt-10 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
-              9 mesi in presenza. 33+ docenti. 8 masterclass specialistiche.
+              9 mesi in presenza. 33+ docenti. 9 masterclass specialistiche.
               <br />
               Un percorso progettato come una squadra professionistica.
             </p>
@@ -986,11 +986,11 @@ export function HeroSection({
               </span>
             </div>
 
-            {/* 8 MASTERCLASS */}
+            {/* 9 MASTERCLASS */}
             <div data-reveal className="flex flex-col items-center text-center">
               <div className="relative">
                 <CountUp
-                  to={8}
+                  to={9}
                   duration={1.2}
                   active={countActive}
                   className="font-black leading-[0.85] tabular-nums"
@@ -1051,8 +1051,9 @@ export function HeroSection({
               className="mx-auto mt-6 max-w-2xl text-[clamp(0.95rem,1.1vw,1.05rem)] leading-[1.7]"
               style={{ color: "rgba(255,255,255,0.85)" }}
             >
-              Due riconoscimenti distinti — uno interno firmato Lacertosus, uno internazionale firmato FIPE — pensati
-              per dare valore reale alla tua professione.
+              Due riconoscimenti distinti — uno interno firmato Lacertosus, uno
+              internazionale firmato FIPE — pensati per dare valore reale alla
+              tua professione.
             </p>
           </div>
 
@@ -1676,7 +1677,7 @@ export function HeroSection({
               className="mt-6 text-[0.95rem] leading-[1.65]"
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
-              9 mesi in presenza. 33+ docenti. 8 masterclass specialistiche. Un
+              9 mesi in presenza. 33+ docenti. 9 masterclass specialistiche. Un
               percorso progettato come una squadra professionistica.
             </p>
 
@@ -1753,7 +1754,7 @@ export function HeroSection({
                 },
                 {
                   idx: "03",
-                  n: 8,
+                  n: 9,
                   label: "Masterclass",
                   sub: "Specialistiche",
                   primary: false,
@@ -1838,8 +1839,9 @@ export function HeroSection({
             className="mt-5 text-[0.9rem] leading-[1.65]"
             style={{ color: "rgba(255,255,255,0.85)" }}
           >
-            Due riconoscimenti distinti — uno interno firmato Lacertosus, uno internazionale firmato FIPE — pensati
-            per dare valore reale alla tua professione.
+            Due riconoscimenti distinti — uno interno firmato Lacertosus, uno
+            internazionale firmato FIPE — pensati per dare valore reale alla tua
+            professione.
           </p>
 
           {/* Two certs stacked */}

@@ -791,14 +791,14 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     headline:
       "La certificazione FIPE che fa la differenza nel mercato professionale.",
     promise:
-      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE × Lacertosus (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 8 sessioni esclusive. Il pack scelto da chi punta in alto.",
+      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE × Lacertosus (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 9 sessioni esclusive. Il pack scelto da chi punta in alto.",
     guarantees: [
       {
         label: "Personal Trainer FIPE",
         sub: "Riconoscimento nazionale e internazionale",
       },
       { label: "Master Coach", sub: "Certificazione nazionale Lacertosus" },
-      { label: "2 Masterclass", sub: "A scelta su 8 sessioni esclusive" },
+      { label: "2 Masterclass", sub: "A scelta su 9 sessioni esclusive" },
     ],
   },
   elite: {
@@ -941,7 +941,7 @@ function PackModal({
       sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale",
     });
     valueStackExtras.push({
-      label: "2 Masterclass a scelta su 8",
+      label: "2 Masterclass a scelta su 9",
       sub: "Specialisti di caratura internazionale",
     });
   }
@@ -1664,7 +1664,7 @@ const CARD_COPY: Record<string, CardCopy> = {
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
-        text: "2 Masterclass a scelta su 8",
+        text: "2 Masterclass a scelta su 9",
         sub: "Specialisti di caratura internazionale",
       },
     ],
@@ -1690,7 +1690,7 @@ const CARD_COPY: Record<string, CardCopy> = {
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
-        text: "2 Masterclass a scelta su 8",
+        text: "2 Masterclass a scelta su 9",
         sub: "Specialisti di caratura internazionale",
       },
       {
