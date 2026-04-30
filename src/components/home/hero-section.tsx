@@ -511,21 +511,16 @@ export function HeroSection({
           0.8,
         );
 
-      /* P4 hold — tempo di lettura del certificato (~58vh di scroll) */
-      scrollTl.to({}, { duration: 0.1 }, 0.84);
+      /* P4 hold — il contenuto certificazioni resta visibile fino alla fine
+         del pin (niente fade-out scorrendo verso il basso). */
+      scrollTl.to({}, { duration: 0.16 }, 0.84);
 
-      /* Exit: fade out hero internals */
-      scrollTl
-        .to(
-          gridRef.current,
-          { opacity: 0, duration: 0.06, ease: "power3.inOut" },
-          0.94,
-        )
-        .to(
-          s3Ref.current,
-          { opacity: 0, y: -20, duration: 0.06, ease: "power3.inOut" },
-          0.94,
-        );
+      /* Exit: solo la grid decorativa fa fade — le card certificazioni restano. */
+      scrollTl.to(
+        gridRef.current,
+        { opacity: 0, duration: 0.06, ease: "power3.inOut" },
+        0.94,
+      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -1056,7 +1051,7 @@ export function HeroSection({
               className="mx-auto mt-6 max-w-2xl text-[clamp(0.95rem,1.1vw,1.05rem)] leading-[1.7]"
               style={{ color: "rgba(255,255,255,0.85)" }}
             >
-              Due riconoscimenti distinti — uno interno, uno federale — pensati
+              Due riconoscimenti distinti — uno interno firmato Lacertosus, uno internazionale firmato FIPE — pensati
               per dare valore reale alla tua professione.
             </p>
           </div>
@@ -1124,7 +1119,7 @@ export function HeroSection({
                   className="text-[0.6rem] font-black tracking-[0.28em] uppercase"
                   style={{ color: "#F09226" }}
                 >
-                  02 · Federale
+                  02 · Internazionale
                 </span>
                 <span
                   className="text-[0.55rem] font-black tracking-[0.22em] uppercase px-2 py-1"
@@ -1843,7 +1838,7 @@ export function HeroSection({
             className="mt-5 text-[0.9rem] leading-[1.65]"
             style={{ color: "rgba(255,255,255,0.85)" }}
           >
-            Due riconoscimenti distinti — uno interno, uno federale — pensati
+            Due riconoscimenti distinti — uno interno firmato Lacertosus, uno internazionale firmato FIPE — pensati
             per dare valore reale alla tua professione.
           </p>
 
@@ -1906,7 +1901,7 @@ export function HeroSection({
                   className="text-[0.55rem] font-black tracking-[0.26em] uppercase"
                   style={{ color: "#F09226" }}
                 >
-                  02 · Federale
+                  02 · Internazionale
                 </span>
                 <span
                   className="text-[0.5rem] font-black tracking-[0.2em] uppercase px-2 py-0.5"
