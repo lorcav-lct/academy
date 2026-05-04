@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { decryptPayload } from "@/lib/qr/encrypt";
+import { getProductBySlug } from "@/lib/constants/packs";
+
+type QrPayload = {
+  ticketId: string;
+  userName: string;
+  courseName: string;
+  eventDate: string;
+  orderId: string;
+};
+
+function getTicketProductName(slug: string | null | undefined): string {
+  if (!slug) return "-";
+  return getProductBySlug(slug)?.name ?? slug;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,9 +43,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Codice mancante" }, { status: 400 });
     }
 
-    // Accept either a plain ticket UUID or an encrypted QR payload
+    // Accept either a plain ticket UUID or an encrypted QR payload.
     const isUuid = /^[0-9a-f-]{36}$/i.test(qrData.trim());
-    let payload: { ticketId: string; userName: string; courseName: string; eventDate: string; orderId: string } | null = null;
+    let payload: QrPayload | null = null;
 
     if (!isUuid) {
       try {
@@ -39,7 +53,7 @@ export async function POST(request: NextRequest) {
       } catch {
         return NextResponse.json(
           { valid: false, error: "QR code non valido o corrotto" },
-          { status: 200 }
+          { status: 200 },
         );
       }
     }
@@ -56,16 +70,19 @@ export async function POST(request: NextRequest) {
     if (!ticket) {
       return NextResponse.json(
         { valid: false, error: "Ticket non trovato" },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
     if (ticket.orders?.status !== "paid") {
       return NextResponse.json(
         { valid: false, error: "Ordine non pagato" },
-        { status: 200 }
+        { status: 200 },
       );
     }
+
+    const ticketName =
+      payload?.courseName || getTicketProductName(ticket.course_id);
 
     // Check if already checked in for this event
     if (eventId) {
@@ -83,11 +100,11 @@ export async function POST(request: NextRequest) {
             error: "Gia registrato per questo evento",
             ticket: {
               userName: payload?.userName || ticket.user_id,
-              courseName: payload?.courseName || (ticket.course_id as string) || "—",
+              courseName: ticketName,
               checkedInAt: existing,
             },
           },
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -104,16 +121,13 @@ export async function POST(request: NextRequest) {
       ticket: {
         id: ticket.id,
         userName: payload?.userName || ticket.user_id,
-        courseName: payload?.courseName || (ticket.course_id as string) || "—",
+        courseName: ticketName,
         eventDate: payload?.eventDate || "",
         orderId: payload?.orderId || ticket.order_id,
       },
     });
   } catch (error) {
     console.error("QR validation error:", error);
-    return NextResponse.json(
-      { error: "Errore validazione" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Errore validazione" }, { status: 500 });
   }
 }

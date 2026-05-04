@@ -42,14 +42,17 @@ export function getProductSubtitle(
 export function getCourseLabel(slug: string | null | undefined): string {
   if (!slug) return "Corso";
   const course = getCourseBySlug(slug);
-  return course?.title || slug.toUpperCase();
+  const product = getProductBySlug(slug);
+  return course?.title || product?.name || slug.toUpperCase();
 }
 
 export function getCourseSubtitle(
   slug: string | null | undefined,
 ): string | null {
   if (!slug) return null;
-  return getCourseBySlug(slug)?.subtitle || null;
+  return (
+    getCourseBySlug(slug)?.subtitle || getProductBySlug(slug)?.subtitle || null
+  );
 }
 
 export function getCourseDates(slug: string | null | undefined): string[] {

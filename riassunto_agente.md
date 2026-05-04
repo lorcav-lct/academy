@@ -12,6 +12,18 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0sext. Aggiornamenti 2026-05-04 — Ticket QR masterclass incluse nei pack
+
+Fix flusso PRO/ELITE: i 2 masterclass selezionati nel checkout ora generano ticket QR insieme al ticket del pack.
+
+- `src/app/api/checkout/session/route.ts`: valida server-side prodotto/prezzo, numero masterclass richiesto dal bundle e slug masterclass validi; passa gli slug selezionati a Stripe in `metadata.masterclass_ids`. Per compatibilità con DB non ancora migrati, l'insert iniziale lascia `orders.selected_workshop_ids = []`.
+- `src/app/api/stripe/webhook/route.ts`: legge sia `metadata.workshop_ids` legacy sia `metadata.masterclass_ids`; genera ticket per `pack_id + masterclass selezionate`; l'idempotenza ora è per singolo ticket, quindi un replay Stripe può completare ticket mancanti senza duplicare email/Make. Prova anche a salvare gli slug in `orders.selected_workshop_ids`, ma se il DB ha ancora `UUID[]` fa fallback e non blocca ordine/ticket.
+- `src/app/api/checkout/resume/route.ts`: preserva la selezione masterclass quando si riprende un pagamento pending; se la selezione manca/non è valida, blocca il resume.
+- `src/lib/utils/account.ts` e `src/app/api/qr/validate/route.ts`: le label ticket masterclass ora fanno fallback sui prodotti in `src/lib/constants/packs.ts`, non solo sui corsi.
+- Nuova migration `supabase/migrations/018_orders_selected_workshops_use_slug.sql`: converte `orders.selected_workshop_ids` da `UUID[]` legacy a `TEXT[]`, coerente con slug statici.
+
+Nota: un ordine già pagato prima di questo fix resta con i ticket mancanti finché non viene rilanciato il webhook Stripe relativo alla sessione, oppure finché non si esegue una riparazione manuale creando i ticket mancanti. Finché la migration `018` non è applicata, la conferma può non mostrare le masterclass nel riepilogo laterale, ma i ticket vengono generati dai metadata Stripe.
+
 ## 0quint. Aggiornamenti 2026-05-04 — Pagina conferma ordine ridisegnata
 
 `/conferma` ora segue lo stesso linguaggio del `/checkout` (tier theming, breadcrumb, summary card sticky, layout 2 colonne).

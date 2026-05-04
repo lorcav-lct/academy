@@ -9,6 +9,77 @@ import { sendEmail } from "@/lib/email/client";
 import { OrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 import React from "react";
 
+function parseMetadataList(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    return Array.from(
+      new Set(
+        parsed
+          .filter((item): item is string => typeof item === "string")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    );
+  } catch {
+    return [];
+  }
+}
+
+async function updateOrderPaid(
+  supabase: ReturnType<typeof createAdminClient>,
+  orderId: string,
+  session: Stripe.Checkout.Session,
+  selectedAddonSlugs: string[],
+) {
+  const baseUpdate = {
+    status: "paid",
+    amount_cents: session.amount_total || 0,
+    tax_cents: session.total_details?.amount_tax || 0,
+    stripe_payment_intent_id: session.payment_intent as string,
+    billing_name: session.customer_details?.name,
+    billing_email: session.customer_details?.email,
+    billing_address: session.customer_details?.address,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (selectedAddonSlugs.length === 0) {
+    return supabase.from("orders").update(baseUpdate).eq("id", orderId);
+  }
+
+  const withSelection = {
+    ...baseUpdate,
+    selected_workshop_ids: selectedAddonSlugs,
+  };
+  const result = await supabase
+    .from("orders")
+    .update(withSelection)
+    .eq("id", orderId);
+
+  if (!result.error) return result;
+
+  // Backward compatibility: some active DBs still have selected_workshop_ids
+  // as UUID[]. Do not block payment confirmation or ticket generation.
+  return supabase.from("orders").update(baseUpdate).eq("id", orderId);
+}
+
+async function updateOrderSelectionIfPossible(
+  supabase: ReturnType<typeof createAdminClient>,
+  orderId: string,
+  selectedAddonSlugs: string[],
+) {
+  if (selectedAddonSlugs.length === 0) return;
+
+  await supabase
+    .from("orders")
+    .update({
+      selected_workshop_ids: selectedAddonSlugs,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId);
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
@@ -35,8 +106,12 @@ export async function POST(request: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
     const productSlug = session.metadata?.pack_id;
-    const workshopIds: string[] = JSON.parse(
-      session.metadata?.workshop_ids || "[]",
+    const workshopIds = parseMetadataList(session.metadata?.workshop_ids);
+    const masterclassIds = parseMetadataList(
+      session.metadata?.masterclass_ids,
+    );
+    const selectedAddonSlugs = Array.from(
+      new Set([...workshopIds, ...masterclassIds]),
     );
 
     if (!orderId) {
@@ -51,24 +126,18 @@ export async function POST(request: NextRequest) {
       .eq("id", orderId)
       .single();
 
-    if (existingOrder?.status === "paid") {
-      return NextResponse.json({ received: true, idempotent: true });
-    }
+    const wasAlreadyPaid = existingOrder?.status === "paid";
 
     // Update order status
-    await supabase
-      .from("orders")
-      .update({
-        status: "paid",
-        amount_cents: session.amount_total || 0,
-        tax_cents: session.total_details?.amount_tax || 0,
-        stripe_payment_intent_id: session.payment_intent as string,
-        billing_name: session.customer_details?.name,
-        billing_email: session.customer_details?.email,
-        billing_address: session.customer_details?.address,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", orderId);
+    if (!wasAlreadyPaid) {
+      await updateOrderPaid(supabase, orderId, session, selectedAddonSlugs);
+    } else if (selectedAddonSlugs.length > 0) {
+      await updateOrderSelectionIfPossible(
+        supabase,
+        orderId,
+        selectedAddonSlugs,
+      );
+    }
 
     // Fetch order to get user info
     const { data: order } = await supabase
@@ -84,7 +153,7 @@ export async function POST(request: NextRequest) {
     // Determine which products to generate tickets for
     const slugsToTicket: string[] = [];
     if (productSlug) slugsToTicket.push(productSlug);
-    workshopIds.forEach((s) => {
+    selectedAddonSlugs.forEach((s) => {
       if (s && !slugsToTicket.includes(s)) slugsToTicket.push(s);
     });
 
@@ -144,7 +213,7 @@ export async function POST(request: NextRequest) {
     // Send order confirmation email
     const customerEmail =
       order.billing_email || session.customer_details?.email;
-    if (customerEmail) {
+    if (customerEmail && !wasAlreadyPaid) {
       const appUrl =
         process.env.NEXT_PUBLIC_BASE_URL ||
         "https://academylacertosus.vercel.app";
@@ -175,7 +244,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Trigger Make.com webhook (async, don't await)
-    if (process.env.MAKE_WEBHOOK_URL) {
+    if (process.env.MAKE_WEBHOOK_URL && !wasAlreadyPaid) {
       fetch(process.env.MAKE_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

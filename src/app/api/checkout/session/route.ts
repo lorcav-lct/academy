@@ -3,6 +3,20 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getActivePromoForProduct } from "@/lib/promos/server";
+import { getProductBySlug } from "@/lib/constants/packs";
+import { WORKSHOPS } from "@/lib/constants/workshops";
+
+function normalizeSlugList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return Array.from(
+    new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,13 +37,57 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Pack non valido" }, { status: 400 });
     }
 
+    const product = getProductBySlug(packId);
+    if (!product || product.stripePriceId !== priceId) {
+      return NextResponse.json(
+        { error: "Prodotto o prezzo non valido" },
+        { status: 400 },
+      );
+    }
+
+    const legacyWorkshopIds = normalizeSlugList(workshopIds);
+    const selectedMasterclassIds = normalizeSlugList(masterclassIds);
+    const selectedAddonSlugs = Array.from(
+      new Set([...legacyWorkshopIds, ...selectedMasterclassIds]),
+    );
+    const workshopSlugs = new Set(WORKSHOPS.map((w) => w.slug));
+    const requiredMasterclasses =
+      product.type === "bundle" ? (product.masterclassSelectionCount ?? 0) : 0;
+
+    if (requiredMasterclasses > 0) {
+      if (selectedAddonSlugs.length !== requiredMasterclasses) {
+        return NextResponse.json(
+          {
+            error: `Seleziona ${requiredMasterclasses} masterclass per il pack ${product.name}`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (selectedAddonSlugs.some((slug) => !workshopSlugs.has(slug))) {
+        return NextResponse.json(
+          { error: "Selezione masterclass non valida" },
+          { status: 400 },
+        );
+      }
+    } else if (selectedAddonSlugs.length > 0) {
+      return NextResponse.json(
+        { error: "Questo prodotto non include masterclass a scelta" },
+        { status: 400 },
+      );
+    }
+
     // Create order in pending state
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: user.id,
         pack_id: packId,
-        selected_workshop_ids: workshopIds || [],
+        // Keep this empty for compatibility with databases that have not yet
+        // run 018_orders_selected_workshops_use_slug.sql. The canonical
+        // selection is passed through Stripe metadata and persisted by the
+        // webhook when the DB column supports TEXT[].
+        selected_workshop_ids: [],
         status: "pending",
         amount_cents: 0, // Will be updated by Stripe webhook
         billing_email: user.email,
@@ -62,8 +120,8 @@ export async function POST(request: NextRequest) {
       customerEmail: user.email!,
       orderId: order.id,
       packId,
-      workshopIds: workshopIds || [],
-      masterclassIds: masterclassIds || [],
+      workshopIds: legacyWorkshopIds,
+      masterclassIds: selectedAddonSlugs,
       promotionCodeId: effectivePromotionCodeId,
       couponId,
     });

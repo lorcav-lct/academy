@@ -3,6 +3,19 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getProductBySlug } from "@/lib/constants/packs";
+import { WORKSHOPS } from "@/lib/constants/workshops";
+
+function normalizeSlugList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return Array.from(
+    new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,13 +35,16 @@ export async function POST(request: NextRequest) {
     // Fetch the pending order (must belong to this user)
     const { data: order } = await supabase
       .from("orders")
-      .select("id, pack_id, status, user_id")
+      .select("id, pack_id, status, user_id, selected_workshop_ids")
       .eq("id", orderId)
       .eq("user_id", user.id)
       .single();
 
     if (!order || order.status !== "pending") {
-      return NextResponse.json({ error: "Ordine non trovato o non in attesa" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Ordine non trovato o non in attesa" },
+        { status: 404 },
+      );
     }
 
     const admin = createAdminClient();
@@ -47,7 +63,33 @@ export async function POST(request: NextRequest) {
     // Look up pack from constants
     const pack = getProductBySlug(order.pack_id);
     if (!pack || !pack.stripePriceId) {
-      return NextResponse.json({ error: "Prodotto non trovato" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Prodotto non trovato" },
+        { status: 404 },
+      );
+    }
+
+    const selectedMasterclassIds = normalizeSlugList(
+      order.selected_workshop_ids,
+    );
+    const requiredMasterclasses =
+      pack.type === "bundle" ? (pack.masterclassSelectionCount ?? 0) : 0;
+
+    if (requiredMasterclasses > 0) {
+      const workshopSlugs = new Set(WORKSHOPS.map((w) => w.slug));
+      const invalidSelection =
+        selectedMasterclassIds.length !== requiredMasterclasses ||
+        selectedMasterclassIds.some((slug) => !workshopSlugs.has(slug));
+
+      if (invalidSelection) {
+        return NextResponse.json(
+          {
+            error:
+              "Selezione masterclass mancante o non valida. Torna al checkout e scegli di nuovo le masterclass.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     // Create a new order + Stripe session
@@ -56,6 +98,8 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         pack_id: pack.slug,
+        // Kept empty for compatibility until the TEXT[] migration is applied.
+        // The checkout metadata still carries the selected masterclass slugs.
         selected_workshop_ids: [],
         status: "pending",
         amount_cents: 0,
@@ -65,7 +109,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError || !newOrder) {
-      return NextResponse.json({ error: "Errore creazione ordine" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Errore creazione ordine" },
+        { status: 500 },
+      );
     }
 
     const session = await createCheckoutSession({
@@ -74,6 +121,7 @@ export async function POST(request: NextRequest) {
       orderId: newOrder.id,
       packId: pack.slug,
       workshopIds: [],
+      masterclassIds: selectedMasterclassIds,
     });
 
     await supabase
@@ -84,6 +132,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Resume checkout error:", error);
-    return NextResponse.json({ error: "Errore durante il checkout" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Errore durante il checkout" },
+      { status: 500 },
+    );
   }
 }

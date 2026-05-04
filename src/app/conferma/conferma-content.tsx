@@ -807,7 +807,7 @@ function TicketsCard({ tickets, t }: { tickets: TicketRow[]; t: TierTokens }) {
           </div>
         </div>
       ) : (
-        <ul className="grid gap-3 p-5 md:p-6">
+        <ul className="grid gap-3 p-5 md:p-6 lg:grid-cols-2" >
           {tickets.map((ticket) => {
             const course = getCourseBySlug(ticket.course_id ?? "");
             const product = ticket.course_id
