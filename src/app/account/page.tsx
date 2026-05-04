@@ -204,14 +204,14 @@ export default function AccountPage() {
   const firstName = (profile?.full_name || "").split(" ")[0] || "Studente";
 
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <div className="max-w-full min-w-0 space-y-6 overflow-x-clip lg:space-y-8">
       {/* ─── Hero ─── */}
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <header className="flex min-w-0 flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0 max-w-full">
           <p className="mb-2 text-[11px] font-bold tracking-[0.3em] text-academy-orange uppercase">
             Area riservata
           </p>
-          <h1 className="text-3xl font-black text-academy-gray-800 md:text-4xl">
+          <h1 className="max-w-full text-3xl font-black break-words text-academy-gray-800 md:text-4xl">
             {greeting()}, <GradientText>{firstName}</GradientText>
           </h1>
           <p className="mt-2 max-w-md text-sm text-academy-gray-500">
@@ -232,7 +232,7 @@ export default function AccountPage() {
       </header>
 
       {/* ─── Bento mobile shortcuts ─── */}
-      <section className="grid grid-cols-2 gap-3 lg:hidden">
+      <section className="grid min-w-0 grid-cols-2 gap-3 lg:hidden">
         <BentoLink
           href="/account/orders"
           icon={<IconBag className="h-6 w-6" />}
@@ -255,7 +255,7 @@ export default function AccountPage() {
       </section>
 
       {/* ─── Stats grid ─── */}
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<IconBag className="h-5 w-5" />}
           label="Ordini totali"
@@ -284,10 +284,10 @@ export default function AccountPage() {
       </section>
 
       {/* ─── Main grid ─── */}
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-3">
         {/* Profile */}
-        <section className="border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:col-span-1">
-          <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-4">
+        <section className="min-w-0 max-w-full overflow-hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:col-span-1">
+          <div className="flex min-w-0 items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4 sm:px-6">
             <h2 className="text-[11px] font-bold tracking-[0.25em] text-academy-gray-700 uppercase">
               Profilo
             </h2>
@@ -310,7 +310,7 @@ export default function AccountPage() {
             </button>
           </div>
 
-          <div className="space-y-4 p-6">
+          <div className="min-w-0 space-y-4 p-5 sm:p-6">
             {!editing ? (
               <>
                 <Field label="Nome" value={profile?.full_name || "—"} />
@@ -389,8 +389,8 @@ export default function AccountPage() {
         </section>
 
         {/* Recent orders */}
-        <section className="border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-4">
+        <section className="min-w-0 max-w-full overflow-hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:col-span-2">
+          <div className="flex min-w-0 items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4 sm:px-6">
             <h2 className="text-[11px] font-bold tracking-[0.25em] text-academy-gray-700 uppercase">
               Ordini recenti
             </h2>
@@ -421,7 +421,7 @@ export default function AccountPage() {
                 return (
                   <li
                     key={order.id}
-                    className="flex flex-wrap items-center gap-4 px-6 py-4 transition-colors hover:bg-black/[0.015]"
+                  className="flex min-w-0 flex-wrap items-center gap-4 px-5 py-4 transition-colors hover:bg-black/[0.015] sm:px-6"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -441,7 +441,7 @@ export default function AccountPage() {
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1 text-right">
+                    <div className="min-w-0 flex flex-col items-end gap-1 text-right">
                       <span className="text-sm font-bold text-academy-gray-800 tabular-nums">
                         {order.amount_cents > 0
                           ? formatEUR(order.amount_cents)
@@ -483,8 +483,8 @@ export default function AccountPage() {
 
       {/* ─── Active tickets quick view ─── */}
       {activeTickets.length > 0 && (
-        <section className="border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-4">
+        <section className="min-w-0 max-w-full overflow-hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div className="flex min-w-0 items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4 sm:px-6">
             <h2 className="text-[11px] font-bold tracking-[0.25em] text-academy-gray-700 uppercase">
               Ticket attivi
             </h2>
@@ -496,7 +496,7 @@ export default function AccountPage() {
               <IconArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <ul className="grid divide-y divide-black/[0.06] sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-3 lg:divide-x">
+          <ul className="grid min-w-0 divide-y divide-black/[0.06] sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-3 lg:divide-x">
             {activeTickets.slice(0, 6).map((t) => (
               <li
                 key={t.id}
@@ -520,7 +520,7 @@ export default function AccountPage() {
       )}
 
       {/* ─── Discover ─── */}
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="grid min-w-0 gap-3 md:grid-cols-2">
         <DiscoverCard
           title="Acquista un pack"
           description="START, PRO o ELITE — il percorso 9 mesi completo."
@@ -555,7 +555,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={`relative overflow-hidden border p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${
+      className={`relative min-w-0 max-w-full overflow-hidden border p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${
         accent
           ? "border-academy-orange/30 bg-gradient-to-br from-academy-orange/[0.06] to-white"
           : "border-black/[0.08] bg-white"
@@ -619,7 +619,7 @@ function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-black/[0.1] bg-white px-3 py-2 text-sm text-academy-gray-800 outline-none transition-colors focus:border-academy-orange/50"
+        className="w-full min-w-0 border border-black/[0.1] bg-white px-3 py-2 text-sm text-academy-gray-800 outline-none transition-colors focus:border-academy-orange/50"
       />
     </div>
   );
@@ -676,7 +676,7 @@ function BentoLink({
   return (
     <Link
       href={href}
-      className={`group relative flex flex-col gap-2 overflow-hidden border p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all active:scale-[0.98] ${
+      className={`group relative min-w-0 max-w-full overflow-hidden border p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all active:scale-[0.98] ${
         highlight
           ? "border-academy-orange/40 bg-gradient-to-br from-academy-orange/[0.08] to-white"
           : "border-black/[0.08] bg-white"
@@ -695,13 +695,15 @@ function BentoLink({
         <IconArrowRight className="h-4 w-4 text-academy-gray-400 transition-transform group-hover:translate-x-0.5 group-hover:text-academy-orange" />
       </div>
       <div>
-        <p className="text-[10px] font-bold tracking-[0.2em] text-academy-gray-500 uppercase">
+        <p className="truncate text-[10px] font-bold tracking-[0.2em] text-academy-gray-500 uppercase">
           {title}
         </p>
         <p className="mt-0.5 text-2xl font-black text-academy-gray-800 tabular-nums leading-none">
           {value}
         </p>
-        <p className="mt-1 text-[11px] text-academy-gray-500">{hint}</p>
+        <p className="mt-1 truncate text-[11px] text-academy-gray-500">
+          {hint}
+        </p>
       </div>
     </Link>
   );
@@ -719,15 +721,17 @@ function DiscoverCard({
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between gap-4 border border-black/[0.08] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all hover:border-academy-orange/30 hover:shadow-[0_4px_16px_rgba(240,146,38,0.08)]"
+      className="group flex min-w-0 max-w-full items-center justify-between gap-4 border border-black/[0.08] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all hover:border-academy-orange/30 hover:shadow-[0_4px_16px_rgba(240,146,38,0.08)]"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 items-center gap-4">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-academy-orange/10 text-academy-orange transition-all group-hover:bg-academy-orange/20">
           <IconSpark className="h-5 w-5" />
         </span>
-        <div>
-          <p className="font-bold text-academy-gray-800">{title}</p>
-          <p className="text-[12px] text-academy-gray-500">{description}</p>
+        <div className="min-w-0">
+          <p className="truncate font-bold text-academy-gray-800">{title}</p>
+          <p className="truncate text-[12px] text-academy-gray-500">
+            {description}
+          </p>
         </div>
       </div>
       <IconArrowRight className="h-4 w-4 shrink-0 text-academy-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-academy-orange" />

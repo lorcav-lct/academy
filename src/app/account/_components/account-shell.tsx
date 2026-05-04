@@ -76,9 +76,9 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] pt-20 pb-24 lg:pt-24 lg:pb-0">
+    <div className="min-h-screen overflow-x-clip bg-[#f5f5f7] pt-20 pb-24 lg:pt-24 lg:pb-0">
       {/* ─── Mobile sticky header (sotto la navbar globale) ─── */}
-      <div className="sticky top-20 z-30 -mt-px flex items-center justify-between gap-3 border-y border-black/[0.06] bg-white/95 px-[5%] py-3 backdrop-blur-md lg:hidden">
+      <div className="sticky top-20 z-30 -mt-px flex max-w-full items-center justify-between gap-3 border-y border-black/[0.06] bg-white/95 px-[5%] py-3 backdrop-blur-md lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-academy-orange/15 text-[12px] font-bold tracking-wider text-academy-orange">
             {initials || <IconUser className="h-4 w-4" />}
@@ -102,7 +102,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         </button>
       </div>
 
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-[5%] py-6 md:px-10 lg:flex-row lg:gap-10 lg:py-12">
+      <div className="mx-auto flex max-w-[1440px] min-w-0 flex-col gap-6 px-[5%] py-6 md:px-10 lg:flex-row lg:gap-10 lg:py-12">
         {/* ─── Desktop sidebar ─── */}
         <aside className="hidden lg:sticky lg:top-28 lg:block lg:h-[calc(100vh-8rem)] lg:w-72 lg:shrink-0">
           <div className="flex items-center gap-3 border border-black/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
@@ -165,11 +165,11 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* ─── Content ─── */}
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 max-w-full flex-1">{children}</div>
       </div>
 
       {/* ─── Mobile bottom tab bar ─── */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-black/[0.08] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md shadow-[0_-2px_20px_rgba(0,0,0,0.06)] lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 max-w-full overflow-hidden border-t border-black/[0.08] bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_20px_rgba(0,0,0,0.06)] backdrop-blur-md lg:hidden">
         <ul className="mx-auto grid max-w-md grid-cols-3">
           {NAV.map((item) => {
             const active = item.match(pathname);
