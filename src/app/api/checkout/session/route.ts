@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 
 export async function POST(request: NextRequest) {
@@ -17,10 +18,7 @@ export async function POST(request: NextRequest) {
     const { packId, priceId, workshopIds, masterclassIds } = body;
 
     if (!packId || !priceId) {
-      return NextResponse.json(
-        { error: "Pack non valido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Pack non valido" }, { status: 400 });
     }
 
     // Create order in pending state
@@ -40,8 +38,12 @@ export async function POST(request: NextRequest) {
     if (orderError || !order) {
       console.error("Order insert error:", orderError);
       return NextResponse.json(
-        { error: "Errore creazione ordine", detail: orderError?.message, code: orderError?.code },
-        { status: 500 }
+        {
+          error: "Errore creazione ordine",
+          detail: orderError?.message,
+          code: orderError?.code,
+        },
+        { status: 500 },
       );
     }
 
@@ -55,18 +57,25 @@ export async function POST(request: NextRequest) {
       masterclassIds: masterclassIds || [],
     });
 
-    // Update order with Stripe session ID
-    await supabase
+    // Update order with Stripe session ID via admin client.
+    // Users have no UPDATE policy on `orders` (RLS), so the user-context
+    // client would silently drop this write and the confirmation page
+    // wouldn't be able to look the order up by session_id.
+    const admin = createAdminClient();
+    const { error: updateError } = await admin
       .from("orders")
       .update({ stripe_checkout_session_id: session.id })
       .eq("id", order.id);
+    if (updateError) {
+      console.error("Order session_id update error:", updateError);
+    }
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json(
       { error: "Errore durante il checkout" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

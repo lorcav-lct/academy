@@ -1031,14 +1031,6 @@ function TrainerSpotlight({
                     >
                       {t.role}
                     </p>
-                    {t.bio && (
-                      <p
-                        className="mt-5 text-[0.92rem] md:text-[0.95rem] leading-[1.65]"
-                        style={{ color: tb }}
-                      >
-                        {t.bio}
-                      </p>
-                    )}
                   </div>
                   {t.talkTitle && (
                     <div

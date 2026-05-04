@@ -12,6 +12,47 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0quint. Aggiornamenti 2026-05-04 — Pagina conferma ordine ridisegnata
+
+`/conferma` ora segue lo stesso linguaggio del `/checkout` (tier theming, breadcrumb, summary card sticky, layout 2 colonne).
+
+### Estrazione tokens condivisi
+
+Nuovo file `src/lib/checkout/theme.ts` con:
+
+- `ORANGE`, `ORANGE_RGB`, `BUNDLE_PRICE_DISPLAY`, `BUNDLE_SLUGS`, `TIER_LABEL`, `TIER_TAGLINE`, `isBundleSlug()`
+- helpers `formatEur`, `formatPriceClean`, `getDisplayCents`, `splitVat`
+- hook `useTierTokens(packSlug, isBundle)` + tipo `TierTokens`
+
+`src/app/checkout/checkout-content.tsx` ora importa tutto da `@/lib/checkout/theme` (rimosse ~170 righe duplicate). Comportamento e UI invariati.
+
+### `src/app/conferma/conferma-content.tsx` — riscritto
+
+Layout sezioni:
+
+- Top breadcrumb sticky con step `3. Conferma` evidenziato (parallelo al checkout)
+- Hero "Grazie [nome]. Il tuo posto è confermato." + label `— Ordine confermato · #ABC1234`
+- Banner polling arancione se ordine ancora `pending` (webhook in arrivo)
+- Grid 2 colonne (mobile stack):
+  - **Sinistra**: `ConfirmationHero` (icona check + meta grid: ordine/data/email/metodo) → `TicketsCard` (QR generati client-side via `qrcode`) → `NextSteps` (timeline 3 step: email, ticket, calendario) → callout supporto
+  - **Destra sticky**: `OrderSummary` (mirror del checkout: line items + IVA + totale pagato + CTA "Vai ai miei ticket" / "Vai al mio account" + trust strip)
+
+### Data flow
+
+- Recupera `session_id` da `useSearchParams`
+- Query `orders` su `stripe_checkout_session_id` (RLS-protected)
+- Se `order.status === 'paid'` → query `tickets` per `order_id` e mostra UI completa
+- Se ordine assente o non ancora pagato → polling ogni 1.5s fino a 25s
+- Stati: `loading | polling | missing | notfound | ready` → componente `FullScreenState` per i casi non-ready
+- Tier theming preservato: usa `pack_id` dell'ordine per ottenere palette START/PRO/ELITE/default
+
+### Note
+
+- I QR mostrati nella card sono generati lato client su `ticket.id` (stesso pattern di `/account/tickets`) — non scaricano l'immagine encrypted dal Supabase Storage; quella resta valida server-side via `qr_image_url` per la mail
+- La pagina non chiama API Stripe direttamente: tutti i dati arrivano dal DB popolato dal webhook `/api/stripe/webhook`
+
+---
+
 ## 0quat. Aggiornamenti 2026-04-30 (PM) — Hero dark Docenti + Masterclass
 
 Allineamento visivo `/docenti`, `/masterclass`, `/masterclass/[slug]` al linguaggio dark cinematic dei block detail (`/percorso/{function|strength|science}`).
@@ -424,9 +465,14 @@ Flusso:
 
 Nota:
 
-- bundle `bronzo`, `argento`, `oro` hanno `priceCents = 0` e `stripePriceId = ""`
-- quindi ad oggi i bundle risultano ancora non realmente acquistabili
-- i blocchi singoli `corpus`, `vis`, `victor` sono i prodotti piu pronti all'acquisto
+- bundle `start`, `pro`, `elite` hanno ancora `priceCents = 0` e `stripePriceId = ""` → non acquistabili
+- i 3 blocchi singoli (`function`, `strength`, `science`) hanno Price su Stripe (Sandbox)
+- le 9 masterclass hanno tutte `priceCents = 49000` (€490) e Price Stripe (Sandbox) — vedi sotto
+- categoria fiscale Stripe usata per le masterclass: `txcd_20030000` (Training services), tax_behavior `inclusive`
+- script `scripts/setup-stripe-masterclasses.mjs` rigenera Product+Price in batch (idempotente by name)
+- mapping locale dei nuovi ID: `scripts/.stripe-masterclass-ids.json` (gitignored)
+- vecchio price `price_1T7u0LCGgXzYzpRp2XeH0tZ8` (rugby) rimpiazzato da `price_1TTHXZCGgXzYzpRpss0BrkXN`
+- attenzione: lo script ha creato un duplicato per `Functional Movement & Bulgarian` perche il Product creato manualmente aveva nome leggermente diverso → archiviare manualmente il duplicato
 
 ### 7.3 Webhook Stripe e ticket
 

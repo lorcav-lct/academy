@@ -175,7 +175,7 @@ export default function TicketsPage() {
               </p>
             </div>
           ) : (
-            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
               {filtered.map((ticket) => {
                 const dates = getCourseDates(ticket.course_id);
                 const used = ticket.is_used;

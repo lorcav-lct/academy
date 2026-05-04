@@ -1,15 +1,16 @@
+import { Row, Column, Text, Section } from "@react-email/components";
 import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Section,
-  Text,
+  EmailShell,
+  Card,
+  MicroLabel,
+  PrimaryCTA,
+  SecondaryCTA,
   Heading,
-  Hr,
-  Link,
-  Button,
-} from "@react-email/components";
+  BodyText,
+  Divider,
+  COLORS,
+  FONT,
+} from "./_shared";
 
 interface OrderCancelledEmailProps {
   userName: string;
@@ -24,168 +25,159 @@ export function OrderCancelledEmail({
   orderId,
   appUrl,
 }: OrderCancelledEmailProps) {
+  const shortId = orderId.slice(0, 8).toUpperCase();
+  const firstName = userName?.trim().split(/\s+/)[0] || "";
+
   return (
-    <Html lang="it">
-      <Head />
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          {/* Header */}
-          <Section style={{ textAlign: "center", paddingBottom: "24px" }}>
-            <Text style={styles.brand}>LACERTOSUS ACADEMY</Text>
-            <Heading style={styles.heading}>Ordine Annullato</Heading>
-            <Text style={styles.subheading}>
-              Ciao {userName}, il tuo ordine è stato annullato.
-            </Text>
-          </Section>
+    <EmailShell
+      appUrl={appUrl}
+      preview={`Ordine #${shortId} annullato — ${packName}`}
+    >
+      {/* Hero */}
+      <MicroLabel color={COLORS.danger}>
+        Ordine annullato · #{shortId}
+      </MicroLabel>
+      <Heading size="lg">{firstName ? `Ciao ${firstName},` : "Ciao,"}</Heading>
+      <Heading size="md" style={{ color: COLORS.muted, fontWeight: 800 }}>
+        il tuo ordine è stato annullato.
+      </Heading>
+      <BodyText muted style={{ marginTop: "12px" }}>
+        Abbiamo annullato l&apos;ordine come richiesto. Se l&apos;avevi pagato,
+        l&apos;eventuale rimborso viene gestito direttamente da Stripe sul
+        metodo originale entro 5–10 giorni lavorativi.
+      </BodyText>
 
-          <Hr style={styles.divider} />
+      <div style={{ height: "12px" }} />
 
-          {/* Order summary */}
-          <Section style={styles.card}>
-            <Text style={styles.label}>Ordine Annullato</Text>
-            <Text style={styles.productName}>{packName}</Text>
-            <Hr style={styles.innerDivider} />
-            <Text style={styles.meta}>
-              Ordine #{orderId.slice(0, 8).toUpperCase()}
-            </Text>
-          </Section>
+      {/* Order summary */}
+      <Card accent="danger">
+        <Row style={{ marginBottom: "10px" }}>
+          <Column style={{ verticalAlign: "baseline" }}>
+            <MicroLabel color={COLORS.danger} style={{ marginBottom: 0 }}>
+              Ordine annullato
+            </MicroLabel>
+          </Column>
+          <Column align="right" style={{ verticalAlign: "baseline" }}>
+            <span style={badgeStyle}>Annullato</span>
+          </Column>
+        </Row>
 
-          {/* Info */}
-          <Section style={styles.infoCard}>
-            <Text style={styles.infoText}>
-              I ticket associati a questo ordine sono stati invalidati. Se
-              ritieni che si tratti di un errore, contattaci rispondendo a
-              questa email.
-            </Text>
-          </Section>
+        <Text
+          style={{
+            margin: 0,
+            color: COLORS.text,
+            fontSize: "16px",
+            fontWeight: 800,
+            lineHeight: "1.3",
+            fontFamily: FONT,
+          }}
+        >
+          {packName}
+        </Text>
 
-          {/* CTA */}
-          <Section style={{ textAlign: "center", padding: "8px 0 24px" }}>
-            <Text style={styles.bodyText}>
-              Puoi effettuare un nuovo acquisto in qualsiasi momento.
-            </Text>
-            <Button href={`${appUrl}/pack`} style={styles.button}>
-              Acquista un Pack →
-            </Button>
-          </Section>
+        <Divider />
 
-          <Hr style={styles.divider} />
+        <Row style={{ marginBottom: "6px" }}>
+          <Column style={{ verticalAlign: "baseline" }}>
+            <Text style={metaLabelStyle}>Riferimento</Text>
+          </Column>
+          <Column align="right" style={{ verticalAlign: "baseline" }}>
+            <Text style={metaValueStyle}>#{shortId}</Text>
+          </Column>
+        </Row>
+        <Row>
+          <Column style={{ verticalAlign: "baseline" }}>
+            <Text style={metaLabelStyle}>Stato ticket</Text>
+          </Column>
+          <Column align="right" style={{ verticalAlign: "baseline" }}>
+            <Text style={{ ...metaValueStyle, color: COLORS.danger }}>
+              Invalidati
+            </Text>
+          </Column>
+        </Row>
+      </Card>
 
-          {/* Footer */}
-          <Section style={{ textAlign: "center", paddingTop: "16px" }}>
-            <Text style={styles.footer}>
-              Hai domande?{" "}
-              <Link href={`${appUrl}`} style={{ color: "#F09226" }}>
-                Visita il sito
-              </Link>{" "}
-              oppure rispondi a questa email.
-            </Text>
-            <Text style={styles.footer}>
-              © {new Date().getFullYear()} Lacertosus Academy. Tutti i diritti
-              riservati.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
+      {/* Info card */}
+      <Section
+        style={{
+          background: COLORS.dangerSoft,
+          border: `1px solid rgba(185,28,28,0.18)`,
+          padding: "18px 22px",
+          marginBottom: "16px",
+        }}
+      >
+        <Text
+          style={{
+            margin: "0 0 6px",
+            color: COLORS.danger,
+            fontSize: "11px",
+            fontWeight: 900,
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            fontFamily: FONT,
+          }}
+        >
+          Cosa succede ai tuoi ticket
+        </Text>
+        <Text
+          style={{
+            margin: 0,
+            color: COLORS.text,
+            fontSize: "13px",
+            lineHeight: "1.65",
+            fontFamily: FONT,
+          }}
+        >
+          I ticket QR collegati a questo ordine sono stati invalidati e non
+          consentono più l&apos;accesso ai weekend formativi. Se ritieni si
+          tratti di un errore, rispondi a questa email o scrivi a{" "}
+          <a
+            href="mailto:academy@lacertosus.com"
+            style={{ color: COLORS.danger, textDecoration: "underline" }}
+          >
+            academy@lacertosus.com
+          </a>{" "}
+          citando il riferimento <strong>#{shortId}</strong>.
+        </Text>
+      </Section>
+
+      {/* CTA */}
+      <Card accent="none">
+        <MicroLabel>Riparti quando vuoi</MicroLabel>
+        <BodyText style={{ marginBottom: "16px" }}>
+          I posti per la prossima edizione sono ancora aperti. Esplora i pack
+          oppure dai un&apos;occhiata alle masterclass singole.
+        </BodyText>
+        <PrimaryCTA href={`${appUrl}/pack`}>Esplora i pack →</PrimaryCTA>
+        <SecondaryCTA href={`${appUrl}/masterclass`}>Masterclass</SecondaryCTA>
+      </Card>
+    </EmailShell>
   );
 }
 
-const styles = {
-  body: {
-    backgroundColor: "#1a1a1a",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    margin: "0",
-    padding: "0",
-  },
-  container: {
-    maxWidth: "580px",
-    margin: "0 auto",
-    padding: "40px 24px",
-  },
-  brand: {
-    color: "#F09226",
-    fontSize: "11px",
-    letterSpacing: "4px",
-    textTransform: "uppercase" as const,
-    fontWeight: "bold",
-    margin: "0 0 8px",
-  },
-  heading: {
-    color: "#f5f5f7",
-    fontSize: "30px",
-    fontWeight: "900",
-    margin: "0 0 8px",
-  },
-  subheading: {
-    color: "#8e8e93",
-    fontSize: "15px",
-    margin: "0",
-  },
-  divider: {
-    borderColor: "rgba(240,146,38,0.15)",
-    margin: "0 0 24px",
-  },
-  innerDivider: {
-    borderColor: "rgba(255,255,255,0.05)",
-    margin: "12px 0",
-  },
-  card: {
-    backgroundColor: "rgba(10,10,58,0.9)",
-    border: "1px solid rgba(220,38,38,0.2)",
-    padding: "20px 24px",
-    marginBottom: "16px",
-  },
-  infoCard: {
-    backgroundColor: "rgba(220,38,38,0.05)",
-    border: "1px solid rgba(220,38,38,0.15)",
-    padding: "16px 24px",
-    marginBottom: "24px",
-  },
-  label: {
-    color: "#f87171",
-    fontSize: "10px",
-    letterSpacing: "3px",
-    textTransform: "uppercase" as const,
-    fontWeight: "bold",
-    margin: "0 0 10px",
-  },
-  productName: {
-    color: "#f5f5f7",
-    fontSize: "18px",
-    fontWeight: "bold",
-    margin: "0",
-  },
-  meta: {
-    color: "#636366",
-    fontSize: "12px",
-    margin: "0",
-  },
-  bodyText: {
-    color: "#8e8e93",
-    fontSize: "14px",
-    lineHeight: "1.6",
-    margin: "0 0 16px",
-    textAlign: "center" as const,
-  },
-  infoText: {
-    color: "#8e8e93",
-    fontSize: "13px",
-    lineHeight: "1.6",
-    margin: "0",
-  },
-  button: {
-    backgroundColor: "#F09226",
-    color: "#1a1a1a",
-    fontSize: "13px",
-    fontWeight: "bold",
-    padding: "12px 24px",
-    textDecoration: "none",
-    display: "inline-block",
-  },
-  footer: {
-    color: "#48484a",
-    fontSize: "11px",
-    margin: "4px 0",
-  },
+const badgeStyle = {
+  display: "inline-block",
+  background: COLORS.danger,
+  color: COLORS.white,
+  fontSize: "10px",
+  fontWeight: 900,
+  letterSpacing: "0.22em",
+  textTransform: "uppercase" as const,
+  padding: "4px 10px",
+  fontFamily: FONT,
+};
+
+const metaLabelStyle = {
+  margin: 0,
+  color: COLORS.muted,
+  fontSize: "12px",
+  fontFamily: FONT,
+};
+
+const metaValueStyle = {
+  margin: 0,
+  color: COLORS.text,
+  fontSize: "13px",
+  fontWeight: 700,
+  fontFamily: FONT,
 };

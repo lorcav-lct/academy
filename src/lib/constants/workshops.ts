@@ -65,7 +65,6 @@ export const WORKSHOPS: Workshop[] = [
     date: "Da definire",
     teacherSlugs: [],
     trainerLabel: "Da definire",
-    tbd: true,
     sortOrder: 5,
   },
   {
@@ -77,7 +76,6 @@ export const WORKSHOPS: Workshop[] = [
     date: "Da definire",
     teacherSlugs: [],
     trainerLabel: "Da definire",
-    tbd: true,
     sortOrder: 6,
   },
   {
@@ -101,7 +99,6 @@ export const WORKSHOPS: Workshop[] = [
     date: "Da definire",
     teacherSlugs: [],
     trainerLabel: "Da definire",
-    tbd: true,
     sortOrder: 8,
   },
   {

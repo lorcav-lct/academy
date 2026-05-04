@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     event = getStripe().webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
@@ -35,10 +35,24 @@ export async function POST(request: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
     const productSlug = session.metadata?.pack_id;
-    const workshopIds: string[] = JSON.parse(session.metadata?.workshop_ids || "[]");
+    const workshopIds: string[] = JSON.parse(
+      session.metadata?.workshop_ids || "[]",
+    );
 
     if (!orderId) {
       return NextResponse.json({ error: "No order_id" }, { status: 400 });
+    }
+
+    // Idempotency: Stripe (and stripe-cli in dev) can deliver the same event
+    // more than once. Skip if this order has already been processed.
+    const { data: existingOrder } = await supabase
+      .from("orders")
+      .select("status")
+      .eq("id", orderId)
+      .single();
+
+    if (existingOrder?.status === "paid") {
+      return NextResponse.json({ received: true, idempotent: true });
     }
 
     // Update order status
@@ -74,8 +88,19 @@ export async function POST(request: NextRequest) {
       if (s && !slugsToTicket.includes(s)) slugsToTicket.push(s);
     });
 
+    // Second-level idempotency: if a ticket for (order, slug) already exists,
+    // skip — covers races where two webhook calls pass the status check together.
+    const { data: existingTickets } = await supabase
+      .from("tickets")
+      .select("course_id")
+      .eq("order_id", orderId);
+    const alreadyTicketed = new Set(
+      (existingTickets ?? []).map((t) => t.course_id),
+    );
+
     // Generate one ticket per product slug
     for (const slug of slugsToTicket) {
+      if (alreadyTicketed.has(slug)) continue;
       const product = PRODUCTS.find((p) => p.slug === slug);
       const productName = product?.name ?? slug;
       const ticketId = crypto.randomUUID();
@@ -117,11 +142,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Send order confirmation email
-    const customerEmail = order.billing_email || session.customer_details?.email;
+    const customerEmail =
+      order.billing_email || session.customer_details?.email;
     if (customerEmail) {
-      const appUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://academylacertosus.vercel.app";
+      const appUrl =
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        "https://academylacertosus.vercel.app";
       const productName =
-        PRODUCTS.find((p) => p.slug === productSlug)?.name || productSlug || "Pack";
+        PRODUCTS.find((p) => p.slug === productSlug)?.name ||
+        productSlug ||
+        "Pack";
       const total = new Intl.NumberFormat("it-IT", {
         style: "currency",
         currency: "EUR",
