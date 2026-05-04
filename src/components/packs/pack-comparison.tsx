@@ -18,6 +18,7 @@ import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
+import { LAUNCH_PROMO, getLaunchPricing } from "@/lib/constants/promo";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
@@ -50,6 +51,38 @@ const PACK_PRICE_DISPLAY: Record<string, string> = {
   pro: "€ 4.700",
   elite: "€ 7.000",
 };
+
+const PACK_PRICE_CENTS: Record<string, number> = {
+  start: 330000,
+  pro: 470000,
+  elite: 700000,
+};
+
+function formatEuroClean(cents: number): string {
+  return `€ ${new Intl.NumberFormat("it-IT").format(Math.round(cents / 100))}`;
+}
+
+/** Restituisce il prezzo "display" tenendo conto della promo di lancio.
+ *  Se attiva, restituisce { discounted, original }; altrimenti solo { discounted } = originale. */
+function getPackPriceDisplay(slug: string): {
+  discounted: string;
+  original?: string;
+  hasDiscount: boolean;
+} {
+  const original = PACK_PRICE_CENTS[slug] ?? 0;
+  const launch = getLaunchPricing(slug, original);
+  if (!launch) {
+    return {
+      discounted: PACK_PRICE_DISPLAY[slug] ?? formatEuroClean(original),
+      hasDiscount: false,
+    };
+  }
+  return {
+    discounted: formatEuroClean(launch.final),
+    original: formatEuroClean(launch.original),
+    hasDiscount: true,
+  };
+}
 
 const BLOCK_SLUGS = ["function", "strength", "science"] as const;
 const BLOCK_LABELS: Record<string, string> = {
@@ -835,7 +868,8 @@ function PackModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const copy = MODAL_COPY[pack.slug] ?? MODAL_COPY.start;
-  const priceDisplay = PACK_PRICE_DISPLAY[pack.slug];
+  const priceInfo = getPackPriceDisplay(pack.slug);
+  const priceDisplay = priceInfo.discounted;
   const totalTeachers = BLOCK_SLUGS.reduce(
     (acc, s) => acc + teachers[s].length,
     0,
@@ -1061,12 +1095,28 @@ function PackModal({
             <div className="mt-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <div
-                  className="text-[0.55rem] font-black tracking-[0.3em] uppercase mb-1"
+                  className="text-[0.55rem] font-black tracking-[0.3em] uppercase mb-1 flex items-center gap-2"
                   style={{ color: textMuted }}
                 >
-                  Investimento
+                  <span>Investimento</span>
+                  {priceInfo.hasDiscount && (
+                    <span
+                      className="px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
+                      style={{ background: ORANGE, color: "#111" }}
+                    >
+                      {LAUNCH_PROMO.label}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  {priceInfo.hasDiscount && priceInfo.original && (
+                    <span
+                      className="text-[clamp(1.2rem,2.4vw,1.7rem)] font-semibold leading-none tabular-nums line-through"
+                      style={{ color: textMuted }}
+                    >
+                      {priceInfo.original}
+                    </span>
+                  )}
                   <span
                     className="text-[clamp(2.4rem,5vw,3.6rem)] font-black leading-none tracking-[-0.025em] tabular-nums"
                     style={{ color: textH }}
@@ -1084,7 +1134,9 @@ function PackModal({
                   className="mt-2 text-[0.7rem] font-semibold"
                   style={{ color: textB }}
                 >
-                  Pagamento rateale disponibile · Iscrizione vincolata? No.
+                  {priceInfo.hasDiscount
+                    ? "Sconto di lancio attivo fino al 30 giugno · Iscrizione vincolata? No."
+                    : "Pagamento rateale disponibile · Iscrizione vincolata? No."}
                 </div>
               </div>
               <button
@@ -1574,16 +1626,34 @@ function PackModal({
         >
           <div className="min-w-0 flex flex-col">
             <span
-              className="text-[0.55rem] font-bold tracking-[0.18em] uppercase"
+              className="text-[0.55rem] font-bold tracking-[0.18em] uppercase flex items-center gap-1.5"
               style={{ color: textMuted }}
             >
-              Pack {tier.label}
+              <span>Pack {tier.label}</span>
+              {priceInfo.hasDiscount && (
+                <span
+                  className="px-1 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
+                  style={{ background: ORANGE, color: "#111" }}
+                >
+                  {LAUNCH_PROMO.label}
+                </span>
+              )}
             </span>
-            <span
-              className="text-[1.05rem] font-black leading-none tabular-nums tracking-[-0.01em]"
-              style={{ color: textH }}
-            >
-              {priceDisplay}
+            <span className="flex items-baseline gap-2">
+              {priceInfo.hasDiscount && priceInfo.original && (
+                <span
+                  className="text-[0.75rem] font-semibold tabular-nums line-through"
+                  style={{ color: textMuted }}
+                >
+                  {priceInfo.original}
+                </span>
+              )}
+              <span
+                className="text-[1.05rem] font-black leading-none tabular-nums tracking-[-0.01em]"
+                style={{ color: textH }}
+              >
+                {priceDisplay}
+              </span>
             </span>
           </div>
           <button
@@ -1715,11 +1785,13 @@ function PackCard({
   void isDark;
   const tier = TIER[pack.slug] ?? TIER.start;
   const isHighlighted = pack.highlighted;
-  const priceDisplay = PACK_PRICE_DISPLAY[pack.slug];
+  const priceInfo = getPackPriceDisplay(pack.slug);
+  const priceDisplay = priceInfo.discounted;
   const copy = CARD_COPY[pack.slug] ?? CARD_COPY.start;
   const isPro = pack.slug === "pro";
   const isElite = pack.slug === "elite";
   const isStart = pack.slug === "start";
+  const ORANGE = "#F09226";
 
   /* ── Theme tokens per tier ─────────────────────────────────────
      - START: full white card, dark text
@@ -1876,22 +1948,42 @@ function PackCard({
         {/* ── Price ─────────────────────────────────────────────── */}
         <div className="-mt-1">
           <div
-            className="text-[0.55rem] font-black tracking-[0.3em] uppercase mb-1"
+            className="text-[0.55rem] font-black tracking-[0.3em] uppercase mb-1 flex items-center gap-2"
             style={{ color: bodyTextMuted }}
           >
-            A partire da
+            <span>Investimento</span>
+            {priceInfo.hasDiscount && (
+              <span
+                className="px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
+                style={{ background: ORANGE, color: "#111" }}
+              >
+                {LAUNCH_PROMO.label}
+              </span>
+            )}
           </div>
-          <div
-            className="text-[2.1rem] font-black leading-none tracking-[-0.02em] tabular-nums"
-            style={{ color: bodyText }}
-          >
-            {priceDisplay}
+          <div className="flex items-baseline gap-2 flex-wrap">
+            {priceInfo.hasDiscount && priceInfo.original && (
+              <span
+                className="text-[1rem] font-semibold leading-none tabular-nums line-through"
+                style={{ color: bodyTextMuted }}
+              >
+                {priceInfo.original}
+              </span>
+            )}
+            <span
+              className="text-[2.1rem] font-black leading-none tracking-[-0.02em] tabular-nums"
+              style={{ color: bodyText }}
+            >
+              {priceDisplay}
+            </span>
           </div>
           <div
             className="mt-1.5 text-[0.6rem] font-bold tracking-[0.16em] uppercase"
             style={{ color: bodyTextMuted }}
           >
-            IVA inclusa · Pagamento rateale
+            {priceInfo.hasDiscount
+              ? "IVA inclusa · Promo fino al 30 giugno"
+              : "IVA inclusa · Pagamento rateale"}
           </div>
         </div>
 

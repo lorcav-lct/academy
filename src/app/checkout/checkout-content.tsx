@@ -24,6 +24,7 @@ import {
   useTierTokens,
   type TierTokens,
 } from "@/lib/checkout/theme";
+import { LAUNCH_PROMO, getLaunchPricing } from "@/lib/constants/promo";
 
 /* ──────────────────────────────────────────────────────────────
    Product icons (per pack tier + default for everything else)
@@ -319,8 +320,14 @@ function OrderSummary({
   onRemovePromo: () => void;
 }) {
   const grossCents = getDisplayCents(pack);
-  const discountCents = computeDiscountCents(grossCents, promo);
-  const finalGrossCents = Math.max(0, grossCents - discountCents);
+  const launch = getLaunchPricing(pack.slug, grossCents);
+  // Auto-launch promo overrides any manual user code (Stripe non permette stacking).
+  const launchDiscountCents = launch ? launch.discount : 0;
+  const manualDiscountCents = launch
+    ? 0
+    : computeDiscountCents(grossCents, promo);
+  const totalDiscountCents = launchDiscountCents + manualDiscountCents;
+  const finalGrossCents = Math.max(0, grossCents - totalDiscountCents);
   const { net, vat } = splitVat(finalGrossCents);
   const tierLabel = TIER_LABEL[pack.slug] ?? pack.name;
   const isBundle = pack.type === "bundle";
@@ -423,8 +430,40 @@ function OrderSummary({
         {/* Divider */}
         <div className="my-5 h-px w-full" style={{ background: t.border }} />
 
-        {/* Promo code section */}
-        {grossCents > 0 && (
+        {/* Launch promo banner — auto-applied, no user action required */}
+        {launch && (
+          <div
+            className="mb-3 flex items-start gap-3 px-3 py-2.5"
+            style={{
+              background: `rgba(${ORANGE_RGB},0.1)`,
+              border: `1px solid rgba(${ORANGE_RGB},0.4)`,
+            }}
+          >
+            <span
+              className="mt-0.5 inline-flex items-center justify-center px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+              style={{ background: ORANGE, color: "#111" }}
+            >
+              {LAUNCH_PROMO.label}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p
+                className="text-[0.78rem] font-bold leading-tight"
+                style={{ color: t.th }}
+              >
+                Sconto di lancio applicato
+              </p>
+              <p
+                className="mt-0.5 text-[0.7rem] leading-snug"
+                style={{ color: t.ts }}
+              >
+                Risparmi {formatEur(launch.discount)} · valido fino al 30 giugno
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Manual promo code section — hidden during launch (no stacking) */}
+        {grossCents > 0 && !launch && (
           <PromoSection
             t={t}
             promo={promo}
@@ -437,12 +476,20 @@ function OrderSummary({
           />
         )}
 
-        {/* Discount line */}
-        {discountCents > 0 && (
+        {/* Discount line — launch first, then manual */}
+        {launchDiscountCents > 0 && (
+          <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
+            <span style={{ color: ORANGE }}>Sconto · {LAUNCH_PROMO.label}</span>
+            <span className="font-bold tabular-nums" style={{ color: ORANGE }}>
+              −{formatEur(launchDiscountCents, true)}
+            </span>
+          </div>
+        )}
+        {manualDiscountCents > 0 && (
           <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
             <span style={{ color: ORANGE }}>Sconto · {promo?.code ?? ""}</span>
             <span className="font-bold tabular-nums" style={{ color: ORANGE }}>
-              −{formatEur(discountCents, true)}
+              −{formatEur(manualDiscountCents, true)}
             </span>
           </div>
         )}
@@ -483,7 +530,7 @@ function OrderSummary({
             Totale
           </span>
           <span className="flex items-baseline gap-2">
-            {discountCents > 0 && (
+            {totalDiscountCents > 0 && (
               <span
                 className="text-[0.85rem] font-semibold tabular-nums line-through"
                 style={{ color: t.ts }}
@@ -794,6 +841,8 @@ function MobileStickyBar({
   onCheckout: () => void;
 }) {
   const grossCents = getDisplayCents(pack);
+  const launch = getLaunchPricing(pack.slug, grossCents);
+  const finalCents = launch ? launch.final : grossCents;
 
   return (
     <motion.div
@@ -817,15 +866,25 @@ function MobileStickyBar({
         <div className="min-w-0 flex flex-col">
           <span
             className="text-[0.55rem] font-bold uppercase tracking-[0.18em]"
-            style={{ color: "rgba(255,255,255,0.55)" }}
+            style={{ color: launch ? ORANGE : "rgba(255,255,255,0.55)" }}
           >
-            Totale
+            {launch ? `${LAUNCH_PROMO.label} · Totale` : "Totale"}
           </span>
-          <span
-            className="text-[1.1rem] font-black leading-none tabular-nums"
-            style={{ color: "#fff" }}
-          >
-            {grossCents > 0 ? formatEur(grossCents) : "TBD"}
+          <span className="flex items-baseline gap-2">
+            {launch && (
+              <span
+                className="text-[0.7rem] font-semibold tabular-nums line-through"
+                style={{ color: "rgba(255,255,255,0.45)" }}
+              >
+                {formatEur(grossCents)}
+              </span>
+            )}
+            <span
+              className="text-[1.1rem] font-black leading-none tabular-nums"
+              style={{ color: "#fff" }}
+            >
+              {finalCents > 0 ? formatEur(finalCents) : "TBD"}
+            </span>
           </span>
         </div>
         <button

@@ -8,10 +8,11 @@ interface CreateCheckoutParams {
   packId: string;
   workshopIds: string[];
   masterclassIds?: string[];
-  /** If present, applies this promotion_code (`promo_...`) and disables the
-   *  Stripe-hosted promo field. If absent, the Stripe page shows the code
-   *  field as fallback. */
+  /** Promotion code id (`promo_...`) — sconto user-entered. */
   promotionCodeId?: string | null;
+  /** Coupon id auto-applicato (es. promo di lancio). Ha precedenza su
+   *  `promotionCodeId` perché Stripe non permette stacking di sconti. */
+  couponId?: string | null;
 }
 
 export async function createCheckoutSession(params: CreateCheckoutParams) {
@@ -35,11 +36,15 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
       workshop_ids: JSON.stringify(params.workshopIds),
       masterclass_ids: JSON.stringify(params.masterclassIds ?? []),
       promotion_code: params.promotionCodeId ?? "",
+      coupon: params.couponId ?? "",
     },
   };
 
   // `discounts` and `allow_promotion_codes` are mutually exclusive on Stripe.
-  if (params.promotionCodeId) {
+  // Priorità: coupon auto-applicato > promotion code utente > campo Stripe nativo.
+  if (params.couponId) {
+    sessionParams.discounts = [{ coupon: params.couponId }];
+  } else if (params.promotionCodeId) {
     sessionParams.discounts = [{ promotion_code: params.promotionCodeId }];
   } else {
     sessionParams.allow_promotion_codes = true;
