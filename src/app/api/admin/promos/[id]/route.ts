@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/client";
+import { findStripeProductBySlug } from "@/lib/stripe/products";
 import type Stripe from "stripe";
 import type { PromoRow } from "@/lib/promos/types";
 
@@ -30,17 +31,22 @@ async function createStripeCoupon(
   row: Pick<
     PromoRow,
     | "product_type"
+    | "slug"
     | "name"
     | "discount_type"
     | "discount_value"
     | "ends_at"
     | "max_redemptions"
   >,
-): Promise<string> {
+): Promise<{ couponId: string; productId: string | null } | { error: string }> {
   const params: Stripe.CouponCreateParams = {
     name: row.name,
     duration: "once",
-    metadata: { product_type: row.product_type, source: "academy-admin" },
+    metadata: {
+      product_type: row.product_type,
+      slug: row.slug ?? "",
+      source: "academy-admin",
+    },
   };
   if (row.discount_type === "amount") {
     params.amount_off = row.discount_value;
@@ -54,8 +60,18 @@ async function createStripeCoupon(
   if (row.max_redemptions) {
     params.max_redemptions = row.max_redemptions;
   }
+
+  let productId: string | null = null;
+  if (row.slug) {
+    productId = await findStripeProductBySlug(row.slug);
+    if (!productId) {
+      return { error: `Prodotto Stripe non trovato per slug "${row.slug}".` };
+    }
+    params.applies_to = { products: [productId] };
+  }
+
   const coupon = await getStripe().coupons.create(params);
-  return coupon.id;
+  return { couponId: coupon.id, productId };
 }
 
 /** Campi che, se cambiano, richiedono ricreazione del coupon Stripe */
@@ -65,6 +81,7 @@ const IMMUTABLE_KEYS = [
   "ends_at",
   "max_redemptions",
   "product_type",
+  "slug",
 ] as const;
 
 export async function PATCH(
@@ -90,10 +107,16 @@ export async function PATCH(
   }
   const current = existing as unknown as PromoRow;
 
-  const next: PromoRow = {
-    ...current,
-    ...(body as Partial<PromoRow>),
-  };
+  // Normalizza slug nullabile
+  const incoming = body as Partial<PromoRow>;
+  if ("slug" in incoming) {
+    incoming.slug =
+      typeof incoming.slug === "string" && incoming.slug.trim()
+        ? incoming.slug.trim()
+        : null;
+  }
+
+  const next: PromoRow = { ...current, ...incoming };
 
   if (next.discount_type === "percent" && next.discount_value > 100) {
     return NextResponse.json({ error: "percent max 100" }, { status: 400 });
@@ -110,9 +133,10 @@ export async function PATCH(
   const immutableChanged = IMMUTABLE_KEYS.some((k) => current[k] !== next[k]);
 
   let stripeCouponId = current.stripe_coupon_id;
+  let stripeProductId = current.stripe_product_id;
   const nameChanged = current.name !== next.name;
 
-  // Archivia il vecchio coupon se non più valido (deactivate o immutable changed)
+  // Archivia il vecchio coupon se non più valido
   if (
     wasActive &&
     current.stripe_coupon_id &&
@@ -124,35 +148,37 @@ export async function PATCH(
       // già archiviato → ignora
     }
     stripeCouponId = null;
+    stripeProductId = null;
   }
 
   if (willBeActive && !stripeCouponId) {
-    // Disattiva altre promo attive sulla stessa categoria
-    await admin
+    // Disattiva conflitti (stesso product_type + slug)
+    const q = admin
       .from("promos")
       .update({ active: false })
       .eq("product_type", next.product_type)
       .eq("active", true)
       .neq("id", id);
-
-    try {
-      stripeCouponId = await createStripeCoupon(next);
-    } catch (err) {
-      return NextResponse.json(
-        {
-          error:
-            "Errore Stripe: " +
-            (err instanceof Error ? err.message : "sconosciuto"),
-        },
-        { status: 500 },
-      );
+    if (next.slug) {
+      q.eq("slug", next.slug);
+    } else {
+      q.is("slug", null);
     }
+    await q;
+
+    const created = await createStripeCoupon(next);
+    if ("error" in created) {
+      return NextResponse.json({ error: created.error }, { status: 400 });
+    }
+    stripeCouponId = created.couponId;
+    stripeProductId = created.productId;
   } else if (willBeActive && stripeCouponId && nameChanged) {
     try {
       await getStripe().coupons.update(stripeCouponId, {
         name: next.name,
         metadata: {
           product_type: next.product_type,
+          slug: next.slug ?? "",
           source: "academy-admin",
         },
       });
@@ -165,6 +191,7 @@ export async function PATCH(
     .from("promos")
     .update({
       product_type: next.product_type,
+      slug: next.slug,
       active: !!willBeActive,
       name: next.name,
       headline: next.headline || null,
@@ -175,6 +202,7 @@ export async function PATCH(
       ends_at: next.ends_at || null,
       max_redemptions: next.max_redemptions || null,
       stripe_coupon_id: stripeCouponId,
+      stripe_product_id: stripeProductId,
     })
     .eq("id", id)
     .select()

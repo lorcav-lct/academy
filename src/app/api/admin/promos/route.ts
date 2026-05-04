@@ -1,18 +1,18 @@
 /**
  * Admin promo CRUD.
  *
- * GET  /api/admin/promos        → lista tutte le promo (admin)
+ * GET  /api/admin/promos        → lista tutte le promo
  * POST /api/admin/promos        → crea nuova promo (+ Stripe coupon se active)
  *
- * Modello category-wide: ogni promo si applica a tutti i prodotti della
- * categoria (pack o masterclass). Il filtro per categoria è gestito
- * server-side da /api/checkout/session, quindi il coupon Stripe non
- * usa applies_to (verrebbe limitato lato Stripe ma è ridondante).
+ * Una promo può essere:
+ *   - category-wide (slug = null)        → coupon Stripe senza applies_to
+ *   - product-specific (slug = "X")       → coupon Stripe con applies_to.products = [productId]
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/client";
+import { findStripeProductBySlug } from "@/lib/stripe/products";
 import type Stripe from "stripe";
 import type { PromoRow } from "@/lib/promos/types";
 
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const {
     product_type,
+    slug,
     name,
     headline,
     subtitle,
@@ -94,26 +95,40 @@ export async function POST(request: NextRequest) {
   if (discount_type === "percent" && discount_value > 100) {
     return NextResponse.json({ error: "percent max 100" }, { status: 400 });
   }
+  const normalizedSlug =
+    typeof slug === "string" && slug.trim() ? slug.trim() : null;
 
   const admin = createAdminClient();
 
-  // Disattiva altre promo attive sulla stessa categoria
+  // Disattiva eventuale conflitto attivo (stesso product_type + stesso slug NULL/valorizzato)
   if (active) {
-    await admin
+    const q = admin
       .from("promos")
       .update({ active: false })
       .eq("product_type", product_type)
       .eq("active", true);
+    if (normalizedSlug) {
+      q.eq("slug", normalizedSlug);
+    } else {
+      q.is("slug", null);
+    }
+    await q;
   }
 
   // Crea coupon Stripe se attiva
   let stripeCouponId: string | null = null;
+  let stripeProductId: string | null = null;
+
   if (active) {
     try {
       const couponParams: Stripe.CouponCreateParams = {
         name,
         duration: "once",
-        metadata: { product_type, source: "academy-admin" },
+        metadata: {
+          product_type,
+          slug: normalizedSlug ?? "",
+          source: "academy-admin",
+        },
       };
       if (discount_type === "amount") {
         couponParams.amount_off = discount_value;
@@ -126,6 +141,20 @@ export async function POST(request: NextRequest) {
       }
       if (typeof max_redemptions === "number" && max_redemptions > 0) {
         couponParams.max_redemptions = max_redemptions;
+      }
+      // Restrizione Stripe a singolo product solo se product-specific
+      if (normalizedSlug) {
+        const productId = await findStripeProductBySlug(normalizedSlug);
+        if (!productId) {
+          return NextResponse.json(
+            {
+              error: `Prodotto Stripe non trovato per slug "${normalizedSlug}". Crealo prima via setup-stripe-*.mjs.`,
+            },
+            { status: 400 },
+          );
+        }
+        stripeProductId = productId;
+        couponParams.applies_to = { products: [productId] };
       }
 
       const coupon = await getStripe().coupons.create(couponParams);
@@ -147,6 +176,7 @@ export async function POST(request: NextRequest) {
     .from("promos")
     .insert({
       product_type,
+      slug: normalizedSlug,
       active: !!active,
       name,
       headline: headline || null,
@@ -157,6 +187,7 @@ export async function POST(request: NextRequest) {
       ends_at: ends_at || null,
       max_redemptions: max_redemptions || null,
       stripe_coupon_id: stripeCouponId,
+      stripe_product_id: stripeProductId,
     })
     .select()
     .single();

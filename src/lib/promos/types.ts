@@ -1,7 +1,9 @@
 /**
  * Tipi condivisi promo (admin UI, API, sito).
- * Una promo è category-wide: si applica a TUTTI i prodotti della categoria
- * (pack o masterclass).
+ * Una promo può essere:
+ *   - category-wide  (slug = null)        → tutti i prodotti della categoria
+ *   - product-specific (slug = "master-…") → solo quello slug
+ * Priorità in lookup: specific > category-wide.
  */
 import { getPackBySlug } from "@/lib/constants/packs";
 
@@ -11,6 +13,8 @@ export type PromoDiscountType = "amount" | "percent";
 export interface PromoRow {
   id: string;
   product_type: PromoProductType;
+  /** null → category-wide; valorizzato → solo questo slug */
+  slug: string | null;
   active: boolean;
   name: string;
   headline: string | null;
@@ -22,6 +26,7 @@ export interface PromoRow {
   ends_at: string | null;
   max_redemptions: number | null;
   stripe_coupon_id: string | null;
+  stripe_product_id: string | null;
   created_at: string;
   updated_at: string;
 }

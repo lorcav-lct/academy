@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
-import { getActivePromoForType } from "@/lib/promos/server";
-import { getPromoTypeForSlug } from "@/lib/promos/types";
+import { getActivePromoForProduct } from "@/lib/promos/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,13 +49,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Auto-apply active promo coupon for this product category (DB-managed via /admin).
-    // Stripe non permette stacking → se c'è una promo attiva sulla categoria,
-    // ignoriamo qualsiasi promotionCodeId inviato dal client.
-    const promoType = getPromoTypeForSlug(packId);
-    const activePromo = promoType
-      ? await getActivePromoForType(promoType)
-      : null;
+    // Auto-apply active promo coupon for this product (DB-managed via /admin).
+    // Priority: product-specific > category-wide.
+    // Stripe non permette stacking → ignoriamo eventuale promotionCodeId del client.
+    const activePromo = await getActivePromoForProduct(packId);
     const couponId = activePromo?.stripe_coupon_id ?? null;
     const effectivePromotionCodeId = couponId ? null : promotionCodeId || null;
 

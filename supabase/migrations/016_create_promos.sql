@@ -1,8 +1,9 @@
 -- Promos table — gestione coupon dall'admin.
--- Una promo è category-wide: o si applica a TUTTI i pack, o a TUTTE le
--- masterclass. La logica di applicazione del coupon Stripe è gestita
--- server-side dall'endpoint /api/checkout/session in base al tipo di
--- prodotto acquistato.
+-- Una promo può essere:
+--   - category-wide (slug IS NULL)        → si applica a tutti i pack o tutte le masterclass
+--   - product-specific (slug = 'master-calcio') → si applica solo a quel prodotto
+-- La logica di applicazione (specific > category) è gestita server-side
+-- da /api/checkout/session.
 
 CREATE TYPE promo_product_type AS ENUM ('pack', 'masterclass');
 CREATE TYPE promo_discount_type AS ENUM ('amount', 'percent');
@@ -10,6 +11,9 @@ CREATE TYPE promo_discount_type AS ENUM ('amount', 'percent');
 CREATE TABLE public.promos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_type promo_product_type NOT NULL,
+  -- Se NULL → category-wide (tutti i prodotti della categoria).
+  -- Se valorizzato → si applica solo a quel singolo slug.
+  slug TEXT,
   active BOOLEAN NOT NULL DEFAULT false,
 
   -- Marketing
@@ -23,23 +27,32 @@ CREATE TABLE public.promos (
   -- Per percent: 1..100
   discount_value INT NOT NULL CHECK (discount_value > 0),
 
-  -- Validità lato sito
+  -- Validità
   starts_at TIMESTAMPTZ,
   ends_at TIMESTAMPTZ,
   max_redemptions INT,
 
-  -- Riferimento Stripe
+  -- Riferimenti Stripe
   stripe_coupon_id TEXT,
+  stripe_product_id TEXT,                 -- popolato solo per promo product-specific
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Massimo una promo ATTIVA per categoria (pack/masterclass).
--- Più "draft" possibili sulla stessa categoria.
-CREATE UNIQUE INDEX idx_promos_active_per_type ON public.promos (product_type) WHERE active;
+-- Massimo una promo ATTIVA category-wide per ciascun product_type.
+CREATE UNIQUE INDEX idx_promos_active_category_wide
+  ON public.promos (product_type)
+  WHERE active AND slug IS NULL;
+
+-- Massimo una promo ATTIVA product-specific per ciascuno slug.
+CREATE UNIQUE INDEX idx_promos_active_per_slug
+  ON public.promos (product_type, slug)
+  WHERE active AND slug IS NOT NULL;
+
 CREATE INDEX idx_promos_product_type ON public.promos (product_type);
 CREATE INDEX idx_promos_active ON public.promos (active);
+CREATE INDEX idx_promos_slug ON public.promos (slug) WHERE slug IS NOT NULL;
 
 -- ─── RLS ─────────────────────────────────────────────────────────────
 ALTER TABLE public.promos ENABLE ROW LEVEL SECURITY;

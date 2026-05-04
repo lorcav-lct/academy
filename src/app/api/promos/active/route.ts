@@ -1,13 +1,18 @@
 /**
- * Endpoint pubblico — promo live raggruppate per categoria.
- * Risposta: { promos: { pack?: PromoRow, masterclass?: PromoRow } }
+ * Endpoint pubblico — promo live raggruppate.
+ * Risposta: {
+ *   promos: {
+ *     byType:  { pack?: PromoRow, masterclass?: PromoRow },
+ *     bySlug:  { [slug]: PromoRow }
+ *   }
+ * }
  */
 import { NextResponse } from "next/server";
-import { getActivePromosByType } from "@/lib/promos/server";
+import { getActivePromosBundle } from "@/lib/promos/server";
 
 export const revalidate = 60;
 
 export async function GET() {
-  const promos = await getActivePromosByType();
+  const promos = await getActivePromosBundle();
   return NextResponse.json({ promos });
 }

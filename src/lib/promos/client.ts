@@ -9,24 +9,28 @@ import {
   type PromoRow,
 } from "./types";
 
-type PromoMap = Partial<Record<PromoProductType, PromoRow>>;
+type PromoBundle = {
+  byType: Partial<Record<PromoProductType, PromoRow>>;
+  bySlug: Record<string, PromoRow>;
+};
 
-let cache: PromoMap | null = null;
-let inflight: Promise<PromoMap> | null = null;
+const emptyBundle: PromoBundle = { byType: {}, bySlug: {} };
 
-async function fetchPromos(): Promise<PromoMap> {
+let cache: PromoBundle | null = null;
+let inflight: Promise<PromoBundle> | null = null;
+
+async function fetchPromos(): Promise<PromoBundle> {
   if (cache) return cache;
   if (inflight) return inflight;
   inflight = fetch("/api/promos/active", { cache: "no-store" })
     .then((r) => r.json())
     .then((data) => {
-      cache = (data?.promos ?? {}) as PromoMap;
+      cache = (data?.promos ?? emptyBundle) as PromoBundle;
       return cache;
     })
     .catch(() => {
-      const empty: PromoMap = {};
-      cache = empty;
-      return empty;
+      cache = emptyBundle;
+      return emptyBundle;
     })
     .finally(() => {
       inflight = null;
@@ -34,9 +38,9 @@ async function fetchPromos(): Promise<PromoMap> {
   return inflight;
 }
 
-/** Hook: ritorna la mappa promo (vuota mentre carica) */
-export function useActivePromos(): { promos: PromoMap; loading: boolean } {
-  const [promos, setPromos] = useState<PromoMap>(cache ?? {});
+/** Hook: ritorna il bundle promo live (vuoto mentre carica) */
+export function useActivePromos(): { promos: PromoBundle; loading: boolean } {
+  const [promos, setPromos] = useState<PromoBundle>(cache ?? emptyBundle);
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
@@ -55,21 +59,20 @@ export function useActivePromos(): { promos: PromoMap; loading: boolean } {
   return { promos, loading };
 }
 
-/** Promo attiva per una categoria (null se nessuna) */
-export function usePromoForType(type: PromoProductType): PromoRow | null {
-  const { promos } = useActivePromos();
-  return promos[type] ?? null;
-}
-
-/** Promo attiva per uno slug (deduce la categoria, null se slug non promo-able) */
+/**
+ * Promo applicabile a uno slug, con priorità:
+ *   1. promo product-specific (slug = X)
+ *   2. promo category-wide della categoria di X
+ */
 export function usePromoForSlug(slug: string): PromoRow | null {
-  const type = getPromoTypeForSlug(slug);
   const { promos } = useActivePromos();
+  if (promos.bySlug[slug]) return promos.bySlug[slug];
+  const type = getPromoTypeForSlug(slug);
   if (!type) return null;
-  return promos[type] ?? null;
+  return promos.byType[type] ?? null;
 }
 
-/** Pricing scontato per uno slug, applicando la promo della sua categoria */
+/** Pricing scontato per uno slug */
 export function usePromoPricing(
   slug: string,
   originalCents: number,
