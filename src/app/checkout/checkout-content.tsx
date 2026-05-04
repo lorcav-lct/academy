@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { getPackBySlug, type AcademyProduct } from "@/lib/constants/packs";
 import { getWorkshopBySlug, type Workshop } from "@/lib/constants/workshops";
@@ -23,6 +24,22 @@ import {
   useTierTokens,
   type TierTokens,
 } from "@/lib/checkout/theme";
+
+/* ──────────────────────────────────────────────────────────────
+   Product icons (per pack tier + default for everything else)
+─────────────────────────────────────────────────────────────── */
+function getProductIcon(slug: string): string {
+  switch (slug) {
+    case "start":
+      return "/prodotto-academy-start.jpg";
+    case "pro":
+      return "/prodotto-academy-pro.jpg";
+    case "elite":
+      return "/prodotto-academy-elite.jpg";
+    default:
+      return "/prodotto-academy.jpg";
+  }
+}
 
 /* ──────────────────────────────────────────────────────────────
    Payment brand logos (compact inline SVG)
@@ -336,7 +353,22 @@ function OrderSummary({
 
         {/* Line items */}
         <div className="space-y-3">
-          <div className="flex items-baseline justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="relative aspect-square shrink-0 overflow-hidden"
+              style={{
+                width: "44px",
+                border: `1px solid ${t.border}`,
+              }}
+            >
+              <Image
+                src={getProductIcon(pack.slug)}
+                alt={pack.name}
+                fill
+                sizes="44px"
+                className="object-cover"
+              />
+            </div>
             <div className="min-w-0 flex-1">
               <p
                 className="text-[0.95rem] font-bold leading-tight"
@@ -1271,34 +1303,52 @@ export function CheckoutContent() {
                 />
                 <div className="p-6 md:p-8">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <span
-                        className="mb-2 inline-flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-[0.32em]"
-                        style={{ color: ORANGE }}
-                      >
-                        {isBundle
-                          ? "Pack"
-                          : pack.type === "course"
-                            ? "Blocco"
-                            : "Masterclass"}
-                        <span style={{ opacity: 0.5 }}>·</span>
-                        <span style={{ color: t.ts }}>{tierLabel}</span>
-                      </span>
-                      <h2
-                        className="font-black leading-tight tracking-[-0.02em]"
+                    <div className="flex min-w-0 flex-1 items-start gap-4">
+                      {/* Product icon */}
+                      <div
+                        className="relative aspect-square shrink-0 overflow-hidden"
                         style={{
-                          fontSize: "clamp(1.4rem, 3vw, 2rem)",
-                          color: t.th,
+                          width: "clamp(80px, 14vw, 110px)",
+                          border: `1px solid ${t.borderStrong}`,
                         }}
                       >
-                        {pack.name}
-                      </h2>
-                      <p
-                        className="mt-2 text-[0.92rem] leading-snug"
-                        style={{ color: t.tb }}
-                      >
-                        {pack.subtitle}
-                      </p>
+                        <Image
+                          src={getProductIcon(pack.slug)}
+                          alt={pack.name}
+                          fill
+                          sizes="110px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <span
+                          className="mb-2 inline-flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-[0.32em]"
+                          style={{ color: ORANGE }}
+                        >
+                          {isBundle
+                            ? "Pack"
+                            : pack.type === "course"
+                              ? "Blocco"
+                              : "Masterclass"}
+                          <span style={{ opacity: 0.5 }}>·</span>
+                          <span style={{ color: t.ts }}>{tierLabel}</span>
+                        </span>
+                        <h2
+                          className="font-black leading-tight tracking-[-0.02em]"
+                          style={{
+                            fontSize: "clamp(1.4rem, 3vw, 2rem)",
+                            color: t.th,
+                          }}
+                        >
+                          {pack.name}
+                        </h2>
+                        <p
+                          className="mt-2 text-[0.92rem] leading-snug"
+                          style={{ color: t.tb }}
+                        >
+                          {pack.subtitle}
+                        </p>
+                      </div>
                     </div>
                     {isBundle ? (
                       <button

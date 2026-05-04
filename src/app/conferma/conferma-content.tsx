@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/client";
@@ -49,6 +50,19 @@ interface TicketRow {
 /* ──────────────────────────────────────────────────────────────
    Helpers
 ─────────────────────────────────────────────────────────────── */
+function getProductIcon(slug: string): string {
+  switch (slug) {
+    case "start":
+      return "/prodotto-academy-start.jpg";
+    case "pro":
+      return "/prodotto-academy-pro.jpg";
+    case "elite":
+      return "/prodotto-academy-elite.jpg";
+    default:
+      return "/prodotto-academy.jpg";
+  }
+}
+
 function formatDateLong(iso: string): string {
   return new Date(iso).toLocaleDateString("it-IT", {
     day: "numeric",
@@ -265,7 +279,24 @@ function OrderSummary({
 
         {/* Line items */}
         <div className="space-y-3">
-          <div className="flex items-baseline justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
+            {pack && (
+              <div
+                className="relative aspect-square shrink-0 overflow-hidden"
+                style={{
+                  width: "44px",
+                  border: `1px solid ${t.border}`,
+                }}
+              >
+                <Image
+                  src={getProductIcon(pack.slug)}
+                  alt={pack.name}
+                  fill
+                  sizes="44px"
+                  className="object-cover"
+                />
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p
                 className="text-[0.95rem] font-bold leading-tight"
