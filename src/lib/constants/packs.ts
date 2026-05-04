@@ -29,8 +29,8 @@ export const PRODUCTS: AcademyProduct[] = [
     name: "START",
     subtitle: "Il percorso completo — 3 blocchi formativi",
     type: "bundle",
-    priceCents: 0,
-    stripePriceId: "",
+    priceCents: 330000,
+    stripePriceId: "price_1TTKfPCGgXzYzpRpn7ygPM3i",
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
       "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
@@ -49,8 +49,8 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle:
       "Il percorso completo + Personal Trainer FIPE × Lacertosus + 2 Masterclass",
     type: "bundle",
-    priceCents: 0,
-    stripePriceId: "",
+    priceCents: 470000,
+    stripePriceId: "price_1TTKfRCGgXzYzpRpXG0mXIRK",
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
       "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
@@ -71,8 +71,8 @@ export const PRODUCTS: AcademyProduct[] = [
     name: "ELITE",
     subtitle: "L'esperienza completa — con vitto e alloggio inclusi",
     type: "bundle",
-    priceCents: 0,
-    stripePriceId: "",
+    priceCents: 700000,
+    stripePriceId: "price_1TTKfSCGgXzYzpRpKScATmfz",
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
       "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",

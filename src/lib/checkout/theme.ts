@@ -10,11 +10,13 @@ import type { AcademyProduct } from "@/lib/constants/packs";
 export const ORANGE = "#F09226";
 export const ORANGE_RGB = "240,146,38";
 
-/** Display prices for bundles (catalog priceCents=0 → TBD) */
+/** Display fallback for bundles (used by PackSwitcher and as safety net
+ *  when packs.ts has priceCents=0). Fonte di verità reale: PRODUCTS in
+ *  src/lib/constants/packs.ts (priceCents + stripePriceId). */
 export const BUNDLE_PRICE_DISPLAY: Record<string, number> = {
-  start: 120000,
-  pro: 160000,
-  elite: 220000,
+  start: 330000,
+  pro: 470000,
+  elite: 700000,
 };
 
 export const TIER_LABEL: Record<string, string> = {

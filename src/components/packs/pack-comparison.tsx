@@ -44,11 +44,11 @@ const TIER: Record<
   elite: { label: "ELITE" },
 };
 
-// Example prices for display (bundles have priceCents:0 in catalog — TBD)
+// Listini bundle (IVA inclusa). Allineati a packs.ts e Stripe.
 const PACK_PRICE_DISPLAY: Record<string, string> = {
-  start: "€ 1.200",
-  pro: "€ 1.600",
-  elite: "€ 2.200",
+  start: "€ 3.300",
+  pro: "€ 4.700",
+  elite: "€ 7.000",
 };
 
 const BLOCK_SLUGS = ["function", "strength", "science"] as const;
