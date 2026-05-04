@@ -1,12 +1,15 @@
 /**
- * Tipi condivisi promo (usati da admin UI, API, lettori sito).
+ * Tipi condivisi promo (admin UI, API, sito).
+ * Una promo è category-wide: si applica a TUTTI i prodotti della categoria
+ * (pack o masterclass).
  */
+import { getPackBySlug } from "@/lib/constants/packs";
+
 export type PromoProductType = "pack" | "masterclass";
 export type PromoDiscountType = "amount" | "percent";
 
 export interface PromoRow {
   id: string;
-  slug: string;
   product_type: PromoProductType;
   active: boolean;
   name: string;
@@ -19,17 +22,9 @@ export interface PromoRow {
   ends_at: string | null;
   max_redemptions: number | null;
   stripe_coupon_id: string | null;
-  stripe_product_id: string | null;
   created_at: string;
   updated_at: string;
 }
-
-export type PromoCreateInput = Omit<
-  PromoRow,
-  "id" | "stripe_coupon_id" | "stripe_product_id" | "created_at" | "updated_at"
->;
-
-export type PromoUpdateInput = Partial<PromoCreateInput>;
 
 /** Calcolo prezzo display */
 export interface PromoPricing {
@@ -58,7 +53,7 @@ export function computePromoPricing(
   };
 }
 
-/** Vero se la promo è "live" adesso (active + non scaduta + non ancora iniziata se starts_at) */
+/** Vero se la promo è "live" adesso (active + finestra date OK) */
 export function isPromoLive(promo: PromoRow): boolean {
   if (!promo.active) return false;
   const now = Date.now();
@@ -66,4 +61,18 @@ export function isPromoLive(promo: PromoRow): boolean {
     return false;
   if (promo.ends_at && new Date(promo.ends_at).getTime() <= now) return false;
   return true;
+}
+
+/**
+ * Mappa uno slug prodotto → categoria promo.
+ * - bundle (start/pro/elite) → "pack"
+ * - workshop (master-*)      → "masterclass"
+ * - course (function/strength/...) → null (no promo applicabile)
+ */
+export function getPromoTypeForSlug(slug: string): PromoProductType | null {
+  const product = getPackBySlug(slug);
+  if (!product) return null;
+  if (product.type === "bundle") return "pack";
+  if (product.type === "workshop") return "masterclass";
+  return null;
 }

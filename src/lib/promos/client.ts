@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { computePromoPricing, type PromoPricing, type PromoRow } from "./types";
+import {
+  computePromoPricing,
+  getPromoTypeForSlug,
+  type PromoPricing,
+  type PromoProductType,
+  type PromoRow,
+} from "./types";
 
-type PromoMap = Record<string, PromoRow>;
+type PromoMap = Partial<Record<PromoProductType, PromoRow>>;
 
 let cache: PromoMap | null = null;
 let inflight: Promise<PromoMap> | null = null;
@@ -49,13 +55,21 @@ export function useActivePromos(): { promos: PromoMap; loading: boolean } {
   return { promos, loading };
 }
 
-/** Promo per un singolo slug (null se nessuna attiva) */
-export function usePromoForSlug(slug: string): PromoRow | null {
+/** Promo attiva per una categoria (null se nessuna) */
+export function usePromoForType(type: PromoProductType): PromoRow | null {
   const { promos } = useActivePromos();
-  return promos[slug] ?? null;
+  return promos[type] ?? null;
 }
 
-/** Pricing scontato + originale per uno slug (null se nessuna promo) */
+/** Promo attiva per uno slug (deduce la categoria, null se slug non promo-able) */
+export function usePromoForSlug(slug: string): PromoRow | null {
+  const type = getPromoTypeForSlug(slug);
+  const { promos } = useActivePromos();
+  if (!type) return null;
+  return promos[type] ?? null;
+}
+
+/** Pricing scontato per uno slug, applicando la promo della sua categoria */
 export function usePromoPricing(
   slug: string,
   originalCents: number,

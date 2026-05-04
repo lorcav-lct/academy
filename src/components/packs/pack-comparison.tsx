@@ -18,7 +18,7 @@ import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
-import { useActivePromos } from "@/lib/promos/client";
+import { usePromoForSlug } from "@/lib/promos/client";
 import { computePromoPricing, type PromoRow } from "@/lib/promos/types";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
@@ -880,8 +880,8 @@ function PackModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const copy = MODAL_COPY[pack.slug] ?? MODAL_COPY.start;
-  const { promos } = useActivePromos();
-  const priceInfo = getPackPriceDisplay(pack.slug, promos[pack.slug] ?? null);
+  const promoForSlug = usePromoForSlug(pack.slug);
+  const priceInfo = getPackPriceDisplay(pack.slug, promoForSlug);
   const priceDisplay = priceInfo.discounted;
   const totalTeachers = BLOCK_SLUGS.reduce(
     (acc, s) => acc + teachers[s].length,
@@ -1798,8 +1798,8 @@ function PackCard({
   void isDark;
   const tier = TIER[pack.slug] ?? TIER.start;
   const isHighlighted = pack.highlighted;
-  const { promos } = useActivePromos();
-  const priceInfo = getPackPriceDisplay(pack.slug, promos[pack.slug] ?? null);
+  const promoForSlug = usePromoForSlug(pack.slug);
+  const priceInfo = getPackPriceDisplay(pack.slug, promoForSlug);
   const priceDisplay = priceInfo.discounted;
   const copy = CARD_COPY[pack.slug] ?? CARD_COPY.start;
   const isPro = pack.slug === "pro";

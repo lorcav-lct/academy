@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/client";
-import { findStripeProductBySlug } from "@/lib/stripe/products";
 import type Stripe from "stripe";
 import type { PromoRow } from "@/lib/promos/types";
 
@@ -27,32 +26,21 @@ async function requireAdmin() {
   return { user };
 }
 
-/** Crea un nuovo coupon Stripe a partire dai dati promo */
 async function createStripeCoupon(
   row: Pick<
     PromoRow,
-    | "slug"
+    | "product_type"
     | "name"
     | "discount_type"
     | "discount_value"
     | "ends_at"
     | "max_redemptions"
-    | "stripe_product_id"
   >,
-): Promise<{ couponId: string; productId: string } | { error: string }> {
-  let productId = row.stripe_product_id;
-  if (!productId) {
-    productId = await findStripeProductBySlug(row.slug);
-  }
-  if (!productId) {
-    return { error: `Prodotto Stripe non trovato per slug "${row.slug}".` };
-  }
-
+): Promise<string> {
   const params: Stripe.CouponCreateParams = {
     name: row.name,
     duration: "once",
-    applies_to: { products: [productId] },
-    metadata: { slug: row.slug, source: "academy-admin" },
+    metadata: { product_type: row.product_type, source: "academy-admin" },
   };
   if (row.discount_type === "amount") {
     params.amount_off = row.discount_value;
@@ -66,9 +54,8 @@ async function createStripeCoupon(
   if (row.max_redemptions) {
     params.max_redemptions = row.max_redemptions;
   }
-
   const coupon = await getStripe().coupons.create(params);
-  return { couponId: coupon.id, productId };
+  return coupon.id;
 }
 
 /** Campi che, se cambiano, richiedono ricreazione del coupon Stripe */
@@ -77,7 +64,7 @@ const IMMUTABLE_KEYS = [
   "discount_value",
   "ends_at",
   "max_redemptions",
-  "slug",
+  "product_type",
 ] as const;
 
 export async function PATCH(
@@ -93,7 +80,6 @@ export async function PATCH(
   const body = await request.json();
   const admin = createAdminClient();
 
-  // Carica row esistente
   const { data: existing, error: loadErr } = await admin
     .from("promos")
     .select("*")
@@ -104,13 +90,11 @@ export async function PATCH(
   }
   const current = existing as unknown as PromoRow;
 
-  // Calcola la row "next" (merge body → current)
   const next: PromoRow = {
     ...current,
     ...(body as Partial<PromoRow>),
   };
 
-  // Validation rapida
   if (next.discount_type === "percent" && next.discount_value > 100) {
     return NextResponse.json({ error: "percent max 100" }, { status: 400 });
   }
@@ -121,74 +105,65 @@ export async function PATCH(
     );
   }
 
-  // Cambio di stato active e/o campi immutabili → bisogna toccare Stripe
   const wasActive = current.active;
   const willBeActive = next.active;
-
   const immutableChanged = IMMUTABLE_KEYS.some((k) => current[k] !== next[k]);
 
   let stripeCouponId = current.stripe_coupon_id;
-  let stripeProductId = current.stripe_product_id;
-  let nameChanged = current.name !== next.name;
+  const nameChanged = current.name !== next.name;
 
-  // Caso 1: era attivo + resta attivo + immutable cambiato → archivia + ricrea
-  // Caso 2: era attivo + non più attivo → archivia
-  // Caso 3: non era attivo + diventa attivo → crea
-  // Caso 4: stato invariato attivo + solo name cambiato → update name su Stripe
-  // Caso 5: stato invariato attivo + niente cambia su Stripe → no-op
-
+  // Archivia il vecchio coupon se non più valido (deactivate o immutable changed)
   if (
     wasActive &&
     current.stripe_coupon_id &&
     (immutableChanged || !willBeActive)
   ) {
-    // Archivia il vecchio coupon (Stripe non permette delete se ha redemptions, ma del() OK su nuovi)
     try {
       await getStripe().coupons.del(current.stripe_coupon_id);
     } catch {
-      // Già archiviato / ha redemptions → ignora
+      // già archiviato → ignora
     }
     stripeCouponId = null;
   }
 
   if (willBeActive && !stripeCouponId) {
-    // Disattiva altre promo attive sullo stesso slug
-    if (next.slug !== current.slug || !wasActive) {
-      await admin
-        .from("promos")
-        .update({ active: false })
-        .eq("slug", next.slug)
-        .eq("active", true)
-        .neq("id", id);
-    }
+    // Disattiva altre promo attive sulla stessa categoria
+    await admin
+      .from("promos")
+      .update({ active: false })
+      .eq("product_type", next.product_type)
+      .eq("active", true)
+      .neq("id", id);
 
-    const created = await createStripeCoupon(next);
-    if ("error" in created) {
-      return NextResponse.json({ error: created.error }, { status: 400 });
+    try {
+      stripeCouponId = await createStripeCoupon(next);
+    } catch (err) {
+      return NextResponse.json(
+        {
+          error:
+            "Errore Stripe: " +
+            (err instanceof Error ? err.message : "sconosciuto"),
+        },
+        { status: 500 },
+      );
     }
-    stripeCouponId = created.couponId;
-    stripeProductId = created.productId;
-    nameChanged = false; // appena creato col nome corretto
   } else if (willBeActive && stripeCouponId && nameChanged) {
-    // Solo name cambiato — update mutabile su Stripe
     try {
       await getStripe().coupons.update(stripeCouponId, {
         name: next.name,
-        metadata: { slug: next.slug, source: "academy-admin" },
+        metadata: {
+          product_type: next.product_type,
+          source: "academy-admin",
+        },
       });
-      nameChanged = false;
     } catch (err) {
       console.error("Stripe coupon update error:", err);
     }
   }
 
-  void nameChanged;
-
-  // Update DB
   const { data, error } = await admin
     .from("promos")
     .update({
-      slug: next.slug,
       product_type: next.product_type,
       active: !!willBeActive,
       name: next.name,
@@ -200,7 +175,6 @@ export async function PATCH(
       ends_at: next.ends_at || null,
       max_redemptions: next.max_redemptions || null,
       stripe_coupon_id: stripeCouponId,
-      stripe_product_id: stripeProductId,
     })
     .eq("id", id)
     .select()
@@ -233,7 +207,7 @@ export async function DELETE(
     try {
       await getStripe().coupons.del(row.stripe_coupon_id);
     } catch {
-      // Già archiviato → ignora
+      // già archiviato
     }
   }
 

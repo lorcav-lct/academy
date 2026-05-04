@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { GradientText } from "@/components/shared/gradient-text";
-import { PRODUCTS } from "@/lib/constants/packs";
 import {
   IconArrowLeft,
   IconClose,
@@ -19,14 +18,13 @@ import type {
 } from "@/lib/promos/types";
 
 type EditableFields = {
-  slug: string;
   product_type: PromoProductType;
   active: boolean;
   name: string;
   headline: string;
   subtitle: string;
   discount_type: PromoDiscountType;
-  /** Per amount: euro (non centesimi) per UX; convertito al salvataggio */
+  /** Per amount: euro (UX-friendly), convertito in cents al salvataggio */
   discount_value_eur: number | "";
   starts_at: string;
   ends_at: string;
@@ -34,7 +32,6 @@ type EditableFields = {
 };
 
 const emptyForm = (): EditableFields => ({
-  slug: "",
   product_type: "pack",
   active: true,
   name: "",
@@ -49,7 +46,6 @@ const emptyForm = (): EditableFields => ({
 
 function rowToForm(row: PromoRow): EditableFields {
   return {
-    slug: row.slug,
     product_type: row.product_type,
     active: row.active,
     name: row.name,
@@ -70,7 +66,6 @@ function formToPayload(form: EditableFields) {
   const value =
     typeof form.discount_value_eur === "number" ? form.discount_value_eur : 0;
   return {
-    slug: form.slug,
     product_type: form.product_type,
     active: form.active,
     name: form.name,
@@ -105,13 +100,23 @@ function formatDate(iso: string | null): string {
   });
 }
 
-const PACK_SLUGS = PRODUCTS.filter((p) => p.type === "bundle").map((p) => ({
-  slug: p.slug,
-  label: `Pack ${p.name}`,
-}));
-const MASTERCLASS_SLUGS = PRODUCTS.filter((p) => p.type === "workshop").map(
-  (p) => ({ slug: p.slug, label: p.name }),
-);
+const PRODUCT_TYPE_LABEL: Record<PromoProductType, string> = {
+  pack: "Tutti i Pack (Start, Pro, Elite)",
+  masterclass: "Tutte le Masterclass",
+};
+
+const PRODUCT_TYPE_LABEL_SHORT: Record<PromoProductType, string> = {
+  pack: "Pack",
+  masterclass: "Masterclass",
+};
+
+/* ──────────────────────────────────────────────────────────────
+   Shared form classes — text-academy-gray-800 esplicito così
+   placeholder e selezioni sono leggibili su sfondo bianco.
+─────────────────────────────────────────────────────────────── */
+const inputClass =
+  "w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm text-academy-gray-800 placeholder:text-academy-gray-400 focus:border-academy-orange focus:outline-none";
+const selectClass = `${inputClass} appearance-none`;
 
 export default function AdminCouponPage() {
   const [promos, setPromos] = useState<PromoRow[]>([]);
@@ -215,9 +220,6 @@ export default function AdminCouponPage() {
     }
   }
 
-  const slugOptions =
-    editing?.product_type === "pack" ? PACK_SLUGS : MASTERCLASS_SLUGS;
-
   const grouped = useMemo(() => {
     const packs = promos.filter((p) => p.product_type === "pack");
     const mc = promos.filter((p) => p.product_type === "masterclass");
@@ -244,9 +246,9 @@ export default function AdminCouponPage() {
             Gestione <GradientText>Coupon</GradientText>
           </h1>
           <p className="mt-2 max-w-xl text-sm text-academy-gray-500">
-            Crea, attiva e modifica le promozioni applicate a pack e
-            masterclass. Le modifiche si sincronizzano automaticamente con
-            Stripe.
+            Crea, attiva e modifica le promozioni applicate a tutti i pack o a
+            tutte le masterclass. Le modifiche si sincronizzano automaticamente
+            con Stripe.
           </p>
         </div>
         <button
@@ -309,41 +311,41 @@ export default function AdminCouponPage() {
             </div>
 
             <div className="space-y-5 p-6">
-              {/* Product type + slug */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="Tipo prodotto">
-                  <select
-                    value={editing.product_type}
-                    onChange={(e) =>
-                      setEditing({
-                        ...editing,
-                        product_type: e.target.value as PromoProductType,
-                        slug: "",
-                      })
-                    }
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
-                  >
-                    <option value="pack">Pack</option>
-                    <option value="masterclass">Masterclass</option>
-                  </select>
-                </Field>
-                <Field label="Prodotto">
-                  <select
-                    value={editing.slug}
-                    onChange={(e) =>
-                      setEditing({ ...editing, slug: e.target.value })
-                    }
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
-                  >
-                    <option value="">— Seleziona —</option>
-                    {slugOptions.map((opt) => (
-                      <option key={opt.slug} value={opt.slug}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
+              {/* Categoria target */}
+              <Field label="Categoria a cui applicare la promo">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {(["pack", "masterclass"] as const).map((cat) => {
+                    const selected = editing.product_type === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() =>
+                          setEditing({ ...editing, product_type: cat })
+                        }
+                        className={`flex flex-col items-start gap-1 border px-4 py-3 text-left transition-all ${
+                          selected
+                            ? "border-academy-orange bg-academy-orange/10"
+                            : "border-black/[0.12] bg-white hover:border-black/30"
+                        }`}
+                      >
+                        <span
+                          className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+                            selected
+                              ? "text-academy-orange"
+                              : "text-academy-gray-500"
+                          }`}
+                        >
+                          {selected ? "✓ Selezionato" : "Categoria"}
+                        </span>
+                        <span className="text-sm font-bold text-academy-gray-800">
+                          {PRODUCT_TYPE_LABEL[cat]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Field>
 
               {/* Name */}
               <Field label="Nome promo (mostrato in badge)">
@@ -353,7 +355,7 @@ export default function AdminCouponPage() {
                     setEditing({ ...editing, name: e.target.value })
                   }
                   placeholder="es. LANCIO PACK"
-                  className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                  className={inputClass}
                 />
               </Field>
 
@@ -366,7 +368,7 @@ export default function AdminCouponPage() {
                       setEditing({ ...editing, headline: e.target.value })
                     }
                     placeholder="es. Sconto di lancio attivo"
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                    className={inputClass}
                   />
                 </Field>
                 <Field label="Sottotitolo (opzionale)">
@@ -376,7 +378,7 @@ export default function AdminCouponPage() {
                       setEditing({ ...editing, subtitle: e.target.value })
                     }
                     placeholder="es. fino al 30 giugno"
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                    className={inputClass}
                   />
                 </Field>
               </div>
@@ -392,7 +394,7 @@ export default function AdminCouponPage() {
                         discount_type: e.target.value as PromoDiscountType,
                       })
                     }
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                    className={selectClass}
                   >
                     <option value="amount">Importo fisso (€)</option>
                     <option value="percent">Percentuale (%)</option>
@@ -420,7 +422,7 @@ export default function AdminCouponPage() {
                     placeholder={
                       editing.discount_type === "amount" ? "800" : "15"
                     }
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                    className={inputClass}
                   />
                 </Field>
               </div>
@@ -434,7 +436,7 @@ export default function AdminCouponPage() {
                     onChange={(e) =>
                       setEditing({ ...editing, starts_at: e.target.value })
                     }
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                    className={inputClass}
                   />
                 </Field>
                 <Field label="Scadenza (opzionale)">
@@ -444,7 +446,7 @@ export default function AdminCouponPage() {
                     onChange={(e) =>
                       setEditing({ ...editing, ends_at: e.target.value })
                     }
-                    className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                    className={inputClass}
                   />
                 </Field>
               </div>
@@ -463,7 +465,7 @@ export default function AdminCouponPage() {
                     });
                   }}
                   placeholder="es. 50"
-                  className="w-full border border-black/[0.12] bg-white px-3 py-2.5 text-sm focus:border-academy-orange focus:outline-none"
+                  className={inputClass}
                 />
               </Field>
 
@@ -483,8 +485,8 @@ export default function AdminCouponPage() {
                   </p>
                   <p className="text-[11px] text-academy-gray-500">
                     Se attiva, viene applicata automaticamente al checkout e
-                    mostrata sul sito. Sostituisce eventuali promo attive sullo
-                    stesso prodotto.
+                    mostrata sul sito. Sostituisce eventuali altre promo attive
+                    sulla stessa categoria.
                   </p>
                 </div>
               </label>
@@ -583,7 +585,7 @@ function PromoGroup({
                     {row.active ? "Attiva" : "Inattiva"}
                   </span>
                   <span className="text-[11px] font-mono text-academy-gray-500">
-                    {row.slug}
+                    {PRODUCT_TYPE_LABEL_SHORT[row.product_type]}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-academy-gray-800">
@@ -670,8 +672,8 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
         Nessuna promo creata
       </h3>
       <p className="mt-1 max-w-md mx-auto text-sm text-academy-gray-500">
-        Crea la prima promo per offrire sconti su pack o masterclass. Tutte le
-        modifiche sono sincronizzate automaticamente con Stripe.
+        Crea la prima promo per offrire sconti su tutti i pack o tutte le
+        masterclass. Sync automatico con Stripe.
       </p>
       <button
         onClick={onCreate}

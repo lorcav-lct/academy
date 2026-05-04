@@ -4,14 +4,15 @@
  * GET  /api/admin/promos        → lista tutte le promo (admin)
  * POST /api/admin/promos        → crea nuova promo (+ Stripe coupon se active)
  *
- * RLS: l'endpoint usa il client utente (server-side cookies) per leggere/scrivere
- * → solo gli admin/staff superano le policy.
+ * Modello category-wide: ogni promo si applica a tutti i prodotti della
+ * categoria (pack o masterclass). Il filtro per categoria è gestito
+ * server-side da /api/checkout/session, quindi il coupon Stripe non
+ * usa applies_to (verrebbe limitato lato Stripe ma è ridondante).
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/client";
-import { findStripeProductBySlug } from "@/lib/stripe/products";
 import type Stripe from "stripe";
 import type { PromoRow } from "@/lib/promos/types";
 
@@ -56,7 +57,6 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
   const {
-    slug,
     product_type,
     name,
     headline,
@@ -70,9 +70,6 @@ export async function POST(request: NextRequest) {
   } = body ?? {};
 
   // Validation
-  if (!slug || typeof slug !== "string") {
-    return NextResponse.json({ error: "slug richiesto" }, { status: 400 });
-  }
   if (!["pack", "masterclass"].includes(product_type)) {
     return NextResponse.json(
       { error: "product_type non valido" },
@@ -100,37 +97,23 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  // Se va creata attiva → disattiva altre promo attive per lo stesso slug
+  // Disattiva altre promo attive sulla stessa categoria
   if (active) {
     await admin
       .from("promos")
       .update({ active: false })
-      .eq("slug", slug)
+      .eq("product_type", product_type)
       .eq("active", true);
   }
 
-  // Se attiva, crea il coupon Stripe
+  // Crea coupon Stripe se attiva
   let stripeCouponId: string | null = null;
-  let stripeProductId: string | null = null;
-
   if (active) {
     try {
-      const productId = await findStripeProductBySlug(slug);
-      if (!productId) {
-        return NextResponse.json(
-          {
-            error: `Prodotto Stripe non trovato per slug "${slug}". Crealo prima via setup-stripe-*.mjs.`,
-          },
-          { status: 400 },
-        );
-      }
-      stripeProductId = productId;
-
       const couponParams: Stripe.CouponCreateParams = {
         name,
         duration: "once",
-        applies_to: { products: [productId] },
-        metadata: { slug, source: "academy-admin" },
+        metadata: { product_type, source: "academy-admin" },
       };
       if (discount_type === "amount") {
         couponParams.amount_off = discount_value;
@@ -163,7 +146,6 @@ export async function POST(request: NextRequest) {
   const { data, error } = await admin
     .from("promos")
     .insert({
-      slug,
       product_type,
       active: !!active,
       name,
@@ -175,13 +157,11 @@ export async function POST(request: NextRequest) {
       ends_at: ends_at || null,
       max_redemptions: max_redemptions || null,
       stripe_coupon_id: stripeCouponId,
-      stripe_product_id: stripeProductId,
     })
     .select()
     .single();
 
   if (error) {
-    // Se l'insert fallisce ma il coupon è stato creato, archivialo per non lasciarlo orfano
     if (stripeCouponId) {
       await getStripe()
         .coupons.del(stripeCouponId)

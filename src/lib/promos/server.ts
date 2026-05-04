@@ -1,20 +1,18 @@
 /**
  * Server-side helpers per leggere le promo attive dal DB.
- * Usato dall'endpoint /api/checkout/session per applicare automaticamente
- * il coupon Stripe corretto.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isPromoLive, type PromoRow } from "./types";
+import { isPromoLive, type PromoProductType, type PromoRow } from "./types";
 
-/** Promo attiva (live) per uno slug — null se nessuna */
-export async function getActivePromoForSlug(
-  slug: string,
+/** Promo attiva (live) per categoria — null se nessuna */
+export async function getActivePromoForType(
+  type: PromoProductType,
 ): Promise<PromoRow | null> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("promos")
     .select("*")
-    .eq("slug", slug)
+    .eq("product_type", type)
     .eq("active", true)
     .limit(1)
     .maybeSingle();
@@ -23,14 +21,16 @@ export async function getActivePromoForSlug(
   return isPromoLive(row) ? row : null;
 }
 
-/** Mappa slug → promo per tutte le promo attive (per UI lista) */
-export async function getActivePromosMap(): Promise<Record<string, PromoRow>> {
+/** Mappa product_type → promo per tutte le promo live */
+export async function getActivePromosByType(): Promise<
+  Partial<Record<PromoProductType, PromoRow>>
+> {
   const supabase = createAdminClient();
   const { data } = await supabase.from("promos").select("*").eq("active", true);
   if (!data) return {};
-  const map: Record<string, PromoRow> = {};
+  const map: Partial<Record<PromoProductType, PromoRow>> = {};
   for (const row of data as unknown as PromoRow[]) {
-    if (isPromoLive(row)) map[row.slug] = row;
+    if (isPromoLive(row)) map[row.product_type] = row;
   }
   return map;
 }
