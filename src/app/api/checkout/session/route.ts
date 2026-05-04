@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { packId, priceId, workshopIds, masterclassIds } = body;
+    const { packId, priceId, workshopIds, masterclassIds, promotionCodeId } =
+      body;
 
     if (!packId || !priceId) {
       return NextResponse.json({ error: "Pack non valido" }, { status: 400 });
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       packId,
       workshopIds: workshopIds || [],
       masterclassIds: masterclassIds || [],
+      promotionCodeId: promotionCodeId || null,
     });
 
     // Update order with Stripe session ID via admin client.

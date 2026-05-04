@@ -1,3 +1,4 @@
+import type Stripe from "stripe";
 import { getStripe } from "./client";
 
 interface CreateCheckoutParams {
@@ -7,10 +8,14 @@ interface CreateCheckoutParams {
   packId: string;
   workshopIds: string[];
   masterclassIds?: string[];
+  /** If present, applies this promotion_code (`promo_...`) and disables the
+   *  Stripe-hosted promo field. If absent, the Stripe page shows the code
+   *  field as fallback. */
+  promotionCodeId?: string | null;
 }
 
 export async function createCheckoutSession(params: CreateCheckoutParams) {
-  const session = await getStripe().checkout.sessions.create({
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
     customer_email: params.customerEmail,
     line_items: [
@@ -29,8 +34,16 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
       pack_id: params.packId,
       workshop_ids: JSON.stringify(params.workshopIds),
       masterclass_ids: JSON.stringify(params.masterclassIds ?? []),
+      promotion_code: params.promotionCodeId ?? "",
     },
-  });
+  };
 
-  return session;
+  // `discounts` and `allow_promotion_codes` are mutually exclusive on Stripe.
+  if (params.promotionCodeId) {
+    sessionParams.discounts = [{ promotion_code: params.promotionCodeId }];
+  } else {
+    sessionParams.allow_promotion_codes = true;
+  }
+
+  return getStripe().checkout.sessions.create(sessionParams);
 }

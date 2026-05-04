@@ -245,6 +245,31 @@ function IconShieldCheck({ className }: { className?: string }) {
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Promo type
+─────────────────────────────────────────────────────────────── */
+type AppliedPromo = {
+  id: string;
+  code: string;
+  label: string;
+  percentOff: number | null;
+  amountOffCents: number | null;
+};
+
+function computeDiscountCents(
+  gross: number,
+  promo: AppliedPromo | null,
+): number {
+  if (!promo || gross <= 0) return 0;
+  if (promo.percentOff != null) {
+    return Math.round((gross * promo.percentOff) / 100);
+  }
+  if (promo.amountOffCents != null) {
+    return Math.min(gross, promo.amountOffCents);
+  }
+  return 0;
+}
+
+/* ──────────────────────────────────────────────────────────────
    Order Summary card (right column on desktop, top on mobile)
 ─────────────────────────────────────────────────────────────── */
 function OrderSummary({
@@ -254,6 +279,13 @@ function OrderSummary({
   unavailable,
   onCheckout,
   t,
+  promo,
+  promoInput,
+  promoError,
+  promoLoading,
+  onPromoInputChange,
+  onApplyPromo,
+  onRemovePromo,
 }: {
   pack: AcademyProduct;
   selectedMc: Workshop[];
@@ -261,9 +293,18 @@ function OrderSummary({
   unavailable: boolean;
   onCheckout: () => void;
   t: TierTokens;
+  promo: AppliedPromo | null;
+  promoInput: string;
+  promoError: string;
+  promoLoading: boolean;
+  onPromoInputChange: (v: string) => void;
+  onApplyPromo: () => void;
+  onRemovePromo: () => void;
 }) {
   const grossCents = getDisplayCents(pack);
-  const { net, vat } = splitVat(grossCents);
+  const discountCents = computeDiscountCents(grossCents, promo);
+  const finalGrossCents = Math.max(0, grossCents - discountCents);
+  const { net, vat } = splitVat(finalGrossCents);
   const tierLabel = TIER_LABEL[pack.slug] ?? pack.name;
   const isBundle = pack.type === "bundle";
   const itemLabel = isBundle ? `Pack ${tierLabel}` : pack.name;
@@ -350,9 +391,33 @@ function OrderSummary({
         {/* Divider */}
         <div className="my-5 h-px w-full" style={{ background: t.border }} />
 
-        {/* VAT breakdown */}
+        {/* Promo code section */}
         {grossCents > 0 && (
-          <div className="space-y-1.5">
+          <PromoSection
+            t={t}
+            promo={promo}
+            input={promoInput}
+            error={promoError}
+            loading={promoLoading}
+            onChange={onPromoInputChange}
+            onApply={onApplyPromo}
+            onRemove={onRemovePromo}
+          />
+        )}
+
+        {/* Discount line */}
+        {discountCents > 0 && (
+          <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
+            <span style={{ color: ORANGE }}>Sconto · {promo?.code ?? ""}</span>
+            <span className="font-bold tabular-nums" style={{ color: ORANGE }}>
+              −{formatEur(discountCents, true)}
+            </span>
+          </div>
+        )}
+
+        {/* VAT breakdown */}
+        {finalGrossCents > 0 && (
+          <div className="mt-3 space-y-1.5">
             <div className="flex items-baseline justify-between text-[0.78rem]">
               <span style={{ color: t.tb }}>Imponibile</span>
               <span
@@ -385,14 +450,24 @@ function OrderSummary({
           >
             Totale
           </span>
-          <span
-            className="text-[1.6rem] font-black leading-none tracking-[-0.02em] tabular-nums"
-            style={{ color: t.th }}
-          >
-            {grossCents > 0 ? formatEur(grossCents) : "TBD"}
+          <span className="flex items-baseline gap-2">
+            {discountCents > 0 && (
+              <span
+                className="text-[0.85rem] font-semibold tabular-nums line-through"
+                style={{ color: t.ts }}
+              >
+                {formatEur(grossCents)}
+              </span>
+            )}
+            <span
+              className="text-[1.6rem] font-black leading-none tracking-[-0.02em] tabular-nums"
+              style={{ color: t.th }}
+            >
+              {finalGrossCents > 0 ? formatEur(finalGrossCents) : "TBD"}
+            </span>
           </span>
         </div>
-        {grossCents > 0 && (
+        {finalGrossCents > 0 && (
           <p
             className="mt-1 text-right text-[0.62rem] font-semibold"
             style={{ color: t.ts }}
@@ -540,6 +615,132 @@ function OrderSummary({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Promo code section
+─────────────────────────────────────────────────────────────── */
+function PromoSection({
+  t,
+  promo,
+  input,
+  error,
+  loading,
+  onChange,
+  onApply,
+  onRemove,
+}: {
+  t: TierTokens;
+  promo: AppliedPromo | null;
+  input: string;
+  error: string;
+  loading: boolean;
+  onChange: (v: string) => void;
+  onApply: () => void;
+  onRemove: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  // If a promo is applied, show the applied state regardless of `open`
+  if (promo) {
+    return (
+      <div
+        className="flex items-center justify-between gap-3 px-3 py-2.5"
+        style={{
+          background: `rgba(${ORANGE_RGB},0.08)`,
+          border: `1px solid rgba(${ORANGE_RGB},0.32)`,
+        }}
+      >
+        <div className="min-w-0 flex-1">
+          <p
+            className="text-[0.6rem] font-black uppercase tracking-[0.22em]"
+            style={{ color: ORANGE }}
+          >
+            Codice applicato
+          </p>
+          <p
+            className="mt-0.5 truncate text-[0.85rem] font-bold"
+            style={{ color: t.th }}
+          >
+            <span className="font-mono">{promo.code}</span>
+            <span className="ml-2" style={{ color: ORANGE }}>
+              {promo.label}
+            </span>
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="shrink-0 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
+          style={{ color: t.tb }}
+          aria-label="Rimuovi codice promo"
+        >
+          Rimuovi
+        </button>
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1.5 text-[0.7rem] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
+        style={{ color: ORANGE }}
+      >
+        <span aria-hidden>+</span>
+        <span>Hai un codice promo?</span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <p
+        className="text-[0.6rem] font-black uppercase tracking-[0.22em]"
+        style={{ color: t.ts }}
+      >
+        Codice promo
+      </p>
+      <div className="flex items-stretch gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (input.trim()) onApply();
+            }
+          }}
+          placeholder="ES. EARLYBIRD"
+          autoFocus
+          className="min-w-0 flex-1 px-3 py-2.5 text-[0.85rem] font-mono uppercase tracking-[0.08em] outline-none transition-colors focus:border-academy-orange"
+          style={{
+            background: t.surface,
+            color: t.th,
+            border: `1px solid ${t.border}`,
+            letterSpacing: "0.08em",
+          }}
+        />
+        <button
+          type="button"
+          onClick={onApply}
+          disabled={loading || !input.trim()}
+          className="shrink-0 px-4 py-2.5 text-[0.7rem] font-black uppercase tracking-[0.18em] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ background: ORANGE, color: "#111" }}
+        >
+          {loading ? "…" : "Applica"}
+        </button>
+      </div>
+      {error && (
+        <p className="text-[0.7rem]" style={{ color: "#dc2626" }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -760,6 +961,50 @@ export function CheckoutContent() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
 
+  // Promo code state
+  const [promo, setPromo] = useState<AppliedPromo | null>(null);
+  const [promoInput, setPromoInput] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+
+  async function handleApplyPromo() {
+    const code = promoInput.trim();
+    if (!code) return;
+    setPromoLoading(true);
+    setPromoError("");
+    try {
+      const res = await fetch("/api/checkout/validate-promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setPromo({
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          percentOff: data.percentOff,
+          amountOffCents: data.amountOffCents,
+        });
+        setPromoInput("");
+        setPromoError("");
+      } else {
+        setPromoError(data.error || "Codice non valido.");
+      }
+    } catch {
+      setPromoError("Errore di connessione, riprova.");
+    } finally {
+      setPromoLoading(false);
+    }
+  }
+
+  function handleRemovePromo() {
+    setPromo(null);
+    setPromoInput("");
+    setPromoError("");
+  }
+
   // Fetch user info on mount
   useEffect(() => {
     let cancelled = false;
@@ -879,6 +1124,7 @@ export function CheckoutContent() {
           priceId: pack.stripePriceId,
           workshopIds: [],
           masterclassIds,
+          promotionCodeId: promo?.id ?? null,
         }),
       });
       const data = await response.json();
@@ -1382,6 +1628,13 @@ export function CheckoutContent() {
                 unavailable={unavailable}
                 onCheckout={handleCheckout}
                 t={t}
+                promo={promo}
+                promoInput={promoInput}
+                promoError={promoError}
+                promoLoading={promoLoading}
+                onPromoInputChange={setPromoInput}
+                onApplyPromo={handleApplyPromo}
+                onRemovePromo={handleRemovePromo}
               />
             </motion.aside>
           </div>
