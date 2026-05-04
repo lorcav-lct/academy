@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
-import { getLaunchEntry } from "@/lib/constants/promo";
+import { getActivePromoForSlug } from "@/lib/promos/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Auto-apply launch coupon if active for this pack (server-side authority).
-    // Stripe non permette stacking → se la promo di lancio è attiva, ignoriamo
-    // qualsiasi promotionCodeId inviato dal client.
-    const launch = getLaunchEntry(packId);
-    const couponId = launch?.couponId ?? null;
+    // Auto-apply active promo coupon for this slug (DB-managed via /admin).
+    // Stripe non permette stacking → se c'è una promo attiva sul prodotto,
+    // ignoriamo qualsiasi promotionCodeId inviato dal client.
+    const activePromo = await getActivePromoForSlug(packId);
+    const couponId = activePromo?.stripe_coupon_id ?? null;
     const effectivePromotionCodeId = couponId ? null : promotionCodeId || null;
 
     // Create Stripe Checkout Session

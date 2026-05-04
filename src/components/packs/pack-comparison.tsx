@@ -18,7 +18,8 @@ import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
-import { LAUNCH_PROMO, getLaunchPricing } from "@/lib/constants/promo";
+import { useActivePromos } from "@/lib/promos/client";
+import { computePromoPricing, type PromoRow } from "@/lib/promos/types";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
@@ -62,25 +63,36 @@ function formatEuroClean(cents: number): string {
   return `€ ${new Intl.NumberFormat("it-IT").format(Math.round(cents / 100))}`;
 }
 
-/** Restituisce il prezzo "display" tenendo conto della promo di lancio.
- *  Se attiva, restituisce { discounted, original }; altrimenti solo { discounted } = originale. */
-function getPackPriceDisplay(slug: string): {
+/** Restituisce il prezzo "display" tenendo conto di un'eventuale promo attiva.
+ *  Passa `promo` da useActivePromos(). Se null, mostra prezzo originale. */
+function getPackPriceDisplay(
+  slug: string,
+  promo: PromoRow | null,
+): {
   discounted: string;
   original?: string;
   hasDiscount: boolean;
+  promoName?: string;
 } {
   const original = PACK_PRICE_CENTS[slug] ?? 0;
-  const launch = getLaunchPricing(slug, original);
-  if (!launch) {
+  if (!promo || original <= 0) {
+    return {
+      discounted: PACK_PRICE_DISPLAY[slug] ?? formatEuroClean(original),
+      hasDiscount: false,
+    };
+  }
+  const pricing = computePromoPricing(promo, original);
+  if (pricing.discount <= 0) {
     return {
       discounted: PACK_PRICE_DISPLAY[slug] ?? formatEuroClean(original),
       hasDiscount: false,
     };
   }
   return {
-    discounted: formatEuroClean(launch.final),
-    original: formatEuroClean(launch.original),
+    discounted: formatEuroClean(pricing.final),
+    original: formatEuroClean(pricing.original),
     hasDiscount: true,
+    promoName: promo.name,
   };
 }
 
@@ -868,7 +880,8 @@ function PackModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const copy = MODAL_COPY[pack.slug] ?? MODAL_COPY.start;
-  const priceInfo = getPackPriceDisplay(pack.slug);
+  const { promos } = useActivePromos();
+  const priceInfo = getPackPriceDisplay(pack.slug, promos[pack.slug] ?? null);
   const priceDisplay = priceInfo.discounted;
   const totalTeachers = BLOCK_SLUGS.reduce(
     (acc, s) => acc + teachers[s].length,
@@ -1104,7 +1117,7 @@ function PackModal({
                       className="px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
                       style={{ background: ORANGE, color: "#111" }}
                     >
-                      {LAUNCH_PROMO.label}
+                      {priceInfo.promoName ?? "PROMO"}
                     </span>
                   )}
                 </div>
@@ -1635,7 +1648,7 @@ function PackModal({
                   className="px-1 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
                   style={{ background: ORANGE, color: "#111" }}
                 >
-                  {LAUNCH_PROMO.label}
+                  {priceInfo.promoName ?? "PROMO"}
                 </span>
               )}
             </span>
@@ -1785,7 +1798,8 @@ function PackCard({
   void isDark;
   const tier = TIER[pack.slug] ?? TIER.start;
   const isHighlighted = pack.highlighted;
-  const priceInfo = getPackPriceDisplay(pack.slug);
+  const { promos } = useActivePromos();
+  const priceInfo = getPackPriceDisplay(pack.slug, promos[pack.slug] ?? null);
   const priceDisplay = priceInfo.discounted;
   const copy = CARD_COPY[pack.slug] ?? CARD_COPY.start;
   const isPro = pack.slug === "pro";
@@ -1957,7 +1971,7 @@ function PackCard({
                 className="px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
                 style={{ background: ORANGE, color: "#111" }}
               >
-                {LAUNCH_PROMO.label}
+                {priceInfo.promoName ?? "PROMO"}
               </span>
             )}
           </div>

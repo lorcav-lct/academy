@@ -24,7 +24,7 @@ import {
   useTierTokens,
   type TierTokens,
 } from "@/lib/checkout/theme";
-import { LAUNCH_PROMO, getLaunchPricing } from "@/lib/constants/promo";
+import { usePromoPricing } from "@/lib/promos/client";
 
 /* ──────────────────────────────────────────────────────────────
    Product icons (per pack tier + default for everything else)
@@ -320,8 +320,8 @@ function OrderSummary({
   onRemovePromo: () => void;
 }) {
   const grossCents = getDisplayCents(pack);
-  const launch = getLaunchPricing(pack.slug, grossCents);
-  // Auto-launch promo overrides any manual user code (Stripe non permette stacking).
+  const launch = usePromoPricing(pack.slug, grossCents);
+  // Auto-promo (server-side) overrides any manual user code (no stacking on Stripe).
   const launchDiscountCents = launch ? launch.discount : 0;
   const manualDiscountCents = launch
     ? 0
@@ -443,20 +443,21 @@ function OrderSummary({
               className="mt-0.5 inline-flex items-center justify-center px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
               style={{ background: ORANGE, color: "#111" }}
             >
-              {LAUNCH_PROMO.label}
+              {launch.promo.name}
             </span>
             <div className="min-w-0 flex-1">
               <p
                 className="text-[0.78rem] font-bold leading-tight"
                 style={{ color: t.th }}
               >
-                Sconto di lancio applicato
+                {launch.promo.headline ?? "Sconto applicato"}
               </p>
               <p
                 className="mt-0.5 text-[0.7rem] leading-snug"
                 style={{ color: t.ts }}
               >
-                Risparmi {formatEur(launch.discount)} · valido fino al 30 giugno
+                Risparmi {formatEur(launch.discount)}
+                {launch.promo.subtitle ? ` · ${launch.promo.subtitle}` : ""}
               </p>
             </div>
           </div>
@@ -479,7 +480,7 @@ function OrderSummary({
         {/* Discount line — launch first, then manual */}
         {launchDiscountCents > 0 && (
           <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
-            <span style={{ color: ORANGE }}>Sconto · {LAUNCH_PROMO.label}</span>
+            <span style={{ color: ORANGE }}>Sconto · {launch?.promo.name}</span>
             <span className="font-bold tabular-nums" style={{ color: ORANGE }}>
               −{formatEur(launchDiscountCents, true)}
             </span>
@@ -841,7 +842,7 @@ function MobileStickyBar({
   onCheckout: () => void;
 }) {
   const grossCents = getDisplayCents(pack);
-  const launch = getLaunchPricing(pack.slug, grossCents);
+  const launch = usePromoPricing(pack.slug, grossCents);
   const finalCents = launch ? launch.final : grossCents;
 
   return (
@@ -868,7 +869,7 @@ function MobileStickyBar({
             className="text-[0.55rem] font-bold uppercase tracking-[0.18em]"
             style={{ color: launch ? ORANGE : "rgba(255,255,255,0.55)" }}
           >
-            {launch ? `${LAUNCH_PROMO.label} · Totale` : "Totale"}
+            {launch ? `${launch.promo.name} · Totale` : "Totale"}
           </span>
           <span className="flex items-baseline gap-2">
             {launch && (

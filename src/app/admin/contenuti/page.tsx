@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { GradientText } from "@/components/shared/gradient-text";
-import { IconImage, IconArrowRight } from "../_components/icons";
+import { IconImage, IconArrowRight, IconEuro } from "../_components/icons";
 
 const CONTENT_SECTIONS = [
   {
@@ -10,6 +10,12 @@ const CONTENT_SECTIONS = [
     label: "Hero Slides",
     desc: "Modifica titoli, descrizioni, CTA e immagini di sfondo delle slide nella sezione hero della home.",
     Icon: IconImage,
+  },
+  {
+    href: "/admin/contenuti/coupon",
+    label: "Promo & Coupon",
+    desc: "Crea e modifica promozioni applicate a pack e masterclass: sconti fissi o percentuali, scadenza, max utilizzi. Sync automatico con Stripe.",
+    Icon: IconEuro,
   },
 ];
 
