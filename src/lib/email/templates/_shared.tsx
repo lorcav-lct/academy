@@ -63,12 +63,14 @@ export function EmailShell({
       <Body style={shellStyles.body}>
         <Container style={shellStyles.container}>
           {/* Brand bar — dark with white "ACADEMY" wordmark.
-              Width-driven sizing: 80% of container, max 460px. Height auto. */}
+              Width-driven: 38% of container, max 200px. Height auto.
+              Kept small to avoid bitmap upscaling in email clients
+              that rasterize SVGs (e.g. Gmail Web). */}
           <Section style={shellStyles.brandBar}>
             <Img
               src={`${appUrl}/scritta-academy.svg`}
               alt="Lacertosus Academy"
-              width={460}
+              width={200}
               style={shellStyles.brandLogo}
             />
           </Section>
@@ -332,8 +334,8 @@ const shellStyles = {
   brandLogo: {
     display: "block",
     margin: "0 auto",
-    width: "80%",
-    maxWidth: "460px",
+    width: "38%",
+    maxWidth: "200px",
     height: "auto",
   } as CSSProperties,
   accentStrip: {
