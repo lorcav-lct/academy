@@ -776,7 +776,7 @@ function TicketsCard({ tickets, t }: { tickets: TicketRow[]; t: TierTokens }) {
           </div>
         </div>
       ) : (
-        <ul className="grid gap-3 p-5 sm:grid-cols-2 md:p-6">
+        <ul className="grid gap-3 p-5 md:p-6">
           {tickets.map((ticket) => {
             const course = getCourseBySlug(ticket.course_id ?? "");
             const product = ticket.course_id
@@ -1166,7 +1166,7 @@ export function ConfermaContent() {
               </span>
             </h1>
             <p
-              className="mt-3 max-w-2xl text-[0.95rem] leading-[1.65]"
+              className="mt-3 text-[0.95rem] leading-[1.65]"
               style={{ color: t.tb }}
             >
               {pack
