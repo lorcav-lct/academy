@@ -511,17 +511,19 @@ export function Navbar() {
               href="/"
               className={cn(
                 "group inline-flex items-center transition-opacity duration-300 hover:opacity-80",
-                /* Logo color follows the actual header background, not the drawer:
+                /* Mobile drawer is always white, so force a dark logo while open.
                    - over hero (home above fold): dark bg → white logo
                    - mobile non-hero: bg is hardcoded white-translucent → dark logo
                    - desktop non-hero: .navbar-scrolled-bg adapts to theme */
-                overHeroDark
-                  ? "text-white"
-                  : isMobileViewport
-                    ? "text-[#111]"
-                    : theme === "dark"
-                      ? "text-academy-gray-100"
-                      : "text-[#111]",
+                mobileOpen
+                  ? "text-[#111]"
+                  : overHeroDark
+                    ? "text-white"
+                    : isMobileViewport
+                      ? "text-[#111]"
+                      : theme === "dark"
+                        ? "text-academy-gray-100"
+                        : "text-[#111]",
               )}
             >
               <Logo width={170} />
@@ -672,9 +674,6 @@ export function Navbar() {
           <div className="absolute right-0 top-0 h-[40vh] w-[40vw] bg-academy-orange/[0.04] blur-[100px]" />
           <div className="absolute left-0 bottom-0 h-[30vh] w-[30vw] bg-academy-orange/[0.02] blur-[120px]" />
         </div>
-
-        <div className="absolute left-8 top-8 h-8 w-8 border-l border-t border-academy-orange/30" />
-        <div className="absolute right-8 bottom-8 h-8 w-8 border-r border-b border-academy-orange/30" />
 
         <div className="relative flex h-full flex-col justify-between px-[8%] pb-14 pt-28">
           <nav className="flex flex-col">
