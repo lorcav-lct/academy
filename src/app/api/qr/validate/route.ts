@@ -11,9 +11,21 @@ type QrPayload = {
   orderId: string;
 };
 
+type AccessRule = {
+  product_slug: string;
+  product_type: "bundle" | "workshop";
+  max_entries: number | null;
+  active: boolean;
+};
+
 function getTicketProductName(slug: string | null | undefined): string {
   if (!slug) return "-";
   return getProductBySlug(slug)?.name ?? slug;
+}
+
+function getFallbackLimit(slug: string | null | undefined): number {
+  const product = slug ? getProductBySlug(slug) : null;
+  return product?.type === "bundle" ? 6 : 1;
 }
 
 export async function POST(request: NextRequest) {
@@ -83,14 +95,60 @@ export async function POST(request: NextRequest) {
 
     const ticketName =
       payload?.courseName || getTicketProductName(ticket.course_id);
+    const productSlug = (ticket.course_id as string | null) ?? "";
+
+    const { data: accessRuleData } = productSlug
+      ? await supabase
+          .from("product_access_rules")
+          .select("product_slug, product_type, max_entries, active")
+          .eq("product_slug", productSlug)
+          .maybeSingle()
+      : { data: null };
+
+    const accessRule = accessRuleData as unknown as AccessRule | null;
+    const maxEntries = accessRule?.max_entries ?? getFallbackLimit(productSlug);
+
+    if (accessRule && !accessRule.active) {
+      return NextResponse.json(
+        { valid: false, error: "Accesso disattivato per questo prodotto" },
+        { status: 200 },
+      );
+    }
+
+    const { count: usedEntries } = await supabase
+      .from("ticket_checkins")
+      .select("id", { count: "exact", head: true })
+      .eq("ticket_id", ticket.id);
+
+    const used = usedEntries ?? 0;
+
+    if (maxEntries !== null && used >= maxEntries) {
+      return NextResponse.json(
+        {
+          valid: false,
+          error: "Ingressi terminati",
+          ticket: {
+            id: ticket.id,
+            userName: payload?.userName || ticket.user_id,
+            courseName: ticketName,
+            eventDate: payload?.eventDate || "",
+            orderId: payload?.orderId || ticket.order_id,
+            usedEntries: used,
+            maxEntries,
+            remainingEntries: 0,
+          },
+        },
+        { status: 200 },
+      );
+    }
 
     // Check if already checked in for this event
     if (eventId) {
       const { data: existing } = await supabase
-        .from("attendance")
+        .from("ticket_checkins")
         .select("id")
         .eq("ticket_id", ticket.id)
-        .eq("calendar_event_id", eventId)
+        .eq("event_id", eventId)
         .single();
 
       if (existing) {
@@ -102,18 +160,37 @@ export async function POST(request: NextRequest) {
               userName: payload?.userName || ticket.user_id,
               courseName: ticketName,
               checkedInAt: existing,
+              usedEntries: used,
+              maxEntries,
+              remainingEntries:
+                maxEntries === null ? null : Math.max(0, maxEntries - used),
             },
           },
           { status: 200 },
         );
       }
+    }
 
-      // Record attendance
-      await supabase.from("attendance").insert({
-        ticket_id: ticket.id,
-        calendar_event_id: eventId,
-        checked_in_by: user.id,
-      });
+    const { error: checkinError } = await supabase.from("ticket_checkins").insert({
+      ticket_id: ticket.id,
+      product_slug: productSlug || ticketName,
+      scanned_by: user.id,
+      event_id: eventId || null,
+    });
+
+    if (checkinError) {
+      return NextResponse.json(
+        { valid: false, error: "Check-in non registrato" },
+        { status: 200 },
+      );
+    }
+
+    const nextUsed = used + 1;
+    const remainingEntries =
+      maxEntries === null ? null : Math.max(0, maxEntries - nextUsed);
+
+    if (maxEntries !== null && nextUsed >= maxEntries) {
+      await supabase.from("tickets").update({ is_used: true }).eq("id", ticket.id);
     }
 
     return NextResponse.json({
@@ -124,6 +201,9 @@ export async function POST(request: NextRequest) {
         courseName: ticketName,
         eventDate: payload?.eventDate || "",
         orderId: payload?.orderId || ticket.order_id,
+        usedEntries: nextUsed,
+        maxEntries,
+        remainingEntries,
       },
     });
   } catch (error) {

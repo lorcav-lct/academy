@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { GradientText } from "@/components/shared/gradient-text";
-import { IconImage, IconArrowRight, IconEuro } from "../_components/icons";
+import {
+  IconImage,
+  IconArrowRight,
+  IconEuro,
+  IconScan,
+} from "../_components/icons";
 
 const CONTENT_SECTIONS = [
   {
@@ -16,6 +21,12 @@ const CONTENT_SECTIONS = [
     label: "Promo & Coupon",
     desc: "Crea e modifica promozioni applicate a pack e masterclass: sconti fissi o percentuali, scadenza, max utilizzi. Sync automatico con Stripe.",
     Icon: IconEuro,
+  },
+  {
+    href: "/admin/contenuti/accessi",
+    label: "Accessi QR",
+    desc: "Configura quante volte ogni QR resta valido per pack e masterclass prima di risultare terminato allo scanner.",
+    Icon: IconScan,
   },
 ];
 
@@ -34,7 +45,7 @@ export default function AdminContenutiPage() {
         </p>
       </header>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {CONTENT_SECTIONS.map((s) => (
           <Link
             key={s.href}

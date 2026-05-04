@@ -28,6 +28,9 @@ interface ScanResult {
     courseName: string;
     eventDate: string;
     orderId: string;
+    usedEntries?: number;
+    maxEntries?: number | null;
+    remainingEntries?: number | null;
   };
 }
 
@@ -122,6 +125,22 @@ export default function ScannerPage() {
               <div className="mx-auto max-w-xs space-y-2 border border-emerald-500/20 bg-white p-4">
                 <Field label="Nome" value={result.ticket?.userName || "—"} />
                 <Field label="Corso" value={result.ticket?.courseName || "—"} />
+                {typeof result.ticket?.usedEntries === "number" && (
+                  <Field
+                    label="Ingressi"
+                    value={
+                      result.ticket.maxEntries == null
+                        ? `${result.ticket.usedEntries} / illimitati`
+                        : `${result.ticket.usedEntries} / ${result.ticket.maxEntries}`
+                    }
+                  />
+                )}
+                {typeof result.ticket?.remainingEntries === "number" && (
+                  <Field
+                    label="Residui"
+                    value={result.ticket.remainingEntries.toString()}
+                  />
+                )}
                 {result.ticket?.eventDate && (
                   <Field label="Data" value={result.ticket.eventDate} />
                 )}
@@ -141,6 +160,20 @@ export default function ScannerPage() {
               <p className="text-sm text-red-700">
                 {result.error || "Codice non riconosciuto"}
               </p>
+              {typeof result.ticket?.usedEntries === "number" && (
+                <div className="mx-auto mt-5 max-w-xs space-y-2 border border-red-500/20 bg-white p-4">
+                  <Field label="Nome" value={result.ticket.userName || "—"} />
+                  <Field label="Corso" value={result.ticket.courseName || "—"} />
+                  <Field
+                    label="Ingressi"
+                    value={
+                      result.ticket.maxEntries == null
+                        ? `${result.ticket.usedEntries} / illimitati`
+                        : `${result.ticket.usedEntries} / ${result.ticket.maxEntries}`
+                    }
+                  />
+                </div>
+              )}
             </>
           )}
         </div>

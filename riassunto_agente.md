@@ -12,6 +12,68 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0sept. Aggiornamenti 2026-05-04 — QR multi-ingresso configurabili
+
+Il QR del ticket ora rappresenta un diritto di accesso stabile, non un singolo check-in. Il consumo ingressi passa da un ledger separato.
+
+### DB
+
+Nuova migration `supabase/migrations/019_product_access_rules.sql`:
+
+- `product_access_rules`
+  - `product_slug TEXT PRIMARY KEY`
+  - `product_type TEXT CHECK ('bundle','workshop')`
+  - `label TEXT`
+  - `max_entries INT NULL` (`NULL` = illimitato)
+  - `active BOOLEAN`
+- `ticket_checkins`
+  - `ticket_id`, `product_slug`, `scanned_by`, `event_id NULL`, `scanned_at`
+  - unique parziale `(ticket_id, event_id)` quando `event_id IS NOT NULL`
+- Seed default:
+  - START/PRO/ELITE = `6` ingressi
+  - tutte le 9 masterclass = `1` ingresso
+
+### Admin UI
+
+Nuova sezione:
+
+- Card in `/admin/contenuti`
+- Pagina `/admin/contenuti/accessi`
+- API `/api/admin/access-rules`
+
+Funzioni:
+
+- lista pack e masterclass da `src/lib/constants/packs.ts`
+- modifica `max_entries` per singolo prodotto
+- campo vuoto = ingressi illimitati
+- toggle attivo/disattivo
+- lettura permessa a `admin` e `staff`, scrittura solo `admin`
+
+### Scanner QR
+
+`src/app/api/qr/validate/route.ts` ora:
+
+- verifica ordine `paid`
+- legge regola da `product_access_rules`
+- conta ingressi da `ticket_checkins`
+- se sotto limite registra un nuovo check-in
+- se raggiunge il limite marca `tickets.is_used = true` per compatibilità UI legacy
+- ritorna allo scanner `usedEntries`, `maxEntries`, `remainingEntries`
+
+`tickets.is_used` non va più considerato source of truth del consumo QR: è solo flag compatibile/derivato per UI esistenti.
+
+### Fix runtime mobile Vercel — Iubenda fuori dal subtree React
+
+`src/app/layout.tsx` non usa più `next/script` per il widget Iubenda dentro il body gestito da React.
+
+Nuovo componente `src/components/providers/iubenda-script.tsx`:
+
+- client component che renderizza `null`
+- in `useEffect` aggiunge lo script Iubenda a `document.head`
+- non fa cleanup e non lascia il nodo script sotto ownership React
+
+Motivo: su mobile produzione si è visto `NotFoundError: Failed to execute 'removeChild' on 'Node'`, compatibile con widget terzi che spostano/rimuovono nodi mentre React fa hydration/unmount. Tenere lo script fuori dal DOM React riduce il rischio.
+
 ## 0sext. Aggiornamenti 2026-05-04 — Ticket QR masterclass incluse nei pack
 
 Fix flusso PRO/ELITE: i 2 masterclass selezionati nel checkout ora generano ticket QR insieme al ticket del pack.
