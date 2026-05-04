@@ -62,12 +62,13 @@ export function EmailShell({
       <Preview>{preview}</Preview>
       <Body style={shellStyles.body}>
         <Container style={shellStyles.container}>
-          {/* Brand bar — dark with white logo */}
+          {/* Brand bar — dark with white "ACADEMY" wordmark.
+              Width-driven sizing: 80% of container, max 460px. Height auto. */}
           <Section style={shellStyles.brandBar}>
             <Img
-              src={`${appUrl}/logo.svg`}
+              src={`${appUrl}/scritta-academy.svg`}
               alt="Lacertosus Academy"
-              height={90}
+              width={460}
               style={shellStyles.brandLogo}
             />
           </Section>
@@ -325,15 +326,15 @@ const shellStyles = {
   } as CSSProperties,
   brandBar: {
     background: COLORS.dark,
-    padding: "32px 24px",
+    padding: "36px 24px",
     textAlign: "center" as const,
   } as CSSProperties,
   brandLogo: {
     display: "block",
     margin: "0 auto",
-    height: "90px",
-    width: "auto",
-    maxWidth: "100%",
+    width: "80%",
+    maxWidth: "460px",
+    height: "auto",
   } as CSSProperties,
   accentStrip: {
     height: "3px",
