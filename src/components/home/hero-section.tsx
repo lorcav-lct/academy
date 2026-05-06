@@ -279,17 +279,11 @@ export function HeroSection({
     return () => clearInterval(id);
   }, [slides.length, goToSlide]);
 
-  /* ── Main GSAP orchestration ───────────────────────────── */
+  /* ── GSAP orchestration: intro + per-panel reveals + count-up ── */
   useEffect(() => {
     if (typeof window === "undefined") return;
     gsap.registerPlugin(ScrollTrigger);
 
-    /* Hydration/navigation robustness:
-       1. Silenzia gli avvisi "GSAP target not found" durante mount (refs
-          temporaneamente null nelle bundle minified con fast refresh/bfcache).
-       2. Monkey-patch one-shot di ScrollTrigger.refresh per intercettare
-          race "insertBefore on Node" quando React ha già mosso il pin
-          wrapper. Il prossimo scroll/resize farà un refresh pulito. */
     gsap.config({ nullTargetWarn: false });
     const STg = ScrollTrigger as typeof ScrollTrigger & {
       __refreshPatched?: boolean;
@@ -309,7 +303,6 @@ export function HeroSection({
       STg.__refreshPatched = true;
     }
 
-    const shouldPin = isDesktop && !isReducedMotion;
     countFiredRef.current = false;
 
     const ctx = gsap.context(() => {
@@ -351,176 +344,87 @@ export function HeroSection({
         "-=0.45",
       );
 
-      if (!shouldPin) return;
+      if (!isDesktop || isReducedMotion) return;
 
-      /* ── Initial states ──────────────────────────────────── */
-      gsap.set(s1Ref.current, { opacity: 0, y: 40 });
-      gsap.set(s2Ref.current, { opacity: 0, y: 40 });
-      gsap.set(s3Ref.current, { opacity: 0, y: 40 });
-      gsap.set(videoLayerRef.current, { opacity: 0 });
-      gsap.set(slideBgRef.current, { opacity: 1 });
-
-      /* Hide panel children by default → reveal on panel arrival */
-      const allReveals = [
-        ...(s1Ref.current?.querySelectorAll("[data-reveal]") ?? []),
-        ...(s2Ref.current?.querySelectorAll("[data-reveal]") ?? []),
-        ...(s3Ref.current?.querySelectorAll("[data-reveal]") ?? []),
-      ];
-      if (allReveals.length) {
-        gsap.set(allReveals, { opacity: 0, y: 24 });
-      }
-
-      const revealPanel = (el: HTMLDivElement | null) => {
-        if (!el) return;
-        const targets = el.querySelectorAll("[data-reveal]");
+      /* ── Per-panel scroll-triggered reveals ────────────────
+         Each panel reveals its [data-reveal] children when it
+         enters the viewport. Reverse animation on scroll-up. */
+      const setupReveal = (panelEl: HTMLDivElement | null) => {
+        if (!panelEl) return;
+        const targets = panelEl.querySelectorAll("[data-reveal]");
         if (!targets.length) return;
-        gsap.fromTo(
-          targets,
-          { opacity: 0, y: 24 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.06,
-            duration: 0.55,
-            ease: "power3.out",
-            overwrite: "auto",
+        gsap.set(targets, { opacity: 0, y: 30 });
+        ScrollTrigger.create({
+          trigger: panelEl,
+          start: "top 75%",
+          end: "bottom top",
+          onEnter: () => {
+            gsap.to(targets, {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              stagger: 0.08,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
           },
-        );
+          onLeaveBack: () => {
+            gsap.to(targets, {
+              opacity: 0,
+              y: 30,
+              duration: 0.4,
+              ease: "power2.in",
+              overwrite: "auto",
+            });
+          },
+        });
       };
 
-      /* ── Master scroll timeline ─────────────────────────── */
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "+=580%",
-          pin: stageRef.current,
-          scrub: 0.9,
-          /* Snap ai centri degli hold (P1/P2/P3/P4) + inizio/fine.
-             Se l'utente si ferma a metà di una transizione, viene portato
-             al pannello più vicino — meno artefatti "incastrati". */
-          snap: {
-            snapTo: [0, 0.11, 0.41, 0.69, 0.89, 1],
-            duration: { min: 0.25, max: 0.7 },
-            delay: 0.12,
-            ease: "power2.inOut",
-            inertia: false,
+      setupReveal(s1Ref.current);
+      setupReveal(s2Ref.current);
+      setupReveal(s3Ref.current);
+
+      /* ── Count-up trigger when numbers panel (s2) enters ── */
+      if (s2Ref.current) {
+        ScrollTrigger.create({
+          trigger: s2Ref.current,
+          start: "top 70%",
+          once: true,
+          onEnter: () => {
+            countFiredRef.current = true;
+            setCountActive(true);
           },
-          onUpdate: (self) => {
-            const p = self.progress;
-            sliderActive.current = p < 0.22;
-            // Trigger count-up when entering P3 (numbers)
-            if (p > 0.58 && !countFiredRef.current) {
-              countFiredRef.current = true;
-              setCountActive(true);
-            }
-            // Map progress → current panel idx (0..3)
-            const idx = p < 0.22 ? 0 : p < 0.52 ? 1 : p < 0.78 ? 2 : 3;
-            if (idx !== stageIdxRef.current) {
+        });
+      }
+
+      /* ── Track active panel for progress + slider autoplay + video bg ──
+         Stage A's video bg fades in only during Panels 2 (metodo) and 3
+         (numeri); fades out during Panels 1 (slider) and 4 (cert). */
+      const panelRefs = [s0Ref, s1Ref, s2Ref, s3Ref];
+      panelRefs.forEach((ref, idx) => {
+        if (!ref.current) return;
+        ScrollTrigger.create({
+          trigger: ref.current,
+          start: "top center",
+          end: "bottom center",
+          onToggle: (self) => {
+            if (self.isActive) {
               stageIdxRef.current = idx;
               setStageIdx(idx);
-              /* Rifai entrance animation degli elementi interni ogni volta
-                 che si entra in un nuovo pannello (anche in navigazione
-                 avanti/indietro). */
-              const panelMap = [
-                null,
-                s1Ref.current,
-                s2Ref.current,
-                s3Ref.current,
-              ];
-              const entering = panelMap[idx];
-              if (entering) revealPanel(entering);
+              sliderActive.current = idx === 0;
+              const targetOpacity = idx === 1 || idx === 2 ? 1 : 0;
+              if (videoLayerRef.current) {
+                gsap.to(videoLayerRef.current, {
+                  opacity: targetOpacity,
+                  duration: 0.5,
+                  ease: "power2.inOut",
+                  overwrite: "auto",
+                });
+              }
             }
           },
-        },
+        });
       });
-
-      /* ──────────────────────────────────────────────────────
-         Panel durations (normalized 0 → 1 over 580vh scroll)
-         P1: 0.00 → 0.22   — slider hold
-         P1→P2: 0.22 → 0.30 — transition: slide bg fades, video fades in
-         P2: 0.30 → 0.52   — method, video as bg
-         P2→P3: 0.52 → 0.60 — transition: video fades out, #111 returns
-         P3: 0.60 → 0.78   — numbers
-         P3→P4: 0.78 → 0.84 — transition
-         P4: 0.84 → 0.94   — certification hold (tempo di lettura)
-         Exit: 0.94 → 1.00 — fade out hero internals
-      ────────────────────────────────────────────────────── */
-
-      /* P1 → P2 transition
-         (slide bg out, video in, grid hidden for P2) */
-      scrollTl
-        .to(
-          s0Ref.current,
-          { opacity: 0, y: -50, duration: 0.08, ease: "power2.in" },
-          0.22,
-        )
-        .to(
-          slideBgRef.current,
-          { opacity: 0, duration: 0.08, ease: "power2.in" },
-          0.22,
-        )
-        .to(
-          videoLayerRef.current,
-          { opacity: 1, duration: 0.08, ease: "power2.out" },
-          0.22,
-        )
-        .fromTo(
-          s1Ref.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.08, ease: "power3.out" },
-          0.24,
-        );
-
-      /* P2 hold */
-      scrollTl.to({}, { duration: 0.22 }, 0.3);
-
-      /* P2 → P3 transition (video STAYS, grid unchanged) */
-      scrollTl
-        .to(
-          s1Ref.current,
-          { opacity: 0, y: -50, duration: 0.08, ease: "power2.in" },
-          0.52,
-        )
-        .fromTo(
-          s2Ref.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.08, ease: "power3.out" },
-          0.54,
-        );
-
-      /* P3 hold */
-      scrollTl.to({}, { duration: 0.18 }, 0.6);
-
-      /* P3 → P4 transition (video fades out, #111 returns for cert; grid stays) */
-      scrollTl
-        .to(
-          s2Ref.current,
-          { opacity: 0, y: -50, duration: 0.06, ease: "power2.in" },
-          0.78,
-        )
-        .to(
-          videoLayerRef.current,
-          { opacity: 0, duration: 0.06, ease: "power2.inOut" },
-          0.78,
-        )
-        .fromTo(
-          s3Ref.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.06, ease: "power3.out" },
-          0.8,
-        );
-
-      /* P4 hold — il contenuto certificazioni resta visibile fino alla fine
-         del pin (niente fade-out scorrendo verso il basso). */
-      scrollTl.to({}, { duration: 0.16 }, 0.84);
-
-      /* Exit: solo la grid decorativa fa fade — le card certificazioni restano. */
-      scrollTl.to(
-        gridRef.current,
-        { opacity: 0, duration: 0.06, ease: "power3.inOut" },
-        0.94,
-      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -600,230 +504,252 @@ export function HeroSection({
   const slide = slides[activeIdx] ?? slides[0];
 
   /* ──────────────────────────────────────────────────────────
-     DESKTOP pinned stage
+     DESKTOP — sticky bg + naturally-scrolling panels + sticky CTA
   ────────────────────────────────────────────────────────── */
   const desktopStage = (
-    <div
-      ref={stageRef}
-      className="relative h-screen w-full overflow-hidden"
-      style={{ background: "#111111" }}
-    >
-      {/* ── VIDEO LAYER (preloaded during P1, visible only in P2) ── */}
+    <>
+      {/* ══ STAGE A — sticky bg (dark base + video layer + brackets + top gradient) ══
+          Stays pinned to viewport while user scrolls through panels.
+          Video is fixed bg for Panels 2+3, opacity 0 elsewhere. */}
       <div
-        ref={videoLayerRef}
-        className="absolute inset-0 z-0"
-        style={{ opacity: 0 }}
+        ref={stageRef}
+        className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none"
+        style={{ background: "#111111", zIndex: 0 }}
       >
-        <iframe
-          src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
-          className="absolute border-0"
-          style={{
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "177.77vh",
-            minWidth: "100%",
-            height: "56.25vw",
-            minHeight: "100%",
-            pointerEvents: "none",
-          }}
-          allow="autoplay; picture-in-picture"
-          title="Lacertosus Academy"
-        />
-        {/* Dark overlay on video for text legibility — uniform 75% */}
+        {/* Video layer (fixed bg, opacity controlled by scroll) */}
         <div
-          ref={videoOverlayRef}
+          ref={videoLayerRef}
           className="absolute inset-0"
-          style={{ background: "rgba(17,17,17,0.75)" }}
-        />
-      </div>
-
-      {/* ── SLIDE BG IMAGE (P1 only) ── */}
-      <div
-        ref={slideBgRef}
-        className="absolute inset-0 z-[1]"
-        style={{
-          backgroundImage: slide.bg_image_url
-            ? `url(${slide.bg_image_url})`
-            : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: slide.bg_image_url ? 1 : 0,
-        }}
-      >
-        {slide.bg_image_url && (
-          <div
-            className="absolute inset-0"
+          style={{ opacity: 0 }}
+        >
+          <iframe
+            src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
+            className="absolute border-0"
             style={{
-              background:
-                "linear-gradient(180deg, rgba(17,17,17,0.7) 0%, rgba(17,17,17,0.55) 45%, rgba(17,17,17,0.9) 100%)",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "177.77vh",
+              minWidth: "100%",
+              height: "56.25vw",
+              minHeight: "100%",
+              pointerEvents: "none",
             }}
+            allow="autoplay; picture-in-picture"
+            title="Lacertosus Academy"
           />
-        )}
+          <div
+            ref={videoOverlayRef}
+            className="absolute inset-0"
+            style={{ background: "rgba(17,17,17,0.75)" }}
+          />
+        </div>
+
+        {/* Top navbar-safe gradient */}
+        <div
+          className="absolute inset-x-0 top-0 h-32"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(17,17,17,0.85) 0%, rgba(17,17,17,0.5) 60%, transparent 100%)",
+          }}
+        />
+
+        {/* Corner brackets (chrome) */}
+        {[
+          "top-8 left-8 border-t border-l",
+          "top-8 right-8 border-t border-r",
+          "bottom-32 left-8 border-b border-l",
+          "bottom-32 right-8 border-b border-r",
+        ].map((cls) => (
+          <div
+            key={cls}
+            className={`absolute w-8 h-8 ${cls}`}
+            style={{ borderColor: "rgba(240,146,38,0.35)" }}
+          />
+        ))}
       </div>
 
-      {/* Top navbar-safe gradient (ensures contrast) */}
+      {/* ══ STAGE A2 — sticky grid overlay (always above panels, below CTA) ══
+          Single source of truth for the orange grid backdrop. Pointer-events
+          disabled so panel interactions still work. */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-32 z-[5]"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(17,17,17,0.85) 0%, rgba(17,17,17,0.5) 60%, transparent 100%)",
-        }}
-      />
-
-      {/* ── DYNAMIC GRID ── */}
-      <div className="absolute inset-0 z-[2]">
+        className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none"
+        style={{ marginTop: "-100vh", zIndex: 20 }}
+      >
         <StaticGrid gridRef={gridRef} />
       </div>
 
-      {/* Corner brackets (chrome) */}
-      {[
-        "top-8 left-8 border-t border-l",
-        "top-8 right-8 border-t border-r",
-        "bottom-28 left-8 border-b border-l",
-        "bottom-28 right-8 border-b border-r",
-      ].map((cls) => (
-        <div
-          key={cls}
-          className={`pointer-events-none absolute w-8 h-8 z-[3] ${cls}`}
-          style={{ borderColor: "rgba(240,146,38,0.35)" }}
-        />
-      ))}
-
-      {/* ──────────────────────────────────────────────────────
-          STATE LAYERS (absolute, stacked, centered)
-      ────────────────────────────────────────────────────── */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-        {/* ══ S0 — SLIDER ══ */}
+      {/* ══ PANELS — natural vertical scroll, pulled up to overlap Stage A ══ */}
+      <div
+        className="relative w-full"
+        style={{ marginTop: "-100vh", zIndex: 10 }}
+      >
+        {/* ──── PANEL 1 — SLIDER ──── */}
         <div
           ref={s0Ref}
-          className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1440px] mx-auto select-none"
+          className="relative w-full min-h-screen overflow-hidden select-none"
           style={{ touchAction: "pan-y" }}
           onPointerDown={onSliderPointerDown}
           onPointerUp={onSliderPointerUp}
           onPointerCancel={onSliderPointerCancel}
         >
-          {/* Prev / Next arrows (desktop) */}
-          {slides.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={prevSlide}
-                data-no-swipe
-                aria-label="Slide precedente"
-                className="group absolute left-4 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-colors"
+          {/* Slide bg image (per-slide, full-bleed) */}
+          <div
+            ref={slideBgRef}
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: slide.bg_image_url
+                ? `url(${slide.bg_image_url})`
+                : undefined,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: slide.bg_image_url ? 1 : 0,
+            }}
+          >
+            {slide.bg_image_url && (
+              <div
+                className="absolute inset-0"
                 style={{
-                  width: "52px",
-                  height: "52px",
-                  border: "1.5px solid rgba(255,255,255,0.25)",
-                  background: "rgba(17,17,17,0.35)",
-                  backdropFilter: "blur(6px)",
-                  color: "rgba(255,255,255,0.9)",
+                  background:
+                    "linear-gradient(180deg, rgba(17,17,17,0.7) 0%, rgba(17,17,17,0.55) 45%, rgba(17,17,17,0.9) 100%)",
                 }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "#F09226";
-                  (e.currentTarget as HTMLElement).style.color = "#F09226";
-                  (e.currentTarget as HTMLElement).style.background =
-                    "rgba(240,146,38,0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "rgba(255,255,255,0.25)";
-                  (e.currentTarget as HTMLElement).style.color =
-                    "rgba(255,255,255,0.9)";
-                  (e.currentTarget as HTMLElement).style.background =
-                    "rgba(17,17,17,0.35)";
-                }}
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="square"
-                  strokeLinejoin="miter"
-                >
-                  <path d="M11 3L5 8l6 5" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={nextSlide}
-                data-no-swipe
-                aria-label="Slide successiva"
-                className="group absolute right-4 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-colors"
-                style={{
-                  width: "52px",
-                  height: "52px",
-                  border: "1.5px solid rgba(255,255,255,0.25)",
-                  background: "rgba(17,17,17,0.35)",
-                  backdropFilter: "blur(6px)",
-                  color: "rgba(255,255,255,0.9)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "#F09226";
-                  (e.currentTarget as HTMLElement).style.color = "#F09226";
-                  (e.currentTarget as HTMLElement).style.background =
-                    "rgba(240,146,38,0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "rgba(255,255,255,0.25)";
-                  (e.currentTarget as HTMLElement).style.color =
-                    "rgba(255,255,255,0.9)";
-                  (e.currentTarget as HTMLElement).style.background =
-                    "rgba(17,17,17,0.35)";
-                }}
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="square"
-                  strokeLinejoin="miter"
-                >
-                  <path d="M5 3l6 5-6 5" />
-                </svg>
-              </button>
-            </>
-          )}
-
-          {/* Title (split reveal) + description */}
-          <div ref={slideContentRef} className="text-center max-w-5xl">
-            <div ref={line1Ref}>
-              <SplitLine
-                text={slide.title_white}
-                className="text-[clamp(3.2rem,7.2vw,8rem)] font-black tracking-[-0.035em]"
-                style={{ color: "#ffffff" }}
               />
-            </div>
-            <div ref={line2Ref} className="mt-1">
-              <SplitLine
-                text={slide.title_orange}
-                className="text-[clamp(3.2rem,7.2vw,8rem)] font-black tracking-[-0.035em]"
-                style={{ color: "#F09226" }}
-              />
-            </div>
-            <p
-              data-s0-sub
-              className="mx-auto mt-8 max-w-2xl text-[clamp(0.95rem,1.15vw,1.1rem)] leading-[1.7]"
-              style={{ color: "rgba(220,215,230,0.82)" }}
-            >
-              {slide.description}
-            </p>
+            )}
           </div>
 
-          {/* Bottom bar: slide dots (centered) */}
+          {/* Inner 1440 stage — holds arrows + title content */}
+          <div
+            className="relative z-10 w-full max-w-[1440px] mx-auto px-10 flex flex-col items-center justify-center"
+            style={{
+              minHeight: "100vh",
+              paddingTop: "120px",
+              paddingBottom: "200px",
+            }}
+          >
+            {/* Prev / Next arrows (desktop) */}
+            {slides.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={prevSlide}
+                  data-no-swipe
+                  aria-label="Slide precedente"
+                  className="group absolute left-4 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-colors"
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    border: "1.5px solid rgba(255,255,255,0.25)",
+                    background: "rgba(17,17,17,0.35)",
+                    backdropFilter: "blur(6px)",
+                    color: "rgba(255,255,255,0.9)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "#F09226";
+                    (e.currentTarget as HTMLElement).style.color = "#F09226";
+                    (e.currentTarget as HTMLElement).style.background =
+                      "rgba(240,146,38,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "rgba(255,255,255,0.25)";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "rgba(255,255,255,0.9)";
+                    (e.currentTarget as HTMLElement).style.background =
+                      "rgba(17,17,17,0.35)";
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="square"
+                    strokeLinejoin="miter"
+                  >
+                    <path d="M11 3L5 8l6 5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={nextSlide}
+                  data-no-swipe
+                  aria-label="Slide successiva"
+                  className="group absolute right-4 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-colors"
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    border: "1.5px solid rgba(255,255,255,0.25)",
+                    background: "rgba(17,17,17,0.35)",
+                    backdropFilter: "blur(6px)",
+                    color: "rgba(255,255,255,0.9)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "#F09226";
+                    (e.currentTarget as HTMLElement).style.color = "#F09226";
+                    (e.currentTarget as HTMLElement).style.background =
+                      "rgba(240,146,38,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "rgba(255,255,255,0.25)";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "rgba(255,255,255,0.9)";
+                    (e.currentTarget as HTMLElement).style.background =
+                      "rgba(17,17,17,0.35)";
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="square"
+                    strokeLinejoin="miter"
+                  >
+                    <path d="M5 3l6 5-6 5" />
+                  </svg>
+                </button>
+              </>
+            )}
+
+            {/* Title (split reveal) + description */}
+            <div ref={slideContentRef} className="text-center max-w-5xl">
+              <div ref={line1Ref}>
+                <SplitLine
+                  text={slide.title_white}
+                  className="text-[clamp(3.2rem,7.2vw,8rem)] font-black tracking-[-0.035em]"
+                  style={{ color: "#ffffff" }}
+                />
+              </div>
+              <div ref={line2Ref} className="mt-1">
+                <SplitLine
+                  text={slide.title_orange}
+                  className="text-[clamp(3.2rem,7.2vw,8rem)] font-black tracking-[-0.035em]"
+                  style={{ color: "#F09226" }}
+                />
+              </div>
+              <p
+                data-s0-sub
+                className="mx-auto mt-8 max-w-2xl text-[clamp(0.95rem,1.15vw,1.1rem)] leading-[1.7]"
+                style={{ color: "rgba(220,215,230,0.82)" }}
+              >
+                {slide.description}
+              </p>
+            </div>
+          </div>
+          {/* /inner 1440 stage */}
+
+          {/* Bottom bar: slide dots (above CTA band) */}
           <div
             data-s0-sub
-            className="absolute left-0 right-0 bottom-[108px] px-10 max-w-[1440px] mx-auto flex items-center justify-end"
+            className="absolute z-10 left-0 right-0 px-10 max-w-[1440px] mx-auto flex items-center justify-end"
+            style={{ bottom: "220px" }}
           >
             {slides.length > 1 && (
               <div className="flex items-center gap-2">
@@ -854,181 +780,211 @@ export function HeroSection({
           </div>
         </div>
 
-        {/* ══ S1 — EDITORIAL QUOTE ══ */}
+        {/* ──── PANEL 2 — METODO (transparent: Stage A video + Stage A2 grid) ──── */}
         <div
           ref={s1Ref}
-          className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1440px] mx-auto pointer-events-none"
+          className="relative w-full min-h-screen overflow-hidden"
         >
-          <span
-            data-reveal
-            className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-8"
-            style={{ color: "#F09226" }}
+          {/* Inner 1440 stage */}
+          <div
+            className="relative z-10 w-full max-w-[1440px] mx-auto px-10 flex flex-col items-center justify-center"
+            style={{
+              minHeight: "100vh",
+              paddingTop: "120px",
+              paddingBottom: "200px",
+            }}
           >
-            — Il Metodo
-          </span>
-          <div className="text-center max-w-5xl">
-            <div
+            <span
               data-reveal
-              className="text-[clamp(2.6rem,6.2vw,6.8rem)] font-black tracking-[-0.035em] leading-[0.96]"
-              style={{ color: "#ffffff" }}
-            >
-              FORMIAMO CHI
-            </div>
-            <div
-              data-reveal
-              className="text-[clamp(2.6rem,6.2vw,6.8rem)] font-black tracking-[-0.035em] leading-[0.96] mt-1"
+              className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-8"
               style={{ color: "#F09226" }}
             >
-              CAMBIA IL FITNESS.
+              — Il Metodo
+            </span>
+            <div className="text-center max-w-5xl">
+              <div
+                data-reveal
+                className="text-[clamp(2.6rem,6.2vw,6.8rem)] font-black tracking-[-0.035em] leading-[0.96]"
+                style={{ color: "#ffffff" }}
+              >
+                FORMIAMO CHI
+              </div>
+              <div
+                data-reveal
+                className="text-[clamp(2.6rem,6.2vw,6.8rem)] font-black tracking-[-0.035em] leading-[0.96] mt-1"
+                style={{ color: "#F09226" }}
+              >
+                CAMBIA IL FITNESS.
+              </div>
+              <p
+                data-reveal
+                className="mx-auto mt-10 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
+                style={{ color: "rgba(255,255,255,0.95)" }}
+              >
+                9 mesi in presenza. 33+ docenti. 9 masterclass specialistiche.
+                <br />
+                Un percorso progettato come una squadra professionistica.
+              </p>
             </div>
-            <p
-              data-reveal
-              className="mx-auto mt-10 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
-              style={{ color: "rgba(255,255,255,0.95)" }}
-            >
-              9 mesi in presenza. 33+ docenti. 9 masterclass specialistiche.
-              <br />
-              Un percorso progettato come una squadra professionistica.
-            </p>
           </div>
         </div>
 
-        {/* ══ S2 — MASSIVE KPI ══ */}
+        {/* ──── PANEL 3 — NUMERI (transparent: Stage A video + Stage A2 grid) ──── */}
         <div
           ref={s2Ref}
-          className="absolute inset-0 flex flex-col items-center justify-center px-10 max-w-[1600px] mx-auto pointer-events-none"
+          className="relative w-full min-h-screen overflow-hidden"
         >
-          <span
-            data-reveal
-            className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-10"
-            style={{ color: "#F09226" }}
+          {/* Inner 1600 stage */}
+          <div
+            className="relative z-10 w-full max-w-[1600px] mx-auto px-10 flex flex-col items-center justify-center"
+            style={{
+              minHeight: "100vh",
+              paddingTop: "120px",
+              paddingBottom: "200px",
+            }}
           >
-            — I Numeri che Ti Aspettano
-          </span>
+            <span
+              data-reveal
+              className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-10"
+              style={{ color: "#F09226" }}
+            >
+              — I Numeri che Ti Aspettano
+            </span>
 
-          <div className="grid grid-cols-3 gap-10 w-full items-center">
-            {/* 9 MESI */}
-            <div data-reveal className="flex flex-col items-center text-center">
-              <div className="relative">
-                <CountUp
-                  to={9}
-                  duration={1.4}
-                  active={countActive}
-                  className="font-black leading-[0.85] tabular-nums"
-                  style={{
-                    color: "#F09226",
-                    fontSize: "clamp(8rem, 18vw, 18rem)",
-                    textShadow: "0 0 60px rgba(240,146,38,0.25)",
-                  }}
-                />
+            <div className="grid grid-cols-3 gap-10 w-full items-center">
+              {/* 9 MESI */}
+              <div
+                data-reveal
+                className="flex flex-col items-center text-center"
+              >
+                <div className="relative">
+                  <CountUp
+                    to={9}
+                    duration={1.4}
+                    active={countActive}
+                    className="font-black leading-[0.85] tabular-nums"
+                    style={{
+                      color: "#F09226",
+                      fontSize: "clamp(8rem, 18vw, 18rem)",
+                      textShadow: "0 0 60px rgba(240,146,38,0.25)",
+                    }}
+                  />
+                  <span
+                    className="absolute -top-4 -right-6 text-[0.75rem] font-black tracking-[0.3em]"
+                    style={{ color: "rgba(240,146,38,0.5)" }}
+                  >
+                    01
+                  </span>
+                </div>
                 <span
-                  className="absolute -top-4 -right-6 text-[0.75rem] font-black tracking-[0.3em]"
-                  style={{ color: "rgba(240,146,38,0.5)" }}
+                  className="mt-4 text-[0.82rem] font-black tracking-[0.32em] uppercase"
+                  style={{ color: "#ffffff" }}
                 >
-                  01
+                  Mesi Formativi
+                </span>
+                <span
+                  className="mt-1 text-[0.68rem] tracking-[0.22em] uppercase"
+                  style={{ color: "#ffffff" }}
+                >
+                  In Presenza
                 </span>
               </div>
-              <span
-                className="mt-4 text-[0.82rem] font-black tracking-[0.32em] uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                Mesi Formativi
-              </span>
-              <span
-                className="mt-1 text-[0.68rem] tracking-[0.22em] uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                In Presenza
-              </span>
-            </div>
 
-            {/* 100% */}
-            <div data-reveal className="flex flex-col items-center text-center">
-              <div className="relative flex items-baseline">
-                <CountUp
-                  to={100}
-                  duration={1.8}
-                  active={countActive}
-                  className="font-black leading-[0.85] tabular-nums"
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "clamp(8rem, 18vw, 18rem)",
-                    textShadow: "0 0 60px rgba(255,255,255,0.15)",
-                  }}
-                />
+              {/* 100% */}
+              <div
+                data-reveal
+                className="flex flex-col items-center text-center"
+              >
+                <div className="relative flex items-baseline">
+                  <CountUp
+                    to={100}
+                    duration={1.8}
+                    active={countActive}
+                    className="font-black leading-[0.85] tabular-nums"
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "clamp(8rem, 18vw, 18rem)",
+                      textShadow: "0 0 60px rgba(255,255,255,0.15)",
+                    }}
+                  />
+                  <span
+                    className="font-black leading-[0.85]"
+                    style={{
+                      color: "#F09226",
+                      fontSize: "clamp(4rem, 9vw, 9rem)",
+                    }}
+                  >
+                    %
+                  </span>
+                  <span
+                    className="absolute -top-4 -right-6 text-[0.75rem] font-black tracking-[0.3em]"
+                    style={{ color: "rgba(240,146,38,0.5)" }}
+                  >
+                    02
+                  </span>
+                </div>
                 <span
-                  className="font-black leading-[0.85]"
-                  style={{
-                    color: "#F09226",
-                    fontSize: "clamp(4rem, 9vw, 9rem)",
-                  }}
+                  className="mt-4 text-[0.82rem] font-black tracking-[0.32em] uppercase"
+                  style={{ color: "#ffffff" }}
                 >
-                  %
+                  In Presenza
                 </span>
                 <span
-                  className="absolute -top-4 -right-6 text-[0.75rem] font-black tracking-[0.3em]"
-                  style={{ color: "rgba(240,146,38,0.5)" }}
+                  className="mt-1 text-[0.68rem] tracking-[0.22em] uppercase"
+                  style={{ color: "#ffffff" }}
                 >
-                  02
+                  Zero DAD, Zero Scuse
                 </span>
               </div>
-              <span
-                className="mt-4 text-[0.82rem] font-black tracking-[0.32em] uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                In Presenza
-              </span>
-              <span
-                className="mt-1 text-[0.68rem] tracking-[0.22em] uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                Zero DAD, Zero Scuse
-              </span>
-            </div>
 
-            {/* 9 MASTERCLASS */}
-            <div data-reveal className="flex flex-col items-center text-center">
-              <div className="relative">
-                <CountUp
-                  to={9}
-                  duration={1.2}
-                  active={countActive}
-                  className="font-black leading-[0.85] tabular-nums"
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "clamp(8rem, 18vw, 18rem)",
-                    textShadow: "0 0 60px rgba(255,255,255,0.15)",
-                  }}
-                />
+              {/* 9 MASTERCLASS */}
+              <div
+                data-reveal
+                className="flex flex-col items-center text-center"
+              >
+                <div className="relative">
+                  <CountUp
+                    to={9}
+                    duration={1.2}
+                    active={countActive}
+                    className="font-black leading-[0.85] tabular-nums"
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "clamp(8rem, 18vw, 18rem)",
+                      textShadow: "0 0 60px rgba(255,255,255,0.15)",
+                    }}
+                  />
+                  <span
+                    className="absolute -top-4 -right-6 text-[0.75rem] font-black tracking-[0.3em]"
+                    style={{ color: "rgba(240,146,38,0.5)" }}
+                  >
+                    03
+                  </span>
+                </div>
                 <span
-                  className="absolute -top-4 -right-6 text-[0.75rem] font-black tracking-[0.3em]"
-                  style={{ color: "rgba(240,146,38,0.5)" }}
+                  className="mt-4 text-[0.82rem] font-black tracking-[0.32em] uppercase"
+                  style={{ color: "#ffffff" }}
                 >
-                  03
+                  Masterclass
+                </span>
+                <span
+                  className="mt-1 text-[0.68rem] tracking-[0.22em] uppercase"
+                  style={{ color: "#ffffff" }}
+                >
+                  Specialistiche
                 </span>
               </div>
-              <span
-                className="mt-4 text-[0.82rem] font-black tracking-[0.32em] uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                Masterclass
-              </span>
-              <span
-                className="mt-1 text-[0.68rem] tracking-[0.22em] uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                Specialistiche
-              </span>
             </div>
           </div>
+          {/* /inner 1600 stage */}
         </div>
 
-        {/* ══ S3 — DUE CERTIFICAZIONI (hero-level) ══ */}
+        {/* ──── PANEL 4 — DUE CERTIFICAZIONI (own video bg + spotlight; grid via Stage A2) ──── */}
         <div
           ref={s3Ref}
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none overflow-hidden"
+          className="relative w-full min-h-screen overflow-hidden"
         >
-          {/* Vimeo background — full hero width (edge-to-edge) */}
+          {/* Cert-specific Vimeo bg + dark tint + spotlight (NO grid: handled by Stage A2) */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
@@ -1055,21 +1011,6 @@ export function HeroSection({
                   "linear-gradient(135deg, rgba(10,10,14,0.6) 0%, rgba(10,10,14,0.82) 100%)",
               }}
             />
-            {/* Orange chrome grid + radial vignette — stesso linguaggio
-                visivo degli altri pannelli del hero */}
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(240,146,38,0.25) 1px, transparent 1px)," +
-                  "linear-gradient(90deg, rgba(240,146,38,0.25) 1px, transparent 1px)",
-                backgroundSize: "88px 88px",
-                maskImage:
-                  "radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)",
-                WebkitMaskImage:
-                  "radial-gradient(ellipse 60% 58% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.4) 72%, black 88%, black 100%)",
-              }}
-            />
             {/* Spotlight radiale al centro per dare risalto alle card */}
             <div
               className="absolute inset-0"
@@ -1080,8 +1021,15 @@ export function HeroSection({
             />
           </div>
 
-          {/* Inner content — clamped to 1440 sopra al video */}
-          <div className="relative z-10 flex w-full max-w-[1440px] flex-col items-center px-10 mx-auto">
+          {/* Inner 1440 stage */}
+          <div
+            className="relative z-10 flex w-full max-w-[1440px] flex-col items-center px-10 mx-auto justify-center"
+            style={{
+              minHeight: "100vh",
+              paddingTop: "120px",
+              paddingBottom: "200px",
+            }}
+          >
             <span
               data-reveal
               className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-6"
@@ -1207,11 +1155,13 @@ export function HeroSection({
         </div>
       </div>
 
-      {/* ══ STICKY CTA BAND — bigger, more prominent ══ */}
+      {/* ══ STAGE B — sticky CTA band at viewport bottom ══ */}
       <div
         ref={ctaBandRef}
-        className="absolute bottom-0 left-0 right-0 z-20"
+        className="sticky left-0 right-0 w-full"
         style={{
+          bottom: 0,
+          zIndex: 30,
           background:
             "linear-gradient(to top, rgba(17,17,17,0.97) 0%, rgba(17,17,17,0.85) 55%, rgba(17,17,17,0.3) 90%, transparent 100%)",
           paddingTop: "48px",
@@ -1380,11 +1330,22 @@ export function HeroSection({
               <span>Guarda la presentazione</span>
             </button>
 
-            {/* Prosegui — progress is the button's own top fill bar
-                (compact, no extra horizontal space needed) */}
+            {/* Prosegui — scrolls to next panel, or to #perche if on last panel */}
             <button
               type="button"
               onClick={() => {
+                const idx = stageIdxRef.current;
+                const nextRefs = [s1Ref, s2Ref, s3Ref];
+                if (idx < 3) {
+                  const nextPanel = nextRefs[idx]?.current;
+                  if (nextPanel) {
+                    nextPanel.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                    return;
+                  }
+                }
                 const target = document.getElementById("perche");
                 if (target) {
                   target.scrollIntoView({
@@ -1472,7 +1433,7 @@ export function HeroSection({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 
   /* ──────────────────────────────────────────────────────────

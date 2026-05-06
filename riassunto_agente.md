@@ -12,6 +12,79 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0octa. Aggiornamenti 2026-05-06 — Hero home: scroll naturale verticale (desktop)
+
+Refactor `src/components/home/hero-section.tsx` per migliorare la chiarezza dello scroll. Pin/scrub timeline GSAP rimosso, layout su `position: sticky` + scroll verticale naturale.
+
+### Architettura desktop (4 layer sticky/scroll)
+
+```
+<section className="relative">
+  <>
+    Stage A   (sticky top, z=0):  dark base #111 + VIDEO bg fisso (opacity controllata) + corner brackets + top gradient
+    Stage A2  (sticky top, z=20): GRID overlay (orange grid + radial vignette mask) sopra i pannelli, pointer-events-none
+    Panels    (-mt-100vh, z=10):
+      Panel 1 — Slider (slide bg image interna, scrolla con il panel)
+      Panel 2 — Metodo (transparent: vede Stage A video + Stage A2 grid)
+      Panel 3 — Numeri (transparent: vede Stage A video + Stage A2 grid)
+      Panel 4 — Certificazioni (own Vimeo bg 1188018710 + dark gradient + spotlight; grid arriva da Stage A2)
+    Stage B   (sticky bottom, z=30): CTA band
+  </>
+</section>
+```
+
+Section height ≈ `100vh + (-100vh) + (-100vh) + 4×100vh + CTA height` = `300vh + 100vh + CTA ≈ 400vh + CTA`.
+
+### Layout pannelli
+
+Ogni pannello = outer `relative w-full min-h-screen overflow-hidden` (no flex, no padding) + inner stage 1440/1600px:
+
+```jsx
+<div ref={sNRef} className="relative w-full min-h-screen overflow-hidden">
+  <div className="bg-layer absolute inset-0 z-0" />{" "}
+  {/* opzionale, panel-specific */}
+  <div
+    className="relative z-10 w-full max-w-[1440px] mx-auto px-10 flex flex-col items-center justify-center"
+    style={{ minHeight: "100vh", paddingTop: "120px", paddingBottom: "200px" }}
+  >
+    ...content with [data-reveal]...
+  </div>
+</div>
+```
+
+- Panel 1: max-w 1440 (slider arrows in left-4/right-4 del 1440 frame, vicini al titolo)
+- Panel 2: max-w 1440
+- Panel 3: max-w 1600 (numeri richiedono più larghezza)
+- Panel 4: max-w 1440
+
+### Video bg (Stage A)
+
+Vimeo `${VIMEO_ID}` (1161847546) in Stage A con `opacity: 0` di default. ScrollTrigger su ogni panel imposta opacity via `gsap.to(videoLayerRef.current, { opacity, duration: 0.5 })`:
+
+- Panel 1, 4 → opacity 0 (slide image / cert bg dominano)
+- Panel 2, 3 → opacity 1 (video fisso visibile come bg per entrambi)
+
+### Grid (Stage A2)
+
+`StaticGrid` in un sticky separato a z=20 con `pointer-events: none`. Sempre visibile sopra ogni panel content (testi compresi), ma il radial-mask vignette tiene il centro pulito così non disturba la lettura. Garantisce continuità visiva (mai discontinuità tra pannelli).
+
+### Animazioni
+
+- Intro one-shot al mount (chars reveal Panel 1, sub-stagger, CTA fade-in).
+- Per-panel reveals: `ScrollTrigger.create({ start: "top 75%", onEnter, onLeaveBack })` su `[data-reveal]`.
+- CountUp Panel 3: `start: "top 70%", once: true`.
+- Active panel tracker: `start: "top center", end: "bottom center", onToggle` per `stageIdx`, `sliderActive`, e tween opacity del video.
+
+### CTA "Prosegui"
+
+Scroll smooth al pannello successivo (idx 0→s1Ref, 1→s2Ref, 2→s3Ref) e a `#perche` se già su Panel 4.
+
+### Mobile
+
+Invariato — il mobile stack era già naturalmente scrollabile.
+
+---
+
 ## 0sept. Aggiornamenti 2026-05-04 — QR multi-ingresso configurabili
 
 Il QR del ticket ora rappresenta un diritto di accesso stabile, non un singolo check-in. Il consumo ingressi passa da un ledger separato.
