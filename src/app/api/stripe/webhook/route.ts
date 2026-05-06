@@ -41,6 +41,7 @@ async function updateOrderPaid(
     billing_name: session.customer_details?.name,
     billing_email: session.customer_details?.email,
     billing_address: session.customer_details?.address,
+    is_test: session.livemode === false,
     updated_at: new Date().toISOString(),
   };
 
@@ -107,9 +108,7 @@ export async function POST(request: NextRequest) {
     const orderId = session.metadata?.order_id;
     const productSlug = session.metadata?.pack_id;
     const workshopIds = parseMetadataList(session.metadata?.workshop_ids);
-    const masterclassIds = parseMetadataList(
-      session.metadata?.masterclass_ids,
-    );
+    const masterclassIds = parseMetadataList(session.metadata?.masterclass_ids);
     const selectedAddonSlugs = Array.from(
       new Set([...workshopIds, ...masterclassIds]),
     );
@@ -215,8 +214,7 @@ export async function POST(request: NextRequest) {
       order.billing_email || session.customer_details?.email;
     if (customerEmail && !wasAlreadyPaid) {
       const appUrl =
-        process.env.NEXT_PUBLIC_BASE_URL ||
-        "https://academylacertosus.vercel.app";
+        process.env.NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com";
       const productName =
         PRODUCTS.find((p) => p.slug === productSlug)?.name ||
         productSlug ||

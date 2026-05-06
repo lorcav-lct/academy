@@ -8,17 +8,24 @@ import React from "react";
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
 
   const { data: profile } = await supabase
-    .from("profiles").select("role").eq("id", user.id).single();
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   if (!profile || !["admin", "staff"].includes(profile.role)) {
     return NextResponse.json({ error: "Non autorizzato" }, { status: 403 });
   }
 
   const { orderId } = await request.json();
-  if (!orderId) return NextResponse.json({ error: "orderId mancante" }, { status: 400 });
+  if (!orderId)
+    return NextResponse.json({ error: "orderId mancante" }, { status: 400 });
 
   const admin = createAdminClient();
 
@@ -34,20 +41,20 @@ export async function POST(request: NextRequest) {
     .update({ status: "cancelled", updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Invalidate all tickets belonging to this order
-  await admin
-    .from("tickets")
-    .update({ is_used: true })
-    .eq("order_id", orderId);
+  await admin.from("tickets").update({ is_used: true }).eq("order_id", orderId);
 
   // Send cancellation email
   if (order) {
     const customerEmail =
-      (order.profiles as { email?: string } | null)?.email || order.billing_email;
+      (order.profiles as { email?: string } | null)?.email ||
+      order.billing_email;
     if (customerEmail) {
-      const appUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://academylacertosus.vercel.app";
+      const appUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com";
       const packName =
         PRODUCTS.find((p) => p.slug === order.pack_id)?.name ||
         (order.pack_id as string)?.toUpperCase() ||

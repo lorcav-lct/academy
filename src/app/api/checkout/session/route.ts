@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
         status: "pending",
         amount_cents: 0, // Will be updated by Stripe webhook
         billing_email: user.email,
+        is_test: process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ?? false,
       })
       .select()
       .single();

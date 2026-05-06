@@ -14,6 +14,7 @@ interface Order {
   billing_email: string;
   created_at: string;
   pack_id: string | null;
+  is_test: boolean;
 }
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
@@ -69,6 +70,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
+  const [showTest, setShowTest] = useState(false);
   const [cancelling, setCancelling] = useState<string | null>(null);
 
   async function load() {
@@ -76,7 +78,7 @@ export default function AdminOrdersPage() {
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id",
+        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test",
       )
       .order("created_at", { ascending: false });
     if (data) setOrders(data as unknown as Order[]);
@@ -99,20 +101,30 @@ export default function AdminOrdersPage() {
     setCancelling(null);
   }
 
+  const scoped = useMemo(
+    () => (showTest ? orders : orders.filter((o) => !o.is_test)),
+    [orders, showTest],
+  );
+
+  const testCount = useMemo(
+    () => orders.filter((o) => o.is_test).length,
+    [orders],
+  );
+
   const counts = useMemo(
     () => ({
-      all: orders.length,
-      paid: orders.filter((o) => o.status === "paid").length,
-      pending: orders.filter((o) => o.status === "pending").length,
-      cancelled: orders.filter((o) => o.status === "cancelled").length,
-      refunded: orders.filter((o) => o.status === "refunded").length,
+      all: scoped.length,
+      paid: scoped.filter((o) => o.status === "paid").length,
+      pending: scoped.filter((o) => o.status === "pending").length,
+      cancelled: scoped.filter((o) => o.status === "cancelled").length,
+      refunded: scoped.filter((o) => o.status === "refunded").length,
     }),
-    [orders],
+    [scoped],
   );
 
   const filtered = useMemo(() => {
     let list =
-      filter === "all" ? orders : orders.filter((o) => o.status === filter);
+      filter === "all" ? scoped : scoped.filter((o) => o.status === filter);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -124,7 +136,7 @@ export default function AdminOrdersPage() {
       );
     }
     return list;
-  }, [orders, filter, search]);
+  }, [scoped, filter, search]);
 
   return (
     <div className="space-y-6">
@@ -137,16 +149,39 @@ export default function AdminOrdersPage() {
             <GradientText>Ordini</GradientText>
           </h1>
           <p className="mt-2 text-sm text-academy-gray-500">
-            {orders.length} ordini totali · {filtered.length} visibili
+            {scoped.length} ordini {showTest ? "totali" : "live"} ·{" "}
+            {filtered.length} visibili
+            {testCount > 0 && !showTest && (
+              <span className="ml-1 text-academy-gray-400">
+                ({testCount} test nascosti)
+              </span>
+            )}
           </p>
         </div>
-        <Link
-          href="/admin/scanner"
-          className="flex items-center gap-2 border border-academy-orange/40 bg-academy-orange/10 px-4 py-2.5 text-[12px] font-bold tracking-wider text-academy-orange uppercase transition-colors hover:bg-academy-orange/20"
-        >
-          <IconScan className="h-3.5 w-3.5" />
-          Scanner QR
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowTest((v) => !v)}
+            className={`flex items-center gap-2 border px-4 py-2.5 text-[12px] font-bold tracking-wider uppercase transition-colors ${
+              showTest
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-700"
+                : "border-black/[0.08] bg-white text-academy-gray-600 hover:text-academy-gray-800"
+            }`}
+            title={
+              showTest
+                ? "Nascondi ordini in test mode"
+                : "Mostra anche ordini in test mode"
+            }
+          >
+            {showTest ? "Test ON" : "Test OFF"}
+          </button>
+          <Link
+            href="/admin/scanner"
+            className="flex items-center gap-2 border border-academy-orange/40 bg-academy-orange/10 px-4 py-2.5 text-[12px] font-bold tracking-wider text-academy-orange uppercase transition-colors hover:bg-academy-orange/20"
+          >
+            <IconScan className="h-3.5 w-3.5" />
+            Scanner QR
+          </Link>
+        </div>
       </header>
 
       {/* Search + Filters */}
@@ -210,7 +245,11 @@ export default function AdminOrdersPage() {
               return (
                 <li
                   key={order.id}
-                  className="border border-black/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                  className={`border bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${
+                    order.is_test
+                      ? "border-amber-500/40 ring-1 ring-amber-500/20"
+                      : "border-black/[0.08]"
+                  }`}
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -221,12 +260,19 @@ export default function AdminOrdersPage() {
                         {order.billing_email}
                       </p>
                     </div>
-                    <span
-                      className={`inline-flex shrink-0 items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
-                    >
-                      <span className={`h-1.5 w-1.5 ${tone.dot}`} />
-                      {ORDER_STATUS_LABEL[order.status]}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {order.is_test && (
+                        <span className="inline-flex items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
+                          Test
+                        </span>
+                      )}
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
+                      >
+                        <span className={`h-1.5 w-1.5 ${tone.dot}`} />
+                        {ORDER_STATUS_LABEL[order.status]}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between gap-3">
@@ -299,12 +345,19 @@ export default function AdminOrdersPage() {
                         {order.pack_id?.toUpperCase() || "—"}
                       </td>
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
-                        >
-                          <span className={`h-1.5 w-1.5 ${tone.dot}`} />
-                          {ORDER_STATUS_LABEL[order.status]}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
+                          >
+                            <span className={`h-1.5 w-1.5 ${tone.dot}`} />
+                            {ORDER_STATUS_LABEL[order.status]}
+                          </span>
+                          {order.is_test && (
+                            <span className="inline-flex items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
+                              Test
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-4 text-right text-sm font-bold text-academy-gray-800 tabular-nums">
                         {formatEUR(order.amount_cents)}

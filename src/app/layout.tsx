@@ -14,7 +14,11 @@ const saira = Saira({
   display: "swap",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Lacertosus Academy | Formazione Fitness Professionale",
     template: "%s | Lacertosus Academy",
@@ -30,10 +34,24 @@ export const metadata: Metadata = {
     "lacertosus",
     "certificazione fitness",
   ],
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "it_IT",
     siteName: "Lacertosus Academy",
+    url: SITE_URL,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
