@@ -5,10 +5,13 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import VimeoPlayer from "@vimeo/player";
 import { HeroSlide, DEFAULT_HERO_SLIDES } from "@/lib/constants/hero-slides";
 import { VideoBlock } from "@/components/shared/video-block";
 
 const VIMEO_ID = "1161847546";
+/** Loop the first N seconds of the bg video to limit bandwidth + speed up load. */
+const VIMEO_BG_LOOP_SECONDS = 10;
 
 /* ──────────────────────────────────────────────────────────────
    SplitLine — char-by-char reveal (overflow:hidden per char)
@@ -127,6 +130,8 @@ export function HeroSection({
   // Background layers
   const videoLayerRef = useRef<HTMLDivElement>(null);
   const videoOverlayRef = useRef<HTMLDivElement>(null);
+  const vimeoBgContainerRef = useRef<HTMLDivElement>(null);
+  const vimeoBgPlayerRef = useRef<VimeoPlayer | null>(null);
   const slideBgRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -278,6 +283,42 @@ export function HeroSection({
     }, 5600);
     return () => clearInterval(id);
   }, [slides.length, goToSlide]);
+
+  /* ── Vimeo bg player (Stage A) — loops first 10s to cap bandwidth ──
+     Vimeo's adaptive stream only fetches the segments needed for the
+     visible playback window, so seeking back to 0 every N seconds keeps
+     the buffered range tiny and the initial frame appears faster. */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isDesktop) return;
+    if (!vimeoBgContainerRef.current) return;
+    if (vimeoBgPlayerRef.current) return;
+
+    const player = new VimeoPlayer(vimeoBgContainerRef.current, {
+      id: parseInt(VIMEO_ID, 10),
+      background: true,
+      muted: true,
+      autoplay: true,
+      loop: true,
+      controls: false,
+      quality: "360p",
+      dnt: true,
+    });
+    vimeoBgPlayerRef.current = player;
+
+    const onTimeUpdate = ({ seconds }: { seconds: number }) => {
+      if (seconds >= VIMEO_BG_LOOP_SECONDS) {
+        player.setCurrentTime(0).catch(() => {});
+      }
+    };
+    player.on("timeupdate", onTimeUpdate);
+
+    return () => {
+      player.off("timeupdate", onTimeUpdate);
+      player.destroy().catch(() => {});
+      vimeoBgPlayerRef.current = null;
+    };
+  }, [isDesktop]);
 
   /* ── GSAP orchestration: intro + per-panel reveals + count-up ── */
   useEffect(() => {
@@ -516,15 +557,17 @@ export function HeroSection({
         className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none"
         style={{ background: "#111111", zIndex: 0 }}
       >
-        {/* Video layer (fixed bg, opacity controlled by scroll) */}
+        {/* Video layer (fixed bg, opacity controlled by scroll).
+            Vimeo Player SDK takes over the container ref and loops the
+            first VIMEO_BG_LOOP_SECONDS via `timeupdate` → setCurrentTime(0). */}
         <div
           ref={videoLayerRef}
           className="absolute inset-0"
           style={{ opacity: 0 }}
         >
-          <iframe
-            src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
-            className="absolute border-0"
+          <div
+            ref={vimeoBgContainerRef}
+            className="absolute pointer-events-none [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:h-full [&>iframe]:w-full [&>iframe]:border-none"
             style={{
               top: "50%",
               left: "50%",
@@ -533,10 +576,7 @@ export function HeroSection({
               minWidth: "100%",
               height: "56.25vw",
               minHeight: "100%",
-              pointerEvents: "none",
             }}
-            allow="autoplay; picture-in-picture"
-            title="Lacertosus Academy"
           />
           <div
             ref={videoOverlayRef}
