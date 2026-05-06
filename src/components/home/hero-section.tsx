@@ -301,7 +301,7 @@ export function HeroSection({
       autoplay: true,
       loop: true,
       controls: false,
-      quality: "720p",
+      quality: "360p",
       dnt: true,
     });
     vimeoBgPlayerRef.current = player;
@@ -559,10 +559,11 @@ export function HeroSection({
       >
         {/* Video layer (fixed bg, opacity controlled by scroll).
             Vimeo Player SDK takes over the container ref and loops the
-            first VIMEO_BG_LOOP_SECONDS via `timeupdate` → setCurrentTime(0). */}
+            first VIMEO_BG_LOOP_SECONDS via `timeupdate` → setCurrentTime(0).
+            Light blur + grain mask the 360p artifacts on a full-bleed bg. */}
         <div
           ref={videoLayerRef}
-          className="absolute inset-0"
+          className="absolute inset-0 overflow-hidden"
           style={{ opacity: 0 }}
         >
           <div
@@ -571,17 +572,29 @@ export function HeroSection({
             style={{
               top: "50%",
               left: "50%",
-              transform: "translate(-50%, -50%)",
+              transform: "translate(-50%, -50%) scale(1.06)",
               width: "177.77vh",
               minWidth: "100%",
               height: "56.25vw",
               minHeight: "100%",
+              filter: "blur(5px) saturate(1.08) brightness(1.02)",
+            }}
+          />
+          {/* Film grain — masks low-res artifacts, adds cinematic texture */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/></svg>\")",
+              backgroundSize: "240px 240px",
+              opacity: 0.18,
+              mixBlendMode: "overlay",
             }}
           />
           <div
             ref={videoOverlayRef}
             className="absolute inset-0"
-            style={{ background: "rgba(17,17,17,0.75)" }}
+            style={{ background: "rgba(17,17,17,0.7)" }}
           />
         </div>
 
