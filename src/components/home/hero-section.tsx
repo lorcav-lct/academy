@@ -301,7 +301,7 @@ export function HeroSection({
       autoplay: true,
       loop: true,
       controls: false,
-      quality: "360p",
+      quality: "720p",
       dnt: true,
     });
     vimeoBgPlayerRef.current = player;
