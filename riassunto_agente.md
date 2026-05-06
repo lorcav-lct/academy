@@ -12,6 +12,39 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0nona. Aggiornamenti 2026-05-06 — Go-live academy.lacertosus.com (two-env Vercel)
+
+Setup ambiente production + staging sullo stesso progetto Vercel/Supabase.
+
+### Branch/Vercel
+
+- `main` → Production → `academy.lacertosus.com`
+- `staging` → Preview persistente → `academylacertosus.vercel.app`
+- Env vars con scope distinto: Production usa NEXT_PUBLIC_BASE_URL=`https://academy.lacertosus.com`, Preview usa `https://academylacertosus.vercel.app`
+- Stripe: stesse chiavi test su entrambi finché live mode non è attivo (manca KYC); poi Production passerà a `sk_live_*` con webhook dedicato
+
+### Codice
+
+- Migration `020_orders_is_test.sql`: `orders.is_test BOOLEAN NOT NULL DEFAULT false` + index
+- `api/checkout/session/route.ts` setta `is_test` da `STRIPE_SECRET_KEY?.startsWith("sk_test_")` all'insert
+- `api/stripe/webhook/route.ts` aggiorna `is_test = session.livemode === false` su pagamento
+- `/admin/orders` ora ha toggle "Test ON/OFF" (default OFF: nasconde test) + badge ambra "TEST" su card e righe; counter test nascosti in header
+- `layout.tsx` ha `metadataBase: new URL(NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com")` + canonical `/` + robots index/follow
+- Nuovi `src/app/robots.ts` e `src/app/sitemap.ts`:
+  - robots blocca tutto se SITE_URL non contiene `academy.lacertosus.com` (staging non indicizzato)
+  - sitemap include `/`, `/percorso`, `/masterclass`, `/pack`, `/docenti` + tutti i COURSES e WORKSHOPS dinamici
+- Fallback URL hardcoded `academylacertosus.vercel.app` rimossi da `webhook/route.ts` e `cancel-order/route.ts`, ora puntano a `academy.lacertosus.com`
+- `.env.example` documenta gli URL per i tre ambienti
+
+### Da fare manualmente lato infra (utente)
+
+- Vercel: assegnare `academylacertosus.vercel.app` al branch `staging`, scope env vars Production vs Preview
+- Supabase Auth → URL Configuration: Site URL = production, Redirect URLs includere entrambi i domini
+- Eseguire migration 020 sul DB hosted (`npx supabase db push`)
+- Stripe test webhook su `https://academylacertosus.vercel.app/api/stripe/webhook` (events: checkout.session.completed, checkout.session.expired, charge.refunded)
+- Stripe live webhook su production (dopo KYC)
+- Resend: verifica DKIM/SPF di `lacertosus.com`
+
 ## 0octa. Aggiornamenti 2026-05-06 — Hero home: scroll naturale verticale (desktop)
 
 Refactor `src/components/home/hero-section.tsx` per migliorare la chiarezza dello scroll. Pin/scrub timeline GSAP rimosso, layout su `position: sticky` + scroll verticale naturale.
