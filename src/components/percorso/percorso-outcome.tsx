@@ -140,7 +140,7 @@ export function PercorsoOutcome() {
             </div>
 
             {/* Numbered manifesto list */}
-            <div className="max-w-4xl">
+            <div>
               {OUTCOMES.map((outcome, i) => (
                 <div
                   key={i}
@@ -172,10 +172,6 @@ export function PercorsoOutcome() {
                       {outcome.desc}
                     </p>
                   </div>
-
-                  <span className="hidden md:block shrink-0 text-[0.7rem] font-bold tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-academy-orange">
-                    →
-                  </span>
                 </div>
               ))}
             </div>

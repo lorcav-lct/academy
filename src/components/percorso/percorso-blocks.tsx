@@ -350,7 +350,7 @@ export function PercorsoBlocks() {
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-[5%] md:px-10 py-24 md:py-36">
         {/* ─── HEADER ─────────────────────────────────────────────── */}
-        <div ref={headerRef} className="mb-20 md:mb-28 max-w-3xl">
+        <div ref={headerRef} className="mb-20 md:mb-28">
           <span data-header-item className="label-tag mb-4 block">
             Il Programma in 3 Blocchi
           </span>
