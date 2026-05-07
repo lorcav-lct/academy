@@ -1213,7 +1213,6 @@ export function CheckoutContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           packId: pack.slug,
-          priceId: pack.stripePriceId,
           workshopIds: [],
           masterclassIds,
           promotionCodeId: promo?.id ?? null,

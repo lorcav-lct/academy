@@ -2,13 +2,21 @@
  * Lacertosus Academy — Prodotti acquistabili.
  * Bundle (Start/Pro/Elite) come offerta principale + singoli blocchi e masterclass.
  */
+export interface StripePriceMap {
+  /** Price ID dell'account/mode di test (Sandbox) */
+  test: string;
+  /** Price ID dell'account live Lacertosus (vuoto se non disponibile in live) */
+  live: string;
+}
+
 export interface AcademyProduct {
   slug: string;
   name: string;
   subtitle: string;
   type: "course" | "certification" | "workshop" | "bundle";
   priceCents: number; // 0 = prezzo da definire
-  stripePriceId: string; // ID Stripe Price — da collegare dopo setup prodotti
+  /** ID Stripe Price separati per modalità: server-side risolve via resolveStripePriceId */
+  stripePriceId: StripePriceMap;
   includes: string[];
   /** Corso/blocco corrispondente (solo per type=course) */
   courseSlug?: string;
@@ -30,7 +38,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Il percorso completo — 3 blocchi formativi",
     type: "bundle",
     priceCents: 330000,
-    stripePriceId: "price_1TTKfPCGgXzYzpRpn7ygPM3i",
+    stripePriceId: {
+      test: "price_1TTKfPCGgXzYzpRpn7ygPM3i",
+      live: "price_1TUNq6CE95vjZKhkue3AHqdq",
+    },
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
       "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
@@ -50,7 +61,10 @@ export const PRODUCTS: AcademyProduct[] = [
       "Il percorso completo + Personal Trainer FIPE × Lacertosus + 2 Masterclass",
     type: "bundle",
     priceCents: 470000,
-    stripePriceId: "price_1TTKfRCGgXzYzpRpXG0mXIRK",
+    stripePriceId: {
+      test: "price_1TTKfRCGgXzYzpRpXG0mXIRK",
+      live: "price_1TUNq6CE95vjZKhkD2stjFHk",
+    },
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
       "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
@@ -72,7 +86,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "L'esperienza completa — con vitto e alloggio inclusi",
     type: "bundle",
     priceCents: 700000,
-    stripePriceId: "price_1TTKfSCGgXzYzpRpKScATmfz",
+    stripePriceId: {
+      test: "price_1TTKfSCGgXzYzpRpKScATmfz",
+      live: "price_1TUNq3CE95vjZKhk4WyHn34S",
+    },
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
       "STRENGTH — Blocco II: Strength & Conditioning (2 weekend)",
@@ -97,7 +114,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Blocco I — Functional Training",
     type: "course",
     priceCents: 150000,
-    stripePriceId: "price_1T7tseCGgXzYzpRp7P4QCO5G",
+    stripePriceId: {
+      test: "price_1T7tseCGgXzYzpRp7P4QCO5G",
+      live: "", // Non creato in live mode (singolo blocco non venduto separatamente)
+    },
     courseSlug: "function",
     includes: [
       "2 weekend di formazione in presenza",
@@ -114,7 +134,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Blocco II — Strength & Conditioning",
     type: "course",
     priceCents: 250000,
-    stripePriceId: "price_1T7txACGgXzYzpRppAoYRDE5",
+    stripePriceId: {
+      test: "price_1T7txACGgXzYzpRppAoYRDE5",
+      live: "", // Non creato in live mode (singolo blocco non venduto separatamente)
+    },
     courseSlug: "strength",
     includes: [
       "2 weekend di formazione in presenza",
@@ -132,7 +155,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Blocco III — Business & Performance",
     type: "course",
     priceCents: 500000,
-    stripePriceId: "price_1T7tz9CGgXzYzpRpHDJ3UpuO",
+    stripePriceId: {
+      test: "price_1T7tz9CGgXzYzpRpHDJ3UpuO",
+      live: "", // Non creato in live mode (singolo blocco non venduto separatamente)
+    },
     courseSlug: "science",
     includes: [
       "2 weekend di formazione in presenza",
@@ -151,7 +177,7 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Riconoscimento nazionale e internazionale",
     type: "certification",
     priceCents: 0,
-    stripePriceId: "",
+    stripePriceId: { test: "", live: "" },
     includes: [
       "Esame di certificazione FIPE × Lacertosus",
       "Riconoscimento nazionale e internazionale",
@@ -168,7 +194,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Metodo bulgaro e functional training avanzato",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXTCGgXzYzpRpk3Y3FOt2",
+    stripePriceId: {
+      test: "price_1TTHXTCGgXzYzpRpk3Y3FOt2",
+      live: "price_1TUNq9CE95vjZKhknKoRmtwV",
+    },
     workshopSlug: "master-functional-bulgarian",
     includes: [
       "1-2 giornate in presenza",
@@ -184,7 +213,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Strength training avanzato e performance",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXUCGgXzYzpRpPsx2IlXK",
+    stripePriceId: {
+      test: "price_1TTHXUCGgXzYzpRpPsx2IlXK",
+      live: "price_1TUNq9CE95vjZKhkkAzoXj88",
+    },
     workshopSlug: "master-strength",
     includes: [
       "1-2 giornate in presenza",
@@ -200,7 +232,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Preparazione fisica nel calcio professionistico",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXVCGgXzYzpRpzFkpuUDO",
+    stripePriceId: {
+      test: "price_1TTHXVCGgXzYzpRpzFkpuUDO",
+      live: "price_1TUNq5CE95vjZKhkMx40Fiog",
+    },
     workshopSlug: "master-calcio",
     includes: [
       "1-2 giornate in presenza",
@@ -216,7 +251,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "S&C per la pallavolo di alto livello",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXXCGgXzYzpRpyPbR688D",
+    stripePriceId: {
+      test: "price_1TTHXXCGgXzYzpRpyPbR688D",
+      live: "price_1TUNq5CE95vjZKhkBBaDE4q2",
+    },
     workshopSlug: "master-volley",
     includes: [
       "1-2 giornate in presenza",
@@ -232,7 +270,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Preparazione e performance per Hyrox",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXYCGgXzYzpRpSShW9Ewg",
+    stripePriceId: {
+      test: "price_1TTHXYCGgXzYzpRpSShW9Ewg",
+      live: "price_1TUNq7CE95vjZKhkKBjjTh0S",
+    },
     workshopSlug: "master-hyrox",
     includes: [
       "1-2 giornate in presenza",
@@ -248,7 +289,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Preparazione atletica specifica per il rugby",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXZCGgXzYzpRpss0BrkXN",
+    stripePriceId: {
+      test: "price_1TTHXZCGgXzYzpRpss0BrkXN",
+      live: "price_1TUNq4CE95vjZKhkqzUqdQbe",
+    },
     workshopSlug: "master-rugby",
     includes: [
       "1-2 giornate in presenza",
@@ -264,7 +308,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Performance e metodologia per la corsa",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXbCGgXzYzpRp8SZ9K655",
+    stripePriceId: {
+      test: "price_1TTHXbCGgXzYzpRp8SZ9K655",
+      live: "price_1TUNq5CE95vjZKhkVOefqx7O",
+    },
     workshopSlug: "master-running",
     includes: [
       "1-2 giornate in presenza",
@@ -280,7 +327,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "Preparazione atletica per arti marziali",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXcCGgXzYzpRp6FSkEbcO",
+    stripePriceId: {
+      test: "price_1TTHXcCGgXzYzpRp6FSkEbcO",
+      live: "price_1TUNq7CE95vjZKhkcS3ECJRo",
+    },
     workshopSlug: "master-sport-combattimento",
     includes: [
       "1-2 giornate in presenza",
@@ -296,7 +346,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle: "S&C per il nuoto agonistico d'élite",
     type: "workshop",
     priceCents: 49000,
-    stripePriceId: "price_1TTHXeCGgXzYzpRpzy1i6LMB",
+    stripePriceId: {
+      test: "price_1TTHXeCGgXzYzpRpzy1i6LMB",
+      live: "price_1TUNq8CE95vjZKhkj1pp4mih",
+    },
     workshopSlug: "master-nuoto",
     includes: [
       "1-2 giornate in presenza",
@@ -322,6 +375,22 @@ export function getMasterclassProducts(): AcademyProduct[] {
 
 export function getCourseProducts(): AcademyProduct[] {
   return PRODUCTS.filter((p) => p.type === "course");
+}
+
+/**
+ * Risolve il Stripe Price ID corretto in base alla modalità Stripe attiva
+ * (`STRIPE_SECRET_KEY` lato server). Sicuro da chiamare anche in build/test —
+ * se la env non è "sk_live_*" ricade automaticamente sul price test.
+ *
+ * NB: server-side only. Lato client `process.env.STRIPE_SECRET_KEY` è
+ * undefined e tornerà sempre il price test (innocuo: il client passa solo
+ * il packId, è il server a costruire la session Stripe).
+ */
+export function resolveStripePriceId(product: AcademyProduct): string {
+  const isLive =
+    typeof process !== "undefined" &&
+    process.env?.STRIPE_SECRET_KEY?.startsWith("sk_live_") === true;
+  return isLive ? product.stripePriceId.live : product.stripePriceId.test;
 }
 
 // Legacy aliases

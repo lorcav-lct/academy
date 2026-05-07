@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getActivePromoForProduct } from "@/lib/promos/server";
-import { getProductBySlug } from "@/lib/constants/packs";
+import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
 import { WORKSHOPS } from "@/lib/constants/workshops";
 
 function normalizeSlugList(value: unknown): string[] {
@@ -30,17 +30,24 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { packId, priceId, workshopIds, masterclassIds, promotionCodeId } =
-      body;
+    const { packId, workshopIds, masterclassIds, promotionCodeId } = body;
 
-    if (!packId || !priceId) {
+    if (!packId) {
       return NextResponse.json({ error: "Pack non valido" }, { status: 400 });
     }
 
     const product = getProductBySlug(packId);
-    if (!product || product.stripePriceId !== priceId) {
+    if (!product) {
       return NextResponse.json(
-        { error: "Prodotto o prezzo non valido" },
+        { error: "Prodotto non valido" },
+        { status: 400 },
+      );
+    }
+
+    const priceId = resolveStripePriceId(product);
+    if (!priceId) {
+      return NextResponse.json(
+        { error: "Prodotto non disponibile per l'acquisto in questa modalità" },
         { status: 400 },
       );
     }

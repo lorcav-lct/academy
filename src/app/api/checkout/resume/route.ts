@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
-import { getProductBySlug } from "@/lib/constants/packs";
+import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
 import { WORKSHOPS } from "@/lib/constants/workshops";
 
 function normalizeSlugList(value: unknown): string[] {
@@ -62,10 +62,18 @@ export async function POST(request: NextRequest) {
 
     // Look up pack from constants
     const pack = getProductBySlug(order.pack_id);
-    if (!pack || !pack.stripePriceId) {
+    if (!pack) {
       return NextResponse.json(
         { error: "Prodotto non trovato" },
         { status: 404 },
+      );
+    }
+
+    const priceId = resolveStripePriceId(pack);
+    if (!priceId) {
+      return NextResponse.json(
+        { error: "Prodotto non disponibile in questa modalità" },
+        { status: 400 },
       );
     }
 
@@ -104,6 +112,7 @@ export async function POST(request: NextRequest) {
         status: "pending",
         amount_cents: 0,
         billing_email: user.email,
+        is_test: process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ?? false,
       })
       .select()
       .single();
@@ -116,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await createCheckoutSession({
-      priceId: pack.stripePriceId,
+      priceId,
       customerEmail: user.email!,
       orderId: newOrder.id,
       packId: pack.slug,
