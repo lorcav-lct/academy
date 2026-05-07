@@ -12,6 +12,26 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0undecima. Aggiornamenti 2026-05-07 — Cleanup schema DB
+
+Migration `021_drop_unused_tables.sql` esegue:
+
+- DROP `packs`, `courses` — contenuti in `src/lib/constants/*.ts` (SSG), FK già rimosse da mig 010
+- DROP `attendance` — sostituita da `ticket_checkins` (mig 019)
+- ALTER `calendar_events` DROP CONSTRAINT calendar_events_course_id_fkey + DROP COLUMN course_id
+- `calendar_events` resta vuota ma viva: `ticket_checkins.event_id` la referenzia come hook futuro per scanner per-evento
+
+### Schema DB attuale (post-021)
+
+- `profiles` — utenti
+- `orders` — pack_id TEXT slug, is_test bool
+- `tickets` — course_id TEXT slug nullable
+- `ticket_checkins` — ledger ingressi QR (multi-entry per regola), event_id NULL
+- `product_access_rules` — limiti ingressi per slug prodotto
+- `calendar_events` — vuota, riservata
+- `promos` — coupon DB-managed
+- `teaser_leads`, `hero_slides`, `site_settings` — gestione contenuti
+
 ## 0deca. Aggiornamenti 2026-05-07 — Stripe Live attivo + prodotto hidden "Sostieni il Progetto"
 
 Ambiente production completamente live. Smoke test reale completato con successo.
