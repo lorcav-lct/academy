@@ -12,7 +12,7 @@ import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
-import { WORKSHOPS } from "@/lib/constants/workshops";
+import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
 
 // ─── Constants (mirror /pack page, simplified — no price) ───────────────────

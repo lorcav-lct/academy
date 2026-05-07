@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { WORKSHOPS } from "@/lib/constants/workshops";
+import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 import { useTheme } from "@/components/providers/theme-provider";
 
 const BENTO_SPANS = [2, 1, 1, 2, 1, 2, 2, 1];

@@ -4,8 +4,8 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
-import { WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
-import { getMasterclassProducts } from "@/lib/constants/packs";
+import { PUBLIC_WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
+import { getPublicMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
 /* ──────────────────────────────────────────────────────────────
@@ -569,7 +569,7 @@ function MasterclassCard({
   isInView: boolean;
 }) {
   const cred = CREDENTIALS[workshop.slug];
-  const product = getMasterclassProducts().find(
+  const product = getPublicMasterclassProducts().find(
     (p) => p.workshopSlug === workshop.slug,
   );
   const isTbd = workshop.tbd || !product || product.priceCents === 0;
@@ -823,7 +823,9 @@ function MasterclassListSection({ isDark }: { isDark: boolean }) {
   const th = isDark ? "#f5f5fa" : "#0a0a1a";
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
 
-  const sorted = [...WORKSHOPS].sort((a, b) => a.sortOrder - b.sortOrder);
+  const sorted = [...PUBLIC_WORKSHOPS].sort(
+    (a, b) => a.sortOrder - b.sortOrder,
+  );
 
   return (
     <section

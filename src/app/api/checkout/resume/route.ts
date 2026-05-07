@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
-import { WORKSHOPS } from "@/lib/constants/workshops";
+import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
 
 function normalizeSlugList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       pack.type === "bundle" ? (pack.masterclassSelectionCount ?? 0) : 0;
 
     if (requiredMasterclasses > 0) {
-      const workshopSlugs = new Set(WORKSHOPS.map((w) => w.slug));
+      const workshopSlugs = new Set(PUBLIC_WORKSHOPS.map((w) => w.slug));
       const invalidSelection =
         selectedMasterclassIds.length !== requiredMasterclasses ||
         selectedMasterclassIds.some((slug) => !workshopSlugs.has(slug));

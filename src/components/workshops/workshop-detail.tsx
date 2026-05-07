@@ -660,6 +660,46 @@ const CONTENT: Record<string, MasterclassContent> = {
     finalHook:
       "Iscriviti alla lista interesse: ti contatteremo per primo appena la faculty sarà confermata.",
   },
+  "sostieni-progetto": {
+    domain: "Sostegno",
+    hook: "Lacertosus Academy nasce dalla volontà di alzare lo standard della formazione fitness in Italia. Ogni euro che riceviamo viene reinvestito in docenti, attrezzature e contenuti formativi.",
+    trainerHeadline: "Il team Lacertosus Academy",
+    trainerPitch:
+      "Un team di professionisti, atleti e formatori che credono in un'idea semplice: la formazione di qualità deve essere accessibile, rigorosa e in continua evoluzione. Se condividi questa visione, il tuo contributo conta.",
+    whatYouLearn:
+      "Non è un corso. È un gesto. Un contributo simbolico per supportare la crescita del progetto e ricevere in cambio aggiornamenti, ringraziamenti e accesso anticipato alle prossime iniziative.",
+    modules: [],
+    outcomes: [
+      "Sostieni concretamente lo sviluppo del progetto formativo",
+      "Ricevi un ringraziamento personalizzato via email",
+      "Accesso anticipato alle prossime iniziative e masterclass",
+      "Possibilità di entrare nella community Sostenitori",
+    ],
+    forWho: [],
+    notFor: [],
+    included: [
+      "Contributo simbolico al progetto Lacertosus Academy",
+      "Ringraziamento personalizzato via email",
+      "Accesso anticipato alle prossime iniziative",
+      "Menzione nella community Sostenitori (opzionale, su richiesta)",
+    ],
+    faq: [
+      {
+        q: "Posso contribuire con una cifra diversa?",
+        a: "Per ora il contributo è fissato a 10€ per semplicità di gestione. Per donazioni di importo diverso scrivici a academy@lacertosus.com.",
+      },
+      {
+        q: "Riceverò una ricevuta?",
+        a: "Sì. Riceverai automaticamente la ricevuta del pagamento via email, come per qualsiasi altro acquisto.",
+      },
+      {
+        q: "È deducibile fiscalmente?",
+        a: "Si tratta di un acquisto, non di una donazione liberale, quindi non è deducibile. Per progetti specifici di donazione fiscale contattaci.",
+      },
+    ],
+    finalHook:
+      "Grazie. Davvero. Ogni contributo, anche piccolo, ci aiuta a continuare il progetto.",
+  },
 };
 
 const ORANGE = "#F09226";

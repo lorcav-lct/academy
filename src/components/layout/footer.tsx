@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
-import { WORKSHOPS } from "@/lib/constants/workshops";
+import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 
 const footerLinks = {
   percorso: [

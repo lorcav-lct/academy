@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
   getBundles,
-  getMasterclassProducts,
+  getPublicMasterclassProducts,
   type AcademyProduct,
 } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
@@ -2463,7 +2463,7 @@ function MasterclassSection({ isDark }: { isDark: boolean }) {
   const ts = isDark ? "rgba(120,120,140,0.5)" : "#888888";
   const rowBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)";
 
-  const masterclasses = getMasterclassProducts();
+  const masterclasses = getPublicMasterclassProducts();
 
   async function handleBuy(product: AcademyProduct) {
     const supabase = createClient();

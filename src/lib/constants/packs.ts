@@ -17,6 +17,9 @@ export interface AcademyProduct {
   priceCents: number; // 0 = prezzo da definire
   /** ID Stripe Price separati per modalità: server-side risolve via resolveStripePriceId */
   stripePriceId: StripePriceMap;
+  /** Se true, escluso da listing pubbliche e selezione bundle.
+   *  Acquistabile solo via URL diretto. */
+  hidden?: boolean;
   includes: string[];
   /** Corso/blocco corrispondente (solo per type=course) */
   courseSlug?: string;
@@ -359,6 +362,28 @@ export const PRODUCTS: AcademyProduct[] = [
     ],
     sortOrder: 28,
   },
+
+  // ─── Hidden — accessibile solo via URL diretto ────────────────────────────
+  {
+    slug: "sostieni-progetto",
+    name: "Sostieni il Progetto",
+    subtitle: "Un contributo che fa la differenza",
+    type: "workshop",
+    priceCents: 1000,
+    stripePriceId: {
+      test: "", // Non disponibile in test mode
+      live: "price_1TUPpKCE95vjZKhkjZoKYwRP",
+    },
+    workshopSlug: "sostieni-progetto",
+    hidden: true,
+    includes: [
+      "Contributo simbolico al progetto Lacertosus Academy",
+      "Ringraziamento personalizzato via email",
+      "Accesso anticipato alle prossime iniziative",
+      "Menzione nella community Sostenitori (opzionale)",
+    ],
+    sortOrder: 999,
+  },
 ];
 
 export function getProductBySlug(slug: string): AcademyProduct | undefined {
@@ -366,15 +391,22 @@ export function getProductBySlug(slug: string): AcademyProduct | undefined {
 }
 
 export function getBundles(): AcademyProduct[] {
-  return PRODUCTS.filter((p) => p.type === "bundle");
+  return PRODUCTS.filter((p) => p.type === "bundle" && !p.hidden);
 }
 
+/** Tutti i prodotti masterclass, inclusi quelli hidden. Utile per lookup
+ *  per slug nelle pagine detail. Per le listing pubbliche usare
+ *  `getPublicMasterclassProducts()`. */
 export function getMasterclassProducts(): AcademyProduct[] {
   return PRODUCTS.filter((p) => p.type === "workshop");
 }
 
+export function getPublicMasterclassProducts(): AcademyProduct[] {
+  return PRODUCTS.filter((p) => p.type === "workshop" && !p.hidden);
+}
+
 export function getCourseProducts(): AcademyProduct[] {
-  return PRODUCTS.filter((p) => p.type === "course");
+  return PRODUCTS.filter((p) => p.type === "course" && !p.hidden);
 }
 
 /**

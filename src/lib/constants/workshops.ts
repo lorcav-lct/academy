@@ -9,6 +9,9 @@ export interface Workshop {
   sortOrder: number;
   trainerLabel: string;
   tbd?: boolean;
+  /** Se true, viene escluso da listing pubbliche e selezione bundle.
+   *  La pagina detail resta accessibile via URL diretto. */
+  hidden?: boolean;
 }
 
 export const WORKSHOPS: Workshop[] = [
@@ -113,7 +116,25 @@ export const WORKSHOPS: Workshop[] = [
     trainerLabel: "Marco Magnani + Riccardo Aimini",
     sortOrder: 9,
   },
+  // Hidden — accessibile solo via URL diretto /masterclass/sostieni-progetto
+  {
+    slug: "sostieni-progetto",
+    title: "Sostieni il Progetto",
+    subtitle: "Un contributo che fa la differenza",
+    focus:
+      "Una donazione simbolica per supportare la crescita di Lacertosus Academy",
+    duration: "Una tantum",
+    date: "—",
+    teacherSlugs: [],
+    trainerLabel: "Il team Lacertosus Academy",
+    sortOrder: 999,
+    hidden: true,
+  },
 ];
+
+/** Lista pubblica — esclude le voci con `hidden: true`. Usare ovunque la lista
+ *  è mostrata all'utente (grid, preview, selettori bundle, sitemap, footer). */
+export const PUBLIC_WORKSHOPS = WORKSHOPS.filter((w) => !w.hidden);
 
 export function getWorkshopBySlug(slug: string): Workshop | undefined {
   return WORKSHOPS.find((w) => w.slug === slug);

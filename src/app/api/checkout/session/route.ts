@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getActivePromoForProduct } from "@/lib/promos/server";
 import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
-import { WORKSHOPS } from "@/lib/constants/workshops";
+import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
 
 function normalizeSlugList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const selectedAddonSlugs = Array.from(
       new Set([...legacyWorkshopIds, ...selectedMasterclassIds]),
     );
-    const workshopSlugs = new Set(WORKSHOPS.map((w) => w.slug));
+    const workshopSlugs = new Set(PUBLIC_WORKSHOPS.map((w) => w.slug));
     const requiredMasterclasses =
       product.type === "bundle" ? (product.masterclassSelectionCount ?? 0) : 0;
 

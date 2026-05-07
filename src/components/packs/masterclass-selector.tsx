@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
+import {
+  PUBLIC_WORKSHOPS as WORKSHOPS,
+  type Workshop,
+} from "@/lib/constants/workshops";
 import { getBundles } from "@/lib/constants/packs";
 
 /* ──────────────────────────────────────────────────────────────
