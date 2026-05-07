@@ -12,6 +12,58 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0deca. Aggiornamenti 2026-05-07 — Stripe Live attivo + prodotto hidden "Sostieni il Progetto"
+
+Ambiente production completamente live. Smoke test reale completato con successo.
+
+### Stripe live attivato
+
+- Account live `Lacertosus` (acct_1T7tn6CE95vjZKhk) — distinto dal Sandbox usato in test (acct_1T7tnNCG…)
+- Chiavi `sk_live_*` / `pk_live_*` configurate scope **Production only** su Vercel
+- Webhook live su `https://academy.lacertosus.com/api/stripe/webhook` con `whsec_*` live in env Production
+- Smoke test: 2 acquisti €10 con carta reale (Revolut), 1 refund. Webhook ricevuto, QR + email partiti correttamente
+- **Limitazione**: `rk_live_*` di `stripe login` ha permessi ristretti — non può creare prodotti/price via CLI. Per crearli usare Dashboard
+
+### Refactor dual-mode price ID (opzione C)
+
+Il `STRIPE_SECRET_KEY` su Production e Preview puntano ad **account Stripe diversi**, quindi i Price ID sono incompatibili.
+
+- `src/lib/constants/packs.ts`:
+  - `stripePriceId: { test: string; live: string }` per ogni prodotto
+  - `resolveStripePriceId(product)` server-side legge `STRIPE_SECRET_KEY?.startsWith("sk_live_")` per scegliere
+  - `getMasterclassProducts()` → include hidden (lookup detail page); `getPublicMasterclassProducts()` → no hidden (listing)
+- Client checkout (`checkout-content.tsx`) **non manda più priceId**: solo `packId`, server risolve
+- `api/checkout/session/route.ts` e `api/checkout/resume/route.ts` usano il resolver
+- I blocchi singoli FUNCTION/STRENGTH/SCIENCE hanno `live: ""` — non venduti standalone in live mode (l'utente ha deciso di non crearli)
+
+### Prodotto hidden "Sostieni il Progetto" (€10)
+
+Donazione simbolica accessibile solo via URL diretto, usata anche come endpoint per piccoli smoke test live.
+
+- `Workshop.hidden?: boolean` + `AcademyProduct.hidden?: boolean`
+- `PUBLIC_WORKSHOPS = WORKSHOPS.filter(w => !w.hidden)` esportato da `workshops.ts`
+- Nuovo entry: slug `sostieni-progetto`, `live: "price_1TUPpKCE95vjZKhkjZoKYwRP"`, `test: ""` (non disponibile su staging)
+- `CONTENT["sostieni-progetto"]` in `workshop-detail.tsx` con copy realistico (donazione, ringraziamento, no trainer/date)
+- URL pubblico: `https://academy.lacertosus.com/masterclass/sostieni-progetto`
+- Esclusa da: grid masterclass, home preview, footer, sitemap, selettore bundle, validation slug per masterclass selection
+- Inclusa in: `generateStaticParams` e `getWorkshopBySlug`/`getMasterclassProducts` (lookup interno)
+- `metadata.robots = noindex,nofollow` per la sua pagina detail
+
+### File toccati in questa fase
+
+- `src/lib/constants/packs.ts` (interface dual-mode + helper + nuovo prodotto)
+- `src/lib/constants/workshops.ts` (interface hidden + PUBLIC_WORKSHOPS + nuovo workshop)
+- `src/components/workshops/workshop-detail.tsx` (CONTENT entry support)
+- `src/components/workshops/workshop-grid.tsx` (PUBLIC_WORKSHOPS + getPublicMasterclassProducts)
+- `src/components/home/{workshop-preview,pack-preview}.tsx` (PUBLIC_WORKSHOPS)
+- `src/components/layout/footer.tsx` (PUBLIC_WORKSHOPS)
+- `src/components/packs/{pack-comparison,masterclass-selector}.tsx` (helpers public)
+- `src/components/docenti/teachers-grid.tsx` (PUBLIC_WORKSHOPS)
+- `src/app/masterclass/[slug]/page.tsx` (otherWorkshops filtrate, robots noindex se hidden)
+- `src/app/api/checkout/{session,resume}/route.ts` (PUBLIC_WORKSHOPS validation, resolver)
+- `src/app/checkout/checkout-content.tsx` (no priceId in body)
+- `src/app/sitemap.ts` (PUBLIC_WORKSHOPS)
+
 ## 0nona. Aggiornamenti 2026-05-06 — Go-live academy.lacertosus.com (two-env Vercel)
 
 Setup ambiente production + staging sullo stesso progetto Vercel/Supabase.
