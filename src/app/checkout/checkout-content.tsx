@@ -27,6 +27,105 @@ import {
 import { usePromoPricing } from "@/lib/promos/client";
 
 /* ──────────────────────────────────────────────────────────────
+   Error handling — typed error + server error mapper
+─────────────────────────────────────────────────────────────── */
+type CheckoutErrorKind =
+  | "network"
+  | "auth"
+  | "validation"
+  | "unavailable"
+  | "server"
+  | "unknown";
+
+interface CheckoutError {
+  kind: CheckoutErrorKind;
+  title: string;
+  message: string;
+  hint: string;
+  /** Se true, il banner mostra un countdown e ricarica la pagina automaticamente. */
+  autoReload: boolean;
+}
+
+function mapCheckoutError(
+  serverMessage: string | null | undefined,
+  status: number,
+): CheckoutError {
+  // Connessione assente / fetch fallito
+  if (status === 0) {
+    return {
+      kind: "network",
+      title: "Connessione interrotta",
+      message:
+        "Non riusciamo a raggiungere i nostri server. Verifica la connessione internet e riprova.",
+      hint: "Se la rete è stabile, prova a ricaricare la pagina.",
+      autoReload: true,
+    };
+  }
+
+  const msg = (serverMessage || "").toLowerCase();
+
+  if (status === 401 || msg.includes("non autenticato")) {
+    return {
+      kind: "auth",
+      title: "Sessione scaduta",
+      message:
+        "La tua sessione è scaduta. Per completare l'acquisto effettua di nuovo il login.",
+      hint: "Ti reindirizzeremo automaticamente al login fra pochi secondi.",
+      autoReload: true,
+    };
+  }
+
+  if (msg.includes("non disponibile") || msg.includes("modalità")) {
+    return {
+      kind: "unavailable",
+      title: "Prodotto non acquistabile",
+      message:
+        "Questo prodotto non è disponibile per l'acquisto in questo momento.",
+      hint: "Se pensi sia un errore contattaci a academy@lacertosus.com.",
+      autoReload: false,
+    };
+  }
+
+  if (
+    msg.includes("masterclass") ||
+    msg.includes("selezione") ||
+    msg.includes("non valido") ||
+    msg.includes("non valida")
+  ) {
+    return {
+      kind: "validation",
+      title: "Selezione incompleta",
+      message:
+        serverMessage ||
+        "Alcuni dati dell'ordine non sono validi. Verifica le scelte e riprova.",
+      hint: "Torna indietro per modificare la selezione.",
+      autoReload: false,
+    };
+  }
+
+  if (msg.includes("creazione") || status >= 500) {
+    return {
+      kind: "server",
+      title: "Errore del server",
+      message:
+        "Qualcosa è andato storto durante la creazione del tuo ordine. Nessun addebito è stato effettuato.",
+      hint: "La pagina si aggiornerà automaticamente per riprovare.",
+      autoReload: true,
+    };
+  }
+
+  return {
+    kind: "unknown",
+    title: "Errore imprevisto",
+    message:
+      serverMessage ||
+      "Si è verificato un errore inatteso durante il checkout.",
+    hint: "Se persiste contattaci a academy@lacertosus.com.",
+    autoReload: true,
+  };
+}
+
+/* ──────────────────────────────────────────────────────────────
    Product icons (per pack tier + default for everything else)
 ─────────────────────────────────────────────────────────────── */
 function getProductIcon(slug: string): string {
@@ -826,6 +925,158 @@ function PromoSection({
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Error alert — shown above the pack card. Optionally counts down
+   and reloads the page (or redirects to login for auth errors).
+─────────────────────────────────────────────────────────────── */
+const ERROR_RELOAD_SECONDS = 5;
+
+function ErrorAlert({
+  error,
+  onDismiss,
+  t,
+}: {
+  error: CheckoutError;
+  onDismiss: () => void;
+  t: TierTokens;
+}) {
+  const [secondsLeft, setSecondsLeft] = useState(ERROR_RELOAD_SECONDS);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (!error.autoReload || paused) return;
+    if (secondsLeft <= 0) {
+      if (error.kind === "auth") {
+        window.location.href = "/auth/login";
+      } else {
+        window.location.reload();
+      }
+      return;
+    }
+    const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [secondsLeft, paused, error.autoReload, error.kind]);
+
+  // Reset countdown when a new error replaces this one
+  useEffect(() => {
+    setSecondsLeft(ERROR_RELOAD_SECONDS);
+    setPaused(false);
+  }, [error]);
+
+  const reloadLabel =
+    error.kind === "auth" ? "Vai al login ora" : "Riprova subito";
+
+  function handleReloadNow() {
+    if (error.kind === "auth") {
+      window.location.href = "/auth/login";
+    } else {
+      window.location.reload();
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25 }}
+      role="alert"
+      aria-live="assertive"
+      className="overflow-hidden"
+      style={{
+        background: t.isDark ? "rgba(220,40,40,0.10)" : "rgba(220,40,40,0.06)",
+        border: `1px solid rgba(220,40,40,${t.isDark ? "0.45" : "0.35"})`,
+      }}
+    >
+      <div className="px-5 py-4 md:px-6 md:py-5">
+        <div className="flex items-start gap-3">
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center"
+            style={{
+              background: "rgba(220,40,40,0.18)",
+              color: t.isDark ? "#ff8a8a" : "#b00020",
+              fontSize: "0.95rem",
+              fontWeight: 900,
+            }}
+            aria-hidden
+          >
+            !
+          </div>
+          <div className="min-w-0 flex-1">
+            <p
+              className="text-[0.66rem] font-black uppercase tracking-[0.28em]"
+              style={{ color: t.isDark ? "#ff8a8a" : "#b00020" }}
+            >
+              {error.title}
+            </p>
+            <p
+              className="mt-1.5 text-[0.92rem] leading-[1.55]"
+              style={{ color: t.th }}
+            >
+              {error.message}
+            </p>
+            <p
+              className="mt-1 text-[0.78rem] leading-[1.55]"
+              style={{ color: t.tb }}
+            >
+              {error.hint}
+            </p>
+
+            {error.autoReload && (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <p
+                  className="text-[0.78rem] tabular-nums"
+                  style={{ color: t.tb }}
+                >
+                  {paused
+                    ? "Aggiornamento automatico in pausa."
+                    : secondsLeft > 0
+                      ? `Aggiornamento automatico in ${secondsLeft}s…`
+                      : "Aggiornamento in corso…"}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleReloadNow}
+                    className="px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-[0.22em] transition-opacity hover:opacity-85"
+                    style={{
+                      background: ORANGE,
+                      color: "#0a0a1a",
+                    }}
+                  >
+                    {reloadLabel}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaused((p) => !p)}
+                    className="px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-[0.22em] transition-opacity hover:opacity-70"
+                    style={{
+                      background: "transparent",
+                      color: t.tb,
+                      border: `1px solid ${t.border}`,
+                    }}
+                  >
+                    {paused ? "Riprendi" : "Annulla"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label="Chiudi avviso"
+            className="shrink-0 px-2 py-1 text-[0.95rem] leading-none transition-opacity hover:opacity-60"
+            style={{ color: t.tb }}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
    Mobile sticky bottom bar
 ─────────────────────────────────────────────────────────────── */
 function MobileStickyBar({
@@ -1044,7 +1295,7 @@ export function CheckoutContent() {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<CheckoutError | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -1193,7 +1444,7 @@ export function CheckoutContent() {
   async function handleCheckout() {
     if (!pack || unavailable) return;
     setLoading(true);
-    setError("");
+    setError(null);
 
     const supabase = createClient();
     const {
@@ -1222,11 +1473,11 @@ export function CheckoutContent() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setError(data.error || "Errore durante il checkout");
+        setError(mapCheckoutError(data.error, response.status));
         setLoading(false);
       }
     } catch {
-      setError("Errore di connessione. Riprova tra qualche secondo.");
+      setError(mapCheckoutError(null, 0));
       setLoading(false);
     }
   }
@@ -1346,6 +1597,18 @@ export function CheckoutContent() {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="space-y-5"
             >
+              {/* Error alert (shown above pack card) */}
+              <AnimatePresence>
+                {error && (
+                  <ErrorAlert
+                    key={error.kind + error.title}
+                    error={error}
+                    onDismiss={() => setError(null)}
+                    t={t}
+                  />
+                )}
+              </AnimatePresence>
+
               {/* Pack card */}
               <div
                 className="overflow-hidden"
@@ -1668,20 +1931,7 @@ export function CheckoutContent() {
                 </Link>
               </div>
 
-              {/* Error */}
-              {error && (
-                <div
-                  className="px-5 py-4 text-[0.88rem]"
-                  style={{
-                    background: "rgba(220,40,40,0.08)",
-                    border: "1px solid rgba(220,40,40,0.35)",
-                    color: t.isDark ? "#ff8a8a" : "#b00020",
-                  }}
-                >
-                  <p className="font-bold">Errore</p>
-                  <p className="mt-0.5 text-[0.82rem] opacity-90">{error}</p>
-                </div>
-              )}
+              {/* Error mostrato sopra la pack card via ErrorAlert */}
 
               {/* Trust paragraph */}
               <div
