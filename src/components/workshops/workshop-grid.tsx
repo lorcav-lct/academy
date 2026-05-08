@@ -36,19 +36,19 @@ const CREDENTIALS: Record<string, Credential> = {
   },
   "master-strength": {
     domain: "Strength Avanzato",
-    headline: "Andrea Quarto + Emanuela Romano",
+    headline: "Andrea Quarto",
     pitch:
-      "Atleta olimpico di ParaPowerlifting × Strength coach specializzata in performance femminile.",
+      "Atleta della Nazionale Italiana di Para Powerlifting, ex Ufficiale Incursore, coach di Stato Maggiore Marina Militare.",
     promise:
       "Tecnica avanzata, programmazione e gestione della forza nei massimali e nello sport di prestazione.",
   },
   "master-calcio": {
     domain: "Performance Calcio",
-    headline: "Mino Fulco",
+    headline: "Luca Collino",
     pitch:
-      "Performance Coach della Nazionale Brasiliana 2025. Real Madrid, Everton FC, Napoli, Bayern Monaco.",
+      "Sport Therapist della Juventus, specializzato nella riatletizzazione e nel ritorno alla massima performance.",
     promise:
-      "Come si prepara fisicamente un giocatore d'élite mondiale. Protocolli, monitoraggio, performance management.",
+      "Prevenzione, recupero e ritorno alla massima performance dei calciatori d'élite. Protocolli applicati sul campo professionistico.",
     featured: true,
   },
   "master-volley": {
@@ -62,19 +62,28 @@ const CREDENTIALS: Record<string, Credential> = {
   },
   "master-hyrox": {
     domain: "Hyrox",
-    headline: "Giovanni Benzon",
+    headline: "Faculty da definire",
     pitch:
-      "Specialista riconosciuto in preparazione e performance per competizioni Hyrox.",
+      "Programma in costruzione con specialisti riconosciuti nella preparazione Hyrox.",
     promise:
       "Strutturare una preparazione Hyrox completa: stazioni, transizioni e gestione del pacing in gara.",
   },
   "master-running": {
     domain: "Running Performance",
-    headline: "Fitri",
+    headline: "Ivan Pellizzari",
     pitch:
-      "Coach del Running Club Parma — metodologia, allenamento e performance per la corsa.",
+      "Tecnico Allenatore della Federazione Italiana Triathlon (F.I.T.R.I.), specialista in running performance.",
     promise:
-      "Programmazione del runner: zone, ritmi, periodizzazione e dosaggio della fatica per gare brevi e lunghe.",
+      "Tecnica, performance e prevenzione infortuni nella corsa: zone, ritmi, periodizzazione e dosaggio della fatica.",
+  },
+  "master-nuoto": {
+    domain: "S&C Nuoto",
+    headline: "Marco Magnani + Riccardo Aimini",
+    pitch:
+      "Strength & Conditioning Coach della Federazione Italiana Nuoto. Oltre un decennio nella Nazionale.",
+    promise:
+      "Il modello S&C che ha contribuito a Martinenghi (Oro Olimpico Parigi 2024), Rivolta (Mondiale vasca corta) e atleti di livello internazionale.",
+    featured: true,
   },
   "master-rugby": {
     domain: "S&C Rugby",
@@ -105,7 +114,7 @@ const REASONS = [
   {
     number: "01",
     title: "Impara da chi lo fa, non da chi lo racconta.",
-    body: "Il Performance Coach della Nazionale Brasiliana, l'S&C Coach di Modena Volley, un preparatore delle Forze Speciali, il medico degli astronauti ESA. Portano il campo in aula — ogni giorno, ad alto livello.",
+    body: "Lo Sport Therapist della Juventus, l'S&C Coach di Modena Volley, un preparatore delle Forze Speciali, il medico degli astronauti ESA. Portano il campo in aula — ogni giorno, ad alto livello.",
   },
   {
     number: "02",
@@ -121,12 +130,12 @@ const REASONS = [
 
 /* Featured names rendered as social proof in the hero */
 const FEATURED_NAMES = [
-  "Mino Fulco",
+  "Luca Collino",
   "Oscar Berti",
   "Ivan Ivanov",
   "Andrea Quarto",
-  "Giovanni Benzon",
-  "Filippo Ongaro",
+  "Marco Magnani",
+  "Antonio Squillante",
 ];
 
 const ORANGE = "#F09226";
@@ -539,10 +548,11 @@ function ManifestoSection({ isDark }: { isDark: boolean }) {
               className="text-[0.95rem] leading-[1.7] md:text-[1rem]"
               style={{ color: tb }}
             >
-              Il Performance Coach della Nazionale Brasiliana. L&rsquo;S&amp;C
-              Coach di Modena Volley e della Nazionale Italiana. Un preparatore
-              delle Forze Speciali dell&rsquo;Esercito. Ricercatori universitari
-              tra i più citati al mondo nel loro campo. Non docenti.{" "}
+              Lo Sport Therapist della Juventus. L&rsquo;S&amp;C Coach di Modena
+              Volley e della Nazionale Italiana. Gli S&amp;C Coach della
+              Nazionale di Nuoto. Un preparatore delle Forze Speciali
+              dell&rsquo;Esercito. Ricercatori universitari tra i più citati al
+              mondo nel loro campo. Non docenti.{" "}
               <span className="font-semibold" style={{ color: th }}>
                 Professionisti in attività, ogni giorno, ad alto livello.
               </span>

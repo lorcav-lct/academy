@@ -6,7 +6,11 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
-import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
+import {
+  TEACHERS,
+  type Teacher,
+  getOrderedTeachers,
+} from "@/lib/constants/teachers";
 import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { staggerContainer, fadeUp } from "@/lib/animations/variants";
@@ -605,39 +609,57 @@ export function TeachersGrid() {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 
   const cardsRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
 
+  // Mount-time intro: explicit fromTo + clearProps so cards never get stuck at opacity:0
+  // if a re-render or page transition interrupts the tween.
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       const cards = cardsRef.current?.querySelectorAll("[data-teacher-card]");
       if (cards && cards.length > 0) {
-        gsap.from(cards, {
-          opacity: 0,
-          y: 28,
-          duration: 0.6,
-          stagger: 0.05,
-          ease: "power3.out",
-          delay: 0.15,
-        });
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 28 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.05,
+            ease: "power3.out",
+            delay: 0.15,
+            clearProps: "opacity,transform",
+          },
+        );
       }
     });
     return () => ctx.revert();
   }, []);
 
+  // Filter-change re-animation: skip the very first run (already covered by mount intro)
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
     const cards = cardsRef.current?.querySelectorAll("[data-teacher-card]");
     if (!cards || cards.length === 0) return;
-    gsap.from(cards, {
-      opacity: 0,
-      y: 18,
-      duration: 0.4,
-      stagger: 0.04,
-      ease: "power2.out",
-    });
+    gsap.fromTo(
+      cards,
+      { opacity: 0, y: 18 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        stagger: 0.04,
+        ease: "power2.out",
+        clearProps: "opacity,transform",
+      },
+    );
   }, [activeFilter]);
 
   const filtered = useMemo(
-    () => TEACHERS.filter((t) => matchesFilter(t, activeFilter)),
+    () => getOrderedTeachers().filter((t) => matchesFilter(t, activeFilter)),
     [activeFilter],
   );
 

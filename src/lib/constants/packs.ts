@@ -223,7 +223,7 @@ export const PRODUCTS: AcademyProduct[] = [
     workshopSlug: "master-strength",
     includes: [
       "1-2 giornate in presenza",
-      "Andrea Quarto + Emanuela Romano",
+      "Andrea Quarto",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
@@ -242,7 +242,7 @@ export const PRODUCTS: AcademyProduct[] = [
     workshopSlug: "master-calcio",
     includes: [
       "1-2 giornate in presenza",
-      "Mino Fulco",
+      "Luca Collino — Sport Therapist Juventus",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
@@ -280,7 +280,7 @@ export const PRODUCTS: AcademyProduct[] = [
     workshopSlug: "master-hyrox",
     includes: [
       "1-2 giornate in presenza",
-      "Giovanni Benzon",
+      "Faculty in definizione",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
@@ -318,7 +318,7 @@ export const PRODUCTS: AcademyProduct[] = [
     workshopSlug: "master-running",
     includes: [
       "1-2 giornate in presenza",
-      "Fitri — Running Club Parma",
+      "Ivan Pellizzari — Tecnico F.I.T.R.I.",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],

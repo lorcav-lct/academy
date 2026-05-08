@@ -33,7 +33,7 @@ const FILE_TO_SLUG = {
   "tommasomazzia.png": "tommaso-mazzia",
   // 31-04 batch
   "annadesi.png": "anna-desi",
-  "elisabettaborgia.png": "elisabetta-borgia",
+  // elisabettaborgia.png — Elisabetta Borgia replaced by Rosalba Romano (no portrait yet)
   "elisasibilla.png": "elisa-sibilla",
   "ettoredellacasa.png": "enrico-dellacasa", // filename typo: maps to Enrico Della Casa
   "ettoremendicino.png": "ettore-mendicino",
@@ -43,7 +43,8 @@ const FILE_TO_SLUG = {
   "ivanpellizzari.png": "ivan-pellizzari",
   "lucacollino.png": "luca-collino",
   "luca_bondi.png": "luca-bondi",
-  "marcobani.png": "marco-bani",
+  // marcobani.png from 31-04 superseded by 08-05/Marco_Bani.png
+  "marco_bani.png": "marco-bani",
   "margheritafonsato.png": "margherita-fonsato",
   "oscarberti.png": "oscar-berti",
   "simonedoti.png": "simone-doti",

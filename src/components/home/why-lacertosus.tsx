@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
+import {
+  TEACHERS,
+  type Teacher,
+  getOrderedTeachers,
+} from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 
 const PROBLEMS = [
@@ -941,7 +945,7 @@ export function WhyLacertosus() {
               aria-label="Carosello docenti"
               onMouseDown={handleMouseDown}
             >
-              {TEACHERS.map((teacher, i) => (
+              {getOrderedTeachers().map((teacher, i) => (
                 <TeacherCard
                   key={teacher.slug}
                   teacher={teacher}
