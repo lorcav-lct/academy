@@ -49,7 +49,11 @@ interface CheckoutError {
 function mapCheckoutError(
   serverMessage: string | null | undefined,
   status: number,
+  detail?: string | null,
 ): CheckoutError {
+  // Detail from server (staging/dev only): mostra il vero errore Stripe/DB
+  // come hint per diagnosi rapida.
+  const detailHint = detail ? ` Dettaglio tecnico: ${detail}` : "";
   // Connessione assente / fetch fallito
   if (status === 0) {
     return {
@@ -109,7 +113,8 @@ function mapCheckoutError(
       title: "Errore del server",
       message:
         "Qualcosa è andato storto durante la creazione del tuo ordine. Nessun addebito è stato effettuato.",
-      hint: "La pagina si aggiornerà automaticamente per riprovare.",
+      hint:
+        "La pagina si aggiornerà automaticamente per riprovare." + detailHint,
       autoReload: true,
     };
   }
@@ -120,7 +125,7 @@ function mapCheckoutError(
     message:
       serverMessage ||
       "Si è verificato un errore inatteso durante il checkout.",
-    hint: "Se persiste contattaci a academy@lacertosus.com.",
+    hint: "Se persiste contattaci a academy@lacertosus.com." + detailHint,
     autoReload: true,
   };
 }
@@ -1473,7 +1478,11 @@ export function CheckoutContent() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setError(mapCheckoutError(data.error, response.status));
+        if (data.detail) {
+          // staging/dev: expose Stripe/DB error in console for diagnosis
+          console.error("[checkout] server detail:", data.detail);
+        }
+        setError(mapCheckoutError(data.error, response.status, data.detail));
         setLoading(false);
       }
     } catch {

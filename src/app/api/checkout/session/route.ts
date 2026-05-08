@@ -150,8 +150,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
+    const isProductionDomain =
+      process.env.NEXT_PUBLIC_BASE_URL?.includes("academy.lacertosus.com") ??
+      false;
+    const detail =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : "unknown";
     return NextResponse.json(
-      { error: "Errore durante il checkout" },
+      {
+        error: "Errore durante il checkout",
+        // expose stripe/db error message on staging+dev to ease debugging
+        detail: isProductionDomain ? undefined : detail,
+      },
       { status: 500 },
     );
   }
