@@ -12,6 +12,34 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0duodecima. Aggiornamenti 2026-05-08 — Error UX checkout + fix promo cross-env
+
+### Error UX checkout (`src/app/checkout/checkout-content.tsx`)
+
+- `error` state passa da `string` a `CheckoutError { kind, title, message, hint, autoReload }`
+- `mapCheckoutError(serverMessage, status, detail?)` classifica le risposte server in: `network` / `auth` / `validation` / `unavailable` / `server` / `unknown`. Errori transitori → autoReload, errori stabili (validation, unavailable) richiedono azione utente
+- Nuovo componente `ErrorAlert` mostrato **sopra la pack card** (prima era in fondo, sotto il box "Pagamento e iscrizione")
+- Countdown 5s con bottoni "Riprova subito" e "Annulla" (sospende countdown). Tipo `auth` redirige a `/auth/login` invece di reload
+- `× ` per dismiss manuale
+- Il vecchio blocco errore in fondo è stato rimosso (no doppia visualizzazione)
+
+### Diagnostic detail in non-prod
+
+`src/app/api/checkout/session/route.ts` catch finale: include `detail: error.message` nel JSON response solo se `NEXT_PUBLIC_BASE_URL` non contiene `academy.lacertosus.com`. Il client logga su console + appende come "Dettaglio tecnico:" in fondo all'hint del banner. In production il detail è omesso (no info leak).
+
+### Fix promo cross-env (`src/lib/promos/server.ts`)
+
+**Problema**: il DB Supabase è condiviso tra production (Stripe live) e staging/local (Stripe Sandbox). Le promo create da admin generano un solo `stripe_coupon_id` per l'env corrente (live in prod). Su staging la lookup riesce dal DB ma `checkout.sessions.create({ discounts: [{ coupon }] })` fallisce con `No such coupon: 'XXX'` → 500.
+
+**Fix**: prima di restituire una promo (sia in `/api/promos/active` che in `getActivePromoForProduct`) il server valida `stripe_coupon_id` con `coupons.retrieve()`. Se invalid (404) la promo viene esclusa.
+
+- Nuovo helper privato `isCouponValidForCurrentEnv(couponId)` con cache in-memory (Map) TTL 5 min, evita round-trip Stripe ogni request
+- `isPromoUsable(row) = isPromoLive(row) AND coupon valid in current env`
+- `getActivePromoForType`, `getActivePromoForSpecificSlug`, `getActivePromosBundle` ora filtrano via `isPromoUsable`
+- Promo con `stripe_coupon_id = null` (manuali, senza Stripe) passano sempre
+
+Su staging/local: client non vede sconti per promo create solo in live → prezzo pieno coerente sia in card che in checkout. Su production: invariato.
+
 ## 0undecima. Aggiornamenti 2026-05-07 — Cleanup schema DB
 
 Migration `021_drop_unused_tables.sql` esegue:
