@@ -4,12 +4,54 @@
  * la category-wide (slug = NULL) sullo stesso product_type.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getStripe } from "@/lib/stripe/client";
 import {
   getPromoTypeForSlug,
   isPromoLive,
   type PromoProductType,
   type PromoRow,
 } from "./types";
+
+/* ──────────────────────────────────────────────────────────────
+   Coupon validation cache
+   I coupon Stripe sono per-account: un coupon creato in modalità
+   live non esiste nell'account test (e viceversa). Filtriamo quindi
+   le promo che fanno riferimento a coupon non risolvibili nell'env
+   Stripe corrente, per evitare 500 al checkout su staging quando il
+   DB Supabase è condiviso tra ambienti.
+─────────────────────────────────────────────────────────────── */
+
+type CouponCacheEntry = { valid: boolean; expiresAt: number };
+const COUPON_CACHE_TTL_MS = 5 * 60 * 1000;
+const couponValidationCache = new Map<string, CouponCacheEntry>();
+
+async function isCouponValidForCurrentEnv(
+  couponId: string | null,
+): Promise<boolean> {
+  // Promo senza stripe_coupon_id: passa, gestita altrove
+  if (!couponId) return true;
+
+  const cached = couponValidationCache.get(couponId);
+  if (cached && cached.expiresAt > Date.now()) return cached.valid;
+
+  let valid = false;
+  try {
+    await getStripe().coupons.retrieve(couponId);
+    valid = true;
+  } catch {
+    valid = false;
+  }
+  couponValidationCache.set(couponId, {
+    valid,
+    expiresAt: Date.now() + COUPON_CACHE_TTL_MS,
+  });
+  return valid;
+}
+
+async function isPromoUsable(promo: PromoRow): Promise<boolean> {
+  if (!isPromoLive(promo)) return false;
+  return isCouponValidForCurrentEnv(promo.stripe_coupon_id);
+}
 
 /** Promo attiva category-wide per una categoria — null se nessuna */
 export async function getActivePromoForType(
@@ -26,7 +68,7 @@ export async function getActivePromoForType(
     .maybeSingle();
   if (!data) return null;
   const row = data as unknown as PromoRow;
-  return isPromoLive(row) ? row : null;
+  return (await isPromoUsable(row)) ? row : null;
 }
 
 /** Promo attiva product-specific per uno slug — null se nessuna */
@@ -43,7 +85,7 @@ export async function getActivePromoForSpecificSlug(
     .maybeSingle();
   if (!data) return null;
   const row = data as unknown as PromoRow;
-  return isPromoLive(row) ? row : null;
+  return (await isPromoUsable(row)) ? row : null;
 }
 
 /**
@@ -71,8 +113,15 @@ export async function getActivePromosBundle(): Promise<{
   const byType: Partial<Record<PromoProductType, PromoRow>> = {};
   const bySlug: Record<string, PromoRow> = {};
   if (!data) return { byType, bySlug };
-  for (const row of data as unknown as PromoRow[]) {
-    if (!isPromoLive(row)) continue;
+
+  // Validazione coupon in parallelo per non bloccare la response.
+  const rows = data as unknown as PromoRow[];
+  const usable = await Promise.all(
+    rows.map(async (row) => ({ row, ok: await isPromoUsable(row) })),
+  );
+
+  for (const { row, ok } of usable) {
+    if (!ok) continue;
     if (row.slug) bySlug[row.slug] = row;
     else byType[row.product_type] = row;
   }
