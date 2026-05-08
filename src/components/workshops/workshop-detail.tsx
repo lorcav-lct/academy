@@ -114,11 +114,11 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-strength": {
     domain: "Strength Avanzato",
     hook: "Il massimale non è un test. È il risultato di una preparazione invisibile fatta bene.",
-    trainerHeadline: "Andrea Quarto × Emanuela Romano",
+    trainerHeadline: "Andrea Quarto",
     trainerPitch:
-      "Andrea Quarto è atleta olimpico di ParaPowerlifting con coaching ai massimi livelli internazionali. Emanuela Romano è una strength coach specializzata nella performance al femminile e nei massimali tecnici. Insieme, due prospettive complementari sulla forza pura.",
+      "Atleta della Nazionale Italiana di Para Powerlifting, ex Ufficiale Incursore e coach ufficiale di Stato Maggiore Marina Militare. Imprenditore nel fitness con vent'anni sul campo nei massimali tecnici e nella preparazione alla forza ai massimi livelli.",
     whatYouLearn:
-      "Due giornate dedicate alla forza nel suo significato più operativo: tecnica, programmazione e gestione del massimale. Per chi non vuole improvvisare schede di forza con il proprio cliente top.",
+      "Una o due giornate dedicate alla forza nel suo significato più operativo: tecnica, programmazione e gestione del massimale. Per chi non vuole improvvisare schede di forza con il proprio cliente top.",
     modules: [
       {
         num: "01",
@@ -137,11 +137,6 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
       {
         num: "04",
-        title: "Performance al femminile",
-        body: "Adattamenti specifici, ciclo mestruale e gestione del carico nella donna allenata seriamente.",
-      },
-      {
-        num: "05",
         title: "Strategie di gara",
         body: "Tapering, gestione del peak e mental toughness per il giorno della pedana.",
       },
@@ -149,7 +144,7 @@ const CONTENT: Record<string, MasterclassContent> = {
     outcomes: [
       "Programmare microcicli e macrocicli di forza con padronanza",
       "Gestire la tecnica del cliente nei massimali",
-      "Adattare il programma a clientela maschile e femminile",
+      "Adattare il programma per clientela diversa (PT, sportivo, agonista)",
       "Pianificare un peak week e un tapering efficaci",
       "Allenare la mente oltre al corpo nel massimale",
     ],
@@ -163,7 +158,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi cerca solo bodybuilding estetico",
     ],
     included: [
-      "1-2 giornate con Andrea Quarto e Emanuela Romano",
+      "1-2 giornate con Andrea Quarto",
       "Schede di programmazione e fogli operativi",
       "Materiale didattico completo",
       "Attestato di partecipazione",
@@ -173,10 +168,6 @@ const CONTENT: Record<string, MasterclassContent> = {
       {
         q: "Devo essere un atleta di forza?",
         a: "No. Il master è pensato per chi allena, non per chi gareggia. Se gareggi è comunque un'esperienza di alto valore.",
-      },
-      {
-        q: "Funziona anche per la clientela femminile?",
-        a: "Assolutamente sì. Una giornata è dedicata specificamente alla performance femminile con Emanuela Romano.",
       },
       {
         q: "Posso applicare quanto imparato anche a sport non di forza?",
@@ -193,11 +184,11 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-calcio": {
     domain: "Performance Calcio",
     hook: "Cosa fa la differenza tra un campo di Serie A e una squadra qualunque? La cura ossessiva del dettaglio fisico — ogni allenamento, ogni giorno.",
-    trainerHeadline: "Mino Fulco",
+    trainerHeadline: "Luca Collino",
     trainerPitch:
-      "Performance Manager al Real Madrid, Everton FC, Napoli e Bayern Monaco. Dal 2025 Performance Coach della Nazionale Brasiliana per la Coppa del Mondo. Mino non parla di teoria: ti porta dentro le metodologie reali del calcio mondiale.",
+      "Sport Therapist della Juventus, specializzato nella prevenzione, nel recupero e nel ritorno alla massima performance dei calciatori d'élite. Vive ogni giorno la riatletizzazione e la cura del dettaglio fisico nel calcio professionistico.",
     whatYouLearn:
-      "Una giornata in cui Mino smonta il modello fisico del calciatore d'élite e mostra protocolli, monitoraggio e gestione del carico esattamente come si fa nelle squadre top mondiali.",
+      "Una giornata in cui Luca Collino smonta il modello di prevenzione, recupero e ritorno alla performance del calciatore d'élite, esattamente come si lavora in un top club di Serie A.",
     modules: [
       {
         num: "01",
@@ -211,30 +202,30 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
       {
         num: "03",
-        title: "Monitoraggio del carico",
-        body: "GPS, RPE, wellness questionnaire: cosa serve davvero, cosa è solo numero, e come integrare il dato nelle decisioni.",
-      },
-      {
-        num: "04",
         title: "Prevenzione infortuni",
         body: "Protocolli di prevenzione muscolare e tendinea che usano i top club. Come ridurre realmente l'incidenza.",
       },
       {
+        num: "04",
+        title: "Riatletizzazione e ritorno alla performance",
+        body: "Il percorso dall'infortunio al ritorno in campo: criteri, milestones e gestione del carico in fase di recupero.",
+      },
+      {
         num: "05",
         title: "Casi studio dal calcio top",
-        body: "Esempi concreti dalle stagioni al Real Madrid, Bayern, Napoli e Brasile. Cosa funziona e perché.",
+        body: "Esempi concreti dall'esperienza in Juventus FC. Cosa funziona, cosa fallisce, cosa replicare.",
       },
     ],
     outcomes: [
       "Costruire un microciclo settimanale di livello professionistico",
-      "Leggere i dati GPS e di carico interno con criterio",
       "Implementare protocolli di prevenzione muscolare e tendinea",
-      "Replicare metodologie di squadre top mondiali nei tuoi contesti",
+      "Strutturare un percorso di riatletizzazione efficace",
+      "Replicare metodologie di un top club nei tuoi contesti",
       "Coordinarsi efficacemente con uno staff tecnico",
     ],
     forWho: [
       "Preparatori atletici di squadre di calcio (giovanili → Serie A)",
-      "PT che lavorano con calciatori individualmente",
+      "PT e fisioterapisti che lavorano con calciatori individualmente",
       "Coach S&C che vogliono entrare nel calcio professionistico",
     ],
     notFor: [
@@ -242,10 +233,10 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi cerca esercitazioni tecnico-tattiche",
     ],
     included: [
-      "1 giornata con Mino Fulco",
+      "1 giornata con Luca Collino",
       "Template di microciclo settimanale (livello professionistico)",
       "Slide e materiali operativi",
-      "Q&A diretto con Mino su casi reali",
+      "Q&A diretto su casi reali",
       "Attestato di partecipazione Lacertosus Academy",
     ],
     faq: [
@@ -254,15 +245,11 @@ const CONTENT: Record<string, MasterclassContent> = {
         a: "No. I principi sono trasferibili a tutti i livelli, dal settore giovanile al professionismo.",
       },
       {
-        q: "Si parla anche di calcio femminile?",
-        a: "Mino ha esperienza con entrambe le realtà. Verranno toccati gli adattamenti specifici dove rilevante.",
-      },
-      {
         q: "Quanto è pratico vs teorico?",
-        a: "Almeno il 60% è pratico/casistica. Mino è famoso per il suo approccio operativo, non accademico.",
+        a: "Almeno il 60% è pratico/casistica. L'approccio è quello del campo, non quello accademico.",
       },
       {
-        q: "Si può chiedere un suo parere su casi propri?",
+        q: "Si può chiedere un parere su casi propri?",
         a: "Sì, c'è una sessione Q&A finale dove i partecipanti possono portare casi reali.",
       },
       {
@@ -271,7 +258,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
     ],
     finalHook:
-      "Una giornata con il Performance Coach del Brasile vale anni di letture sulla preparazione fisica del calcio.",
+      "Una giornata con lo Sport Therapist della Juventus vale anni di letture sulla preparazione fisica del calcio.",
   },
   "master-volley": {
     domain: "S&C Pallavolo",
@@ -355,9 +342,9 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-hyrox": {
     domain: "Hyrox",
     hook: "Hyrox non si improvvisa. È una gara cardiovascolare con un format unico — chi non programma il pacing perde minuti reali.",
-    trainerHeadline: "Giovanni Benzon",
+    trainerHeadline: "Faculty in definizione",
     trainerPitch:
-      "Specialista riconosciuto in preparazione e performance per le competizioni Hyrox. Atleta e coach che vive in prima persona il circuito internazionale.",
+      "Stiamo finalizzando la faculty con specialisti riconosciuti in preparazione e performance Hyrox. Annunceremo il roster appena confermato.",
     whatYouLearn:
       "Una giornata dedicata alla preparazione completa di un atleta Hyrox: dalle stazioni alle transizioni, dal pacing al recupero. Per coach o atleti che vogliono fare sul serio.",
     modules: [
@@ -404,7 +391,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha mai testato il formato Hyrox",
     ],
     included: [
-      "1 giornata con Giovanni Benzon",
+      "1 giornata con la faculty Hyrox",
       "Template 12-week di preparazione Hyrox",
       "Strategia di pacing personalizzata",
       "Slide e materiali operativi",
@@ -434,9 +421,9 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-running": {
     domain: "Running Performance",
     hook: "Correre è l'80% testa, 20% gambe. Programmare bene il 20% libera tutto il resto.",
-    trainerHeadline: "Fitri",
+    trainerHeadline: "Ivan Pellizzari",
     trainerPitch:
-      "Coach del Running Club Parma. Esperto di metodologia e performance applicata alla corsa, dai 5K alla maratona.",
+      "Tecnico Allenatore della Federazione Italiana Triathlon (F.I.T.R.I.). Specialista di running performance, tecnica e prevenzione infortuni dai 5K alla maratona.",
     whatYouLearn:
       "Una giornata dedicata alla programmazione del runner: dalle zone fisiologiche alla periodizzazione, dalla forza per il corridore al tapering pre-gara.",
     modules: [
@@ -483,7 +470,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi corre solo per dimagrimento occasionale",
     ],
     included: [
-      "1 giornata con Fitri",
+      "1 giornata con Ivan Pellizzari",
       "Template di programmazione per 5K/10K/mezza/maratona",
       "Schede di tapering e race week",
       "Slide e materiali operativi",
@@ -508,7 +495,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
     ],
     finalHook:
-      "Una giornata con un coach del Running Club Parma vale anni di tentativi ed errori sul tuo programma.",
+      "Una giornata con un Tecnico Allenatore F.I.T.R.I. vale anni di tentativi ed errori sul tuo programma.",
   },
   "master-rugby": {
     domain: "S&C Rugby",
@@ -659,6 +646,85 @@ const CONTENT: Record<string, MasterclassContent> = {
     ],
     finalHook:
       "Iscriviti alla lista interesse: ti contatteremo per primo appena la faculty sarà confermata.",
+  },
+  "master-nuoto": {
+    domain: "S&C Nuoto",
+    hook: "Il nuoto si vince a secco. Ogni medaglia olimpica nasce da anni di lavoro fuori dalla vasca — sulla forza, sulla potenza, sulla gestione del carico.",
+    trainerHeadline: "Marco Magnani × Riccardo Aimini",
+    trainerPitch:
+      "Strength & Conditioning Coach della Federazione Italiana Nuoto. Per oltre un decennio hanno preparato la Nazionale al fianco di Marco Pedoja, partecipando ai collegiali di Livigno, Gloria Sports Arena e Calella. Tra i loro atleti: Nicolò Martinenghi (Oro Olimpico Parigi 2024), Matteo Rivolta (Mondiale vasca corta), Simone Sabbioni, Ludovico Viberti.",
+    whatYouLearn:
+      "Una o due giornate dentro il modello S&C che ha portato medaglie olimpiche e mondiali. Forza, potenza, monitoraggio del carico e periodizzazione del nuotatore d'élite.",
+    modules: [
+      {
+        num: "01",
+        title: "Modello fisico del nuotatore moderno",
+        body: "Demand fisica per stile e distanza. Profilo bioenergetico, rapporto forza/velocità a secco e in vasca.",
+      },
+      {
+        num: "02",
+        title: "Forza e potenza specifica",
+        body: "Lavoro di forza generale, potenza esplosiva e trasferimento al gesto natatorio. Errori più comuni e progressioni.",
+      },
+      {
+        num: "03",
+        title: "Programmazione stagionale",
+        body: "Macrociclo verso campionati nazionali e internazionali. Tapering, peaking e gestione del carico nell'élite.",
+      },
+      {
+        num: "04",
+        title: "Sviluppo dei giovani talenti",
+        body: "Come accompagnare dorso, rana, stile libero e farfalla dalla categoria juniores ai senior. Progressioni a lungo termine.",
+      },
+      {
+        num: "05",
+        title: "Casi studio dall'Olimpiade",
+        body: "Cosa ha funzionato nella preparazione di Martinenghi, Rivolta, Sabbioni e Viberti. Decisioni operative dalla scrivania alla pedana.",
+      },
+    ],
+    outcomes: [
+      "Costruire un programma S&C per nuotatori dalla categoria all'élite",
+      "Sviluppare forza e potenza con trasferimento reale al gesto",
+      "Pianificare un macrociclo stagionale verso un peaking",
+      "Replicare metodologie usate sui medagliati olimpici",
+      "Gestire il doppio impegno club + nazionale",
+    ],
+    forWho: [
+      "Preparatori atletici di squadre di nuoto e sport acquatici",
+      "Coach S&C che lavorano con nuotatori individualmente",
+      "Allenatori tecnici che vogliono comprendere meglio il lavoro a secco",
+    ],
+    notFor: [
+      "Chi cerca esercitazioni tecniche di nuoto",
+      "Chi non ha alcun contatto con il mondo del nuoto agonistico",
+    ],
+    included: [
+      "1-2 giornate con Marco Magnani e Riccardo Aimini",
+      "Template di programmazione stagionale (livello professionistico)",
+      "Casi studio reali dall'esperienza in Nazionale",
+      "Slide e materiali operativi",
+      "Attestato di partecipazione Lacertosus Academy",
+    ],
+    faq: [
+      {
+        q: "Devo lavorare in una squadra agonistica?",
+        a: "No. I principi sono trasferibili a tutti i livelli, dal settore giovanile all'élite.",
+      },
+      {
+        q: "Si parla anche di nuoto in acque libere?",
+        a: "I principi base sono gli stessi. Le specificità delle acque libere vengono toccate dove rilevante.",
+      },
+      {
+        q: "Quanto è pratico vs teorico?",
+        a: "Almeno il 60% è pratico/casistica. Marco e Riccardo lavorano sul campo ogni giorno con la Nazionale.",
+      },
+      {
+        q: "Posso portare casi propri?",
+        a: "Sì, c'è una sessione Q&A finale dove i partecipanti possono portare casi reali.",
+      },
+    ],
+    finalHook:
+      "Una giornata con i preparatori della Nazionale di Nuoto vale anni di letture sulla preparazione fisica nel nuoto.",
   },
   "sostieni-progetto": {
     domain: "Sostegno",

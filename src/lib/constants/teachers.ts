@@ -49,11 +49,13 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "marco-bani",
     name: "Marco Bani",
-    role: "Docente Universitario",
-    bio: "Docente esperto di metodologia dell'allenamento e formazione professionale nel settore del Functional Training.",
+    role: "Chinesiologo, Preparatore Fisico e Docente",
+    bio: "Più di 15 anni di esperienza tra palestre, campi da basket e tennis, università e studi professionali, con un approccio al movimento che mette al centro la persona prima dello sport o della prestazione. Laurea in Scienze Motorie e Magistrale in Scienze e Tecniche dell'Attività Motoria Preventiva ed Adattata. Preparatore fisico per la Pallacanestro Mantovana e la Bonfiglioli Ferrara Basket; ex giocatore di basket fino alla Serie A. Specializzato con la Federazione Italiana Tennis e nel campo posturale avanzato (Metodo Canali e Souchard). Oggi titolare dello studio professionale “Educazione al Movimento” a Ferrara, dove integra prestazione, postura, rieducazione e prevenzione. Dal 2021 docente di seminario all'Università degli Studi di Ferrara.",
     courses: ["function", "master-functional-bulgarian"],
     image_url: "/docenti/marco-bani.webp",
     color: BRAND,
+    talkTitle:
+      "Specificità dell'allenamento e adattamenti del controllo posturale: basi teoriche e implicazioni applicative nelle scienze motorie",
   },
   {
     slug: "matteo-romanazzi",
@@ -181,8 +183,8 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "riccardo-capello",
     name: "Riccardo Capello",
-    role: "Fitness Entrepreneur",
-    bio: "Imprenditore nel settore fitness, fondatore di strutture di allenamento di riferimento.",
+    role: "Osteopata | Esperto in Salute Posturale — Masso-fisioterapista Juventus FC",
+    bio: "Osteopata ed esperto in salute posturale, masso-fisioterapista della Juventus FC. Lavora nel mondo del calcio professionistico ad alto livello con focus sulla prevenzione, il recupero e l'ottimizzazione fisica dell'atleta.",
     courses: ["science"],
     image_url: "/docenti/riccardo-capello.webp",
     color: BRAND,
@@ -210,12 +212,11 @@ export const TEACHERS: Teacher[] = [
       "Psicologia del movimento: come l'attività fisica influenza mente e alimentazione",
   },
   {
-    slug: "elisabetta-borgia",
-    name: "Elisabetta Borgia",
+    slug: "rosalba-romano",
+    name: "Rosalba Romano",
     role: "Sport Psychologist",
     bio: "Psicologa dello sport esperta in mindset, performance e gestione mentale dell'atleta.",
     courses: ["science"],
-    image_url: "/docenti/elisabetta-borgia.webp",
     color: BRAND,
     talkTitle: "Vinci o Impari: il mindset che cambia tutto",
   },

@@ -135,7 +135,7 @@ export const COURSES: Course[] = [
       "riccardo-capello",
       "luca-bondi",
       "elisa-sibilla",
-      "elisabetta-borgia",
+      "rosalba-romano",
       "simone-doti",
       "margherita-fonsato",
       "gionata-raffaelli",

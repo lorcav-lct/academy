@@ -23,25 +23,30 @@ const CREDENTIALS: Record<string, Cred> = {
   },
   "master-strength": {
     domain: "Strength Avanzato",
-    pitch: "Atleta olimpico ParaPowerlifting + Strength coach.",
+    pitch: "Andrea Quarto — Nazionale Para Powerlifting & Marina Militare.",
   },
   "master-calcio": {
     domain: "Performance Calcio",
-    pitch: "Performance Coach Nazionale Brasile · Real Madrid · Bayern.",
+    pitch: "Luca Collino — Sport Therapist Juventus FC.",
     featured: true,
   },
   "master-volley": {
     domain: "S&C Pallavolo",
-    pitch: "S&C Coach Modena Volley + Nazionale Italiana.",
+    pitch: "Oscar Berti — S&C Coach Modena Volley + Nazionale Italiana.",
     featured: true,
   },
   "master-hyrox": {
     domain: "Hyrox",
-    pitch: "Specialista Hyrox internazionale.",
+    pitch: "Faculty in finalizzazione.",
   },
   "master-running": {
     domain: "Running Performance",
-    pitch: "Coach Running Club Parma.",
+    pitch: "Ivan Pellizzari — Tecnico Allenatore F.I.T.R.I.",
+  },
+  "master-nuoto": {
+    domain: "S&C Nuoto",
+    pitch: "Marco Magnani + Riccardo Aimini — S&C Federazione Italiana Nuoto.",
+    featured: true,
   },
   "master-rugby": {
     domain: "S&C Rugby",
