@@ -6,7 +6,11 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
-import { TEACHERS, type Teacher } from "@/lib/constants/teachers";
+import {
+  TEACHERS,
+  type Teacher,
+  getOrderedTeachers,
+} from "@/lib/constants/teachers";
 import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { staggerContainer, fadeUp } from "@/lib/animations/variants";
@@ -637,7 +641,7 @@ export function TeachersGrid() {
   }, [activeFilter]);
 
   const filtered = useMemo(
-    () => TEACHERS.filter((t) => matchesFilter(t, activeFilter)),
+    () => getOrderedTeachers().filter((t) => matchesFilter(t, activeFilter)),
     [activeFilter],
   );
 

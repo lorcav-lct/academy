@@ -382,3 +382,29 @@ export function getTeacherBySlug(slug: string): Teacher | undefined {
 export function getTeachersByCourse(courseSlug: string): Teacher[] {
   return TEACHERS.filter((t) => t.courses.includes(courseSlug));
 }
+
+/**
+ * Slugs to surface first in public-facing showcases (home carousel, /docenti grid).
+ * Order matters — first slug becomes the first card. Slugs not listed keep their
+ * original order from TEACHERS after the featured ones.
+ */
+export const FEATURED_TEACHER_ORDER: readonly string[] = [
+  "andrea-quarto",
+  "antonio-squillante",
+  "angelo-zullo",
+  "luca-collino",
+  "samuele-marcora",
+];
+
+/**
+ * TEACHERS reordered with the featured slugs first (in FEATURED_TEACHER_ORDER
+ * order), followed by every other teacher in the original declaration order.
+ */
+export function getOrderedTeachers(): Teacher[] {
+  const featured = FEATURED_TEACHER_ORDER.map((s) =>
+    TEACHERS.find((t) => t.slug === s),
+  ).filter((t): t is Teacher => Boolean(t));
+  const featuredSet = new Set(featured.map((t) => t.slug));
+  const rest = TEACHERS.filter((t) => !featuredSet.has(t.slug));
+  return [...featured, ...rest];
+}
