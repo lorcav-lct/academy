@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
+import { ProgramAccordion } from "@/components/packs/program-accordion";
 import { CertificationsCards } from "@/components/shared/certifications-cards";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
@@ -46,23 +46,23 @@ function getBundleTeachers(): Record<string, Teacher[]> {
   };
 }
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
-
 // ─── Card copy ───────────────────────────────────────────────────────────────
+
+type HeroExtraIcon = "bed" | "masterclass";
+
+type HeroExtra = {
+  eyebrow: string;
+  text: string;
+  sub: string;
+  icon: HeroExtraIcon;
+};
 
 type CardCopy = {
   badge?: string;
   tagline: string;
   audience: string;
-  /** Hero extra — luxury callout above the regular extras list */
-  heroExtra?: { eyebrow: string; text: string; sub: string };
+  /** Premium luxury callouts shown above the regular extras list. */
+  heroExtras?: HeroExtra[];
   extras: { text: string; sub?: string }[];
   ctaLabel: string;
 };
@@ -84,6 +84,14 @@ const CARD_COPY: Record<string, CardCopy> = {
     tagline:
       "Il percorso completo + la certificazione FIPE riconosciuta a livello nazionale e internazionale.",
     audience: "Per chi vuole costruire una carriera riconosciuta.",
+    heroExtras: [
+      {
+        icon: "masterclass",
+        eyebrow: "Specializzazione",
+        text: "2 Masterclass a scelta",
+        sub: "Sessioni esclusive con specialisti di caratura internazionale. Selezioni i percorsi affini al tuo profilo durante l'iscrizione.",
+      },
+    ],
     extras: [
       {
         text: "Functional Strength Master Coach",
@@ -92,10 +100,6 @@ const CARD_COPY: Record<string, CardCopy> = {
       {
         text: "Personal Trainer FIPE × Lacertosus",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
-      },
-      {
-        text: "2 Masterclass a scelta su 9",
-        sub: "Specialisti di caratura internazionale",
       },
     ],
     ctaLabel: "Scopri PRO",
@@ -105,11 +109,20 @@ const CARD_COPY: Record<string, CardCopy> = {
     tagline:
       "Vivi i 6 weekend di formazione da insider. Vitto e alloggio inclusi, niente di operativo a cui pensare.",
     audience: "Per chi sceglie di concentrarsi solo sulla formazione.",
-    heroExtra: {
-      eyebrow: "L'Esperienza Esclusiva",
-      text: "Vitto & Alloggio inclusi",
-      sub: "Struttura premium e ristorazione curata per tutti i 6 weekend formativi. Zero pensieri operativi: dorma, mangia, formati.",
-    },
+    heroExtras: [
+      {
+        icon: "bed",
+        eyebrow: "Esperienza Esclusiva",
+        text: "Vitto & Alloggio inclusi",
+        sub: "Struttura premium e ristorazione curata per tutti i 6 weekend formativi.",
+      },
+      {
+        icon: "masterclass",
+        eyebrow: "Specializzazione",
+        text: "2 Masterclass a scelta",
+        sub: "Sessioni esclusive con specialisti di caratura internazionale. Selezioni i percorsi affini al tuo profilo durante l'iscrizione.",
+      },
+    ],
     extras: [
       {
         text: "Functional Strength Master Coach",
@@ -118,10 +131,6 @@ const CARD_COPY: Record<string, CardCopy> = {
       {
         text: "Personal Trainer FIPE × Lacertosus",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
-      },
-      {
-        text: "2 Masterclass a scelta su 9",
-        sub: "Specialisti di caratura internazionale",
       },
       {
         text: "Accesso prioritario alla community",
@@ -502,49 +511,7 @@ function PackModal({
             </h3>
 
             <div className="mt-7">
-              <span
-                className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
-                style={{ color: lightTextMuted }}
-              >
-                Il Percorso · 9 mesi · 6 weekend in presenza
-              </span>
-              <div className="grid sm:grid-cols-3 gap-3">
-                {BLOCK_SLUGS.map((slug, i) => (
-                  <div
-                    key={slug}
-                    className="flex items-start gap-3 p-4"
-                    style={{
-                      background: lightSurface,
-                      border: `1px solid ${lightBorder}`,
-                    }}
-                  >
-                    <span
-                      className="shrink-0 flex h-8 w-8 items-center justify-center text-[0.7rem] font-black tabular-nums"
-                      style={{
-                        border: `1.5px solid rgba(${ORANGE_RGB},0.55)`,
-                        color: ORANGE,
-                        background: `rgba(${ORANGE_RGB},0.07)`,
-                      }}
-                    >
-                      0{i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div
-                        className="text-[0.95rem] font-black leading-tight tracking-[0.02em]"
-                        style={{ color: lightTextH }}
-                      >
-                        {BLOCK_LABELS[slug]}
-                      </div>
-                      <div
-                        className="mt-1 text-[0.65rem] font-bold tracking-[0.18em] uppercase"
-                        style={{ color: lightTextMuted }}
-                      >
-                        2 weekend
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ProgramAccordion scopeId={`home-pack-${pack.slug}`} />
             </div>
 
             {valueStackExtras.length > 0 && (
@@ -880,74 +847,46 @@ function PackModal({
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-8">
               {BLOCK_SLUGS.map((slug) => (
                 <div key={slug}>
                   <p
-                    className="mb-2.5 text-[0.62rem] font-black tracking-[0.3em] uppercase"
-                    style={{ color: lightTextMuted }}
+                    className="mb-4 text-[0.62rem] font-black tracking-[0.3em] uppercase"
+                    style={{ color: ORANGE }}
                   >
                     Docenti — {BLOCK_LABELS[slug]}
                   </p>
-                  {/* Mobile: due colonne con portrait full + overlay nome/ruolo. */}
-                  <div className="grid grid-cols-2 gap-2.5 sm:hidden">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 md:gap-3">
                     {teachers[slug].map((t) => (
-                      <TeacherPortrait
+                      <article
                         key={t.slug}
-                        teacher={t}
-                        overlayName
-                        overlayRole={t.role}
-                        fallbackTheme="light"
-                        sizes="50vw"
-                      />
-                    ))}
-                  </div>
-                  {/* Tablet/desktop: grid compatto avatar + nome */}
-                  <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {teachers[slug].map((t) => (
-                      <div
-                        key={t.slug}
-                        className="flex items-center gap-2.5 p-2.5"
+                        className="flex flex-col overflow-hidden"
                         style={{
-                          background: lightBg,
+                          background: lightSurface,
                           border: `1px solid ${lightBorder}`,
+                          maxWidth: 220,
                         }}
-                        title={t.role}
                       >
-                        <div
-                          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.66rem] font-black"
-                          style={{
-                            background: `${t.color}26`,
-                            color: t.color,
-                          }}
-                        >
-                          {t.image_url ? (
-                            <Image
-                              src={t.image_url}
-                              alt={t.name}
-                              width={40}
-                              height={40}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            initials(t.name)
-                          )}
-                        </div>
-                        <div className="min-w-0">
+                        <TeacherPortrait
+                          teacher={t}
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 28vw, 200px"
+                          fallbackTheme="light"
+                        />
+                        <div className="px-2.5 pt-2.5 pb-3">
                           <p
-                            className="text-[0.7rem] font-black leading-tight truncate"
+                            className="text-[0.78rem] md:text-[0.82rem] font-black leading-tight tracking-[-0.005em] m-0"
                             style={{ color: lightTextH }}
                           >
                             {t.name}
                           </p>
                           <p
-                            className="mt-0.5 text-[0.55rem] leading-snug line-clamp-1"
-                            style={{ color: lightTextMuted }}
+                            className="mt-1 text-[0.58rem] font-bold tracking-[0.16em] uppercase line-clamp-2 leading-[1.35]"
+                            style={{ color: ORANGE }}
                           >
                             {t.role}
                           </p>
                         </div>
-                      </div>
+                      </article>
                     ))}
                   </div>
                 </div>
@@ -1059,6 +998,45 @@ function onLeave(e: React.MouseEvent<HTMLDivElement>) {
     duration: 0.9,
     ease: "elastic.out(1, 0.4)",
   });
+}
+
+// ─── Hero extra icon glyphs ──────────────────────────────────────────────────
+
+function HeroExtraGlyph({ icon }: { icon: HeroExtraIcon }) {
+  if (icon === "bed") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="#F09226"
+        strokeWidth="2"
+        strokeLinecap="square"
+        aria-hidden
+      >
+        <path d="M3 18v-7m0 7h18m-18 0v-3h18v3M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
+      </svg>
+    );
+  }
+  // masterclass — graduation cap
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="#F09226"
+      strokeWidth="2"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
+      aria-hidden
+    >
+      <path d="M2 9l10-5 10 5-10 5z" />
+      <path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
+      <path d="M21 9v6" />
+    </svg>
+  );
 }
 
 // ─── Pack Card — mirror /pack card, NO PRICE ────────────────────────────────
@@ -1265,67 +1243,54 @@ function PackCard({
           </div>
         </div>
 
-        {/* ── HERO EXTRA — luxury callout (ELITE) ───────────── */}
-        {copy.heroExtra && (
-          <div
-            className="relative overflow-hidden p-5"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(240,146,38,0.22) 0%, rgba(240,146,38,0.06) 60%, rgba(240,146,38,0.12) 100%)",
-              border: "1.5px solid rgba(240,146,38,0.55)",
-              boxShadow: "0 0 32px rgba(240,146,38,0.12)",
-            }}
-          >
-            <div
-              className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(240,146,38,0.32) 0%, transparent 70%)",
-              }}
-            />
-
-            <div className="relative flex items-start gap-4">
+        {/* ── HERO EXTRAS — dark premium callouts (PRO/ELITE) ─── */}
+        {copy.heroExtras && copy.heroExtras.length > 0 && (
+          <div className="flex flex-col gap-2.5">
+            {copy.heroExtras.map((extra, idx) => (
               <div
-                className="shrink-0 flex h-11 w-11 items-center justify-center"
+                key={idx}
+                className="flex items-start gap-3.5 p-4"
                 style={{
-                  background: "rgba(240,146,38,0.18)",
-                  border: "1.5px solid rgba(240,146,38,0.65)",
+                  background:
+                    "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)",
+                  border: "1px solid rgba(240,146,38,0.45)",
+                  borderLeft: "3px solid #F09226",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 18px rgba(0,0,0,0.25)",
                 }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="#F09226"
-                  strokeWidth="2"
-                  strokeLinecap="square"
+                <div
+                  className="shrink-0 flex h-9 w-9 items-center justify-center"
+                  style={{
+                    background: "rgba(240,146,38,0.14)",
+                    border: "1px solid rgba(240,146,38,0.55)",
+                  }}
                 >
-                  <path d="M3 18v-7m0 7h18m-18 0v-3h18v3M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
-                </svg>
-              </div>
+                  <HeroExtraGlyph icon={extra.icon} />
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <div
-                  className="text-[0.55rem] font-black tracking-[0.34em] uppercase"
-                  style={{ color: "#F09226" }}
-                >
-                  ★ {copy.heroExtra.eyebrow}
+                <div className="min-w-0 flex-1">
+                  <div
+                    className="text-[0.55rem] font-bold tracking-[0.3em] uppercase"
+                    style={{ color: "#F09226" }}
+                  >
+                    {extra.eyebrow}
+                  </div>
+                  <div
+                    className="mt-1 text-[0.98rem] font-black leading-tight tracking-[-0.005em]"
+                    style={{ color: "#ffffff" }}
+                  >
+                    {extra.text}
+                  </div>
+                  <p
+                    className="mt-1.5 text-[0.72rem] leading-[1.5]"
+                    style={{ color: "rgba(255,255,255,0.72)" }}
+                  >
+                    {extra.sub}
+                  </p>
                 </div>
-                <div
-                  className="mt-1.5 text-[1.15rem] font-black leading-tight tracking-[-0.01em]"
-                  style={{ color: bodyText }}
-                >
-                  {copy.heroExtra.text}
-                </div>
-                <p
-                  className="mt-2 text-[0.74rem] leading-[1.55]"
-                  style={{ color: bodyTextSecondary }}
-                >
-                  {copy.heroExtra.sub}
-                </p>
               </div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -1336,7 +1301,9 @@ function PackCard({
               className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
               style={{ color: bodyAccent }}
             >
-              {copy.heroExtra ? "Inoltre" : "Inclusi"}
+              {copy.heroExtras && copy.heroExtras.length > 0
+                ? "Inoltre"
+                : "Inclusi"}
             </span>
             <div className="flex flex-col gap-2.5">
               {copy.extras.map((e, i) => (

@@ -23,6 +23,7 @@ import { computePromoPricing, type PromoRow } from "@/lib/promos/types";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
+import { ProgramAccordion } from "./program-accordion";
 import dynamic from "next/dynamic";
 
 const HeroScene = dynamic(
@@ -1235,51 +1236,9 @@ function PackModal({
               Il percorso, in dettaglio.
             </h3>
 
-            {/* Blocks — always shown, prominent */}
+            {/* Blocks — accordion programma completo */}
             <div className="mt-7">
-              <span
-                className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
-                style={{ color: lightTextMuted }}
-              >
-                Il Percorso · 9 mesi · 6 weekend in presenza
-              </span>
-              <div className="grid sm:grid-cols-3 gap-3">
-                {BLOCK_SLUGS.map((slug, i) => (
-                  <div
-                    key={slug}
-                    className="flex items-start gap-3 p-4"
-                    style={{
-                      background: lightSurface,
-                      border: `1px solid ${lightBorder}`,
-                    }}
-                  >
-                    <span
-                      className="shrink-0 flex h-8 w-8 items-center justify-center text-[0.7rem] font-black tabular-nums"
-                      style={{
-                        border: `1.5px solid rgba(${ORANGE_RGB},0.55)`,
-                        color: ORANGE,
-                        background: `rgba(${ORANGE_RGB},0.07)`,
-                      }}
-                    >
-                      0{i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div
-                        className="text-[0.95rem] font-black leading-tight tracking-[0.02em]"
-                        style={{ color: lightTextH }}
-                      >
-                        {BLOCK_LABELS[slug]}
-                      </div>
-                      <div
-                        className="mt-1 text-[0.65rem] font-bold tracking-[0.18em] uppercase"
-                        style={{ color: lightTextMuted }}
-                      >
-                        2 weekend
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ProgramAccordion scopeId={`pack-${pack.slug}`} />
             </div>
 
             {/* Tier extras */}
@@ -1543,30 +1502,31 @@ function PackModal({
                   >
                     Docenti — {BLOCK_LABELS[slug]}
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 md:gap-3">
                     {teachers[slug].map((t) => (
                       <article
                         key={t.slug}
                         className="flex flex-col overflow-hidden"
                         style={{
-                          background: lightBg,
+                          background: lightSurface,
                           border: `1px solid ${lightBorder}`,
+                          maxWidth: 220,
                         }}
                       >
                         <TeacherPortrait
                           teacher={t}
-                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 28vw, 200px"
                           fallbackTheme="light"
                         />
-                        <div className="px-3 pt-3 pb-3.5">
+                        <div className="px-2.5 pt-2.5 pb-3">
                           <p
-                            className="text-[0.85rem] font-black leading-tight tracking-tight"
+                            className="text-[0.78rem] md:text-[0.82rem] font-black leading-tight tracking-[-0.005em] m-0"
                             style={{ color: lightTextH }}
                           >
                             {t.name}
                           </p>
                           <p
-                            className="mt-1.5 text-[0.65rem] font-bold tracking-[0.14em] uppercase leading-snug line-clamp-2"
+                            className="mt-1 text-[0.58rem] font-bold tracking-[0.16em] uppercase line-clamp-2 leading-[1.35]"
                             style={{ color: ORANGE }}
                           >
                             {t.role}
@@ -1709,12 +1669,57 @@ function onLeave(e: React.MouseEvent<HTMLDivElement>) {
 
 // ─── Pack Card ────────────────────────────────────────────────────────────────
 
+type HeroExtraIcon = "bed" | "masterclass";
+
+function HeroExtraGlyph({ icon }: { icon: HeroExtraIcon }) {
+  if (icon === "bed") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="#F09226"
+        strokeWidth="2"
+        strokeLinecap="square"
+        aria-hidden
+      >
+        <path d="M3 18v-7m0 7h18m-18 0v-3h18v3M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="#F09226"
+      strokeWidth="2"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
+      aria-hidden
+    >
+      <path d="M2 9l10-5 10 5-10 5z" />
+      <path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
+      <path d="M21 9v6" />
+    </svg>
+  );
+}
+
+type HeroExtra = {
+  eyebrow: string;
+  text: string;
+  sub: string;
+  icon: HeroExtraIcon;
+};
+
 type CardCopy = {
   badge?: string;
   tagline: string;
   audience: string;
-  /** Hero extra — rendered as luxury callout above the regular extras list */
-  heroExtra?: { eyebrow: string; text: string; sub: string };
+  /** Premium luxury callouts shown above the regular extras list. */
+  heroExtras?: HeroExtra[];
   /** Tier-specific extras shown after the always-visible blocks */
   extras: { text: string; sub?: string }[];
   ctaLabel: string;
@@ -1737,6 +1742,14 @@ const CARD_COPY: Record<string, CardCopy> = {
     tagline:
       "Il percorso completo + la certificazione FIPE riconosciuta a livello nazionale e internazionale.",
     audience: "Per chi vuole costruire una carriera riconosciuta.",
+    heroExtras: [
+      {
+        icon: "masterclass",
+        eyebrow: "Specializzazione",
+        text: "2 Masterclass a scelta",
+        sub: "Sessioni esclusive con specialisti di caratura internazionale. Selezioni i percorsi affini al tuo profilo durante l'iscrizione.",
+      },
+    ],
     extras: [
       {
         text: "Functional Strength Master Coach",
@@ -1745,10 +1758,6 @@ const CARD_COPY: Record<string, CardCopy> = {
       {
         text: "Personal Trainer FIPE × Lacertosus",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
-      },
-      {
-        text: "2 Masterclass a scelta su 9",
-        sub: "Specialisti di caratura internazionale",
       },
     ],
     ctaLabel: "Scegli PRO",
@@ -1758,11 +1767,20 @@ const CARD_COPY: Record<string, CardCopy> = {
     tagline:
       "Vivi i 6 weekend di formazione da insider. Vitto e alloggio inclusi, niente di operativo a cui pensare.",
     audience: "Per chi sceglie di concentrarsi solo sulla formazione.",
-    heroExtra: {
-      eyebrow: "L'Esperienza Esclusiva",
-      text: "Vitto & Alloggio inclusi",
-      sub: "Struttura premium e ristorazione curata per tutti i 6 weekend formativi. Zero pensieri operativi: dorma, mangia, formati.",
-    },
+    heroExtras: [
+      {
+        icon: "bed",
+        eyebrow: "Esperienza Esclusiva",
+        text: "Vitto & Alloggio inclusi",
+        sub: "Struttura premium e ristorazione curata per tutti i 6 weekend formativi.",
+      },
+      {
+        icon: "masterclass",
+        eyebrow: "Specializzazione",
+        text: "2 Masterclass a scelta",
+        sub: "Sessioni esclusive con specialisti di caratura internazionale. Selezioni i percorsi affini al tuo profilo durante l'iscrizione.",
+      },
+    ],
     extras: [
       {
         text: "Functional Strength Master Coach",
@@ -1771,10 +1789,6 @@ const CARD_COPY: Record<string, CardCopy> = {
       {
         text: "Personal Trainer FIPE × Lacertosus",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
-      },
-      {
-        text: "2 Masterclass a scelta su 9",
-        sub: "Specialisti di caratura internazionale",
       },
       {
         text: "Accesso prioritario alla community",
@@ -2051,69 +2065,54 @@ function PackCard({
           </div>
         </div>
 
-        {/* ── HERO EXTRA — luxury callout (ELITE: Vitto&Alloggio) ── */}
-        {copy.heroExtra && (
-          <div
-            className="relative overflow-hidden p-5"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(240,146,38,0.22) 0%, rgba(240,146,38,0.06) 60%, rgba(240,146,38,0.12) 100%)",
-              border: "1.5px solid rgba(240,146,38,0.55)",
-              boxShadow: "0 0 32px rgba(240,146,38,0.12)",
-            }}
-          >
-            {/* Corner ornament */}
-            <div
-              className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(240,146,38,0.32) 0%, transparent 70%)",
-              }}
-            />
-
-            <div className="relative flex items-start gap-4">
-              {/* Luxury icon — bed glyph */}
+        {/* ── HERO EXTRAS — dark premium callouts (PRO/ELITE) ── */}
+        {copy.heroExtras && copy.heroExtras.length > 0 && (
+          <div className="flex flex-col gap-2.5">
+            {copy.heroExtras.map((extra, idx) => (
               <div
-                className="shrink-0 flex h-11 w-11 items-center justify-center"
+                key={idx}
+                className="flex items-start gap-3.5 p-4"
                 style={{
-                  background: "rgba(240,146,38,0.18)",
-                  border: "1.5px solid rgba(240,146,38,0.65)",
+                  background:
+                    "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)",
+                  border: "1px solid rgba(240,146,38,0.45)",
+                  borderLeft: "3px solid #F09226",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 18px rgba(0,0,0,0.25)",
                 }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="#F09226"
-                  strokeWidth="2"
-                  strokeLinecap="square"
+                <div
+                  className="shrink-0 flex h-9 w-9 items-center justify-center"
+                  style={{
+                    background: "rgba(240,146,38,0.14)",
+                    border: "1px solid rgba(240,146,38,0.55)",
+                  }}
                 >
-                  <path d="M3 18v-7m0 7h18m-18 0v-3h18v3M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
-                </svg>
-              </div>
+                  <HeroExtraGlyph icon={extra.icon} />
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <div
-                  className="text-[0.55rem] font-black tracking-[0.34em] uppercase"
-                  style={{ color: "#F09226" }}
-                >
-                  ★ {copy.heroExtra.eyebrow}
+                <div className="min-w-0 flex-1">
+                  <div
+                    className="text-[0.55rem] font-bold tracking-[0.3em] uppercase"
+                    style={{ color: "#F09226" }}
+                  >
+                    {extra.eyebrow}
+                  </div>
+                  <div
+                    className="mt-1 text-[0.98rem] font-black leading-tight tracking-[-0.005em]"
+                    style={{ color: "#ffffff" }}
+                  >
+                    {extra.text}
+                  </div>
+                  <p
+                    className="mt-1.5 text-[0.72rem] leading-[1.5]"
+                    style={{ color: "rgba(255,255,255,0.72)" }}
+                  >
+                    {extra.sub}
+                  </p>
                 </div>
-                <div
-                  className="mt-1.5 text-[1.15rem] font-black leading-tight tracking-[-0.01em]"
-                  style={{ color: bodyText }}
-                >
-                  {copy.heroExtra.text}
-                </div>
-                <p
-                  className="mt-2 text-[0.74rem] leading-[1.55]"
-                  style={{ color: bodyTextSecondary }}
-                >
-                  {copy.heroExtra.sub}
-                </p>
               </div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -2124,7 +2123,9 @@ function PackCard({
               className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
               style={{ color: bodyAccent }}
             >
-              {copy.heroExtra ? "Inoltre" : "In più"}
+              {copy.heroExtras && copy.heroExtras.length > 0
+                ? "Inoltre"
+                : "In più"}
             </span>
             <div className="flex flex-col gap-2.5">
               {copy.extras.map((e, i) => (

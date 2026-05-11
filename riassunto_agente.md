@@ -12,6 +12,59 @@ Generato da analisi locale il `2026-03-30`.
 - Alla fine di ogni richiesta, l'agente deve verificare se ci sono nuove informazioni o modifiche da riflettere qui
 - Non salvare mai segreti o credenziali in questo file
 
+## 0quindecima. Aggiornamenti 2026-05-11 — Refinement callout + accordion faculty
+
+### Callout minimal (Vitto&Alloggio + Masterclass)
+
+- Rimossi gradient luxury, glow shadow `0 0 32px`, corner ornament radial, eyebrow `★`. Adesso: bg `rgba(240,146,38,0.04-0.05)`, border 1px arancione 0.32 + borderLeft 3px arancio solido. Icon 36px (h-9 w-9). Tipografia più contenuta. Stile coerente con gli altri "extras" cards.
+- Copy aggiornato: ora "**2 Masterclass a scelta**" (con conteggio integrato e chiaro). Vitto&Alloggio: copy snellito ("Zero pensieri operativi" rimosso).
+- Stesso treatment in `home/pack-preview.tsx` e `packs/pack-comparison.tsx`.
+
+### ProgramAccordion — syllabus card 2-col (lesson | teacher)
+
+- **Accordion `Cosa ottieni`** (program-accordion.tsx) rifatto: ogni lezione = card autonoma `grid md:grid-cols-[1fr_minmax(0,38%)]` con border-left arancio 3px, su sfondo panel `#fafafa`. Colonna sinistra: number badge 40×40 arancio + eyebrow `LEZIONE` + titolo bold. Colonna destra: pannello docente con bg `rgba(orange,0.04)` + nome bold + ruolo. Separator border-top su mobile / border-left su desktop. Visivamente ogni lezione è un blocco distinto e scannable.
+- **Sezione "La Faculty"** (pack-comparison.tsx + pack-preview.tsx): rifatta con **card 4:5 portrait** (`TeacherPortrait`) in grid `grid-cols-2 md:grid-cols-3 gap-2.5 md:gap-3`, max-w 220px. Sizing immagini `(max-width:640px)45vw,(max-width:1024px)28vw,200px`. Stessa tipografia: nome bold + ruolo arancio uppercase tracking. Versione mobile coerente con desktop (sempre 2 col mobile, 3 desktop).
+- Rimossi da pack-preview.tsx: import `Image`, helper `initials()` non più usati.
+
+## 0quattordecima. Aggiornamenti 2026-05-11 — Accordion universitario + Masterclass luxury callout
+
+### ProgramAccordion riusabile
+
+- `src/lib/constants/program.ts`: aggiunto `teacherSlugs?: string[]` per topic. Mapping completo dei docenti per ogni lezione (FUNCTION, STRENGTH, SCIENCE) basato sui `talkTitle` da `teachers.ts`. Helper `getTopicTeachers(topic) → Teacher[]`.
+- Nuovo `src/components/packs/program-accordion.tsx`: componente client riusabile (`<ProgramAccordion scopeId={...} />`) con design accademico premium — numerazione romana (I/II/III) per modulo, eyebrow "Modulo · 0X", titolo + area + lezioni count, lista lezioni con badge numerico arancione, e per ogni lezione una **faculty card** (avatar 24px + nome + ruolo). Stile syllabus universitario, italicized note finale "Il programma può subire piccole variazioni…".
+- Sostituito accordion inline in `pack-comparison.tsx` (linea 1242) e gridStatica blocchi in `pack-preview.tsx` (linea 504) — entrambi ora usano `<ProgramAccordion scopeId={...} />`. Modale Home + Modale /pack + Modale /percorso/[slug] mostrano lo stesso accordion.
+
+### Masterclass come luxury callout (PRO + ELITE)
+
+- `CardCopy.heroExtra` (singolo) → `heroExtras: HeroExtra[]` con `icon: "bed" | "masterclass"`. Aggiornato in entrambi i file `home/pack-preview.tsx` e `packs/pack-comparison.tsx`.
+- **PRO**: nuovo callout luxury "Masterclass su misura, a scelta" (icon graduation cap).
+- **ELITE**: due callout — Vitto&Alloggio (bed) + Masterclass (graduation cap).
+- "2 Masterclass a scelta su 9" **rimosso** dagli `extras` list di PRO/ELITE in entrambe le card preview. Il numero esatto (2) non è più indicato nella preview.
+- Nuovo componente locale `HeroExtraGlyph({ icon })` in entrambi i file con SVG bed e graduation cap.
+
+## 0terdecima. Aggiornamenti 2026-05-08 — Programma accordion + WhatsApp brand
+
+### Programma Academy → accordion nel modale pack
+
+- Nuovo `src/lib/constants/program.ts`: `PROGRAM_BLOCKS` (FUNCTION, STRENGTH, SCIENCE) con `topics[]` per ciascun blocco. Source: `public/ACADEMY-FILES/programma-academy.md` (testi normalizzati: typo `STRENGHT` → `STRENGTH`, accenti corretti, capitalizzazione coerente).
+- `src/components/packs/pack-comparison.tsx` — nella `PackModal` section "Il percorso, in dettaglio" la grid statica 3-col è sostituita da un accordion verticale unico, surface light, con icona + label + area + weekends in header e lista numerata `0X` dei topic nel pannello espandibile. State `openBlock` (default `"function"`), single-open behavior.
+- Animazione height/opacity via `AnimatePresence` + `motion.div`, easing `[0.4,0,0.2,1]`. Plus icon ruota a 45° quando aperto.
+- ARIA: `aria-expanded`, `aria-controls`, role="region", `aria-labelledby` per accessibilità keyboard/screen reader.
+
+### Scroll progress rimosso
+
+- Componente `src/components/ui/scroll-progress.tsx` cancellato e rimosso da `src/app/layout.tsx`. Il counter circolare di scroll % in basso a destra non è più presente né da desktop né da mobile.
+
+### WhatsApp CTA flottante — chat composer (nuovo)
+
+- WhatsApp **rimosso da navbar** sia desktop sia mobile.
+- Nuovo `src/components/layout/whatsapp-float.tsx`: due stati con cross-fade.
+  - **Collapsed FAB cluster**: phone (circolare dark `#1a1a1a` + icona orange `#F09226`, hover invertito → tel:`+390521607870`) + WhatsApp pill (rounded-l only attaccata al bordo destro, brand green). `bottom: 20px` mobile / `bottom: 32px` desktop. Desktop: icona + label `Scrivici`. Mobile: icona-only.
+  - **Expanded composer**: pannello chat-style 360–380px, header gradient WhatsApp teal/green con avatar + "Lacertosus Academy" + "Online · risposta in poche ore" + close, body chat-bubble pattern (`#ECE5DD` + dotted) con messaggio benvenuto, composer con textarea + send button verde. Enter invia, Shift+Enter newline. Esc chiude. Mobile ha backdrop blur, desktop no.
+  - Submit → `window.open('https://wa.me/393454522094?text=<msg>')` con messaggio digitato (fallback al default "Ciao Lacertosus Academy…" se vuoto).
+- Iniettato in `src/app/layout.tsx` dopo `<Footer />`. Auto-hidden su `/admin/*` via `usePathname`.
+- Nessuna animazione pulse/ping — design premium con shadow soft brand-colored.
+
 ## 0duodecima. Aggiornamenti 2026-05-08 — Error UX checkout + fix promo cross-env
 
 ### Error UX checkout (`src/app/checkout/checkout-content.tsx`)

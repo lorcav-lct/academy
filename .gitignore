@@ -51,3 +51,5 @@ public/ACADEMY-FILES/
 
 # Local Stripe setup mappings
 scripts/.stripe-*.json
+ACADEMY-STRIPE-BACKUP-CODE.txt
+ciao.txt
