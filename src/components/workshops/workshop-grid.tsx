@@ -114,17 +114,17 @@ const REASONS = [
   {
     number: "01",
     title: "Impara da chi lo fa, non da chi lo racconta.",
-    body: "Lo Sport Therapist della Juventus, l'S&C Coach di Modena Volley, un preparatore delle Forze Speciali, il medico degli astronauti ESA. Portano il campo in aula — ogni giorno, ad alto livello.",
+    body: "Lo Sport Therapist della Juventus, l'S&C Coach di Modena Volley, un preparatore delle Forze Speciali, i preparatori di nuotatori olimpici e delle Nazionali: portano il campo in aula, condividendo esperienza pratica, protocolli reali e strategie che funzionano davvero.",
   },
   {
     number: "02",
-    title: "Quello che i libri non possono darti.",
-    body: "La distanza tra atleta d'élite e mediocre non è nei concetti — è nei dettagli operativi. Protocolli testati, errori reali, soluzioni che nascono solo da anni sul campo ad alta pressione.",
+    title: "Quello che i libri non possono insegnare.",
+    body: "La differenza tra un coach qualunque e un professionista d'élite sta nei dettagli operativi. Errori reali, protocolli testati sul campo e soluzioni nate dall'esperienza ad alta pressione: tutto ciò che serve per allenare al massimo livello.",
   },
   {
     number: "03",
     title: "Verticale. Intensivo. Trasformativo.",
-    body: "Un dominio, una o due giornate, profondità totale. Nessun generalismo, nessun rumore di fondo. Il formato che produce il cambiamento più rapido nel modo di pensare e allenare.",
+    body: "Formazione mirata, poche giornate ma totale immersione. Nessun generalismo, nessun rumore di fondo. Un formato che accelera il cambiamento nel modo di pensare, programmare e allenare, portandoti direttamente al livello dei top coach.",
   },
 ];
 
@@ -253,9 +253,9 @@ function HeroSection() {
               color: th,
             }}
           >
-            L&rsquo;élite italiana.
+            L&rsquo;ELITE
             <br />
-            <span className="gradient-text">In aula con te.</span>
+            <span className="gradient-text">IN AULA CON TE.</span>
           </motion.h1>
 
           {/* Subline */}
@@ -264,10 +264,13 @@ function HeroSection() {
             className="mt-7 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
             style={{ color: tb }}
           >
-            9 masterclass intensivi con i professionisti che vivono ogni giorno
-            ciò che insegnano. Performance Coach di Nazionali, S&amp;C di
-            squadre di SuperLega, ricercatori universitari tra i più citati al
-            mondo.
+            9 masterclass intensive guidate da professionisti che operano ogni
+            giorno sul campo della performance reale. Performance coach di
+            Nazionali, Strength &amp; Conditioning coach di squadre di SuperLega
+            e ricercatori universitari tra i più autorevoli a livello
+            internazionale: un corpo docenti che unisce pratica d&rsquo;élite e
+            ricerca scientifica applicata. Un confronto diretto con chi
+            definisce gli standard del settore, oggi.
           </motion.p>
 
           {/* Stats */}
@@ -433,7 +436,7 @@ function ManifestoSection({ isDark }: { isDark: boolean }) {
             La specializzazione verticale
             <br />
             non è un&rsquo;opzione.{" "}
-            <span className="gradient-text">È il vantaggio.</span>
+            <span className="gradient-text">È un vantaggio.</span>
           </motion.h2>
 
           <motion.p
@@ -441,9 +444,12 @@ function ManifestoSection({ isDark }: { isDark: boolean }) {
             className="mt-6 max-w-2xl text-[1rem] leading-[1.7] md:text-[1.05rem]"
             style={{ color: tb }}
           >
-            In un settore saturo di generalisti, chi si distingue è chi sa fare
-            una cosa meglio di chiunque altro. I Masterclass Lacertosus sono
-            costruiti attorno a questa verità.
+            In un settore saturo di generalisti, a fare la differenza è chi
+            sviluppa competenze profonde e realmente applicabili in
+            un&rsquo;area specifica della performance. I Masterclass Lacertosus
+            nascono con questo obiettivo: portare ogni professionista dentro un
+            livello di specializzazione elevato, guidato da chi quel campo lo
+            vive e lo definisce ogni giorno.
           </motion.p>
         </motion.div>
 
