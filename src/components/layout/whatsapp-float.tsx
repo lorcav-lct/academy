@@ -163,7 +163,7 @@ export function WhatsAppFloat() {
         >
           <WhatsAppGlyph size={22} />
           <span className="hidden md:inline text-[12.5px] font-black tracking-[0.24em] uppercase leading-none">
-            Scrivici
+            Contattaci
           </span>
         </button>
       </div>

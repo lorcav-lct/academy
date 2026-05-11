@@ -126,13 +126,9 @@ function HeroSection({
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const sceneWrapRef = useRef<HTMLDivElement>(null);
 
   const th = isDark ? "#f5f5fa" : "#0a0a1a";
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
-  const ts = isDark ? "rgba(120,120,140,0.5)" : "#888888";
-  const borderSubtle = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -150,54 +146,13 @@ function HeroSection({
       );
     }
 
-    const scrollParent = sectionRef.current?.closest("[data-hero-scroll]");
-    if (!scrollParent) return;
-
+    // Desktop-only: details fade as scroll begins (mobile: no scroll anim)
     const isMobile = window.innerWidth < 1024;
-    const triggers: ScrollTrigger[] = [];
+    const scrollParent = sectionRef.current?.closest("[data-hero-scroll]");
+    let scrollTrig: ScrollTrigger | null = null;
 
-    if (isMobile) {
-      // Single ScrollTrigger for all mobile text animations
-      const statEls = statsRef.current?.children
-        ? (Array.from(statsRef.current.children) as HTMLElement[])
-        : [];
-
-      const trigger = ScrollTrigger.create({
-        trigger: scrollParent,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const p = self.progress; // 0→1 over full 280vh scroll
-
-          // 0→0.06: stats disappear one by one (reverse)
-          const reversed = [...statEls].reverse();
-          reversed.forEach((el, i) => {
-            const start = i * 0.015;
-            const end = start + 0.015;
-            const sp = gsap.utils.clamp(0, 1, (p - start) / (end - start));
-            el.style.opacity = String(1 - sp);
-            el.style.transform = `scale(${1 - sp * 0.3})`;
-          });
-
-          // 0.06→0.12: description fades
-          if (detailsRef.current) {
-            const dp = gsap.utils.clamp(0, 1, (p - 0.06) / 0.06);
-            detailsRef.current.style.opacity = String(1 - dp);
-            detailsRef.current.style.transform = `translateY(${-dp * 30}px)`;
-          }
-
-          // 0.1→0.22: scene slides up
-          if (sceneWrapRef.current) {
-            const sp2 = gsap.utils.clamp(0, 1, (p - 0.1) / 0.12);
-            sceneWrapRef.current.style.transform = `translateY(${-sp2 * 180}px)`;
-          }
-        },
-      });
-      triggers.push(trigger);
-    } else {
-      // Desktop: details + stats fade
-      const trigger = ScrollTrigger.create({
+    if (!isMobile && scrollParent) {
+      scrollTrig = ScrollTrigger.create({
         trigger: scrollParent,
         start: "top top",
         end: "25% top",
@@ -208,33 +163,21 @@ function HeroSection({
             detailsRef.current.style.opacity = String(1 - p);
             detailsRef.current.style.transform = `translateY(${-p * 20}px)`;
           }
-          if (statsRef.current) {
-            statsRef.current.style.opacity = String(1 - p);
-            statsRef.current.style.transform = `translateY(${-p * 10}px)`;
-          }
         },
       });
-      triggers.push(trigger);
     }
 
     return () => {
       entranceTl.kill();
-      triggers.forEach((t) => t.kill());
+      if (scrollTrig) scrollTrig.kill();
     };
   }, []);
 
   return (
-    <div data-hero-scroll className="relative h-[180vh] lg:h-[280vh]">
+    <div data-hero-scroll className="relative lg:h-[280vh]">
       <section
         ref={sectionRef}
-        className="themed-section relative overflow-hidden"
-        style={{
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-        }}
+        className="themed-section relative overflow-hidden flex items-center min-h-screen lg:sticky lg:top-0 lg:h-screen"
       >
         {/* Background */}
         <div className="absolute inset-0 section-bg" />
@@ -261,69 +204,45 @@ function HeroSection({
             <div className="js-pack-hero-text flex flex-col lg:w-[52%]">
               <span className="label-tag mb-5 block">Pack &amp; Prezzi</span>
               <h1
-                className="font-black tracking-[-0.025em] leading-[0.93] text-[clamp(2.6rem,5.2vw,4.8rem)]"
+                className="font-black tracking-[-0.025em] leading-[1.02] text-[clamp(2.2rem,4.2vw,3.8rem)]"
                 style={{ color: th }}
               >
-                Investi nella tua
-                <br />
-                <span className="gradient-text">eccellenza.</span>
+                Formazione avanzata per{" "}
+                <span className="gradient-text">
+                  professionisti del fitness
+                </span>
+                .
               </h1>
 
               {/* Description — hidden on mobile scroll */}
               <div ref={detailsRef}>
                 <p
-                  className="mt-6 max-w-[440px] text-[0.95rem] leading-relaxed"
+                  className="mt-6 max-w-[560px] text-[0.95rem] leading-relaxed"
                   style={{ color: tb }}
                 >
-                  Tre blocchi progressivi. Certificazione FIPE.{" "}
+                  Un percorso strutturato in tre blocchi progressivi che
+                  integrano Functional Training, Strength &amp; Conditioning e
+                  scienza applicata alla performance.
+                </p>
+                <p
+                  className="mt-4 max-w-[560px] text-[0.95rem] leading-relaxed"
+                  style={{ color: tb }}
+                >
                   <span
                     className="font-semibold"
                     style={{ color: isDark ? "rgba(220,220,235,0.9)" : "#222" }}
                   >
-                    9 mesi per costruire il professionista completo del fitness.
-                  </span>
+                    9 mesi di formazione in presenza
+                  </span>{" "}
+                  per sviluppare competenze tecniche, metodologiche e
+                  professionali nel mondo del fitness e della preparazione
+                  fisica.
                 </p>
-              </div>
-
-              {/* Stats — hidden one by one on mobile scroll */}
-              <div ref={statsRef} className="mt-6 flex flex-wrap gap-3">
-                {[
-                  { val: "9", unit: "mesi" },
-                  { val: "100%", unit: "in presenza" },
-                  { val: "33+", unit: "docenti" },
-                  { val: "3", unit: "certificazioni" },
-                ].map((s) => (
-                  <div
-                    key={s.unit}
-                    className="flex flex-col items-center px-4 py-2.5"
-                    style={{
-                      border: `1px solid ${borderSubtle}`,
-                      background: isDark
-                        ? "rgba(255,255,255,0.03)"
-                        : "rgba(0,0,0,0.02)",
-                      minWidth: "68px",
-                    }}
-                  >
-                    <span
-                      className="text-xl font-black leading-none"
-                      style={{ color: "#F09226" }}
-                    >
-                      {s.val}
-                    </span>
-                    <span
-                      className="mt-1 text-[0.62rem] font-bold tracking-[0.18em] uppercase"
-                      style={{ color: ts }}
-                    >
-                      {s.unit}
-                    </span>
-                  </div>
-                ))}
               </div>
             </div>
 
-            {/* Right — scroll-driven animation */}
+            {/* Right — scene (desktop morph; mobile static idle float) */}
             <div
-              ref={sceneWrapRef}
               className="lg:w-[48%]"
               style={{ minHeight: "clamp(280px, 40vw, 420px)" }}
             >
@@ -2694,6 +2613,48 @@ export function PackComparison() {
       <JourneySection isDark={isDark} onOpenBlock={setOpenBlock} />
       <PacksSection isDark={isDark} onOpenModal={setActiveModal} />
       <MasterclassSection isDark={isDark} />
+
+      {/* Mobile-only floating CTA — mirrors the right WhatsApp/phone cluster.
+          Pinned to the left edge, same bottom offset (bottom-5) and height (h-12). */}
+      <a
+        href="#section-packs"
+        onClick={(e) => {
+          e.preventDefault();
+          document
+            .getElementById("section-packs")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }}
+        aria-label="Scegli il tuo pack"
+        className="fixed left-0 z-40 md:hidden inline-flex items-center gap-2 active:scale-95 h-12 pl-3.5 pr-4 bottom-5"
+        style={{
+          background: "#F09226",
+          color: "#1a1a1a",
+          borderTopRightRadius: 9999,
+          borderBottomRightRadius: 9999,
+          boxShadow:
+            "0 14px 36px rgba(240,146,38,0.32), 0 4px 12px rgba(0,0,0,0.18)",
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          className="shrink-0"
+        >
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+          <path d="M3 6h18" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+        <span className="text-[11.5px] font-black tracking-[0.2em] uppercase leading-none">
+          Scegli il Tuo Pack
+        </span>
+      </a>
 
       {/* Block detail modal */}
       {openBlock && (

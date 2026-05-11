@@ -7,40 +7,50 @@ import { useTheme } from "@/components/providers/theme-provider";
 
 const FAQS = [
   {
-    q: "Quali sono i prerequisiti per iscriversi?",
-    a: "Non esistono prerequisiti accademici formali. Il percorso è aperto a tutti gli appassionati e professionisti del fitness che vogliono formalizzare e approfondire le proprie competenze. È sufficiente la passione per il settore e la volontà di investire seriamente nella propria formazione.",
+    q: "Per chi è pensato il percorso?",
+    a: "Per personal trainer, preparatori atletici e appassionati che vogliono costruire competenze tecniche solide e un'identità professionale credibile. Non sono richiesti titoli pregressi: il percorso parte dalle fondamenta (FUNCTION) e arriva alla strategia di business (SCIENCE).",
   },
   {
-    q: "La certificazione FipexLacertosus è riconosciuta a livello nazionale?",
-    a: "Sì. La certificazione è riconosciuta nel settore fitness italiano attraverso la collaborazione con FipexLacertosus, ente che opera a livello nazionale. Il titolo è spendibile per esercitare la professione come Personal Trainer e per aprire strutture affiliate.",
+    q: "Cosa include esattamente il percorso?",
+    a: "9 mesi di formazione in presenza, articolati in 3 blocchi — FUNCTION, STRENGTH, SCIENCE — per un totale di 11 weekend formativi. Posti limitati a 30 partecipanti per garantire qualità didattica e rapporto diretto con i docenti.",
   },
   {
-    q: "È possibile rateizzare il pagamento?",
-    a: "Attualmente i prodotti sono acquistabili singolarmente, il che ti permette di seguire il percorso un blocco alla volta e gestire l'investimento nel tempo. Contattaci per ulteriori opzioni di pagamento personalizzate.",
+    q: "Qual è la differenza tra START, PRO ed ELITE?",
+    a: "START (€3.300) include i 3 blocchi e l'attestazione Functional Strength Master Coach. PRO (€4.700) aggiunge la certificazione Personal Trainer FIPE × Lacertosus e 2 masterclass a scelta tra le 9 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
   },
   {
-    q: "Cosa succede se non posso partecipare a un weekend?",
-    a: "Ogni caso viene valutato individualmente. In generale è prevista la possibilità di recupero nelle edizioni successive per eventi straordinari e documentati. Tuttavia, la presenza è fondamentale per il corretto apprendimento e per accedere alla certificazione.",
+    q: "La certificazione FIPE × Lacertosus è riconosciuta?",
+    a: "Sì. È rilasciata in collaborazione con FIPE (Federazione Italiana Pesistica) ed è spendibile in palestre e strutture sportive sia in Italia sia all'estero. Dà accesso al registro professionisti e abilita all'esercizio della professione di Personal Trainer.",
   },
   {
-    q: "I workshop sono obbligatori o opzionali?",
-    a: "I Master specialistici sono completamente opzionali. Puoi acquistarli singolarmente o selezionare quelli che ti interessano in base al tuo percorso professionale. Ogni Master è indipendente e si svolge in una giornata dedicata.",
+    q: "Posso acquistare un singolo blocco o una sola masterclass?",
+    a: "Sì. Ogni blocco (FUNCTION, STRENGTH, SCIENCE) è acquistabile separatamente, così come ciascuna delle 9 masterclass specialistiche (Functional & Bulgarian, Strength, Calcio, Pallavolo, Hyrox, Rugby, Running, Sport da Combattimento, Nuoto). La certificazione FIPE però è inclusa solo nei bundle PRO ed ELITE.",
   },
   {
     q: "Dove si svolge il percorso?",
-    a: "Il percorso si svolge in presenza in strutture appositamente selezionate. Le location esatte vengono comunicate agli iscritti con anticipo. Il percorso è attualmente attivo in Italia.",
+    a: "In presenza, in strutture selezionate sul territorio italiano. Le location esatte di ogni weekend vengono comunicate agli iscritti con anticipo, in modo da permettere di organizzare viaggio e alloggio (incluso nel pack ELITE).",
   },
   {
-    q: "Come funziona la collaborazione con FIPE?",
-    a: "FipexLacertosus conduce le sessioni di valutazione al termine di ogni blocco formativo. La collaborazione garantisce standard elevati di valutazione e il riconoscimento ufficiale del percorso nell'ecosistema professionale del fitness.",
+    q: "Cosa succede se non posso partecipare a un weekend?",
+    a: "La presenza è fondamentale per la qualità del percorso e per l'accesso alla certificazione. In caso di assenza documentata per cause straordinarie valutiamo individualmente la possibilità di recupero nelle edizioni successive.",
   },
   {
-    q: "È possibile aprire un Training Hub subito dopo il percorso?",
-    a: "L'opportunità di aprire un Training Hub Lacertosus è disponibile per i professionisti certificati che completano il percorso completo. Il processo richiede un colloquio di valutazione e l'accordo con il team Lacertosus per garantire standard qualitativi uniformi.",
+    q: "Posso aprire un Training Hub Lacertosus dopo il percorso?",
+    a: "Sì, è una delle opportunità riservate ai professionisti certificati che completano il percorso. Apre con un colloquio dedicato e un accordo con il team Lacertosus per allineare standard qualitativi e identità del brand.",
   },
 ];
 
-function FaqItem({ q, a, index, isDark }: { q: string; a: string; index: number; isDark: boolean }) {
+function FaqItem({
+  q,
+  a,
+  index,
+  isDark,
+}: {
+  q: string;
+  a: string;
+  index: number;
+  isDark: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +91,12 @@ function FaqItem({ q, a, index, isDark }: { q: string; a: string; index: number;
           <span className="mt-0.5 shrink-0 text-[0.75rem] font-black text-academy-orange/40">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className="text-sm font-semibold text-academy-gray-200" style={{ color: th }}>{q}</span>
+          <span
+            className="text-sm font-semibold text-academy-gray-200"
+            style={{ color: th }}
+          >
+            {q}
+          </span>
         </div>
         <span
           className="mt-0.5 shrink-0 text-lg font-light text-academy-orange/60 transition-transform duration-300"
@@ -95,7 +110,12 @@ function FaqItem({ q, a, index, isDark }: { q: string; a: string; index: number;
         ref={bodyRef}
         style={{ maxHeight: 0, opacity: 0, overflow: "hidden" }}
       >
-        <p className="pb-5 pl-10 text-sm leading-relaxed text-academy-gray-400" style={{ color: tb }}>{a}</p>
+        <p
+          className="pb-5 pl-10 text-sm leading-relaxed text-academy-gray-400"
+          style={{ color: tb }}
+        >
+          {a}
+        </p>
       </div>
     </div>
   );
@@ -113,14 +133,29 @@ export function FaqSection() {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.from(headRef.current, {
-        scrollTrigger: { trigger: headRef.current, start: "top 85%", once: true },
-        opacity: 0, y: 25, duration: 0.7, ease: "power3.out",
+        scrollTrigger: {
+          trigger: headRef.current,
+          start: "top 85%",
+          once: true,
+        },
+        opacity: 0,
+        y: 25,
+        duration: 0.7,
+        ease: "power3.out",
       });
       const items = listRef.current?.querySelectorAll("[data-faq-item]");
       if (items) {
         gsap.from(items, {
-          scrollTrigger: { trigger: listRef.current, start: "top 78%", once: true },
-          opacity: 0, x: -20, duration: 0.45, stagger: 0.07, ease: "power2.out",
+          scrollTrigger: {
+            trigger: listRef.current,
+            start: "top 78%",
+            once: true,
+          },
+          opacity: 0,
+          x: -20,
+          duration: 0.45,
+          stagger: 0.07,
+          ease: "power2.out",
         });
       }
     }, sectionRef);
@@ -147,18 +182,21 @@ export function FaqSection() {
               className="text-[clamp(1.9rem,3.5vw,3rem)] font-black leading-[1.05] tracking-tight text-academy-gray-100"
               style={{ color: th }}
             >
-              Hai ancora{" "}
-              <span className="gradient-text">domande?</span>
+              Hai ancora <span className="gradient-text">domande?</span>
             </h2>
-            <p className="mt-4 text-sm text-academy-gray-500" style={{ color: tm }}>
-              Ecco le risposte alle domande più comuni. Per tutto il resto, contattaci direttamente.
+            <p
+              className="mt-4 text-sm text-academy-gray-500"
+              style={{ color: tm }}
+            >
+              Ecco le risposte alle domande più comuni. Per tutto il resto,
+              contattaci direttamente.
             </p>
             <div className="mt-8">
               <a
-                href="mailto:info@lacertosus.com"
+                href="mailto:academy@lacertosus.com"
                 className="text-xs font-semibold text-academy-orange underline underline-offset-4 hover:text-academy-orange-light"
               >
-                info@lacertosus.com →
+                academy@lacertosus.com →
               </a>
             </div>
           </div>
