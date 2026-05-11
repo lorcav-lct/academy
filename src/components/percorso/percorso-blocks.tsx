@@ -11,16 +11,6 @@ import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 
 const PREVIEW_TEACHERS = 3;
 
-// SEO-oriented descriptors per block: keyword-rich, specific, search-friendly.
-const SEO_TAGLINE_BY_SLUG: Record<string, string> = {
-  function:
-    "Anatomia, biomeccanica e Functional Training applicato alla general population.",
-  strength:
-    "Forza, condizionamento e preparazione atletica per atleti e operatori tattici.",
-  science:
-    "Recupero, nutrizione, psicologia del movimento e business del fitness.",
-};
-
 export function PercorsoBlocks() {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -352,26 +342,26 @@ export function PercorsoBlocks() {
         {/* ─── HEADER ─────────────────────────────────────────────── */}
         <div ref={headerRef} className="mb-20 md:mb-28">
           <span data-header-item className="label-tag mb-4 block">
-            Il Programma in 3 Blocchi
+            FUNCTION. STRENGTH. SCIENCE.
           </span>
           <h2
             data-header-item
             className="font-black tracking-[-0.025em] leading-[0.92] text-[clamp(2.6rem,5.5vw,5rem)]"
             style={{ color: th }}
           >
-            FUNCTION, STRENGTH, SCIENCE.
-            <br />9 mesi per diventare{" "}
-            <span className="gradient-text">personal trainer</span>.
+            Un Sistema Formativo Creato
+            <br />
+            per la{" "}
+            <span className="gradient-text">Performance Professionale</span>.
           </h2>
           <p
             data-header-item
             className="mt-6 max-w-xl text-[0.95rem] leading-relaxed"
             style={{ color: tb }}
           >
-            Tre blocchi formativi in presenza che coprono biomeccanica e
-            Functional Training, Strength &amp; Conditioning per atleti e
-            preparazione tattica, recupero, nutrizione, psicologia del movimento
-            e business del fitness. Curriculum, docenti e date di ogni blocco.
+            Tre blocchi didattici integrati per costruire competenze tecniche,
+            metodologiche e professionali immediatamente applicabili nel
+            coaching moderno.
           </p>
         </div>
 
@@ -402,9 +392,8 @@ export function PercorsoBlocks() {
                   index={i}
                   isLast={i === blocks.length - 1}
                   title={course.title}
-                  seoTagline={SEO_TAGLINE_BY_SLUG[course.slug] ?? ""}
                   area={course.area}
-                  objective={course.objective}
+                  description={course.description}
                   curriculum={course.curriculum}
                   duration={course.duration}
                   teacherCount={teachers.length}
@@ -428,9 +417,8 @@ interface BlockRowProps {
   index: number;
   isLast: boolean;
   title: string;
-  seoTagline: string;
   area: string;
-  objective: string;
+  description: string;
   curriculum: string[];
   duration: string;
   teacherCount: number;
@@ -450,9 +438,8 @@ function BlockRow({
   index,
   isLast,
   title,
-  seoTagline,
   area,
-  objective,
+  description,
   curriculum,
   duration,
   teacherCount,
@@ -523,23 +510,12 @@ function BlockRow({
           </p>
         </div>
 
-        {/* SEO-rich tagline — keyword-dense, search-friendly */}
-        {seoTagline && (
-          <p
-            data-block-meta
-            className="mt-6 text-[1.05rem] md:text-[1.1rem] font-black leading-[1.35] tracking-[-0.01em] max-w-[42ch]"
-            style={{ color: th }}
-          >
-            {seoTagline}
-          </p>
-        )}
-
         <p
           data-block-meta
-          className="mt-4 text-[0.95rem] leading-[1.65] max-w-[44ch]"
+          className="mt-6 text-[0.95rem] leading-[1.7] max-w-[52ch]"
           style={{ color: tb }}
         >
-          {objective}
+          {description}
         </p>
 
         {/* Inline meta line — minimal, no boxes */}

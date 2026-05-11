@@ -10,28 +10,28 @@ import { useTheme } from "@/components/providers/theme-provider";
 const FEATURES = [
   {
     n: "01",
-    title: "Zero investimento iniziale",
-    desc: "Nessun capitale da immobilizzare. Paghi un canone mensile che include attrezzatura, immobile e supporto.",
+    title: "Format già pronto",
+    desc: "Accedi a un modello strutturato con brand consolidato e metodologia definita, pronto per essere attivato.",
   },
   {
     n: "02",
-    title: "Autonomia totale",
-    desc: "Sei tu a fissare tariffe, orari e strategia commerciale. Il brand Lacertosus, il tuo business.",
+    title: "Nessun investimento di sistema",
+    desc: "Niente capitale immobilizzato nella costruzione del format: il sistema esiste già, tu lo attivi sul territorio.",
   },
   {
     n: "03",
-    title: "Brand e rete già pronti",
-    desc: "Accedi al brand Lacertosus, ai materiali di marketing e alla rete nazionale di professionisti certificati.",
+    title: "Canone mensile sostenibile",
+    desc: "Un canone calibrato che ti dà identità forte, supporto operativo continuo ed ecosistema integrato.",
   },
   {
     n: "04",
-    title: "Supporto operativo continuo",
-    desc: "Metodologie, materiali di formazione e assistenza diretta dal team Lacertosus per avviare e crescere.",
+    title: "Condizioni Academy Graduate",
+    desc: "Vantaggi e condizioni agevolate riservati a chi completa l'Academy con impegno e standard qualitativi elevati.",
   },
   {
     n: "05",
-    title: "Apertura rapida",
-    desc: "Il format è già testato e rodato. Dalla firma del contratto all'apertura in tempi brevi.",
+    title: "Accesso al network",
+    desc: "Entri nella rete Lacertosus con supporto operativo, formativo e una community di professionisti certificati.",
   },
 ];
 
@@ -312,11 +312,11 @@ export function TrainingHubSection() {
               className="text-[clamp(1.4rem,2.5vw,2.2rem)] font-black tracking-tight leading-tight"
               style={{ color: th }}
             >
-              Pronto ad aprire il tuo Hub?
+              Inizia il Percorso.
             </p>
             <p className="mt-2 text-[0.9rem] max-w-md" style={{ color: tb }}>
-              Scopri tutti i dettagli e candidati per un Training Hub Lacertosus
-              nella tua città.
+              Scopri i pack disponibili per l&apos;edizione 2026/27 e scegli la
+              formula adatta al tuo livello di partenza.
             </p>
           </div>
 
@@ -325,9 +325,9 @@ export function TrainingHubSection() {
             className="shrink-0 inline-flex items-center gap-3 px-8 py-4 text-sm font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-85"
             style={{ background: "#F09226", color: "#111111" }}
           >
-            Inizia il Percorso
+            Vedi i Pack
             <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
-              <path d="M8 13L3 8l1.4-1.4L7 9.2V3h2v6.2l2.6-2.6L13 8z" />
+              <path d="M6 3l5 5-5 5-1.4-1.4L8.2 8 4.6 4.4z" />
             </svg>
           </a>
         </div>

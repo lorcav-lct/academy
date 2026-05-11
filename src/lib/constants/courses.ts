@@ -9,6 +9,8 @@ export interface Course {
   area: string;
   duration: string;
   objective: string;
+  /** Long-form description shown on the percorso page block section */
+  description: string;
   curriculum: string[];
   /** One-sentence description for each curriculum item (parallel array) */
   curriculumDescs: string[];
@@ -31,6 +33,8 @@ export const COURSES: Course[] = [
     duration: "2 weekend",
     objective:
       "Fondamenti anatomici, biomeccanici e metodologici del movimento funzionale.",
+    description:
+      "Dalle basi scientifiche del movimento fino all'applicazione avanzata del Functional Training: un blocco formativo progettato per sviluppare una comprensione completa del corpo umano, della biomeccanica e delle metodologie di allenamento funzionale per la general population. Un percorso altamente pratico dove valutazione, programmazione e analisi del movimento si integrano per costruire coach capaci di leggere, correggere e migliorare la performance reale attraverso il Functional Training moderno.",
     curriculum: [
       "Chinesiologia applicata al Functional Training",
       "Metodologie avanzate per la valutazione della composizione corporea",
@@ -70,6 +74,8 @@ export const COURSES: Course[] = [
     area: "Strength & Conditioning",
     duration: "2 weekend",
     objective: "Sviluppo di forza, potenza e condizionamento.",
+    description:
+      "Un blocco formativo dedicato allo sviluppo della forza e della preparazione atletica moderna, dove teoria, metodologia e applicazione pratica si integrano per costruire competenze avanzate nel Strength & Conditioning. Dalla periodizzazione dell'allenamento alla gestione della performance, il percorso approfondisce i principi che guidano lo sviluppo di forza, potenza, ipertrofia e condizionamento per atleti e operatori tattici, con un approccio concreto orientato alla prestazione reale.",
     curriculum: [
       "Periodizzazione dell'allenamento e architettura muscolare",
       "La complessità dell'allenamento di forza e ipertrofia",
@@ -109,6 +115,8 @@ export const COURSES: Course[] = [
     area: "Integrazione Professionale, Performance e Business",
     duration: "2 weekend",
     objective: "Formazione completa del professionista e imprenditore.",
+    description:
+      "Un blocco formativo dedicato agli aspetti che completano il profilo del coach moderno: nutrizione, recupero, psicologia del movimento e sviluppo professionale. Dalla performance alla gestione del proprio brand, il percorso approfondisce tutte le competenze necessarie per costruire un professionista preparato, autorevole e capace di creare valore nel mondo fitness e performance.",
     curriculum: [
       "Nutrizione applicata alla performance",
       "Psicologia del movimento: attività fisica, mente e alimentazione",

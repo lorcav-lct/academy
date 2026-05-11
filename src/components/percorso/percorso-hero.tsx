@@ -76,22 +76,22 @@ export function PercorsoHero() {
                 className="font-black tracking-[-0.025em] leading-[0.93] text-[clamp(2.6rem,5.2vw,4.8rem)]"
                 style={{ color: th }}
               >
-                Il Percorso
+                Un Sistema Formativo
                 <br />
-                <span className="gradient-text">Formativo</span>
+                Costruito su <span className="gradient-text">3 Pilastri</span>
               </h1>
               <p
-                className="mt-6 max-w-[460px] text-[0.95rem] leading-relaxed"
+                className="mt-6 max-w-[480px] text-[0.95rem] leading-relaxed"
                 style={{ color: tb }}
               >
-                Functional Training, Strength &amp; Conditioning, recovery,
-                nutrizione e business del fitness in 9 mesi in presenza.{" "}
                 <span
                   className="font-semibold"
                   style={{ color: isDark ? "rgba(220,220,235,0.9)" : "#222" }}
                 >
-                  Diventa personal trainer certificato FIPE × Lacertosus.
-                </span>
+                  FUNCTION, STRENGTH e SCIENCE
+                </span>{" "}
+                si integrano in un percorso immersivo 100% in presenza
+                sviluppato all&apos;interno dell&apos;HQ Lacertosus.
               </p>
 
               {/* Stats pills */}

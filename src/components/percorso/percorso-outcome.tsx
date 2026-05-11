@@ -10,44 +10,44 @@ import { useTheme } from "@/components/providers/theme-provider";
 
 const OUTCOMES = [
   {
-    title: "Anatomia e biomeccanica applicate al movimento",
-    desc: "Le basi scientifiche del corpo umano diventano strumenti operativi, non nozioni astratte.",
+    title: "Leggere il movimento umano",
+    desc: "Comprendi biomeccanica, controllo motorio e adattamenti funzionali in profondità.",
   },
   {
-    title: "Valutazione funzionale e screening professionale",
-    desc: "Leggi il soggetto prima ancora che parli. Assessment, postura, analisi del movimento.",
+    title: "Functional Training applicato",
+    desc: "Usalo come strumento concreto di valutazione, sviluppo e miglioramento della performance.",
   },
   {
-    title: "Programmazione Functional Training",
-    desc: "Costruisci percorsi strutturati partendo dai pattern di movimento fondamentali.",
+    title: "Programmazione strutturata",
+    desc: "Costruisci percorsi progressivi basati su principi solidi di programmazione e monitoraggio.",
   },
   {
-    title: "Strength & Conditioning avanzato",
-    desc: "Bilanciere, manubri, sprint, potenza. Programmazione S&C per atleti e non.",
+    title: "Strength & Conditioning completo",
+    desc: "Sviluppa percorsi per atleti e popolazione generale orientati a forza, potenza e condizionamento.",
   },
   {
-    title: "Preparazione atleti e operatori tattici",
-    desc: "Forze dell'ordine, militari, atleti agonisti. Saprai allenare chi ha bisogno del meglio.",
+    title: "Fondamentali della forza",
+    desc: "Analizza, insegna e correggi Squat, Panca e Stacco con approccio tecnico e metodologico.",
   },
   {
-    title: "Collaborazione con professionisti sanitari",
-    desc: "Post-intervento, lavoro interdisciplinare, comunicazione con medici e fisioterapisti.",
+    title: "Allenamento, recupero, adattamento",
+    desc: "Gestisci il rapporto tra carico e ripristino per continuità e sostenibilità della performance.",
   },
   {
-    title: "Gestione professionale del cliente",
-    desc: "Relazione, comunicazione efficace, fidelizzazione. Il cliente diventa un riferimento.",
+    title: "Nutrizione integrata",
+    desc: "Comprendi l'impatto su composizione corporea, recupero e prestazione e integrala nei programmi.",
   },
   {
-    title: "Business e imprenditoria nel fitness",
-    desc: "Strategie, branding, numeri. Costruisci e gestisci la tua attività come un'impresa.",
+    title: "Dimensione comportamentale del movimento",
+    desc: "Interpreta motivazione, mente e aderenza per costruire un percorso reale con il cliente.",
   },
   {
-    title: "Certificazione FIPE × Lacertosus",
-    desc: "L'attestazione ufficiale che distingue il tuo profilo sul mercato del lavoro.",
+    title: "Visione professionale del settore",
+    desc: "Costruisci posizionamento e autorevolezza per affermarti nel mercato fitness moderno.",
   },
   {
-    title: "Diventare l'imprenditore di te stesso",
-    desc: "Il percorso termina dove inizia la tua carriera da professionista completo.",
+    title: "Da coach a imprenditore",
+    desc: "Trasforma le competenze tecniche in un progetto di lavoro strutturato e orientato alla crescita.",
   },
 ];
 
@@ -130,12 +130,12 @@ export function PercorsoOutcome() {
                 <span className="gradient-text">Fare</span>
               </h2>
               <p
-                className="mt-5 max-w-lg text-[0.95rem] leading-relaxed"
+                className="mt-5 max-w-xl text-[0.95rem] leading-relaxed"
                 style={{ color: tb }}
               >
-                Al termine dei 9 mesi avrai costruito un profilo professionale
-                che pochi sanno offrire. Queste sono le 10 competenze che ti
-                distingueranno.
+                Al termine dei 9 mesi avrai sviluppato una visione completa del
+                coaching moderno, dove allenamento, scienza e strategia si
+                integrano in un unico sistema di lavoro.
               </p>
             </div>
 
