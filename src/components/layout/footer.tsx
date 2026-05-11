@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
+import { CookiePreferencesLink } from "@/components/layout/cookie-preferences-link";
 import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 
 const footerLinks = {
@@ -19,8 +20,8 @@ const footerLinks = {
     { href: "/auth/register", label: "Registrati" },
   ],
   legal: [
-    { href: "#", label: "Privacy Policy" },
-    { href: "#", label: "Cookie Policy" },
+    { href: "/privacy-policy", label: "Privacy Policy" },
+    { href: "/cookie-policy", label: "Cookie Policy" },
     { href: "#", label: "Condizioni di vendita" },
     { href: "#", label: "Diritto di recesso" },
   ],
@@ -115,6 +116,9 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <CookiePreferencesLink />
+              </li>
             </ul>
           </div>
         </div>

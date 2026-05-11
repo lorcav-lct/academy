@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { IubendaScript } from "@/components/providers/iubenda-script";
+import { CookieConsentProvider } from "@/components/providers/cookie-consent";
 import "./globals.css";
 
 const saira = Saira({
@@ -74,8 +74,7 @@ export default function RootLayout({
           <Footer />
           <WhatsAppFloat />
         </ThemeProvider>
-        {/* Iubenda cookie banner — loaded on every page */}
-        <IubendaScript />
+        <CookieConsentProvider />
       </body>
     </html>
   );
