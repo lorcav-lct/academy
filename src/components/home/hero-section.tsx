@@ -280,7 +280,7 @@ export function HeroSection({
       if (sliderActive.current && !isTransitioning.current) {
         goToSlide((activeIdxRef.current + 1) % slides.length);
       }
-    }, 5600);
+    }, 6600);
     return () => clearInterval(id);
   }, [slides.length, goToSlide]);
 
@@ -772,7 +772,7 @@ export function HeroSection({
             )}
 
             {/* Title (split reveal) + description */}
-            <div ref={slideContentRef} className="text-center max-w-5xl">
+            <div ref={slideContentRef} className="text-center">
               <div ref={line1Ref}>
                 <SplitLine
                   text={slide.title_white}

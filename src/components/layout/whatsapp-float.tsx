@@ -75,7 +75,7 @@ export function WhatsAppFloat() {
       <div
         aria-hidden
         onClick={() => setOpen(false)}
-        className="fixed inset-0 z-[79] md:hidden transition-opacity duration-300"
+        className="fixed inset-0 z-[39] md:hidden transition-opacity duration-300"
         style={{
           background: "rgba(10,10,15,0.45)",
           backdropFilter: "blur(3px)",
@@ -88,8 +88,8 @@ export function WhatsAppFloat() {
       {/* ── Collapsed FAB cluster (phone + WhatsApp) ─────────────── */}
       <div
         aria-hidden={open}
-        className="fixed right-0 z-[80] flex items-center gap-2.5 pl-3 md:pl-4
-                   bottom-5 md:bottom-8"
+        className="fixed right-0 z-40 md:z-[80] flex items-center gap-2.5 pl-3 md:pl-4
+                   bottom-5 md:bottom-50"
         style={{
           opacity: open ? 0 : 1,
           transform: open
@@ -175,9 +175,9 @@ export function WhatsAppFloat() {
         aria-modal="false"
         aria-label="Composer WhatsApp"
         aria-hidden={!open}
-        className="fixed z-[80] flex flex-col overflow-hidden
+        className="fixed z-40 md:z-[80] flex flex-col overflow-hidden
                    right-3 md:right-6
-                   bottom-5 md:bottom-8
+                   bottom-5 md:bottom-50
                    w-[min(360px,calc(100vw-1.5rem))] md:w-[380px]
                    h-[min(70vh,520px)] md:h-[480px]"
         style={{
