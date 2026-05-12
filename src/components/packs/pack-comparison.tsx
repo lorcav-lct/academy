@@ -705,7 +705,7 @@ function JourneySection({
               className="text-[1.7rem] font-black leading-none tabular-nums"
               style={{ color: "#F09226" }}
             >
-              2
+              3
             </span>
             <div>
               <span
@@ -718,7 +718,7 @@ function JourneySection({
                 className="text-[0.55rem] font-bold tracking-[0.15em] uppercase"
                 style={{ color: ts }}
               >
-                Master Coach + FIPE × Lacertosus
+                Master Trainer · NSCA · FIPE Elite
               </span>
             </div>
           </div>
@@ -756,13 +756,13 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     headline:
       "La certificazione FIPE che fa la differenza nel mercato professionale.",
     promise:
-      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE × Lacertosus (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 9 sessioni esclusive. Il pack scelto da chi punta in alto.",
+      "Tutto il percorso + la certificazione ufficiale Personal Elite Trainer FIPE (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 9 sessioni esclusive. Il pack scelto da chi punta in alto.",
     guarantees: [
       {
-        label: "Personal Trainer FIPE",
+        label: "Personal Elite Trainer FIPE",
         sub: "Riconoscimento nazionale e internazionale",
       },
-      { label: "Master Coach", sub: "Certificazione nazionale Lacertosus" },
+      { label: "Master Trainer", sub: "Certificazione nazionale Lacertosus" },
       { label: "2 Masterclass", sub: "A scelta su 9 sessioni esclusive" },
     ],
   },
@@ -775,7 +775,7 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     guarantees: [
       { label: "Vitto & Alloggio", sub: "Inclusi per tutti i 6 weekend" },
       {
-        label: "Personal Trainer FIPE",
+        label: "Personal Elite Trainer FIPE",
         sub: "Riconoscimento nazionale e internazionale",
       },
       { label: "Accesso prioritario", sub: "Eventi riservati e network" },
@@ -899,12 +899,16 @@ function PackModal({
   const valueStackExtras: { label: string; sub: string }[] = [];
   // Sempre incluso (tutti i pack)
   valueStackExtras.push({
-    label: "Functional Strength Master Coach",
-    sub: "Certificazione nazionale Lacertosus inclusa in tutti i pack",
+    label: "Functional Strength Master Trainer",
+    sub: "Diploma rilasciato da CSEN — riconoscimento nazionale, incluso in tutti i pack",
+  });
+  valueStackExtras.push({
+    label: "+ 2.0 CEU NSCA",
+    sub: "Lacertosus è NSCA CEU Provider · Riconoscimento internazionale incluso in tutti i pack",
   });
   if (isPro || isElite) {
     valueStackExtras.push({
-      label: "Personal Trainer FIPE × Lacertosus",
+      label: "Personal Elite Trainer FIPE",
       sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale",
     });
     valueStackExtras.push({
@@ -1651,8 +1655,12 @@ const CARD_COPY: Record<string, CardCopy> = {
     audience: "Per chi vuole entrare nell'Academy.",
     extras: [
       {
-        text: "Functional Strength Master Coach",
-        sub: "Certificazione nazionale Lacertosus inclusa",
+        text: "Functional Strength Master Trainer",
+        sub: "Diploma rilasciato da CSEN — riconoscimento nazionale",
+      },
+      {
+        text: "+ 2.0 CEU NSCA",
+        sub: "Riconoscimento internazionale incluso — Lacertosus è NSCA CEU Provider",
       },
     ],
     ctaLabel: "Scegli START",
@@ -1671,11 +1679,15 @@ const CARD_COPY: Record<string, CardCopy> = {
     ],
     extras: [
       {
-        text: "Functional Strength Master Coach",
-        sub: "Certificazione nazionale Lacertosus inclusa",
+        text: "Functional Strength Master Trainer",
+        sub: "Diploma rilasciato da CSEN — riconoscimento nazionale",
       },
       {
-        text: "Personal Trainer FIPE × Lacertosus",
+        text: "+ 2.0 CEU NSCA",
+        sub: "Riconoscimento internazionale — Lacertosus è NSCA CEU Provider",
+      },
+      {
+        text: "Personal Elite Trainer FIPE",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
     ],
@@ -1702,11 +1714,15 @@ const CARD_COPY: Record<string, CardCopy> = {
     ],
     extras: [
       {
-        text: "Functional Strength Master Coach",
-        sub: "Certificazione nazionale Lacertosus inclusa",
+        text: "Functional Strength Master Trainer",
+        sub: "Diploma rilasciato da CSEN — riconoscimento nazionale",
       },
       {
-        text: "Personal Trainer FIPE × Lacertosus",
+        text: "+ 2.0 CEU NSCA",
+        sub: "Riconoscimento internazionale — Lacertosus è NSCA CEU Provider",
+      },
+      {
+        text: "Personal Elite Trainer FIPE",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
@@ -2343,7 +2359,7 @@ function PacksSection({
               className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-3 block"
               style={{ color: "#F09226" }}
             >
-              — Le Due Certificazioni
+              — Le Certificazioni
             </span>
             <h3
               className="font-black tracking-[-0.025em] leading-[0.95]"
@@ -2352,7 +2368,7 @@ function PacksSection({
                 color: th,
               }}
             >
-              Due titoli <span className="gradient-text">riconosciuti</span>.
+              Titoli <span className="gradient-text">riconosciuti</span>.
               <br />
               Una carriera reale.
             </h3>
@@ -2360,9 +2376,12 @@ function PacksSection({
               className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed"
               style={{ color: tb }}
             >
-              Al termine del percorso ricevi due certificazioni distinte. Una è
-              inclusa in qualunque pack, l&apos;altra è riservata ai pack PRO ed
-              ELITE per chi vuole il riconoscimento FIPE ufficiale.
+              Al termine del percorso esci con la certificazione{" "}
+              <strong>Functional Strength Master Trainer</strong> rilasciata da
+              CSEN e i <strong>2.0 CEU NSCA</strong> di valore internazionale —
+              inclusi in tutti i pack. Con PRO ed ELITE ottieni anche il{" "}
+              <strong>Personal Elite Trainer FIPE</strong>, riconosciuto a
+              livello nazionale e internazionale.
             </p>
           </div>
           <CertificationsCards isDark={isDark} />

@@ -16,15 +16,31 @@ const FAQS = [
   },
   {
     q: "Qual è la differenza tra START, PRO ed ELITE?",
-    a: "START (€3.300) include i 3 blocchi e l'attestazione Functional Strength Master Coach. PRO (€4.700) aggiunge la certificazione Personal Trainer FIPE × Lacertosus e 2 masterclass a scelta tra le 9 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
+    a: "START (€3.300) include i 3 blocchi, l'attestazione Functional Strength Master Trainer (diploma CSEN) e il riconoscimento NSCA con 2.0 CEU internazionali. PRO (€4.700) aggiunge la certificazione Personal Elite Trainer FIPE e 2 masterclass a scelta tra le 9 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
   },
   {
-    q: "La certificazione FIPE × Lacertosus è riconosciuta?",
-    a: "Sì. È rilasciata in collaborazione con FIPE (Federazione Italiana Pesistica) ed è spendibile in palestre e strutture sportive sia in Italia sia all'estero. Dà accesso al registro professionisti e abilita all'esercizio della professione di Personal Trainer.",
+    q: "Quali certificazioni ottengo al termine del percorso?",
+    a: "In tutti i pack ricevi due riconoscimenti: il diploma Functional Strength Master Trainer rilasciato da CSEN (con Tesserino tecnico e iscrizione all'albo nazionale degli istruttori sportivi) e i 2.0 CEU NSCA — Lacertosus Academy è ufficialmente NSCA CEU Provider. Nei pack PRO ed ELITE si aggiunge la certificazione Personal Elite Trainer FIPE, rilasciata dalla Federazione Italiana Pesistica.",
+  },
+  {
+    q: "Cosa significa che Lacertosus è NSCA CEU Provider?",
+    a: "Significa che la NSCA — National Strength and Conditioning Association, una delle organizzazioni internazionali più autorevoli nello Strength & Conditioning — riconosce ufficialmente il percorso Academy. Completando i 9 mesi ottieni 2.0 CEU (Continuing Education Units) validi per il mantenimento delle certificazioni NSCA, l'aggiornamento professionale continuo e la spendibilità internazionale del tuo profilo. È incluso in tutti i pack, senza costi aggiuntivi.",
+  },
+  {
+    q: "Cosa attesta il diploma CSEN Functional Strength Master Trainer?",
+    a: "Attesta competenze pratiche e teoriche avanzate in Functional Training, Strength & Conditioning, valutazione del movimento e gestione del cliente. Include Diploma da Istruttore, Tesserino tecnico e iscrizione nell'albo nazionale CSEN degli istruttori sportivi riconosciuti. È immediatamente spendibile in palestre, studi e centri fitness su tutto il territorio nazionale.",
+  },
+  {
+    q: "La certificazione FIPE Personal Elite Trainer è riconosciuta?",
+    a: "Sì. È rilasciata dalla FIPE (Federazione Italiana Pesistica) ed è spendibile in palestre e strutture sportive sia in Italia sia all'estero. Dà accesso al registro nazionale dei professionisti FIPE, attesta competenze avanzate di programmazione della forza e standard internazionali, ed è il titolo che fa la differenza per ruoli di responsabilità tecnica.",
   },
   {
     q: "Posso acquistare un singolo blocco o una sola masterclass?",
-    a: "Sì. Ogni blocco (FUNCTION, STRENGTH, SCIENCE) è acquistabile separatamente, così come ciascuna delle 9 masterclass specialistiche (Functional & Bulgarian, Strength, Calcio, Pallavolo, Hyrox, Rugby, Running, Sport da Combattimento, Nuoto). La certificazione FIPE però è inclusa solo nei bundle PRO ed ELITE.",
+    a: "Sì. Ogni blocco (FUNCTION, STRENGTH, SCIENCE) è acquistabile separatamente, così come ciascuna delle 9 masterclass specialistiche (Functional & Bulgarian, Strength, Calcio, Pallavolo, Hyrox, Rugby, Running, Sport da Combattimento, Nuoto). Le certificazioni complete (CSEN, NSCA, FIPE) sono però vincolate al percorso integrale: NSCA e Master Trainer richiedono i 3 blocchi, FIPE è inclusa nei bundle PRO ed ELITE.",
+  },
+  {
+    q: "C'è un test d'ingresso per accedere all'Academy?",
+    a: "Sì, l'accesso è a numero chiuso e prevede un test d'ingresso che valuta il livello tecnico e teorico, le competenze pregresse e l'idoneità rispetto alle esigenze del percorso. Serve a garantire la sostenibilità del percorso per ciascun partecipante e a costruire un gruppo omogeneo che massimizzi apprendimento e interazione.",
   },
   {
     q: "Dove si svolge il percorso?",

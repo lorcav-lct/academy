@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | Lacertosus Academy",
   },
   description:
-    "Percorso formativo unico per professionisti e imprenditori del fitness. FUNCTION, STRENGTH, SCIENCE: 9 mesi di formazione in presenza con certificazione FipexLacertosus.",
+    "Percorso formativo unico per professionisti e imprenditori del fitness. FUNCTION, STRENGTH, SCIENCE: 9 mesi di formazione in presenza con tre certificazioni — Functional Strength Master Trainer (CSEN), 2.0 CEU NSCA e Personal Elite Trainer FIPE.",
   keywords: [
     "fitness academy",
     "formazione fitness",
@@ -32,7 +32,11 @@ export const metadata: Metadata = {
     "strength conditioning",
     "functional training",
     "lacertosus",
-    "certificazione fitness",
+    "certificazione personal trainer",
+    "diploma CSEN",
+    "NSCA CEU",
+    "FIPE Personal Elite Trainer",
+    "Functional Strength Master Trainer",
   ],
   alternates: {
     canonical: "/",

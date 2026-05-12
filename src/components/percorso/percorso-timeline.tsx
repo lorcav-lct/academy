@@ -189,7 +189,7 @@ function FipePanel({ item }: { item: FipeItem }) {
           {item.displayTitle}
         </h3>
         <p className="text-[0.7rem] font-bold tracking-[0.22em] text-academy-gray-400 uppercase mb-6">
-          FIPE × Lacertosus
+          Personal Elite Trainer FIPE
         </p>
 
         <div className="flex flex-wrap gap-2 justify-center">
@@ -217,8 +217,8 @@ function FipePanel({ item }: { item: FipeItem }) {
           }}
         >
           <p className="text-[0.88rem] leading-relaxed text-academy-gray-400">
-            Sessione formativa e di certificazione ufficiale FIPE × Lacertosus.
-            Al termine del blocco{" "}
+            Sessione formativa e di certificazione ufficiale Personal Elite
+            Trainer FIPE. Al termine del blocco{" "}
             <span className="font-bold text-academy-gray-200">
               {item.afterBlock}
             </span>

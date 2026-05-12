@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -38,9 +39,9 @@ const FOUNDER_PERKS = [
   {
     icon: "⬡",
     label: "Dopo il Percorso",
-    title: "Training Hub Lacertosus",
-    sub: "Apri nel tuo territorio",
-    body: "Il percorso ti dà le competenze, il metodo e il network per aprire un Training Hub certificato Lacertosus Academy nella tua città.",
+    title: "3 Certificazioni Riconosciute",
+    sub: "Spendibili in Italia e all'estero",
+    body: "Esci con il Diploma Functional Strength Master Trainer rilasciato da CSEN, 2.0 CEU NSCA di valore internazionale e — per i pack PRO ed ELITE — il Personal Elite Trainer FIPE. Tre titoli che aprono porte concrete: palestre, centri sportivi, training hub, strutture federali in Italia e all'estero.",
   },
 ];
 
@@ -645,54 +646,102 @@ export function WhyLacertosus() {
             </div>
           </div>
 
-          {/* FIPE STRIP */}
+          {/* CERTIFICAZIONI STRIP */}
           <div
             ref={fipeCardRef}
-            className="flex items-center gap-5 p-7 md:p-8 lg:col-span-5"
+            className="flex flex-col gap-5 p-7 md:p-8 lg:col-span-5"
             style={{
               background: CARD_BG,
               border: `1px solid ${CARD_BORDER}`,
               boxShadow: CARD_SHADOW,
             }}
           >
-            <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center"
-              style={{
-                background: "rgba(240,146,38,0.1)",
-                border: "1px solid rgba(240,146,38,0.35)",
-              }}
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#F09226"
-                strokeWidth="1.8"
-              >
-                <path
-                  d="M12 2L4 5v6.5c0 5 3.5 9 8 10.5 4.5-1.5 8-5.5 8-10.5V5l-8-3z"
-                  strokeLinejoin="miter"
-                />
-              </svg>
-            </div>
-            <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
               <p className="font-mono text-[0.65rem] font-bold tracking-[0.28em] uppercase text-academy-orange">
-                Le due certificazioni
+                Le 3 certificazioni
               </p>
-              <p
-                className="mt-1 text-[0.95rem] font-black"
-                style={{ color: TEXT_PRIMARY }}
+              <span
+                className="px-2 py-0.5 text-[0.55rem] font-black tracking-[0.22em] uppercase"
+                style={{
+                  color: "#F09226",
+                  background: "rgba(240,146,38,0.1)",
+                  border: "1px solid rgba(240,146,38,0.35)",
+                }}
               >
-                Master Coach + FIPE × Lacertosus
-              </p>
-              <p
-                className="mt-1 text-[0.78rem]"
-                style={{ color: TEXT_SECONDARY }}
-              >
-                Master Coach in tutti i pack · FIPE riconosciuta nazionale e
-                internazionale.
-              </p>
+                Nazionali · Internazionali
+              </span>
+            </div>
+
+            {/* 3 mini-rows */}
+            <ul className="flex flex-col gap-3">
+              {[
+                {
+                  pill: "Tutti i pack",
+                  title: "Functional Strength Master Trainer",
+                  sub: "Diploma rilasciato da CSEN · Riconoscimento nazionale.",
+                },
+                {
+                  pill: "Tutti i pack",
+                  title: "NSCA CEU Provider · +2.0 CEU",
+                  sub: "Crediti formativi internazionali validi per certificazioni NSCA.",
+                },
+                {
+                  pill: "Pro · Elite",
+                  title: "Personal Elite Trainer FIPE",
+                  sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale.",
+                },
+              ].map((cert) => (
+                <li key={cert.title} className="flex items-start gap-3">
+                  <span
+                    className="shrink-0 mt-1 h-2 w-2"
+                    style={{ background: "#F09226" }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span
+                        className="text-[0.86rem] font-black leading-tight"
+                        style={{ color: TEXT_PRIMARY }}
+                      >
+                        {cert.title}
+                      </span>
+                      <span
+                        className="px-1.5 py-0.5 text-[0.48rem] font-black tracking-[0.18em] uppercase"
+                        style={{
+                          color: "#F09226",
+                          background: "rgba(240,146,38,0.08)",
+                          border: "1px solid rgba(240,146,38,0.3)",
+                        }}
+                      >
+                        {cert.pill}
+                      </span>
+                    </div>
+                    <p
+                      className="text-[0.74rem] leading-[1.5]"
+                      style={{ color: TEXT_SECONDARY }}
+                    >
+                      {cert.sub}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Logo row — 6 placeholders */}
+            <div
+              className="flex items-center justify-between gap-1 pt-5"
+              style={{ borderTop: `1px solid ${DIVIDER}` }}
+              aria-label="Enti certificatori"
+            >
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Image
+                  key={i}
+                  src="/certificazioni/csen.webp"
+                  alt="Ente certificatore"
+                  width={88}
+                  height={88}
+                  className="h-16 w-16 md:h-20 md:w-20 object-contain"
+                />
+              ))}
             </div>
           </div>
         </div>

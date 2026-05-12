@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -1088,7 +1089,7 @@ export function HeroSection({
               className="text-[0.72rem] font-black tracking-[0.34em] uppercase mb-6"
               style={{ color: "rgba(240,146,38,0.85)" }}
             >
-              — Due Certificazioni
+              — Le Certificazioni
             </span>
 
             {/* Title */}
@@ -1103,21 +1104,49 @@ export function HeroSection({
               </div>
               <p
                 data-reveal
-                className="mx-auto mt-6 max-w-2xl text-[clamp(0.95rem,1.1vw,1.05rem)] leading-[1.7]"
+                className="mx-auto mt-6 max-w-3xl text-[clamp(0.95rem,1.1vw,1.05rem)] leading-[1.7]"
                 style={{ color: "rgba(255,255,255,0.85)" }}
               >
-                Due riconoscimenti distinti — uno interno firmato Lacertosus,
-                uno internazionale firmato FIPE — pensati per dare valore reale
-                alla tua professione.
+                Tre riconoscimenti che fanno la differenza:{" "}
+                <strong>Functional Strength Master Trainer</strong> rilasciato
+                da CSEN e <strong>2.0 CEU NSCA</strong> di valore internazionale
+                — inclusi in tutti i pack. Con PRO ed ELITE ottieni anche il{" "}
+                <strong>Personal Elite Trainer FIPE</strong>, il titolo che apre
+                le porte del mercato professionale del fitness in Italia e
+                all&apos;estero.
               </p>
+            </div>
+
+            {/* Logo row — 4 placeholders: Master Trainer, CSEN, FIPE, NSCA */}
+            <div
+              data-reveal
+              className="mt-10 flex items-center justify-center gap-3 md:gap-4"
+              aria-label="Enti riconoscitori"
+            >
+              {[
+                "Functional Strength Master Trainer",
+                "CSEN",
+                "FIPE",
+                "NSCA",
+              ].map((label) => (
+                <Image
+                  key={label}
+                  src="/certificazioni/csen.webp"
+                  alt={label}
+                  title={label}
+                  width={160}
+                  height={160}
+                  className="h-24 w-24 md:h-32 md:w-32 lg:h-36 lg:w-36 object-contain"
+                />
+              ))}
             </div>
 
             {/* Two-cert grid */}
             <div
               data-reveal
-              className="relative z-10 mt-10 grid grid-cols-2 gap-5 w-full max-w-4xl"
+              className="relative z-10 mt-10 grid grid-cols-2 gap-5 w-full max-w-5xl"
             >
-              {/* Cert 1 — Functional Strength Master Coach */}
+              {/* Cert 1 — Master Trainer (CSEN) */}
               <div
                 className="flex flex-col gap-4 p-7"
                 style={{
@@ -1149,18 +1178,25 @@ export function HeroSection({
                 >
                   Functional Strength
                   <br />
-                  <span style={{ color: "#F09226" }}>Master Coach</span>
+                  <span style={{ color: "#F09226" }}>Master Trainer</span>
                 </div>
                 <p
-                  className="text-[0.85rem] leading-[1.6]"
-                  style={{ color: "rgba(255,255,255,0.75)" }}
+                  className="text-[0.7rem] font-black tracking-[0.22em] uppercase"
+                  style={{ color: "rgba(240,146,38,0.85)" }}
                 >
-                  Attestazione interna Lacertosus rilasciata al termine dei tre
-                  blocchi. Inclusa in START, PRO ed ELITE.
+                  Rilasciata da CSEN
+                </p>
+                <p
+                  className="text-[0.85rem] leading-[1.6]"
+                  style={{ color: "rgba(255,255,255,0.78)" }}
+                >
+                  Diploma da Istruttore CSEN con Tesserino tecnico e iscrizione
+                  nell&apos;albo nazionale degli istruttori sportivi. Spendibile
+                  immediatamente in palestre, studi e centri fitness.
                 </p>
               </div>
 
-              {/* Cert 2 — FIPE × Lacertosus */}
+              {/* Cert 2 — Personal Elite Trainer FIPE */}
               <div
                 className="flex flex-col gap-4 p-7"
                 style={{
@@ -1191,17 +1227,124 @@ export function HeroSection({
                   className="text-[clamp(1.1rem,1.55vw,1.6rem)] font-black tracking-[-0.02em] leading-[1.05]"
                   style={{ color: "#ffffff" }}
                 >
-                  Personal Trainer
+                  Personal Elite Trainer
                   <br />
-                  <span style={{ color: "#F09226" }}>FIPE × Lacertosus</span>
+                  <span style={{ color: "#F09226" }}>FIPE</span>
                 </div>
+                <p
+                  className="text-[0.7rem] font-black tracking-[0.22em] uppercase"
+                  style={{ color: "#F09226" }}
+                >
+                  Rilasciata da FIPE
+                </p>
                 <p
                   className="text-[0.85rem] leading-[1.6]"
                   style={{ color: "rgba(255,255,255,0.85)" }}
                 >
-                  Certificazione ufficiale FIPE con riconoscimento nazionale.
-                  Riservata ai pack PRO ed ELITE.
+                  Certificazione ufficiale della Federazione Italiana Pesistica.
+                  Specializzazione elite su Strength &amp; Conditioning,
+                  programmazione avanzata della forza e applicazioni multi-sport
+                  — con supporto diretto dei docenti FIPE.
                 </p>
+                <ul className="mt-1 flex flex-col gap-1.5">
+                  {[
+                    "Iscrizione registro nazionale FIPE",
+                    "Valida in Italia e all'estero",
+                    "Standard internazionali di programmazione forza",
+                  ].map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2 text-[0.78rem] leading-[1.5]"
+                      style={{ color: "rgba(255,255,255,0.78)" }}
+                    >
+                      <span
+                        className="shrink-0 mt-1.5 h-1 w-1"
+                        style={{ background: "#F09226" }}
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* NSCA full-width endorsement strip — muted dark, orange only on +2.0 CEU */}
+            <div
+              data-reveal
+              className="relative z-10 mt-5 w-full max-w-5xl overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <div
+                className="absolute left-0 top-0 h-full w-1"
+                style={{ background: "rgba(255,255,255,0.2)" }}
+                aria-hidden
+              />
+              <div className="relative flex items-center gap-7 px-8 py-6">
+                <Image
+                  src="/certificazioni/csen.webp"
+                  alt="NSCA — National Strength and Conditioning Association"
+                  width={120}
+                  height={120}
+                  className="shrink-0 h-24 w-24 object-contain"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 flex-wrap mb-1.5">
+                    <span
+                      className="text-[0.62rem] font-black tracking-[0.3em] uppercase"
+                      style={{ color: "rgba(255,255,255,0.6)" }}
+                    >
+                      Riconoscimento Internazionale
+                    </span>
+                    <span
+                      className="text-[0.55rem] font-black tracking-[0.22em] uppercase px-2 py-1"
+                      style={{
+                        color: "rgba(255,255,255,0.75)",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.14)",
+                      }}
+                    >
+                      Tutti i pack
+                    </span>
+                  </div>
+                  <h4
+                    className="font-black tracking-[-0.02em] leading-[1.05] text-white"
+                    style={{ fontSize: "clamp(1.2rem, 2vw, 1.7rem)" }}
+                  >
+                    NSCA CEU Provider ·{" "}
+                    <span style={{ color: "#F09226" }}>+2.0 CEU</span>
+                  </h4>
+                  <p
+                    className="mt-2 text-[0.88rem] leading-[1.55]"
+                    style={{ color: "rgba(255,255,255,0.72)" }}
+                  >
+                    Lacertosus Academy è ufficialmente riconosciuta come{" "}
+                    <strong>NSCA CEU Provider</strong>. Il percorso vale{" "}
+                    <strong>2.0 CEU</strong> validi per il mantenimento delle
+                    certificazioni NSCA e per la spendibilità internazionale.
+                  </p>
+                </div>
+                <div
+                  className="hidden md:flex flex-col items-center justify-center shrink-0 pl-6"
+                  style={{
+                    borderLeft: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <span
+                    className="text-[2.6rem] font-black leading-none tabular-nums"
+                    style={{ color: "#F09226" }}
+                  >
+                    2.0
+                  </span>
+                  <span
+                    className="mt-1 text-[0.55rem] font-black tracking-[0.26em] uppercase"
+                    style={{ color: "rgba(255,255,255,0.72)" }}
+                  >
+                    CEU NSCA
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -1946,7 +2089,7 @@ export function HeroSection({
             className="relative z-10 text-[0.6rem] font-black tracking-[0.32em] uppercase mb-6 block"
             style={{ color: "rgba(240,146,38,0.85)" }}
           >
-            — Due Certificazioni
+            — Le Certificazioni
           </span>
 
           <div
@@ -1961,14 +2104,34 @@ export function HeroSection({
             className="relative z-10 mt-5 text-[0.9rem] leading-[1.65]"
             style={{ color: "rgba(255,255,255,0.85)" }}
           >
-            Due riconoscimenti distinti — uno interno firmato Lacertosus, uno
-            internazionale firmato FIPE — pensati per dare valore reale alla tua
-            professione.
+            Tre riconoscimenti che fanno la differenza:{" "}
+            <strong>Master Trainer</strong> rilasciato da CSEN e{" "}
+            <strong>2.0 CEU NSCA</strong> in tutti i pack. Con PRO ed ELITE
+            anche il <strong>Personal Elite Trainer FIPE</strong>, riconosciuto
+            in Italia e all&apos;estero.
           </p>
 
+          {/* Logo row — 4 placeholders */}
+          <div
+            className="relative z-10 mt-8 flex items-center justify-between gap-2"
+            aria-label="Enti riconoscitori"
+          >
+            {["Master Trainer", "CSEN", "FIPE", "NSCA"].map((label) => (
+              <Image
+                key={label}
+                src="/certificazioni/csen.webp"
+                alt={label}
+                title={label}
+                width={96}
+                height={96}
+                className="h-20 w-20 object-contain"
+              />
+            ))}
+          </div>
+
           {/* Two certs stacked */}
-          <div className="relative z-10 mt-7 mb-4 flex flex-col gap-4">
-            {/* Cert 1 — Functional Strength Master Coach */}
+          <div className="relative z-10 mt-8 mb-4 flex flex-col gap-4">
+            {/* Cert 1 — Master Trainer (CSEN) */}
             <div
               className="flex flex-col gap-3 p-5"
               style={{
@@ -1999,18 +2162,25 @@ export function HeroSection({
                 style={{ color: "#ffffff" }}
               >
                 Functional Strength{" "}
-                <span style={{ color: "#F09226" }}>Master Coach</span>
+                <span style={{ color: "#F09226" }}>Master Trainer</span>
               </div>
+              <p
+                className="text-[0.62rem] font-black tracking-[0.22em] uppercase"
+                style={{ color: "rgba(240,146,38,0.85)" }}
+              >
+                Rilasciata da CSEN
+              </p>
               <p
                 className="text-[0.8rem] leading-[1.55]"
                 style={{ color: "rgba(255,255,255,0.75)" }}
               >
-                Attestazione interna Lacertosus rilasciata al termine dei tre
-                blocchi.
+                Diploma da Istruttore CSEN con Tesserino tecnico e iscrizione
+                all&apos;albo nazionale. Spendibile in palestre, studi e centri
+                fitness.
               </p>
             </div>
 
-            {/* Cert 2 — FIPE × Lacertosus */}
+            {/* Cert 2 — Personal Elite Trainer FIPE */}
             <div
               className="flex flex-col gap-3 p-5"
               style={{
@@ -2041,15 +2211,96 @@ export function HeroSection({
                 className="text-[1.05rem] font-black tracking-[-0.015em] leading-[1.1]"
                 style={{ color: "#ffffff" }}
               >
-                Personal Trainer{" "}
-                <span style={{ color: "#F09226" }}>FIPE × Lacertosus</span>
+                Personal Elite Trainer{" "}
+                <span style={{ color: "#F09226" }}>FIPE</span>
               </div>
+              <p
+                className="text-[0.62rem] font-black tracking-[0.22em] uppercase"
+                style={{ color: "#F09226" }}
+              >
+                Rilasciata da FIPE
+              </p>
               <p
                 className="text-[0.8rem] leading-[1.55]"
                 style={{ color: "rgba(255,255,255,0.85)" }}
               >
-                Certificazione ufficiale FIPE con riconoscimento nazionale.
+                Certificazione ufficiale della Federazione Italiana Pesistica.
+                Specializzazione elite su Strength &amp; Conditioning,
+                programmazione avanzata della forza e applicazioni multi-sport.
               </p>
+              <ul className="mt-1 flex flex-col gap-1">
+                {[
+                  "Iscrizione registro nazionale FIPE",
+                  "Valida in Italia e all'estero",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-[0.72rem] leading-[1.45]"
+                    style={{ color: "rgba(255,255,255,0.78)" }}
+                  >
+                    <span
+                      className="shrink-0 mt-1.5 h-1 w-1"
+                      style={{ background: "#F09226" }}
+                    />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* NSCA strip — muted dark, orange only on +2.0 CEU */}
+            <div
+              className="relative w-full overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <div
+                className="absolute left-0 top-0 h-full w-1"
+                style={{ background: "rgba(255,255,255,0.2)" }}
+                aria-hidden
+              />
+              <div className="relative flex items-start gap-4 px-5 py-5">
+                <Image
+                  src="/certificazioni/csen.webp"
+                  alt="NSCA — National Strength and Conditioning Association"
+                  width={72}
+                  height={72}
+                  className="shrink-0 h-16 w-16 object-contain"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span
+                      className="text-[0.5rem] font-black tracking-[0.26em] uppercase"
+                      style={{ color: "rgba(255,255,255,0.6)" }}
+                    >
+                      Internazionale
+                    </span>
+                    <span
+                      className="px-1.5 py-0.5 text-[0.46rem] font-black tracking-[0.2em] uppercase"
+                      style={{
+                        color: "rgba(255,255,255,0.75)",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.14)",
+                      }}
+                    >
+                      Tutti i pack
+                    </span>
+                  </div>
+                  <p className="text-[1rem] font-black leading-[1.1] text-white">
+                    NSCA CEU Provider ·{" "}
+                    <span style={{ color: "#F09226" }}>+2.0 CEU</span>
+                  </p>
+                  <p
+                    className="mt-1.5 text-[0.74rem] leading-[1.5]"
+                    style={{ color: "rgba(255,255,255,0.72)" }}
+                  >
+                    2.0 CEU NSCA validi a livello internazionale — incluso in
+                    tutti i pack.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

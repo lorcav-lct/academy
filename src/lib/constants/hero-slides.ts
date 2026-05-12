@@ -40,7 +40,7 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
     title_white: "DUE CERTIFICAZIONI",
     title_orange: "RICONOSCIUTE.",
     description:
-      "Functional Strength Master Coach in tutti i pack. Personal Trainer FIPE × Lacertosus — riconosciuta a livello nazionale e internazionale — nei pack PRO ed ELITE.",
+      "Functional Strength Master Trainer in tutti i pack. Personal Elite Trainer FIPE — riconosciuta a livello nazionale e internazionale — nei pack PRO ed ELITE.",
     cta_label: "Scopri i Pack",
     cta_href: "#pack",
     bg_image_url: null,

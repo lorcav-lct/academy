@@ -16,12 +16,79 @@ import {
 } from "@/app/account/_components/icons";
 import type { User } from "@supabase/supabase-js";
 
-const NAV_LINKS = [
-  { href: "/percorso", label: "Il Percorso", num: "01" },
-  { href: "/pack", label: "Pack", num: "02" },
+type NavSubItem = { href: string; label: string; description?: string };
+type NavSubColumn = { label?: string; items: NavSubItem[] };
+type NavLink = {
+  href: string;
+  label: string;
+  num: string;
+  megamenu?: { columns: NavSubColumn[] };
+};
+
+const NAV_LINKS: NavLink[] = [
+  {
+    href: "/percorso",
+    label: "Il Percorso",
+    num: "01",
+    megamenu: {
+      columns: [
+        {
+          label: "Il Percorso",
+          items: [
+            { href: "/percorso#blocchi", label: "Programma" },
+            { href: "/percorso#competenze", label: "Cosa saprai fare" },
+            { href: "/percorso#calendario", label: "Il Calendario" },
+            { href: "/certificazioni", label: "Certificazioni" },
+            {
+              href: "/percorso#training-hub",
+              label: "Opportunità Training Hub",
+            },
+          ],
+        },
+        {
+          label: "I Blocchi",
+          items: [
+            { href: "/percorso/function", label: "Function" },
+            { href: "/percorso/strength", label: "Strength" },
+            { href: "/percorso/science", label: "Science" },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    href: "/pack",
+    label: "Pack",
+    num: "02",
+    megamenu: {
+      columns: [
+        {
+          label: "Pack",
+          items: [
+            { href: "/pack", label: "Confronta i Pack" },
+            { href: "/pack#section-packs", label: "Acquista un Pack" },
+          ],
+        },
+      ],
+    },
+  },
   { href: "/masterclass", label: "Masterclass", num: "03" },
   { href: "/docenti", label: "Docenti", num: "04" },
 ];
+
+/** Flatten megamenu into ordered list (used by mobile). */
+function flattenMegamenu(
+  link: NavLink,
+): { letter: string; label: string; href: string }[] {
+  if (!link.megamenu) return [];
+  const flat: NavSubItem[] = [];
+  for (const col of link.megamenu.columns) flat.push(...col.items);
+  return flat.map((item, idx) => ({
+    letter: String.fromCharCode(65 + idx), // A, B, C, ...
+    label: item.label,
+    href: item.href,
+  }));
+}
 
 /* ─── User Avatar + Dropdown ─── */
 function UserAvatar({
@@ -192,6 +259,22 @@ export function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [currentHash, setCurrentHash] = useState("");
+  /** Mobile accordion: href of the currently expanded main nav item, or null. */
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+
+  // Reset accordion state when the drawer closes
+  useEffect(() => {
+    if (!mobileOpen) setMobileExpanded(null);
+  }, [mobileOpen]);
+
+  // Track URL hash for sub-item highlighting (anchored items in megamenu)
+  useEffect(() => {
+    setCurrentHash(window.location.hash);
+    const onHashChange = () => setCurrentHash(window.location.hash);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   // Track mobile breakpoint (matches navbar's `min-[981px]:flex` desktop cutoff)
   useEffect(() => {
@@ -239,7 +322,6 @@ export function Navbar() {
      of the viewport, the navbar stays fully visible and transparent. After that
      point it resumes normal hide-on-scroll-down / show-on-scroll-up behavior. */
   useEffect(() => {
-    let lastY = window.scrollY;
     let ticking = false;
     let ready = false;
     const readyTimer = setTimeout(() => {
@@ -261,52 +343,17 @@ export function Navbar() {
         setScrolled(pastHero && y > 30);
 
         if (ready && !document.documentElement.dataset.pathActive) {
+          // Header always visible (no hide-on-scroll-down). Compact mode is
+          // driven by the `scrolled` state and applied via Tailwind classes.
           const header = headerRef.current;
-          // Mobile: always visible, no hide-on-scroll-down
-          const mobile = window.matchMedia("(max-width: 980px)").matches;
-          if (mobile) {
-            gsap.to(header, {
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.38,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          } else if (!pastHero) {
-            // Inside hero: always visible, transparent
-            gsap.to(header, {
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.38,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          } else if (y < 80) {
-            gsap.to(header, {
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.38,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          } else if (y > lastY + 4) {
-            gsap.to(header, {
-              yPercent: -110,
-              duration: 0.42,
-              ease: "power3.inOut",
-              overwrite: "auto",
-            });
-          } else if (y < lastY - 4) {
-            gsap.to(header, {
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.38,
-              ease: "power3.out",
-              overwrite: "auto",
-            });
-          }
+          gsap.to(header, {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.38,
+            ease: "power2.out",
+            overwrite: "auto",
+          });
         }
-        lastY = y;
         ticking = false;
       });
     };
@@ -458,9 +505,28 @@ export function Navbar() {
               : "bg-transparent",
         )}
       >
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-[5%] py-5 md:px-10">
-          {/* Logo */}
-          <div className="flex items-center gap-4 shrink-0">
+        <div
+          className="mx-auto flex max-w-[1440px] items-center justify-between px-[5%] md:px-10"
+          style={{
+            paddingTop: scrolled && !isMobileViewport ? "0.625rem" : "1.25rem",
+            paddingBottom:
+              scrolled && !isMobileViewport ? "0.625rem" : "1.25rem",
+            transition:
+              "padding 500ms cubic-bezier(0.4, 0, 0.2, 1), background-color 500ms cubic-bezier(0.4, 0, 0.2, 1)",
+            willChange: "padding",
+          }}
+        >
+          {/* Logo — GPU-accelerated scale (no SVG attr re-flow) */}
+          <div
+            className="flex items-center gap-4 shrink-0"
+            style={{
+              transform:
+                scrolled && !isMobileViewport ? "scale(0.82)" : "scale(1)",
+              transformOrigin: "left center",
+              transition: "transform 500ms cubic-bezier(0.4, 0, 0.2, 1)",
+              willChange: "transform",
+            }}
+          >
             <Link
               href="/"
               className={cn(
@@ -496,43 +562,151 @@ export function Navbar() {
             />
 
             {NAV_LINKS.map((link) => {
+              const subHrefs = link.megamenu?.columns.flatMap((c) =>
+                c.items.map((i) => i.href.split("#")[0] || i.href),
+              );
               const active =
                 pathname === link.href ||
-                (link.href !== "/" && pathname.startsWith(link.href));
+                (link.href !== "/" && pathname.startsWith(link.href)) ||
+                (subHrefs?.some(
+                  (h) => h && h !== "/" && pathname.startsWith(h),
+                ) ??
+                  false);
+              const hasMega = !!link.megamenu?.columns.length;
+              const isWide =
+                (link.megamenu?.columns.reduce(
+                  (acc, c) => acc + c.items.length,
+                  0,
+                ) ?? 0) > 3;
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onMouseEnter={handleLinkEnter}
-                  className={cn(
-                    "group flex flex-col items-center pb-1 transition-colors duration-200",
-                    active
-                      ? "text-academy-orange"
-                      : onDarkBg
-                        ? "text-white hover:text-academy-orange"
-                        : isDark
-                          ? "text-academy-gray-300 hover:text-academy-orange"
-                          : "text-[#444] hover:text-academy-orange",
-                  )}
-                >
-                  <span
+                <div key={link.href} className="group/nav relative">
+                  <Link
+                    href={link.href}
+                    onMouseEnter={handleLinkEnter}
                     className={cn(
-                      "mb-0.5 text-[12px] font-bold tracking-[0.3em] uppercase transition-colors",
+                      "group flex flex-col items-center pb-1 transition-colors duration-200",
                       active
                         ? "text-academy-orange"
                         : onDarkBg
-                          ? "text-white/80 group-hover:text-academy-orange"
+                          ? "text-white hover:text-academy-orange"
                           : isDark
-                            ? "text-academy-gray-400 group-hover:text-academy-orange"
-                            : "text-[#888] group-hover:text-academy-orange",
+                            ? "text-academy-gray-300 hover:text-academy-orange"
+                            : "text-[#444] hover:text-academy-orange",
                     )}
                   >
-                    {link.num}
-                  </span>
-                  <span className="text-sm font-medium tracking-wider uppercase">
-                    {link.label}
-                  </span>
-                </Link>
+                    <span
+                      className={cn(
+                        "mb-0.5 text-[12px] font-bold tracking-[0.3em] uppercase transition-colors",
+                        active
+                          ? "text-academy-orange"
+                          : onDarkBg
+                            ? "text-white/80 group-hover:text-academy-orange"
+                            : isDark
+                              ? "text-academy-gray-400 group-hover:text-academy-orange"
+                              : "text-[#888] group-hover:text-academy-orange",
+                      )}
+                    >
+                      {link.num}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider uppercase">
+                      {link.label}
+                      {hasMega && (
+                        <svg
+                          className="h-2.5 w-2.5 transition-transform duration-200 group-hover/nav:rotate-180"
+                          viewBox="0 0 10 6"
+                          fill="none"
+                          aria-hidden
+                        >
+                          <path
+                            d="M1 1l4 4 4-4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          />
+                        </svg>
+                      )}
+                    </span>
+                  </Link>
+                  {hasMega && (
+                    /* Megamenu wrapper: pt-3 acts as invisible hover bridge so
+                       cursor moving from trigger to panel stays inside the hover
+                       group. No `mt-*` gap. */
+                    <div
+                      className={cn(
+                        "pointer-events-none absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3",
+                        "opacity-0 transition-opacity duration-200",
+                        "group-hover/nav:pointer-events-auto group-hover/nav:opacity-100",
+                        "focus-within:pointer-events-auto focus-within:opacity-100",
+                      )}
+                      style={{ width: isWide ? "320px" : "240px" }}
+                    >
+                      {/* Megamenu card — Option A: minimal light card (always) */}
+                      <div
+                        className="relative overflow-hidden"
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid rgba(0,0,0,0.05)",
+                          borderRadius: "12px",
+                          boxShadow: "0 12px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <div
+                          className={cn(
+                            "grid p-5",
+                            link.megamenu!.columns.length > 1
+                              ? "grid-cols-2 gap-4"
+                              : "grid-cols-1",
+                          )}
+                        >
+                          {link.megamenu!.columns.map((col, ci) => (
+                            <div
+                              key={ci}
+                              className={cn(
+                                "flex flex-col gap-0.5",
+                                ci > 0 && "pl-4 border-l border-black/[0.04]",
+                              )}
+                            >
+                              {col.label && (
+                                <p className="mb-2 text-[0.6rem] font-black tracking-[0.3em] uppercase text-[#888]">
+                                  {col.label}
+                                </p>
+                              )}
+                              {col.items.map((sub) => {
+                                const [subBase, subHash] = sub.href.split("#");
+                                /* Anchor sub-items (e.g. /percorso#blocchi):
+                                   active only if the URL hash matches the
+                                   clicked anchor — otherwise visiting the
+                                   parent page would mark all of them active.
+                                   Dedicated pages (no hash): active on exact
+                                   match or as nested route. */
+                                const subActive = subHash
+                                  ? pathname === subBase &&
+                                    currentHash === `#${subHash}`
+                                  : pathname === sub.href ||
+                                    (sub.href !== "/" &&
+                                      pathname.startsWith(sub.href + "/"));
+                                return (
+                                  <Link
+                                    key={sub.href}
+                                    href={sub.href}
+                                    className={cn(
+                                      "group/sub block px-2.5 py-2 text-[0.81rem] font-semibold tracking-wide transition-all duration-200 hover:translate-x-0.5",
+                                      subActive
+                                        ? "text-academy-orange"
+                                        : "text-[#222] hover:text-academy-orange hover:bg-[#fafafa]",
+                                    )}
+                                    style={{ borderRadius: "8px" }}
+                                  >
+                                    {sub.label}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -619,33 +793,122 @@ export function Navbar() {
           !mobileOpen && "pointer-events-none",
         )}
         style={{ clipPath: "circle(0% at 93% 4%)" }}
-        onTouchMove={(e) => e.preventDefault()}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute right-0 top-0 h-[40vh] w-[40vw] bg-academy-orange/[0.04] blur-[100px]" />
           <div className="absolute left-0 bottom-0 h-[30vh] w-[30vw] bg-academy-orange/[0.02] blur-[120px]" />
         </div>
 
-        <div className="relative flex h-full flex-col justify-between px-[8%] pb-14 pt-28">
-          <nav className="flex flex-col">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeMenu}
-                className="nav-overlay-item group flex items-baseline gap-5 py-6 border-b border-black/6"
-              >
-                <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/40 uppercase">
-                  {link.num}
-                </span>
-                <span className="text-[2.5rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange text-[#111]">
-                  {link.label}
-                </span>
-              </Link>
-            ))}
+        <div className="relative flex h-full max-h-screen flex-col pb-10 pt-28">
+          <nav
+            className="nav-mobile-scroll flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain pb-4"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {NAV_LINKS.map((link) => {
+              const subItems = flattenMegamenu(link);
+              const hasSub = subItems.length > 0;
+              const isExpanded = mobileExpanded === link.href;
+              return (
+                <div
+                  key={link.href}
+                  className="nav-overlay-item border-b border-black/[0.06]"
+                >
+                  {hasSub ? (
+                    /* With submenu: row toggles accordion (no navigation).
+                       Parent page is reachable via "Vai a …" CTA inside. */
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMobileExpanded(isExpanded ? null : link.href)
+                      }
+                      className="flex w-full items-baseline gap-5 py-5 px-[8%] text-left"
+                      aria-expanded={isExpanded}
+                    >
+                      <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/40 uppercase">
+                        {link.num}
+                      </span>
+                      <span
+                        className={cn(
+                          "flex-1 text-[2.1rem] font-black leading-none tracking-tight uppercase transition-colors duration-200",
+                          isExpanded ? "text-academy-orange" : "text-[#111]",
+                        )}
+                      >
+                        {link.label}
+                      </span>
+                      <span
+                        aria-hidden
+                        className="shrink-0 transition-transform duration-300"
+                        style={{
+                          transform: isExpanded
+                            ? "rotate(-135deg)"
+                            : "rotate(45deg)",
+                          width: "11px",
+                          height: "11px",
+                          borderRight: "2px solid #F09226",
+                          borderBottom: "2px solid #F09226",
+                          marginBottom: isExpanded ? "0" : "4px",
+                          alignSelf: "center",
+                        }}
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      onClick={closeMenu}
+                      className="group flex items-baseline gap-5 py-5 px-[8%]"
+                    >
+                      <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/40 uppercase">
+                        {link.num}
+                      </span>
+                      <span className="text-[2.1rem] font-black leading-none tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange text-[#111]">
+                        {link.label}
+                      </span>
+                    </Link>
+                  )}
+                  {hasSub && (
+                    <div
+                      className="overflow-hidden transition-[grid-template-rows] duration-300 ease-out grid"
+                      style={{
+                        gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                      }}
+                    >
+                      <div className="min-h-0 overflow-hidden">
+                        {/* Full-width naturalmente, padding interno per il contenuto */}
+                        <div className="bg-[#fafafa] px-[8%] pb-4">
+                          {/* CTA "Vai a …" */}
+                          <Link
+                            href={link.href}
+                            onClick={closeMenu}
+                            className="flex items-center justify-between gap-3 py-4 text-[0.72rem] font-black tracking-[0.24em] uppercase text-academy-orange"
+                          >
+                            <span>Vai a {link.label}</span>
+                            <span aria-hidden>→</span>
+                          </Link>
+                          {subItems.map((sub) => (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={closeMenu}
+                              className="group flex items-baseline gap-5 py-2.5"
+                            >
+                              <span className="w-8 shrink-0 text-xs font-bold tracking-[0.3em] text-academy-orange/50 uppercase">
+                                {sub.letter}
+                              </span>
+                              <span className="text-[1.15rem] font-black leading-tight tracking-tight uppercase transition-colors duration-200 group-hover:text-academy-orange text-[#555]">
+                                {sub.label}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
-          <div className="nav-overlay-item flex flex-col gap-4">
+          <div className="nav-overlay-item shrink-0 flex flex-col gap-4 px-[8%] pt-4">
             {user ? (
               <>
                 <Link

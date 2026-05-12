@@ -413,14 +413,18 @@ export function BlockModal({
               >
                 Tutti i pack rilasciano l&apos;attestazione{" "}
                 <span className="font-bold" style={{ color: accentColor }}>
-                  Functional Strength Master Coach
-                </span>
-                . I pack{" "}
+                  Functional Strength Master Trainer
+                </span>{" "}
+                (diploma CSEN) e i{" "}
+                <span className="font-bold" style={{ color: accentColor }}>
+                  2.0 CEU NSCA
+                </span>{" "}
+                di valore internazionale. I pack{" "}
                 <span className="font-bold" style={{ color: accentColor }}>
                   PRO ed ELITE
                 </span>{" "}
-                aggiungono la certificazione ufficiale Personal Trainer FIPE ×
-                Lacertosus e 2 Masterclass a scelta tra le 9 disponibili.
+                aggiungono la certificazione ufficiale Personal Elite Trainer
+                FIPE e 2 Masterclass a scelta tra le 9 disponibili.
               </p>
             </div>
           </div>
