@@ -10,7 +10,10 @@ import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import { ProgramAccordion } from "@/components/packs/program-accordion";
-import { CertificationsCards } from "@/components/shared/certifications-cards";
+import {
+  CertificationsCards,
+  CertificationsIconRow,
+} from "@/components/shared/certifications-cards";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
@@ -1619,24 +1622,27 @@ export function PackPreview() {
 
           {/* Certifications block — rich shared component */}
           <div className="mt-12 md:mt-16">
-            <div className="mb-8 max-w-3xl">
-              <span
-                className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-3 block"
-                style={{ color: "#F09226" }}
-              >
-                — Le Certificazioni
-              </span>
-              <h3
-                className="font-black tracking-[-0.025em] leading-[0.95]"
-                style={{
-                  fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
-                  color: th,
-                }}
-              >
-                Titoli <span className="gradient-text">riconosciuti</span>.
-                <br />
-                Una carriera reale.
-              </h3>
+            <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-10">
+              <div className="max-w-3xl">
+                <span
+                  className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-3 block"
+                  style={{ color: "#F09226" }}
+                >
+                  — Le Certificazioni
+                </span>
+                <h3
+                  className="font-black tracking-[-0.025em] leading-[0.95]"
+                  style={{
+                    fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
+                    color: th,
+                  }}
+                >
+                  Titoli <span className="gradient-text">riconosciuti</span>.
+                  <br />
+                  Una carriera reale.
+                </h3>
+              </div>
+              <CertificationsIconRow isDark={d} />
             </div>
             <CertificationsCards isDark={d} />
           </div>

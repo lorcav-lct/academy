@@ -385,7 +385,7 @@ export default function CertificazioniPage() {
                 className="p-4 md:p-5"
                 style={{ background: "rgba(0,0,0,0.03)" }}
               >
-                Certificazione
+                CERT.
               </div>
               {(["START", "PRO", "ELITE"] as const).map((p) => (
                 <div

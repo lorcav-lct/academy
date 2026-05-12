@@ -14,7 +14,10 @@ import {
 } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
-import { CertificationsCards } from "@/components/shared/certifications-cards";
+import {
+  CertificationsCards,
+  CertificationsIconRow,
+} from "@/components/shared/certifications-cards";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
@@ -2354,35 +2357,38 @@ function PacksSection({
         </div>
         {/* ─── Certificazioni — prominent dual cards (mirror home + percorso) ── */}
         <div className="mt-16 md:mt-20">
-          <div className="mb-8 max-w-3xl">
-            <span
-              className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-3 block"
-              style={{ color: "#F09226" }}
-            >
-              — Le Certificazioni
-            </span>
-            <h3
-              className="font-black tracking-[-0.025em] leading-[0.95]"
-              style={{
-                fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
-                color: th,
-              }}
-            >
-              Titoli <span className="gradient-text">riconosciuti</span>.
-              <br />
-              Una carriera reale.
-            </h3>
-            <p
-              className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed"
-              style={{ color: tb }}
-            >
-              Al termine del percorso esci con la certificazione{" "}
-              <strong>Functional Strength Master Trainer</strong> rilasciata da
-              CSEN e i <strong>2.0 CEU NSCA</strong> di valore internazionale —
-              inclusi in tutti i pack. Con PRO ed ELITE ottieni anche il{" "}
-              <strong>Personal Elite Trainer FIPE</strong>, riconosciuto a
-              livello nazionale e internazionale.
-            </p>
+          <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-10">
+            <div className="max-w-3xl">
+              <span
+                className="text-[0.7rem] font-black tracking-[0.34em] uppercase mb-3 block"
+                style={{ color: "#F09226" }}
+              >
+                — Le Certificazioni
+              </span>
+              <h3
+                className="font-black tracking-[-0.025em] leading-[0.95]"
+                style={{
+                  fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
+                  color: th,
+                }}
+              >
+                Titoli <span className="gradient-text">riconosciuti</span>.
+                <br />
+                Una carriera reale.
+              </h3>
+              <p
+                className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed"
+                style={{ color: tb }}
+              >
+                Al termine del percorso esci con la certificazione{" "}
+                <strong>Functional Strength Master Trainer</strong> rilasciata
+                da CSEN e i <strong>2.0 CEU NSCA</strong> di valore
+                internazionale — inclusi in tutti i pack. Con PRO ed ELITE
+                ottieni anche il <strong>Personal Elite Trainer FIPE</strong>,
+                riconosciuto a livello nazionale e internazionale.
+              </p>
+            </div>
+            <CertificationsIconRow isDark={isDark} />
           </div>
           <CertificationsCards isDark={isDark} />
         </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -725,24 +724,6 @@ export function WhyLacertosus() {
                 </li>
               ))}
             </ul>
-
-            {/* Logo row — 6 placeholders */}
-            <div
-              className="flex items-center justify-between gap-1 pt-5"
-              style={{ borderTop: `1px solid ${DIVIDER}` }}
-              aria-label="Enti certificatori"
-            >
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Image
-                  key={i}
-                  src="/certificazioni/csen.webp"
-                  alt="Ente certificatore"
-                  width={88}
-                  height={88}
-                  className="h-16 w-16 md:h-20 md:w-20 object-contain"
-                />
-              ))}
-            </div>
           </div>
         </div>
 

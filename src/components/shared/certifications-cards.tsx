@@ -46,15 +46,8 @@ export function CertificationsCards({ isDark }: Props) {
             borderLeft: "4px solid #F09226",
           }}
         >
-          {/* Header — bare issuer logo + tag pill */}
-          <div className="flex items-start justify-between gap-3 mb-6">
-            <Image
-              src={PLACEHOLDER_LOGO}
-              alt="CSEN — Centro Sportivo Educativo Nazionale"
-              width={64}
-              height={64}
-              className="h-14 w-14 md:h-16 md:w-16 object-contain"
-            />
+          {/* Header — tag pill only */}
+          <div className="flex items-start justify-end mb-6">
             <span
               className="shrink-0 px-2.5 py-1 text-[0.62rem] font-black tracking-[0.22em] uppercase"
               style={{
@@ -178,15 +171,8 @@ export function CertificationsCards({ isDark }: Props) {
             boxShadow: "0 0 32px rgba(240,146,38,0.15)",
           }}
         >
-          {/* Header — bare issuer logo + tag pill */}
-          <div className="flex items-start justify-between gap-3 mb-6">
-            <Image
-              src={PLACEHOLDER_LOGO}
-              alt="FIPE — Federazione Italiana Pesistica"
-              width={64}
-              height={64}
-              className="h-14 w-14 md:h-16 md:w-16 object-contain"
-            />
+          {/* Header — tag pill only */}
+          <div className="flex items-start justify-end mb-6">
             <span
               className="shrink-0 px-2.5 py-1 text-[0.62rem] font-black tracking-[0.22em] uppercase"
               style={{ color: "#111111", background: ORANGE }}
@@ -332,15 +318,6 @@ function NscaStrip({ isDark }: { isDark: boolean }) {
       />
 
       <div className="relative flex flex-col md:flex-row md:items-center gap-6 md:gap-8 px-7 md:px-10 py-7 md:py-8">
-        {/* Logo (bare, large) */}
-        <Image
-          src={PLACEHOLDER_LOGO}
-          alt="NSCA — National Strength and Conditioning Association"
-          width={120}
-          height={120}
-          className="shrink-0 h-20 w-20 md:h-28 md:w-28 object-contain"
-        />
-
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap mb-2">
@@ -402,6 +379,36 @@ function NscaStrip({ isDark }: { isDark: boolean }) {
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * CertificationsIconRow — horizontal row of 6 issuer logos.
+ * Sits next to section title on desktop, below on mobile.
+ */
+export function CertificationsIconRow({ isDark }: Props) {
+  const border = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  return (
+    <div
+      className="flex items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap md:justify-end"
+      aria-label="Enti certificatori"
+    >
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="shrink-0 flex items-center justify-center p-1.5 md:p-2"
+          style={{ border: `1px solid ${border}` }}
+        >
+          <Image
+            src={PLACEHOLDER_LOGO}
+            alt="Ente certificatore"
+            width={72}
+            height={72}
+            className="h-10 w-10 md:h-12 md:w-12 object-contain"
+          />
+        </div>
+      ))}
     </div>
   );
 }
