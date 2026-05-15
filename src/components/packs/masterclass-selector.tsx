@@ -35,9 +35,9 @@ const CREDENTIALS: Record<string, Cred> = {
     pitch: "Oscar Berti — S&C Coach Modena Volley + Nazionale Italiana.",
     featured: true,
   },
-  "master-hyrox": {
-    domain: "Hyrox",
-    pitch: "Faculty in finalizzazione.",
+  "master-tennis": {
+    domain: "Performance Tennis",
+    pitch: "Piatti Tennis Center — centro di alta specializzazione tennistica.",
   },
   "master-running": {
     domain: "Running Performance",
@@ -50,10 +50,6 @@ const CREDENTIALS: Record<string, Cred> = {
   },
   "master-rugby": {
     domain: "S&C Rugby",
-    pitch: "Faculty in finalizzazione.",
-  },
-  "master-sport-combattimento": {
-    domain: "Combat Sports",
     pitch: "Faculty in finalizzazione.",
   },
 };

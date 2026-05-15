@@ -215,8 +215,9 @@ export const PRODUCTS: AcademyProduct[] = [
   },
   {
     slug: "master-strength",
-    name: "Masterclass Strength",
-    subtitle: "Strength training avanzato e performance",
+    name: "Masterclass Strength Avanzato",
+    subtitle:
+      "Advanced Strength Programming — Programmazione dell'allenamento della forza",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {
@@ -235,7 +236,8 @@ export const PRODUCTS: AcademyProduct[] = [
   {
     slug: "master-calcio",
     name: "Masterclass Calcio",
-    subtitle: "Preparazione fisica nel calcio professionistico",
+    subtitle:
+      "Elite Football Rehab Master — Prevenzione, recupero e ritorno alla massima performance",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {
@@ -254,7 +256,8 @@ export const PRODUCTS: AcademyProduct[] = [
   {
     slug: "master-volley",
     name: "Masterclass Pallavolo",
-    subtitle: "S&C per la pallavolo di alto livello",
+    subtitle:
+      "Jump Higher, Play Stronger — la preparazione atletica nella pallavolo",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {
@@ -271,19 +274,19 @@ export const PRODUCTS: AcademyProduct[] = [
     sortOrder: 23,
   },
   {
-    slug: "master-hyrox",
-    name: "Masterclass Hyrox",
-    subtitle: "Preparazione e performance per Hyrox",
+    slug: "master-tennis",
+    name: "Masterclass Tennis",
+    subtitle: "Performance e preparazione atletica nel tennis di alto livello",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {
-      test: "price_1TTHXYCGgXzYzpRpSShW9Ewg",
-      live: "price_1TUNq7CE95vjZKhkKBjjTh0S",
+      test: "price_1TWHrvCGgXzYzpRpNsXfBsWX",
+      live: "price_1TWIDnCE95vjZKhk1psEVRqi",
     },
-    workshopSlug: "master-hyrox",
+    workshopSlug: "master-tennis",
     includes: [
       "1-2 giornate in presenza",
-      "Faculty in definizione",
+      "Piatti Tennis Center",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
@@ -311,7 +314,8 @@ export const PRODUCTS: AcademyProduct[] = [
   {
     slug: "master-running",
     name: "Masterclass Running",
-    subtitle: "Performance e metodologia per la corsa",
+    subtitle:
+      "Running Science Master — Tecnica, Performance e Prevenzione Infortuni",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {
@@ -326,25 +330,6 @@ export const PRODUCTS: AcademyProduct[] = [
       "Attestato di partecipazione",
     ],
     sortOrder: 26,
-  },
-  {
-    slug: "master-sport-combattimento",
-    name: "Masterclass Sport da Combattimento",
-    subtitle: "Preparazione atletica per arti marziali",
-    type: "workshop",
-    priceCents: 49000,
-    stripePriceId: {
-      test: "price_1TTHXcCGgXzYzpRp6FSkEbcO",
-      live: "price_1TUNq7CE95vjZKhkcS3ECJRo",
-    },
-    workshopSlug: "master-sport-combattimento",
-    includes: [
-      "1-2 giornate in presenza",
-      "Trainer da definire",
-      "Materiale didattico",
-      "Attestato di partecipazione",
-    ],
-    sortOrder: 27,
   },
   {
     slug: "master-nuoto",

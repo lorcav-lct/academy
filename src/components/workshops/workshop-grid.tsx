@@ -18,10 +18,14 @@ type Credential = {
   pitch: string;
   /** Used in the body — short, sells the deliverable */
   promise: string;
-  /** Marquee feature flag — only top 2-3 deserve this */
+  /** Marquee feature flag — drives the orange gradient card styling */
   featured?: boolean;
   /** Domain tag — eyebrow on the card */
   domain: string;
+  /** Distinctive label rendered as a badge — each master has its own identity */
+  badge: string;
+  /** Tooltip text shown on badge hover — explains why this master is special */
+  badgeTooltip: string;
 };
 
 const CREDENTIALS: Record<string, Credential> = {
@@ -33,6 +37,9 @@ const CREDENTIALS: Record<string, Credential> = {
     promise:
       "Pattern motori, protocolli del metodo bulgaro e applicazione del functional al massimo livello.",
     featured: true,
+    badge: "Iconic",
+    badgeTooltip:
+      "Ivan Ivanov, founder Suples, è il riferimento internazionale del Bulgarian Bag Training System nel mondo.",
   },
   "master-strength": {
     domain: "Strength Avanzato",
@@ -41,6 +48,9 @@ const CREDENTIALS: Record<string, Credential> = {
       "Atleta della Nazionale Italiana di Para Powerlifting, ex Ufficiale Incursore, coach di Stato Maggiore Marina Militare.",
     promise:
       "Tecnica avanzata, programmazione e gestione della forza nei massimali e nello sport di prestazione.",
+    badge: "Militare",
+    badgeTooltip:
+      "Coach Ufficiale di Stato Maggiore Marina Militare ed ex Ufficiale Incursore: forza applicata ai contesti più estremi.",
   },
   "master-calcio": {
     domain: "Performance Calcio",
@@ -50,6 +60,9 @@ const CREDENTIALS: Record<string, Credential> = {
     promise:
       "Prevenzione, recupero e ritorno alla massima performance dei calciatori d'élite. Protocolli applicati sul campo professionistico.",
     featured: true,
+    badge: "Juventus",
+    badgeTooltip:
+      "Sport Therapist della Juventus: protocolli di riatletizzazione applicati sul campo professionistico di Serie A.",
   },
   "master-volley": {
     domain: "S&C Pallavolo",
@@ -59,14 +72,20 @@ const CREDENTIALS: Record<string, Credential> = {
     promise:
       "Il modello S&C di una squadra di SuperLega: forza esplosiva, salto, gestione del carico stagionale.",
     featured: true,
+    badge: "SuperLega",
+    badgeTooltip:
+      "S&C Coach di Modena Volley: il modello fisico di una squadra di vertice della SuperLega italiana.",
   },
-  "master-hyrox": {
-    domain: "Hyrox",
-    headline: "Faculty da definire",
+  "master-tennis": {
+    domain: "Performance Tennis",
+    headline: "Piatti Tennis Center",
     pitch:
-      "Programma in costruzione con specialisti riconosciuti nella preparazione Hyrox.",
+      "Centro di alta specializzazione tennistica fondato da Riccardo Piatti, riferimento internazionale per la formazione di tennisti d'élite.",
     promise:
-      "Strutturare una preparazione Hyrox completa: stazioni, transizioni e gestione del pacing in gara.",
+      "Performance e preparazione atletica nel tennis di alto livello: integrazione di tecnica, fisico e programmazione su atleti d'élite.",
+    badge: "Elite",
+    badgeTooltip:
+      "Piatti Tennis Center: centro di alta specializzazione che ha formato tennisti d'élite del circuito internazionale.",
   },
   "master-running": {
     domain: "Running Performance",
@@ -75,6 +94,9 @@ const CREDENTIALS: Record<string, Credential> = {
       "Tecnico Allenatore della Federazione Italiana Triathlon (F.I.T.R.I.), specialista in running performance.",
     promise:
       "Tecnica, performance e prevenzione infortuni nella corsa: zone, ritmi, periodizzazione e dosaggio della fatica.",
+    badge: "Federale",
+    badgeTooltip:
+      "Tecnico Allenatore F.I.T.R.I. — Federazione Italiana Triathlon: metodologia federale applicata al running.",
   },
   "master-nuoto": {
     domain: "S&C Nuoto",
@@ -84,6 +106,9 @@ const CREDENTIALS: Record<string, Credential> = {
     promise:
       "Il modello S&C che ha contribuito a Martinenghi (Oro Olimpico Parigi 2024), Rivolta (Mondiale vasca corta) e atleti di livello internazionale.",
     featured: true,
+    badge: "Olimpico",
+    badgeTooltip:
+      "S&C Coach FIN: tra gli atleti seguiti Nicolò Martinenghi, Oro Olimpico Parigi 2024 nei 100m rana.",
   },
   "master-rugby": {
     domain: "S&C Rugby",
@@ -92,19 +117,14 @@ const CREDENTIALS: Record<string, Credential> = {
       "Programma in costruzione con preparatori atletici di livello internazionale.",
     promise:
       "Modello fisico del rugbista moderno: forza, contatto, velocità e prevenzione infortuni nei reparti.",
-  },
-  "master-sport-combattimento": {
-    domain: "Combat Sports",
-    headline: "Faculty da definire",
-    pitch:
-      "Programma in costruzione con preparatori di MMA, boxe e arti marziali.",
-    promise:
-      "Forza esplosiva, condizionamento metabolico e gestione del peso per fight night al massimo della forma.",
+    badge: "Prossimamente",
+    badgeTooltip:
+      "Faculty in finalizzazione: stiamo selezionando preparatori atletici di livello internazionale nel rugby.",
   },
 };
 
 const STATS = [
-  { value: "9", label: "Specializzazioni" },
+  { value: "8", label: "Specializzazioni" },
   { value: "15+", label: "Professionisti" },
   { value: "1-2", label: "Giornate intensive" },
   { value: "100%", label: "In presenza" },
@@ -140,12 +160,6 @@ const FEATURED_NAMES = [
 
 const ORANGE = "#F09226";
 const ORANGE_RGB = "240,146,38";
-
-/* Format like "€ 500" (no decimals, with space) — matches Pack page */
-function formatPriceClean(cents: number): string {
-  const v = Math.round(cents / 100);
-  return `€ ${new Intl.NumberFormat("it-IT").format(v)}`;
-}
 
 /* ──────────────────────────────────────────────────────────────
    HERO
@@ -264,7 +278,7 @@ function HeroSection() {
             className="mt-7 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
             style={{ color: tb }}
           >
-            9 masterclass intensive guidate da professionisti che operano ogni
+            8 masterclass intensive guidate da professionisti che operano ogni
             giorno sul campo della performance reale. Performance coach di
             Nazionali, Strength &amp; Conditioning coach di squadre di SuperLega
             e ricercatori universitari tra i più autorevoli a livello
@@ -336,7 +350,7 @@ function HeroSection() {
               className="text-[0.85rem] font-semibold"
               style={{ color: tb }}
             >
-              + altri 9 specialisti
+              + altri 8 specialisti
             </span>
           </motion.div>
 
@@ -672,19 +686,26 @@ function MasterclassCard({
               >
                 {cred?.domain ?? "Masterclass"}
               </span>
-              {featured && (
+              {cred?.badge && (
                 <span
-                  className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
-                  style={{
-                    background: ORANGE,
-                    color: "#111",
-                  }}
+                  title={cred.badgeTooltip}
+                  aria-label={cred.badgeTooltip}
+                  className="inline-flex cursor-help items-center gap-1.5 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+                  style={
+                    featured
+                      ? { background: ORANGE, color: "#111" }
+                      : {
+                          background: `rgba(${ORANGE_RGB},0.14)`,
+                          color: ORANGE,
+                          border: `1px solid rgba(${ORANGE_RGB},0.45)`,
+                        }
+                  }
                 >
                   <span
                     className="inline-block h-1 w-1 rounded-full"
-                    style={{ background: "#111" }}
+                    style={{ background: featured ? "#111" : ORANGE }}
                   />
-                  Top
+                  {cred.badge}
                 </span>
               )}
               {isTbd && (
@@ -733,52 +754,23 @@ function MasterclassCard({
               {cred?.promise ?? workshop.focus}
             </p>
 
-            {/* Stats inline */}
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              {[
-                { v: workshop.duration, l: "" },
-                { v: workshop.date, l: "" },
-                {
-                  v: cred?.headline?.includes("+") ? "2 trainer" : "1 trainer",
-                  l: "",
-                },
-              ].map((s, idx) => (
+            {/* Date inline — solo data, senza pill prezzo / durata / trainer */}
+            {workshop.date && workshop.date !== "Da definire" && (
+              <div className="mt-5 flex items-center gap-2">
                 <span
-                  key={idx}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.18em] md:text-[0.62rem]"
-                  style={{
-                    border: `1px solid ${borderSubtle}`,
-                    background: isDark
-                      ? "rgba(255,255,255,0.025)"
-                      : "rgba(0,0,0,0.02)",
-                    color: tb,
-                  }}
+                  className="text-[0.6rem] font-black uppercase tracking-[0.28em]"
+                  style={{ color: ts }}
                 >
-                  <span
-                    className="font-black tabular-nums"
-                    style={{ color: th }}
-                  >
-                    {s.v}
-                  </span>
-                  {s.l && <span style={{ color: ts }}>{s.l}</span>}
+                  Data
                 </span>
-              ))}
-              {!isTbd && product && (
                 <span
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.18em] md:text-[0.62rem]"
-                  style={{
-                    border: `1px solid rgba(${ORANGE_RGB},0.45)`,
-                    background: `rgba(${ORANGE_RGB},0.08)`,
-                    color: ORANGE,
-                  }}
+                  className="text-[0.85rem] font-bold tabular-nums"
+                  style={{ color: th }}
                 >
-                  <span className="font-black tabular-nums">
-                    {formatPriceClean(product.priceCents)}
-                  </span>
-                  <span style={{ opacity: 0.7 }}>singola</span>
+                  {workshop.date}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* CTA right */}
@@ -882,7 +874,7 @@ function MasterclassListSection({ isDark }: { isDark: boolean }) {
             Otto verticali.
             <br />
             <span className="gradient-text">Otto modi</span> di diventare il
-            riferimento.
+            riferimento.{" "}
           </h2>
           <p
             className="mt-6 max-w-2xl text-[1rem] leading-[1.7] md:text-[1.05rem]"
@@ -1006,7 +998,7 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
             style={{ background: borderSubtle }}
           >
             {[
-              { v: "9", l: "Masterclass disponibili" },
+              { v: "8", l: "Masterclass disponibili" },
               { v: "2", l: "Inclusi in PRO &amp; ELITE" },
               { v: "€ 500", l: "Acquisto singolo (da)" },
             ].map((s) => (

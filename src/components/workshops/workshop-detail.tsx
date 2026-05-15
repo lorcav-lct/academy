@@ -339,84 +339,84 @@ const CONTENT: Record<string, MasterclassContent> = {
     finalHook:
       "Imparare l'S&C dalla pallavolo italiana di SuperLega è un vantaggio competitivo immediato.",
   },
-  "master-hyrox": {
-    domain: "Hyrox",
-    hook: "Hyrox non si improvvisa. È una gara cardiovascolare con un format unico — chi non programma il pacing perde minuti reali.",
-    trainerHeadline: "Faculty in definizione",
+  "master-tennis": {
+    domain: "Performance Tennis",
+    hook: "Il tennis moderno si gioca al limite della performance fisica. Forza, esplosività, velocità e recupero fanno la differenza tra Top 100 e Top 10.",
+    trainerHeadline: "Piatti Tennis Center",
     trainerPitch:
-      "Stiamo finalizzando la faculty con specialisti riconosciuti in preparazione e performance Hyrox. Annunceremo il roster appena confermato.",
+      "Centro di alta specializzazione tennistica fondato da Riccardo Piatti, riferimento internazionale per la formazione di tennisti d'élite, dove allenamento tecnico, preparazione fisica e performance management vengono integrati con un approccio scientifico al servizio del tennis di alto livello.",
     whatYouLearn:
-      "Una giornata dedicata alla preparazione completa di un atleta Hyrox: dalle stazioni alle transizioni, dal pacing al recupero. Per coach o atleti che vogliono fare sul serio.",
+      "Una o due giornate dentro il modello fisico del tennista moderno: forza esplosiva, cambi di direzione, gestione del carico in una stagione che non finisce mai e prevenzione degli infortuni tipici della racchetta.",
     modules: [
       {
         num: "01",
-        title: "Anatomia di una gara Hyrox",
-        body: "Le 8 stazioni, le distanze di running, il time domain reale e dove si vince/perde davvero la gara.",
+        title: "Modello fisico del tennista moderno",
+        body: "Demand condizionale di un match: scambi, recuperi, durata media dei rally. Profilo bioenergetico del tennista d'élite.",
       },
       {
         num: "02",
-        title: "Allenamento delle stazioni",
-        body: "Forza specifica, lavoro misto, condizionamento metabolico per ogni stazione: dal SkiErg al wall ball.",
+        title: "Forza, potenza ed esplosività",
+        body: "Trasferire forza in racchetta e in spostamento. Pliometria, lavoro elastico-reattivo e potenza specifica.",
       },
       {
         num: "03",
-        title: "Programmazione 12 weeks",
-        body: "Costruire una preparazione di 12 settimane verso una gara con tapering e peak settimanale.",
+        title: "Agilità e cambi di direzione",
+        body: "Sviluppo della reattività multidirezionale e dell'efficienza nei cambi di direzione tipici del tennis.",
       },
       {
         num: "04",
-        title: "Pacing e strategie di gara",
-        body: "Come distribuire l'energia nelle 8 stazioni + 8 km di corsa. Errori da non fare nella prima gara.",
+        title: "Programmazione in stagione continua",
+        body: "Gestione del carico in un calendario senza vere off-season: blocchi, tapering pre-torneo e recupero post-match.",
       },
       {
         num: "05",
-        title: "Recupero e tapering",
-        body: "Settimana di gara: come arrivare al via riposato e affilato. Recupero post-gara e ripartenza.",
+        title: "Prevenzione infortuni del tennista",
+        body: "Spalla, gomito, schiena e ginocchio: protocolli di prevenzione e ritorno al campo dopo gli infortuni più tipici.",
       },
     ],
     outcomes: [
-      "Programmare un blocco completo di 12 settimane di Hyrox",
-      "Distinguere lavoro di stazione vs lavoro di corsa nella settimana",
-      "Coachare un atleta nelle 24 ore pre-gara",
-      "Costruire una strategia di pacing personalizzata",
-      "Replicare metodi di chi gareggia ad alto livello",
+      "Profilare la preparazione fisica del tennista per livello e fase",
+      "Programmare forza, potenza e cambi di direzione tennis-specifici",
+      "Gestire il carico in una stagione senza vere off-season",
+      "Implementare protocolli di prevenzione per spalla e gomito",
+      "Replicare un modello applicato su tennisti d'élite internazionali",
     ],
     forWho: [
-      "Coach che preparano atleti Hyrox o ibridi",
-      "Atleti Hyrox che vogliono autoallenarsi seriamente",
-      "PT che vogliono entrare nel circuito Hyrox",
+      "Preparatori atletici di tennisti agonisti e pro",
+      "Coach tecnici che vogliono integrare S&C nel piano del giocatore",
+      "PT che lavorano con tennisti amatori avanzati",
     ],
     notFor: [
-      "Chi cerca un workout HIIT generico",
-      "Chi non ha mai testato il formato Hyrox",
+      "Chi cerca lezioni di tecnica tennistica",
+      "Chi non ha contatto con sport con racchetta",
     ],
     included: [
-      "1 giornata con la faculty Hyrox",
-      "Template 12-week di preparazione Hyrox",
-      "Strategia di pacing personalizzata",
+      "1-2 giornate con la faculty Piatti Tennis Center",
+      "Template di programmazione stagionale per tennisti",
+      "Schede di prevenzione spalla, gomito e ginocchio",
       "Slide e materiali operativi",
       "Attestato di partecipazione",
     ],
     faq: [
       {
-        q: "Devo aver fatto Hyrox per partecipare?",
-        a: "No, ma è consigliato. Avere fatto almeno una gara aiuta a contestualizzare il contenuto.",
+        q: "Devo lavorare con tennisti pro per partecipare?",
+        a: "No. I contenuti sono pensati per chi opera dal livello agonistico nazionale fino al circuito internazionale.",
       },
       {
-        q: "Il template 12-week è adattabile?",
-        a: "Sì, è progettato per essere personalizzato sul livello dell'atleta o del cliente.",
+        q: "Si parla anche di padel?",
+        a: "Molti principi di S&C sono trasferibili al padel. Le differenze specifiche verranno richiamate dove rilevanti.",
       },
       {
-        q: "Si parla anche di Doubles e Pro?",
-        a: "I principi base sono gli stessi. Verranno toccate le specificità dei format più impegnativi.",
+        q: "I template sono adattabili al singolo atleta?",
+        a: "Sì, sono progettati per essere personalizzati su livello, calendario gare e profilo individuale.",
       },
       {
-        q: "Valido per crossfitter?",
-        a: "Sì. Hyrox e CrossFit hanno overlap ma logiche diverse. Il master chiarisce cosa importare e cosa lasciare fuori.",
+        q: "Vale anche per i settori giovanili?",
+        a: "Assolutamente sì. Una parte del master è dedicata al lavoro di sviluppo nei giovani tennisti.",
       },
     ],
     finalHook:
-      "Smetti di improvvisare i tuoi allenamenti per Hyrox: programmali come chi vince.",
+      "Una o due giornate dentro un centro che ha formato tennisti d'élite internazionali: un livello di metodo difficile da trovare altrove.",
   },
   "master-running": {
     domain: "Running Performance",
@@ -566,82 +566,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
       {
         q: "È incluso nei pack PRO/ELITE?",
-        a: "Sì. Sarà tra le 9 masterclass selezionabili nei pack PRO ed ELITE.",
-      },
-    ],
-    finalHook:
-      "Iscriviti alla lista interesse: ti contatteremo per primo appena la faculty sarà confermata.",
-  },
-  "master-sport-combattimento": {
-    domain: "Combat Sports",
-    hook: "Il fight è 90% preparazione fisica. Senza una S&C seria non si sale sul ring nemmeno una volta in più.",
-    trainerHeadline: "Faculty in definizione",
-    trainerPitch:
-      "Stiamo finalizzando la faculty con preparatori di MMA, boxe e arti marziali di livello internazionale. Annunceremo il roster appena confermato.",
-    whatYouLearn:
-      "Una giornata sul modello fisico del fighter: forza esplosiva, condizionamento metabolico, gestione del peso e fight night execution.",
-    modules: [
-      {
-        num: "01",
-        title: "Modello fisico del fighter",
-        body: "Demand fisica di MMA, boxe e arti marziali. Profilo bioenergetico per round.",
-      },
-      {
-        num: "02",
-        title: "Forza esplosiva e potenza",
-        body: "Sviluppo della potenza specifica per il combattimento: catene cinetiche, pliometria, esercitazioni complesse.",
-      },
-      {
-        num: "03",
-        title: "Condizionamento metabolico",
-        body: "Lavoro a soglia, intermittente e specifico per round. Errori più comuni nelle settimane di camp.",
-      },
-      {
-        num: "04",
-        title: "Gestione del peso",
-        body: "Cut peso e water cut: cosa è scientificamente sicuro e cosa è folklore. Protocolli responsabili.",
-      },
-      {
-        num: "05",
-        title: "Fight night",
-        body: "Le 48 ore prima del match. Recupero post-pesata, gestione mentale, riscaldamento ottimale.",
-      },
-    ],
-    outcomes: [
-      "Costruire un fight camp completo (8-12 settimane)",
-      "Programmare condizionamento per round e per minuto",
-      "Gestire un cut peso responsabile e ripetibile",
-      "Coachare il fighter nelle 48 ore pre-match",
-      "Replicare metodi di chi prepara campioni",
-    ],
-    forWho: [
-      "Coach S&C nei combat sports",
-      "Trainer di MMA, boxe, kickboxing",
-      "Fighter avanzati che vogliono autoallenarsi seriamente",
-    ],
-    notFor: [
-      "Chi cerca lezioni di tecnica marziale",
-      "Chi non ha mai fatto sparring o ring",
-    ],
-    included: [
-      "Master in presenza con la faculty selezionata",
-      "Template di fight camp 8-12 settimane",
-      "Schede gestione peso e fight night",
-      "Slide e materiali operativi",
-      "Attestato di partecipazione",
-    ],
-    faq: [
-      {
-        q: "Quando sarà annunciata la faculty?",
-        a: "Stiamo finalizzando con preparatori di livello internazionale. L'annuncio è previsto nelle prossime settimane.",
-      },
-      {
-        q: "Posso prenotarmi prima del prezzo finale?",
-        a: "Sì. Lasciaci il tuo interesse: ti contatteremo appena disponibili date e prezzo definitivo.",
-      },
-      {
-        q: "Vale anche per kickboxing e muay thai?",
-        a: "Sì. I principi di S&C nei combat sport sono ampiamente trasferibili tra discipline.",
+        a: "Sì. Sarà tra le 8 masterclass selezionabili nei pack PRO ed ELITE.",
       },
     ],
     finalHook:
@@ -942,36 +867,28 @@ function HeroSection({
             </p>
           </motion.div>
 
-          {/* Stats inline */}
-          <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-3">
+          {/* Key info — non riquadrato, layout pulito a tre voci */}
+          <motion.div
+            variants={fadeUp}
+            className="mt-9 flex flex-wrap items-baseline gap-x-10 gap-y-4"
+          >
             {[
-              { v: workshop.duration, l: "Durata" },
               { v: "100%", l: "In presenza" },
-              { v: workshop.date, l: "Edizione" },
-              { v: priceLabel ?? "TBD", l: "Singolo" },
+              { v: workshop.duration, l: "Durata" },
+              { v: priceLabel ?? "TBD", l: "Prezzo singolo" },
             ].map((s) => (
-              <div
-                key={s.l}
-                className="flex flex-col items-start px-4 py-2.5"
-                style={{
-                  border: `1px solid ${borderSubtle}`,
-                  background: isDark
-                    ? "rgba(255,255,255,0.03)"
-                    : "rgba(0,0,0,0.02)",
-                  minWidth: "138px",
-                }}
-              >
+              <div key={s.l} className="flex flex-col">
                 <span
-                  className="text-[1.15rem] font-black leading-tight tabular-nums"
-                  style={{ color: ORANGE }}
-                >
-                  {s.v}
-                </span>
-                <span
-                  className="mt-1 text-[0.58rem] font-bold uppercase tracking-[0.22em]"
+                  className="text-[0.58rem] font-bold uppercase tracking-[0.28em]"
                   style={{ color: ts }}
                 >
                   {s.l}
+                </span>
+                <span
+                  className="mt-1 text-[1.6rem] font-black leading-none tabular-nums md:text-[1.85rem]"
+                  style={{ color: th }}
+                >
+                  {s.v}
                 </span>
               </div>
             ))}
@@ -1014,7 +931,7 @@ function HeroSection({
           >
             {isTbd
               ? "Posti e prezzo in definizione · Lasciando interesse hai priorità sull'edizione 2026/27."
-              : "Posti limitati · Edizione 2026/27 · Conferma vincolata? No."}
+              : "Posti limitati · Edizione 2026/27"}
           </motion.p>
         </motion.div>
       </div>
@@ -1849,7 +1766,7 @@ function ValueStackSection({
                 >
                   {isTbd
                     ? "Lasciando interesse hai priorità sull'edizione 2026/27 e ricevi date e prezzo prima del pubblico."
-                    : "Posti limitati per garantire qualità formativa. Conferma vincolata? No: paghi solo a iscrizione confermata."}
+                    : "Posti limitati per garantire qualità formativa."}
                 </p>
               </div>
             </div>

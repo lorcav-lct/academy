@@ -40,7 +40,7 @@ const COLORS = {
 
 const EVENTS = [
   { label: "FUNCTION 1", dates: "11–12 Settembre", type: "function" },
-  { label: "Master Hyrox", dates: "26 Settembre", type: "workshop" },
+  { label: "Master Tennis", dates: "26 Settembre", type: "workshop" },
   { label: "FUNCTION 2", dates: "9–10 Ottobre", type: "function" },
   { label: "Master Calcio", dates: "24 Ottobre", type: "workshop" },
   { label: "FIPE I", dates: "13–14 Novembre", type: "fipe" },
@@ -54,7 +54,7 @@ const EVENTS = [
   { label: "SCIENCE 1", dates: "12–13 Marzo", type: "science" },
   { label: "Master Volley", dates: "27 Marzo", type: "workshop" },
   { label: "SCIENCE 2", dates: "9–10 Aprile", type: "science" },
-  { label: "Master Combat", dates: "24 Aprile", type: "workshop" },
+  { label: "Master Running", dates: "24 Aprile", type: "workshop" },
   { label: "FIPE III", dates: "14–15 Maggio", type: "fipe" },
 ];
 

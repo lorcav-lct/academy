@@ -4,9 +4,11 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { useTheme } from "@/components/providers/theme-provider";
-import { VideoBlock } from "@/components/shared/video-block";
+import { VideoBlockMux } from "@/components/shared/video-block-mux";
 
-const VIMEO_ID = "1161847546";
+const MUX_PLAYBACK_ID = "czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE";
+const MUX_POSTER =
+  "https://image.mux.com/czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE/thumbnail.png?fit_mode=preserve&time=31";
 
 export function PercorsoHero() {
   const { theme } = useTheme();
@@ -165,7 +167,11 @@ export function PercorsoHero() {
 
             {/* Right — video */}
             <div className="js-ph-video lg:w-[56%]">
-              <VideoBlock vimeoId={VIMEO_ID} isDark={isDark} />
+              <VideoBlockMux
+                playbackId={MUX_PLAYBACK_ID}
+                isDark={isDark}
+                poster={MUX_POSTER}
+              />
             </div>
           </div>
         </div>

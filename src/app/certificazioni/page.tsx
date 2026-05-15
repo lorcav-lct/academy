@@ -400,8 +400,15 @@ export default function CertificazioniPage() {
                     background:
                       p === "PRO"
                         ? "rgba(240,146,38,0.14)"
-                        : "rgba(0,0,0,0.03)",
-                    color: p === "PRO" ? ORANGE : undefined,
+                        : p === "ELITE"
+                          ? "#111111"
+                          : "rgba(0,0,0,0.03)",
+                    color:
+                      p === "PRO"
+                        ? ORANGE
+                        : p === "ELITE"
+                          ? "#f5f5fa"
+                          : undefined,
                   }}
                 >
                   {p}
@@ -429,14 +436,17 @@ export default function CertificazioniPage() {
                     (cert.packs === "pro-elite" &&
                       (tier === "pro" || tier === "elite"));
                   const isProCell = tier === "pro";
+                  const isEliteCell = tier === "elite";
                   return (
                     <div
                       key={tier}
                       className="flex items-center justify-center p-4 md:p-5"
                       style={{
-                        background: isProCell
-                          ? "rgba(240,146,38,0.06)"
-                          : undefined,
+                        background: isEliteCell
+                          ? "#111111"
+                          : isProCell
+                            ? "rgba(240,146,38,0.06)"
+                            : undefined,
                       }}
                     >
                       {included ? (
@@ -455,7 +465,18 @@ export default function CertificazioniPage() {
                           />
                         </svg>
                       ) : (
-                        <span className="text-[1rem] text-academy-gray-600">
+                        <span
+                          className={
+                            isEliteCell
+                              ? "text-[1rem]"
+                              : "text-[1rem] text-academy-gray-600"
+                          }
+                          style={
+                            isEliteCell
+                              ? { color: "rgba(255,255,255,0.35)" }
+                              : undefined
+                          }
+                        >
                           —
                         </span>
                       )}

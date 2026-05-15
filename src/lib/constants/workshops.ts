@@ -28,8 +28,9 @@ export const WORKSHOPS: Workshop[] = [
   },
   {
     slug: "master-strength",
-    title: "Strength",
-    subtitle: "Masterclass — Strength Training Avanzato",
+    title: "Strength Avanzato",
+    subtitle:
+      "Advanced Strength Programming — Programmazione dell'Allenamento della Forza",
     focus: "Tecnica avanzata di forza, programmazione e performance",
     duration: "1-2 giornate",
     date: "Da definire",
@@ -40,7 +41,8 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "master-calcio",
     title: "Preparazione Fisica Calcio",
-    subtitle: "Masterclass — Performance nel Calcio Professionistico",
+    subtitle:
+      "Elite Football Rehab Master — Prevenzione, Recupero e Ritorno alla Massima Performance",
     focus: "Preparazione atletica e performance management nel calcio d'élite",
     duration: "1-2 giornate",
     date: "Da definire",
@@ -51,7 +53,8 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "master-volley",
     title: "Preparazione Fisica Pallavolo",
-    subtitle: "Masterclass — S&C per la Pallavolo",
+    subtitle:
+      "Jump Higher, Play Stronger — la Preparazione Atletica nella Pallavolo",
     focus: "Strength & Conditioning specifico per la pallavolo di alto livello",
     duration: "1-2 giornate",
     date: "Da definire",
@@ -60,14 +63,15 @@ export const WORKSHOPS: Workshop[] = [
     sortOrder: 4,
   },
   {
-    slug: "master-hyrox",
-    title: "Hyrox",
-    subtitle: "Masterclass — Preparazione Hyrox",
-    focus: "Preparazione atletica e tecnica per competizioni Hyrox",
+    slug: "master-tennis",
+    title: "Preparazione Fisica Tennis",
+    subtitle: "Masterclass — Performance e Preparazione Atletica nel Tennis",
+    focus:
+      "Preparazione fisica, performance e metodologie applicate al tennis di alto livello",
     duration: "1-2 giornate",
     date: "Da definire",
-    teacherSlugs: [],
-    trainerLabel: "Da definire",
+    teacherSlugs: ["piatti-tennis-center"],
+    trainerLabel: "Piatti Tennis Center",
     sortOrder: 5,
   },
   {
@@ -84,25 +88,14 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "master-running",
     title: "Running",
-    subtitle: "Masterclass — Running Performance",
+    subtitle:
+      "Running Science Master — Tecnica, Performance e Prevenzione Infortuni",
     focus: "Performance e metodologia di allenamento per la corsa",
     duration: "1-2 giornate",
     date: "Da definire",
     teacherSlugs: ["ivan-pellizzari"],
     trainerLabel: "Ivan Pellizzari",
     sortOrder: 7,
-  },
-  {
-    slug: "master-sport-combattimento",
-    title: "Sport da Combattimento",
-    subtitle: "Masterclass — Preparazione Atletica Arti Marziali",
-    focus:
-      "Preparazione fisica e atletica per sport da combattimento e arti marziali",
-    duration: "1-2 giornate",
-    date: "Da definire",
-    teacherSlugs: [],
-    trainerLabel: "Da definire",
-    sortOrder: 8,
   },
   {
     slug: "master-nuoto",

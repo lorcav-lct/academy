@@ -123,7 +123,7 @@ export const PROGRAM_BLOCKS: ProgramBlock[] = [
       {
         title:
           "Psicologia del movimento: come l'attività fisica influenza mente e alimentazione",
-        teacherSlugs: ["luca-bondi", "elisa-sibilla"],
+        teacherSlugs: ["luca-bondi"],
       },
       {
         title: "Il potere della mente",

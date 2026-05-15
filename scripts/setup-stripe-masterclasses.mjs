@@ -58,7 +58,7 @@ const MASTERCLASSES = [
   },
   {
     slug: "master-strength",
-    productName: "Masterclass Strength — Lacertosus Academy",
+    productName: "Masterclass Strength Avanzato — Lacertosus Academy",
     description:
       "Masterclass intensiva 1-2 giornate in presenza · Andrea Quarto",
   },
@@ -74,10 +74,10 @@ const MASTERCLASSES = [
     description: "Masterclass intensiva 1-2 giornate in presenza · Oscar Berti",
   },
   {
-    slug: "master-hyrox",
-    productName: "Masterclass Hyrox — Lacertosus Academy",
+    slug: "master-tennis",
+    productName: "Masterclass Tennis — Lacertosus Academy",
     description:
-      "Masterclass intensiva 1-2 giornate in presenza · Trainer in definizione",
+      "Masterclass intensiva 1-2 giornate in presenza · Piatti Tennis Center",
   },
   {
     slug: "master-rugby",
@@ -91,12 +91,6 @@ const MASTERCLASSES = [
     productName: "Masterclass Running — Lacertosus Academy",
     description:
       "Masterclass intensiva 1-2 giornate in presenza · Ivan Pellizzari",
-  },
-  {
-    slug: "master-sport-combattimento",
-    productName: "Masterclass Sport da Combattimento — Lacertosus Academy",
-    description:
-      "Masterclass intensiva 1-2 giornate in presenza · Trainer in definizione",
   },
   {
     slug: "master-nuoto",
@@ -151,6 +145,36 @@ async function getActivePrice(productId) {
     limit: 10,
   });
   return prices.data[0] ?? null;
+}
+
+// Masterclass rimosse dal catalogo: archivia product + price attivi
+const TO_ARCHIVE = [
+  {
+    slug: "master-hyrox",
+    productId: "prod_USBv6jPq5Fg11e",
+    priceId: "price_1TTHXYCGgXzYzpRpSShW9Ewg",
+  },
+  {
+    slug: "master-sport-combattimento",
+    productId: "prod_USBv9BNQrSnP3f",
+    priceId: "price_1TTHXcCGgXzYzpRp6FSkEbcO",
+  },
+];
+
+for (const a of TO_ARCHIVE) {
+  console.log(`\n[ARCHIVE ${a.slug}]`);
+  try {
+    await stripe.prices.update(a.priceId, { active: false });
+    console.log(`  ↳ archiviato price: ${a.priceId}`);
+  } catch (err) {
+    console.log(`  ↳ archive price fallito: ${err.message}`);
+  }
+  try {
+    await stripe.products.update(a.productId, { active: false });
+    console.log(`  ↳ archiviato product: ${a.productId}`);
+  } catch (err) {
+    console.log(`  ↳ archive product fallito: ${err.message}`);
+  }
 }
 
 const results = {};
