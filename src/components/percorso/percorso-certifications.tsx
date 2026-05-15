@@ -104,6 +104,10 @@ export function PercorsoCertifications() {
           aria-label="Enti certificatori"
         >
           {[
+            {
+              src: "/certificazioni/fsmt.webp",
+              label: "Functional Strength Master Trainer",
+            },
             { src: "/certificazioni/csen.webp", label: "CSEN" },
             { src: "/certificazioni/nsca.webp", label: "NSCA" },
             { src: "/certificazioni/fipe.webp", label: "FIPE" },

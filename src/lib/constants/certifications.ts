@@ -19,6 +19,9 @@ export interface Certification {
   issuerFull: string;
   /** Path to issuer logo (in /public). */
   logo: string;
+  /** Optional path to the certificate's own brand logo (e.g. FSMT for Master Trainer).
+   *  When present, it's shown paired with the issuer logo on detail blocks. */
+  logoCert?: string;
   /** Cert type — for visual tagging. */
   kind: "diploma" | "credits" | "diploma-international";
   recognition: string;
@@ -42,6 +45,7 @@ export const CERTIFICATIONS: Certification[] = [
     issuer: "CSEN",
     issuerFull: "Centro Sportivo Educativo Nazionale",
     logo: "/certificazioni/csen.webp",
+    logoCert: "/certificazioni/fsmt.webp",
     kind: "diploma",
     recognition: "Riconoscimento Nazionale",
     packs: "all",

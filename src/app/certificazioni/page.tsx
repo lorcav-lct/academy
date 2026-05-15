@@ -70,12 +70,17 @@ export default function CertificazioniPage() {
             l&apos;investimento formativo.
           </p>
 
-          {/* Logo row — 3 real issuer logos */}
+          {/* Logo row — FSMT (Lacertosus diploma) + 3 issuer logos */}
           <div
-            className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-10 max-w-4xl"
+            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 max-w-5xl"
             aria-label="Enti certificatori"
           >
             {[
+              {
+                src: "/certificazioni/fsmt.webp",
+                label: "Functional Strength Master Trainer",
+                sub: "Diploma Lacertosus Academy",
+              },
               {
                 src: "/certificazioni/csen.webp",
                 label: "CSEN",
@@ -175,15 +180,35 @@ export default function CertificazioniPage() {
                       : "Certificazione"}
                   </span>
 
-                  {/* BIG LOGO — bare */}
-                  <Image
-                    src={cert.logo}
-                    alt={`${cert.issuer} — ${cert.issuerFull}`}
-                    width={420}
-                    height={420}
-                    className="h-auto w-full max-w-[420px] object-contain"
-                    priority={idx === 0}
-                  />
+                  {/* BIG LOGO — bare; pair cert logo + issuer logo when available */}
+                  {cert.logoCert ? (
+                    <div className="flex w-full max-w-[420px] items-center justify-center gap-6 md:gap-8">
+                      <Image
+                        src={cert.logoCert}
+                        alt={`${cert.title} ${cert.titleAccent}`}
+                        width={300}
+                        height={300}
+                        className="h-auto w-full max-w-[220px] object-contain"
+                        priority={idx === 0}
+                      />
+                      <Image
+                        src={cert.logo}
+                        alt={`${cert.issuer} — ${cert.issuerFull}`}
+                        width={220}
+                        height={220}
+                        className="h-auto w-full max-w-[160px] object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <Image
+                      src={cert.logo}
+                      alt={`${cert.issuer} — ${cert.issuerFull}`}
+                      width={420}
+                      height={420}
+                      className="h-auto w-full max-w-[420px] object-contain"
+                      priority={idx === 0}
+                    />
+                  )}
 
                   {/* Issuer caption */}
                   <div className="mt-5 max-w-md text-center lg:text-left">

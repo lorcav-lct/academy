@@ -22,6 +22,10 @@ const ORANGE = "#F09226";
 
 const CERT_LOGOS = [
   {
+    src: "/certificazioni/fsmt.webp",
+    alt: "Functional Strength Master Trainer — Lacertosus Academy",
+  },
+  {
     src: "/certificazioni/csen.webp",
     alt: "CSEN — Centro Sportivo Educativo Nazionale",
   },

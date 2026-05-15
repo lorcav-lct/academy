@@ -1080,6 +1080,10 @@ export function HeroSection({
               aria-label="Enti riconoscitori"
             >
               {[
+                {
+                  src: "/certificazioni/fsmt.webp",
+                  label: "Functional Strength Master Trainer",
+                },
                 { src: "/certificazioni/csen.webp", label: "CSEN" },
                 { src: "/certificazioni/fipe.webp", label: "FIPE" },
                 { src: "/certificazioni/nsca.webp", label: "NSCA" },
@@ -2065,6 +2069,10 @@ export function HeroSection({
             aria-label="Enti riconoscitori"
           >
             {[
+              {
+                src: "/certificazioni/fsmt.webp",
+                label: "Functional Strength Master Trainer",
+              },
               { src: "/certificazioni/csen.webp", label: "CSEN" },
               { src: "/certificazioni/fipe.webp", label: "FIPE" },
               { src: "/certificazioni/nsca.webp", label: "NSCA" },
@@ -2076,7 +2084,7 @@ export function HeroSection({
                 title={logo.label}
                 width={96}
                 height={96}
-                className="h-20 w-20 object-contain"
+                className="h-16 w-16 object-contain"
               />
             ))}
           </div>
