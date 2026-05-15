@@ -70,26 +70,31 @@ export default function CertificazioniPage() {
             l&apos;investimento formativo.
           </p>
 
-          {/* Logo row — large, bare */}
+          {/* Logo row — 3 real issuer logos */}
           <div
-            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 max-w-5xl"
+            className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-10 max-w-4xl"
             aria-label="Enti certificatori"
           >
             {[
               {
-                label: "Functional Strength Master Trainer",
-                sub: "Diploma proprietario",
+                src: "/certificazioni/csen.webp",
+                label: "CSEN",
+                sub: "Centro Sportivo Educativo Nazionale",
               },
-              { label: "CSEN", sub: "Centro Sportivo Educativo Nazionale" },
               {
+                src: "/certificazioni/nsca.webp",
                 label: "NSCA",
                 sub: "National Strength & Conditioning Association",
               },
-              { label: "FIPE", sub: "Federazione Italiana Pesistica" },
+              {
+                src: "/certificazioni/fipe.webp",
+                label: "FIPE",
+                sub: "Federazione Italiana Pesistica",
+              },
             ].map((b) => (
               <div key={b.label} className="flex flex-col items-center gap-4">
                 <Image
-                  src="/certificazioni/csen.webp"
+                  src={b.src}
                   alt={b.label}
                   width={192}
                   height={192}

@@ -98,24 +98,26 @@ export function PercorsoCertifications() {
           </p>
         </div>
 
-        {/* Logo row — 4 placeholders */}
+        {/* Logo row — 3 real issuer logos */}
         <div
-          className="mb-14 flex items-center justify-start gap-3 md:gap-4 flex-wrap"
+          className="mb-14 flex items-center justify-start gap-6 md:gap-8 flex-wrap"
           aria-label="Enti certificatori"
         >
-          {["Functional Strength Master Trainer", "CSEN", "NSCA", "FIPE"].map(
-            (label) => (
-              <Image
-                key={label}
-                src="/certificazioni/csen.webp"
-                alt={label}
-                title={label}
-                width={128}
-                height={128}
-                className="h-24 w-24 md:h-32 md:w-32 object-contain"
-              />
-            ),
-          )}
+          {[
+            { src: "/certificazioni/csen.webp", label: "CSEN" },
+            { src: "/certificazioni/nsca.webp", label: "NSCA" },
+            { src: "/certificazioni/fipe.webp", label: "FIPE" },
+          ].map((logo) => (
+            <Image
+              key={logo.label}
+              src={logo.src}
+              alt={logo.label}
+              title={logo.label}
+              width={128}
+              height={128}
+              className="h-24 w-24 md:h-32 md:w-32 object-contain"
+            />
+          ))}
         </div>
 
         {/* 3 certification cards in horizontal grid */}

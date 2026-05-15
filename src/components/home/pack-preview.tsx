@@ -6,6 +6,11 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
+import { VideoBlockMux } from "@/components/shared/video-block-mux";
+
+const MUX_PLAYBACK_ID = "czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE";
+const MUX_POSTER =
+  "https://image.mux.com/czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE/thumbnail.png?fit_mode=preserve&time=31";
 import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
@@ -318,9 +323,7 @@ function PackModal({
       "-=0.1",
     );
     const timeout = setTimeout(() => {
-      setVideoSrc(
-        "https://player.vimeo.com/video/1161847546?autoplay=0&title=0&byline=0&portrait=0&dnt=1",
-      );
+      setVideoSrc("mux");
     }, 400);
     document.body.style.overflow = "hidden";
     return () => {
@@ -478,23 +481,23 @@ function PackModal({
                 — L&apos;Academy in 2 minuti
               </p>
               <div
-                className="relative w-full overflow-hidden"
+                className="relative w-full overflow-hidden flex items-center justify-center"
                 style={{
-                  paddingBottom: "56.25%",
                   background: "#000",
                   border: `1px solid ${surfaceBorderStrong}`,
                   boxShadow: `0 0 60px rgba(${ORANGE_RGB},0.06)`,
+                  minHeight: "320px",
                 }}
               >
                 {videoSrc ? (
-                  <iframe
-                    src={videoSrc}
-                    className="absolute inset-0 h-full w-full"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
+                  <VideoBlockMux
+                    playbackId={MUX_PLAYBACK_ID}
+                    isDark
+                    borderColor="transparent"
+                    poster={MUX_POSTER}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex items-center justify-center py-20">
                     <div
                       className="flex h-14 w-14 items-center justify-center rounded-full"
                       style={{
@@ -1642,7 +1645,7 @@ export function PackPreview() {
                   Una carriera reale.
                 </h3>
               </div>
-              <CertificationsIconRow isDark={d} />
+              <CertificationsIconRow />
             </div>
             <CertificationsCards isDark={d} />
           </div>

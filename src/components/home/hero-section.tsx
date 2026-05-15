@@ -6,13 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import VimeoPlayer from "@vimeo/player";
 import { HeroSlide, DEFAULT_HERO_SLIDES } from "@/lib/constants/hero-slides";
-import { VideoBlock } from "@/components/shared/video-block";
+import { VideoBlockMux } from "@/components/shared/video-block-mux";
 
-const VIMEO_ID = "1161847546";
-/** Loop the first N seconds of the bg video to limit bandwidth + speed up load. */
-const VIMEO_BG_LOOP_SECONDS = 10;
+const MUX_PLAYBACK_ID = "czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE";
 
 /* ──────────────────────────────────────────────────────────────
    SplitLine — char-by-char reveal (overflow:hidden per char)
@@ -131,8 +128,6 @@ export function HeroSection({
   // Background layers
   const videoLayerRef = useRef<HTMLDivElement>(null);
   const videoOverlayRef = useRef<HTMLDivElement>(null);
-  const vimeoBgContainerRef = useRef<HTMLDivElement>(null);
-  const vimeoBgPlayerRef = useRef<VimeoPlayer | null>(null);
   const slideBgRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -284,42 +279,6 @@ export function HeroSection({
     }, 6600);
     return () => clearInterval(id);
   }, [slides.length, goToSlide]);
-
-  /* ── Vimeo bg player (Stage A) — loops first 10s to cap bandwidth ──
-     Vimeo's adaptive stream only fetches the segments needed for the
-     visible playback window, so seeking back to 0 every N seconds keeps
-     the buffered range tiny and the initial frame appears faster. */
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!isDesktop) return;
-    if (!vimeoBgContainerRef.current) return;
-    if (vimeoBgPlayerRef.current) return;
-
-    const player = new VimeoPlayer(vimeoBgContainerRef.current, {
-      id: parseInt(VIMEO_ID, 10),
-      background: true,
-      muted: true,
-      autoplay: true,
-      loop: true,
-      controls: false,
-      quality: "360p",
-      dnt: true,
-    });
-    vimeoBgPlayerRef.current = player;
-
-    const onTimeUpdate = ({ seconds }: { seconds: number }) => {
-      if (seconds >= VIMEO_BG_LOOP_SECONDS) {
-        player.setCurrentTime(0).catch(() => {});
-      }
-    };
-    player.on("timeupdate", onTimeUpdate);
-
-    return () => {
-      player.off("timeupdate", onTimeUpdate);
-      player.destroy().catch(() => {});
-      vimeoBgPlayerRef.current = null;
-    };
-  }, [isDesktop]);
 
   /* ── GSAP orchestration: intro + per-panel reveals + count-up ── */
   useEffect(() => {
@@ -559,25 +518,22 @@ export function HeroSection({
         style={{ background: "#111111", zIndex: 0 }}
       >
         {/* Video layer (fixed bg, opacity controlled by scroll).
-            Vimeo Player SDK takes over the container ref and loops the
-            first VIMEO_BG_LOOP_SECONDS via `timeupdate` → setCurrentTime(0).
-            Light blur + grain mask the 360p artifacts on a full-bleed bg. */}
+            Short MP4 loop, blurred + grain to soften compression artifacts. */}
         <div
           ref={videoLayerRef}
           className="absolute inset-0 overflow-hidden"
           style={{ opacity: 0 }}
         >
-          <div
-            ref={vimeoBgContainerRef}
-            className="absolute pointer-events-none [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:h-full [&>iframe]:w-full [&>iframe]:border-none"
+          <video
+            src="/videos/hero-bg-loop.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
             style={{
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%) scale(1.06)",
-              width: "177.77vh",
-              minWidth: "100%",
-              height: "56.25vw",
-              minHeight: "100%",
+              transform: "scale(1.06)",
               filter: "blur(5px) saturate(1.08) brightness(1.02)",
             }}
           />
@@ -875,7 +831,7 @@ export function HeroSection({
                 className="mx-auto mt-10 max-w-2xl text-[clamp(0.95rem,1.15vw,1.08rem)] leading-[1.7]"
                 style={{ color: "rgba(255,255,255,0.95)" }}
               >
-                9 mesi in presenza. 33+ docenti. 9 masterclass specialistiche.
+                9 mesi in presenza. 33+ docenti. 8 masterclass specialistiche.
                 <br />
                 Un percorso progettato come una squadra professionistica.
               </p>
@@ -1117,26 +1073,25 @@ export function HeroSection({
               </p>
             </div>
 
-            {/* Logo row — 4 placeholders: Master Trainer, CSEN, FIPE, NSCA */}
+            {/* Logo row — 3 real issuer logos */}
             <div
               data-reveal
-              className="mt-10 flex items-center justify-center gap-3 md:gap-4"
+              className="mt-10 flex items-center justify-center gap-6 md:gap-10"
               aria-label="Enti riconoscitori"
             >
               {[
-                "Functional Strength Master Trainer",
-                "CSEN",
-                "FIPE",
-                "NSCA",
-              ].map((label) => (
+                { src: "/certificazioni/csen.webp", label: "CSEN" },
+                { src: "/certificazioni/fipe.webp", label: "FIPE" },
+                { src: "/certificazioni/nsca.webp", label: "NSCA" },
+              ].map((logo) => (
                 <Image
-                  key={label}
-                  src="/certificazioni/csen.webp"
-                  alt={label}
-                  title={label}
+                  key={logo.label}
+                  src={logo.src}
+                  alt={logo.label}
+                  title={logo.label}
                   width={160}
                   height={160}
-                  className="h-24 w-24 md:h-32 md:w-32 lg:h-36 lg:w-36 object-contain"
+                  className="h-20 w-20 md:h-28 md:w-28 lg:h-32 lg:w-32 object-contain"
                 />
               ))}
             </div>
@@ -1284,7 +1239,7 @@ export function HeroSection({
               />
               <div className="relative flex items-center gap-7 px-8 py-6">
                 <Image
-                  src="/certificazioni/csen.webp"
+                  src="/certificazioni/nsca.webp"
                   alt="NSCA — National Strength and Conditioning Association"
                   width={120}
                   height={120}
@@ -1842,21 +1797,14 @@ export function HeroSection({
         {/* ══ P2 — IL METODO (video bg + dark overlay) ══ */}
         <div className="relative overflow-hidden" style={{ minHeight: "70vh" }}>
           <div className="absolute inset-0">
-            <iframe
-              src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
-              className="absolute border-0"
-              style={{
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "177.77vh",
-                minWidth: "100%",
-                height: "56.25vw",
-                minHeight: "100%",
-                pointerEvents: "none",
-              }}
-              allow="autoplay; picture-in-picture"
-              title="Lacertosus Academy"
+            <video
+              src="/videos/hero-bg-loop.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
             />
             <div
               className="absolute inset-0"
@@ -1889,7 +1837,7 @@ export function HeroSection({
               className="mt-6 text-[0.95rem] leading-[1.65]"
               style={{ color: "rgba(255,255,255,0.95)" }}
             >
-              9 mesi in presenza. 33+ docenti. 9 masterclass specialistiche. Un
+              9 mesi in presenza. 33+ docenti. 8 masterclass specialistiche. Un
               percorso progettato come una squadra professionistica.
             </p>
 
@@ -2111,17 +2059,21 @@ export function HeroSection({
             in Italia e all&apos;estero.
           </p>
 
-          {/* Logo row — 4 placeholders */}
+          {/* Logo row — 3 real issuer logos */}
           <div
-            className="relative z-10 mt-8 flex items-center justify-between gap-2"
+            className="relative z-10 mt-8 flex items-center justify-center gap-5"
             aria-label="Enti riconoscitori"
           >
-            {["Master Trainer", "CSEN", "FIPE", "NSCA"].map((label) => (
+            {[
+              { src: "/certificazioni/csen.webp", label: "CSEN" },
+              { src: "/certificazioni/fipe.webp", label: "FIPE" },
+              { src: "/certificazioni/nsca.webp", label: "NSCA" },
+            ].map((logo) => (
               <Image
-                key={label}
-                src="/certificazioni/csen.webp"
-                alt={label}
-                title={label}
+                key={logo.label}
+                src={logo.src}
+                alt={logo.label}
+                title={logo.label}
                 width={96}
                 height={96}
                 className="h-20 w-20 object-contain"
@@ -2263,7 +2215,7 @@ export function HeroSection({
               />
               <div className="relative flex items-start gap-4 px-5 py-5">
                 <Image
-                  src="/certificazioni/csen.webp"
+                  src="/certificazioni/nsca.webp"
                   alt="NSCA — National Strength and Conditioning Association"
                   width={72}
                   height={72}
@@ -2348,7 +2300,11 @@ export function HeroSection({
                     "0 0 0 1px rgba(240,146,38,0.22), 0 0 80px rgba(240,146,38,0.15), 0 0 180px rgba(240,146,38,0.05)",
                 }}
               >
-                <VideoBlock vimeoId={VIMEO_ID} isDark />
+                <VideoBlockMux
+                  playbackId={MUX_PLAYBACK_ID}
+                  isDark
+                  poster="https://image.mux.com/czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE/thumbnail.png?fit_mode=preserve&time=31"
+                />
               </div>
               <div className="mt-4 flex items-center justify-between text-[0.62rem] font-black tracking-[0.28em] uppercase text-white/40">
                 <span>Lacertosus Academy · 2 min</span>

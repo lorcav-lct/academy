@@ -27,7 +27,12 @@ import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
 import { ProgramAccordion } from "./program-accordion";
+import { VideoBlockMux } from "@/components/shared/video-block-mux";
 import dynamic from "next/dynamic";
+
+const MUX_PLAYBACK_ID = "czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE";
+const MUX_POSTER =
+  "https://image.mux.com/czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE/thumbnail.png?fit_mode=preserve&time=31";
 
 const HeroScene = dynamic(
   () => import("./hero-scene").then((m) => m.HeroScene),
@@ -268,9 +273,11 @@ function HeroSection({
 function JourneySection({
   isDark,
   onOpenBlock,
+  onOpenVideo,
 }: {
   isDark: boolean;
   onOpenBlock: (slug: BlockSlug) => void;
+  onOpenVideo: () => void;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
@@ -392,6 +399,31 @@ function JourneySection({
             vissuti in sequenza. Ogni blocco apre il successivo, ogni successivo
             consolida il precedente.
           </p>
+          <button
+            type="button"
+            onClick={onOpenVideo}
+            className="group mt-7 inline-flex items-center gap-3 px-5 py-3 transition-opacity duration-200 hover:opacity-85"
+            style={{
+              border: "1px solid rgba(240,146,38,0.45)",
+              background: isDark
+                ? "rgba(240,146,38,0.06)"
+                : "rgba(240,146,38,0.05)",
+              color: "#F09226",
+            }}
+            aria-label="Guarda l'Academy in 2 minuti"
+          >
+            <span
+              className="flex h-7 w-7 items-center justify-center"
+              style={{ background: "#F09226" }}
+            >
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="#111111">
+                <path d="M8 5.14v14l11-7-11-7z" />
+              </svg>
+            </span>
+            <span className="text-[0.74rem] font-black tracking-[0.22em] uppercase">
+              Guarda l&apos;Academy in 2 min
+            </span>
+          </button>
         </motion.div>
 
         {/* Progression rail — desktop horizontal nodes */}
@@ -862,9 +894,7 @@ function PackModal({
       "-=0.1",
     );
     const timeout = setTimeout(() => {
-      setVideoSrc(
-        "https://player.vimeo.com/video/1161847546?autoplay=0&title=0&byline=0&portrait=0&dnt=1",
-      );
+      setVideoSrc("mux");
     }, 400);
     document.body.style.overflow = "hidden";
     return () => {
@@ -1105,23 +1135,23 @@ function PackModal({
                 — L&apos;Academy in 2 minuti
               </p>
               <div
-                className="relative w-full overflow-hidden"
+                className="relative w-full overflow-hidden flex items-center justify-center"
                 style={{
-                  paddingBottom: "56.25%",
                   background: "#000",
                   border: `1px solid ${surfaceBorderStrong}`,
                   boxShadow: `0 0 60px rgba(${ORANGE_RGB},0.06)`,
+                  minHeight: "320px",
                 }}
               >
                 {videoSrc ? (
-                  <iframe
-                    src={videoSrc}
-                    className="absolute inset-0 h-full w-full"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
+                  <VideoBlockMux
+                    playbackId={MUX_PLAYBACK_ID}
+                    isDark
+                    borderColor="transparent"
+                    poster={MUX_POSTER}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex items-center justify-center py-20">
                     <div
                       className="flex h-14 w-14 items-center justify-center rounded-full"
                       style={{
@@ -2388,7 +2418,7 @@ function PacksSection({
                 riconosciuto a livello nazionale e internazionale.
               </p>
             </div>
-            <CertificationsIconRow isDark={isDark} />
+            <CertificationsIconRow />
           </div>
           <CertificationsCards isDark={isDark} />
         </div>
@@ -2602,6 +2632,20 @@ export function PackComparison() {
   const [openBlock, setOpenBlock] = useState<BlockSlug | null>(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectedPack, setSelectedPack] = useState<AcademyProduct | null>(null);
+  const [videoOpen, setVideoOpen] = useState(false);
+
+  useEffect(() => {
+    if (!videoOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setVideoOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [videoOpen]);
 
   async function handleBuy(pack: AcademyProduct) {
     setActiveModal(null);
@@ -2635,7 +2679,11 @@ export function PackComparison() {
   return (
     <>
       <HeroSection isDark={isDark} onOpenBlock={setOpenBlock} />
-      <JourneySection isDark={isDark} onOpenBlock={setOpenBlock} />
+      <JourneySection
+        isDark={isDark}
+        onOpenBlock={setOpenBlock}
+        onOpenVideo={() => setVideoOpen(true)}
+      />
       <PacksSection isDark={isDark} onOpenModal={setActiveModal} />
       <MasterclassSection isDark={isDark} />
 
@@ -2709,6 +2757,59 @@ export function PackComparison() {
           onClose={() => setSelectorOpen(false)}
         />
       )}
+
+      {/* Presentation video modal — opened from HeroSection CTA */}
+      {videoOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-10"
+            style={{
+              background: "rgba(17,17,17,0.94)",
+              backdropFilter: "blur(14px)",
+            }}
+            onClick={() => setVideoOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Video di presentazione dell'Academy"
+          >
+            <div
+              className="relative w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setVideoOpen(false)}
+                className="absolute -top-12 right-0 flex items-center gap-2.5 text-[0.72rem] font-black tracking-[0.28em] uppercase text-white/60 hover:text-white transition-colors"
+                aria-label="Chiudi video"
+              >
+                <span>Chiudi</span>
+                <span
+                  className="flex items-center justify-center w-7 h-7"
+                  style={{ border: "1px solid rgba(255,255,255,0.25)" }}
+                >
+                  ×
+                </span>
+              </button>
+              <div
+                style={{
+                  boxShadow:
+                    "0 0 0 1px rgba(240,146,38,0.22), 0 0 80px rgba(240,146,38,0.15), 0 0 180px rgba(240,146,38,0.05)",
+                }}
+              >
+                <VideoBlockMux
+                  playbackId={MUX_PLAYBACK_ID}
+                  isDark
+                  poster={MUX_POSTER}
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-between text-[0.62rem] font-black tracking-[0.28em] uppercase text-white/40">
+                <span>Lacertosus Academy · 2 min</span>
+                <span>Premi 🔊 per attivare l&apos;audio</span>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

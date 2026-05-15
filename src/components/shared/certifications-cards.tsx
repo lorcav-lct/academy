@@ -19,7 +19,21 @@ import Image from "next/image";
  */
 
 const ORANGE = "#F09226";
-const PLACEHOLDER_LOGO = "/certificazioni/csen.webp";
+
+const CERT_LOGOS = [
+  {
+    src: "/certificazioni/csen.webp",
+    alt: "CSEN — Centro Sportivo Educativo Nazionale",
+  },
+  {
+    src: "/certificazioni/fipe.webp",
+    alt: "FIPE — Federazione Italiana Pesistica",
+  },
+  {
+    src: "/certificazioni/nsca.webp",
+    alt: "NSCA — National Strength and Conditioning Association",
+  },
+] as const;
 
 interface Props {
   isDark: boolean;
@@ -384,30 +398,24 @@ function NscaStrip({ isDark }: { isDark: boolean }) {
 }
 
 /**
- * CertificationsIconRow — horizontal row of 6 issuer logos.
+ * CertificationsIconRow — horizontal row of issuer logos.
  * Sits next to section title on desktop, below on mobile.
  */
-export function CertificationsIconRow({ isDark }: Props) {
-  const border = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+export function CertificationsIconRow() {
   return (
     <div
-      className="flex items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap md:justify-end"
+      className="flex items-center gap-3 md:gap-5 flex-wrap md:flex-nowrap md:justify-end"
       aria-label="Enti certificatori"
     >
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="shrink-0 flex items-center justify-center p-1.5 md:p-2"
-          style={{ border: `1px solid ${border}` }}
-        >
-          <Image
-            src={PLACEHOLDER_LOGO}
-            alt="Ente certificatore"
-            width={72}
-            height={72}
-            className="h-10 w-10 md:h-12 md:w-12 object-contain"
-          />
-        </div>
+      {CERT_LOGOS.map((logo) => (
+        <Image
+          key={logo.src}
+          src={logo.src}
+          alt={logo.alt}
+          width={72}
+          height={72}
+          className="shrink-0 h-12 w-12 md:h-14 md:w-14 object-contain"
+        />
       ))}
     </div>
   );
