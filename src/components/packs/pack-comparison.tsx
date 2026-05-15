@@ -57,14 +57,14 @@ const TIER: Record<
 
 // Listini bundle (IVA inclusa). Allineati a packs.ts e Stripe.
 const PACK_PRICE_DISPLAY: Record<string, string> = {
-  start: "€ 3.300",
-  pro: "€ 4.700",
+  start: "€ 3.900",
+  pro: "€ 4.900",
   elite: "€ 7.000",
 };
 
 const PACK_PRICE_CENTS: Record<string, number> = {
-  start: 330000,
-  pro: 470000,
+  start: 390000,
+  pro: 490000,
   elite: 700000,
 };
 

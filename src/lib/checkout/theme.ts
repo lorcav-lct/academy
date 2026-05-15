@@ -14,8 +14,8 @@ export const ORANGE_RGB = "240,146,38";
  *  when packs.ts has priceCents=0). Fonte di verità reale: PRODUCTS in
  *  src/lib/constants/packs.ts (priceCents + stripePriceId). */
 export const BUNDLE_PRICE_DISPLAY: Record<string, number> = {
-  start: 330000,
-  pro: 470000,
+  start: 390000,
+  pro: 490000,
   elite: 700000,
 };
 

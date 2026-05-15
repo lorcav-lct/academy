@@ -40,10 +40,10 @@ export const PRODUCTS: AcademyProduct[] = [
     name: "START",
     subtitle: "Il percorso completo — 3 blocchi formativi",
     type: "bundle",
-    priceCents: 330000,
+    priceCents: 390000,
     stripePriceId: {
       test: "price_1TTKfPCGgXzYzpRpn7ygPM3i",
-      live: "price_1TUNq6CE95vjZKhkue3AHqdq",
+      live: "price_1TXNWwCE95vjZKhkk4Riao5A",
     },
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",
@@ -64,10 +64,10 @@ export const PRODUCTS: AcademyProduct[] = [
     subtitle:
       "Il percorso completo + Personal Elite Trainer FIPE + 2 Masterclass",
     type: "bundle",
-    priceCents: 470000,
+    priceCents: 490000,
     stripePriceId: {
       test: "price_1TTKfRCGgXzYzpRpXG0mXIRK",
-      live: "price_1TUNq6CE95vjZKhkD2stjFHk",
+      live: "price_1TXNV5CE95vjZKhk56HoiUkC",
     },
     includes: [
       "FUNCTION — Blocco I: Functional Training (2 weekend)",

@@ -16,7 +16,7 @@ const FAQS = [
   },
   {
     q: "Qual è la differenza tra START, PRO ed ELITE?",
-    a: "START (€3.300) include i 3 blocchi, l'attestazione Functional Strength Master Trainer (diploma CSEN) e il riconoscimento NSCA con 2.0 CEU internazionali. PRO (€4.700) aggiunge la certificazione Personal Elite Trainer FIPE e 2 masterclass a scelta tra le 9 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
+    a: "START (€3.900) include i 3 blocchi, l'attestazione Functional Strength Master Trainer (diploma CSEN) e il riconoscimento NSCA con 2.0 CEU internazionali. PRO (€4.900) aggiunge la certificazione Personal Elite Trainer FIPE e 2 masterclass a scelta tra le 9 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
   },
   {
     q: "Quali certificazioni ottengo al termine del percorso?",
