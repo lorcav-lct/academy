@@ -343,7 +343,7 @@ export const PRODUCTS: AcademyProduct[] = [
     },
     workshopSlug: "master-nuoto",
     includes: [
-      "1-2 giornate in presenza",
+      "1 giornata in presenza",
       "Marco Magnani + Riccardo Aimini",
       "Materiale didattico",
       "Attestato di partecipazione",

@@ -27,6 +27,11 @@ import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
 import { ProgramAccordion } from "./program-accordion";
+import { FipeProgramAccordion } from "@/components/shared/fipe-program-accordion";
+import {
+  FIPE_COURSE_TITLE,
+  FIPE_PROGRAM_HEADING,
+} from "@/lib/constants/fipe-program";
 import { VideoBlockMux } from "@/components/shared/video-block-mux";
 import dynamic from "next/dynamic";
 
@@ -1196,6 +1201,32 @@ function PackModal({
             <div className="mt-7">
               <ProgramAccordion scopeId={`pack-${pack.slug}`} />
             </div>
+
+            {/* FIPE — programma certificazione (solo PRO ed ELITE) */}
+            {(isPro || isElite) && (
+              <div className="mt-10">
+                <div className="mb-4 flex items-baseline justify-between gap-3 flex-wrap">
+                  <div>
+                    <p
+                      className="text-[0.58rem] font-black tracking-[0.32em] uppercase"
+                      style={{ color: ORANGE }}
+                    >
+                      {FIPE_PROGRAM_HEADING}
+                    </p>
+                    <h4
+                      className="mt-1 text-[1.05rem] md:text-[1.15rem] font-black leading-tight tracking-[-0.005em]"
+                      style={{ color: lightTextH }}
+                    >
+                      {FIPE_COURSE_TITLE}
+                    </h4>
+                  </div>
+                </div>
+                <FipeProgramAccordion
+                  scopeId={`pack-${pack.slug}-fipe`}
+                  defaultOpen={null}
+                />
+              </div>
+            )}
 
             {/* Tier extras */}
             {valueStackExtras.length > 0 && (

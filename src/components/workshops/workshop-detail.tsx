@@ -192,28 +192,33 @@ const CONTENT: Record<string, MasterclassContent> = {
     modules: [
       {
         num: "01",
-        title: "Modello fisico del calciatore moderno",
-        body: "Profilo bioenergetico, demand fisico per ruolo e cosa è cambiato negli ultimi 10 anni nel gioco d'élite.",
+        title: "Cosa prevenire: gli infortuni più frequenti nel calcio",
+        body: "Excursus bibliografico sugli infortuni tipici del calciatore: incidenza, meccanismi, fattori di rischio.",
       },
       {
         num: "02",
-        title: "Microciclo settimanale",
-        body: "Come si costruisce la settimana tipo in una squadra di Serie A: dal MD-3 al MD+1, errori frequenti e best practice.",
+        title: "Come prevenire: strategie efficaci",
+        body: "Warm-up strutturato, forza, propriocezione, screening, anamnesi. La parte pratica che riduce davvero gli stop.",
       },
       {
         num: "03",
-        title: "Prevenzione infortuni",
-        body: "Protocolli di prevenzione muscolare e tendinea che usano i top club. Come ridurre realmente l'incidenza.",
+        title: "Riabilitare in palestra: le fasi del percorso",
+        body: "Dal controllo del dolore al ritorno alla corsa. Criteri di progressione, non solo tempi fissi.",
       },
       {
         num: "04",
-        title: "Riatletizzazione e ritorno alla performance",
-        body: "Il percorso dall'infortunio al ritorno in campo: criteri, milestones e gestione del carico in fase di recupero.",
+        title: "Gestione del carico nel rientro in squadra",
+        body: "Come reinserire il giocatore senza ricadute: RPE, GPS, microcicli, comunicazione con lo staff. Il ponte tra return to play e return to performance.",
       },
       {
         num: "05",
-        title: "Casi studio dal calcio top",
-        body: "Esempi concreti dall'esperienza in Juventus FC. Cosa funziona, cosa fallisce, cosa replicare.",
+        title: "Esempi pratici ed esperienza sul campo",
+        body: "Casi reali dall'esperienza in Juventus FC: cosa funziona, cosa fallisce, cosa replicare nei propri contesti.",
+      },
+      {
+        num: "06",
+        title: "Take home message",
+        body: "I principi operativi da portare a casa: cosa cambia da lunedì nei tuoi protocolli di prevenzione, riabilitazione e gestione del carico.",
       },
     ],
     outcomes: [
@@ -574,12 +579,12 @@ const CONTENT: Record<string, MasterclassContent> = {
   },
   "master-nuoto": {
     domain: "S&C Nuoto",
-    hook: "Il nuoto si vince a secco. Ogni medaglia olimpica nasce da anni di lavoro fuori dalla vasca — sulla forza, sulla potenza, sulla gestione del carico.",
+    hook: "Una giornata.",
     trainerHeadline: "Marco Magnani × Riccardo Aimini",
     trainerPitch:
-      "Strength & Conditioning Coach della Federazione Italiana Nuoto. Per oltre un decennio hanno preparato la Nazionale al fianco di Marco Pedoja, partecipando ai collegiali di Livigno, Gloria Sports Arena e Calella. Tra i loro atleti: Nicolò Martinenghi (Oro Olimpico Parigi 2024), Matteo Rivolta (Mondiale vasca corta), Simone Sabbioni, Ludovico Viberti.",
+      "Strength & Conditioning Coach specializzati nel nuoto agonistico con atleti di interesse nazionale ed internazionale. Riccardo Aimini ha fatto parte in diverse occasioni dello staff tecnico della Nazionale Italiana di Nuoto lavorando al fianco di Marco Pedoja. Tra gli atleti seguiti: Nicolò Martinenghi (Oro Olimpico Parigi 2024), Matteo Rivolta, Alessandro Pinzuti e Ludovico Viberti. Marco Magnani segue da anni atleti del nuoto agonistico e giovani velocisti emergenti come Francesco Lazzari, Davide Lazzari e Mattia Morello. Il loro approccio integra forza, condizionamento e sviluppo della performance nel lungo termine.",
     whatYouLearn:
-      "Una o due giornate dentro il modello S&C che ha portato medaglie olimpiche e mondiali. Forza, potenza, monitoraggio del carico e periodizzazione del nuotatore d'élite.",
+      "Una giornata dentro il modello S&C che ha accompagnato atleti della Nazionale Italiana di Nuoto. Forza, potenza, monitoraggio del carico e periodizzazione del nuotatore agonistico.",
     modules: [
       {
         num: "01",
@@ -599,12 +604,12 @@ const CONTENT: Record<string, MasterclassContent> = {
       {
         num: "04",
         title: "Sviluppo dei giovani talenti",
-        body: "Come accompagnare dorso, rana, stile libero e farfalla dalla categoria juniores ai senior. Progressioni a lungo termine.",
+        body: "Come introdurre i giovani atleti alla preparazione atletica tra logistica, tempo, spazi e gruppi di lavoro per avere una giusta progressione.",
       },
       {
         num: "05",
-        title: "Casi studio dall'Olimpiade",
-        body: "Cosa ha funzionato nella preparazione di Martinenghi, Rivolta, Sabbioni e Viberti. Decisioni operative dalla scrivania alla pedana.",
+        title: "Nicolò Martinenghi: il viaggio verso l'oro olimpico",
+        body: "Il percorso di preparazione che ha accompagnato Nicolò Martinenghi fino all'Oro Olimpico di Parigi 2024 nei 100m rana. Decisioni operative, scelte di programmazione e gestione delle fasi chiave.",
       },
     ],
     outcomes: [
@@ -624,9 +629,9 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha alcun contatto con il mondo del nuoto agonistico",
     ],
     included: [
-      "1-2 giornate con Marco Magnani e Riccardo Aimini",
+      "1 giornata con Marco Magnani e Riccardo Aimini",
       "Template di programmazione stagionale (livello professionistico)",
-      "Casi studio reali dall'esperienza in Nazionale",
+      "Caso studio Nicolò Martinenghi — Oro Olimpico Parigi 2024",
       "Slide e materiali operativi",
       "Attestato di partecipazione Lacertosus Academy",
     ],
@@ -641,7 +646,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
       {
         q: "Quanto è pratico vs teorico?",
-        a: "Almeno il 60% è pratico/casistica. Marco e Riccardo lavorano sul campo ogni giorno con la Nazionale.",
+        a: "Almeno il 60% è pratico/casistica. Marco e Riccardo lavorano da anni sul campo con atleti del nuoto agonistico di interesse nazionale e internazionale.",
       },
       {
         q: "Posso portare casi propri?",
@@ -649,7 +654,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
     ],
     finalHook:
-      "Una giornata con i preparatori della Nazionale di Nuoto vale anni di letture sulla preparazione fisica nel nuoto.",
+      "Una giornata con i preparatori di atleti della nazionale italiana di nuoto.",
   },
   "sostieni-progetto": {
     domain: "Sostegno",

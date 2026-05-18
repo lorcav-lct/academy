@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CERTIFICATIONS } from "@/lib/constants/certifications";
+import { FipeProgramAccordion } from "@/components/shared/fipe-program-accordion";
+import {
+  FIPE_COURSE_TITLE,
+  FIPE_PROGRAM_HEADING,
+  FIPE_PROGRAM_META,
+} from "@/lib/constants/fipe-program";
 
 const ORANGE = "#F09226";
 
@@ -327,6 +333,56 @@ export default function CertificazioniPage() {
                   </div>
                 </div>
               </div>
+
+              {/* FIPE — programma corso integrato (solo sezione FIPE) */}
+              {isFipe && (
+                <div className="mt-14 md:mt-16">
+                  <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                    <div>
+                      <p
+                        className="text-[0.6rem] font-black tracking-[0.32em] uppercase mb-2"
+                        style={{ color: ORANGE }}
+                      >
+                        {FIPE_PROGRAM_HEADING}
+                      </p>
+                      <h3
+                        className="font-black tracking-[-0.02em] leading-[1.05] text-academy-gray-100"
+                        style={{ fontSize: "clamp(1.4rem, 2.8vw, 2.2rem)" }}
+                      >
+                        {FIPE_COURSE_TITLE}
+                      </h3>
+                      <p className="mt-3 max-w-2xl text-[0.95rem] leading-[1.65] text-academy-gray-400">
+                        {FIPE_PROGRAM_META.weekends} weekend in presenza,{" "}
+                        {FIPE_PROGRAM_META.hoursTheory} ore di teoria e{" "}
+                        {FIPE_PROGRAM_META.hoursPractice} ore di pratica, esame
+                        finale al 6° giorno.
+                      </p>
+                    </div>
+                    <Link
+                      href="/percorso/fipe-personal-trainer"
+                      className="inline-flex shrink-0 items-center gap-2 px-5 py-3 text-[0.72rem] font-black tracking-[0.18em] uppercase transition-opacity hover:opacity-85"
+                      style={{ color: "#111", background: ORANGE }}
+                    >
+                      Pagina dedicata
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="h-3.5 w-3.5"
+                        aria-hidden
+                      >
+                        <path
+                          d="M4 8h8m0 0L8 4m4 4l-4 4"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="square"
+                        />
+                      </svg>
+                    </Link>
+                  </div>
+
+                  <FipeProgramAccordion scopeId="cert-fipe" defaultOpen={1} />
+                </div>
+              )}
             </div>
           </section>
         );

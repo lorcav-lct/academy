@@ -103,7 +103,7 @@ export const WORKSHOPS: Workshop[] = [
     subtitle: "Masterclass — S&C per il Nuoto d'élite",
     focus:
       "Preparazione fisica per il nuoto agonistico, dalla nazionale ai giovani talenti",
-    duration: "1-2 giornate",
+    duration: "1 giornata",
     date: "Da definire",
     teacherSlugs: ["marco-magnani", "riccardo-aimini"],
     trainerLabel: "Marco Magnani + Riccardo Aimini",

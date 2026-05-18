@@ -102,9 +102,9 @@ const CREDENTIALS: Record<string, Credential> = {
     domain: "S&C Nuoto",
     headline: "Marco Magnani + Riccardo Aimini",
     pitch:
-      "Strength & Conditioning Coach della Federazione Italiana Nuoto. Oltre un decennio nella Nazionale.",
+      "S&C che preparano da oltre un decennio atleti della nazionale italiana di nuoto.",
     promise:
-      "Il modello S&C che ha contribuito a Martinenghi (Oro Olimpico Parigi 2024), Rivolta (Mondiale vasca corta) e atleti di livello internazionale.",
+      "Il modello S&C che ha contribuito a Martinenghi (Oro Olimpico Parigi 2024) e ad altri atleti di livello internazionale.",
     featured: true,
     badge: "Olimpico",
     badgeTooltip:

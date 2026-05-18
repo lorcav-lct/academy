@@ -60,8 +60,8 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "matteo-romanazzi",
     name: "Matteo Romanazzi",
-    role: "Docente presso SUISM",
-    bio: "Ricercatore in biomeccanica e analisi del movimento, docente presso SUISM (Università di Torino).",
+    role: "PhD, Docente a contratto presso Università degli Studi di Torino",
+    bio: "Docente di Chinesiologia e ricercatore in biomeccanica e analisi del movimento presso la SUISM (Università degli Studi di Torino). Vanta pubblicazioni in atti di convegni e riviste scientifiche sia nazionali che internazionali su argomenti riguardanti l'allenamento della forza, controllo motorio e biomeccanica. La sua ricerca si è concentrata sulle metodiche del Resistance Training oltre che sulle caratteristiche biomeccaniche di alcuni movimenti fondamentali contribuendo alla realizzazione e progettazione di attrezzature sportive.",
     courses: ["function"],
     image_url: "/docenti/matteo-romanazzi.webp",
     color: BRAND,
@@ -148,7 +148,7 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "massimiliano-febbi",
     name: "Massimiliano Febbi",
-    role: "Fisioterapista • Performance Scientist • Researcher",
+    role: "Professore Ordinario ACS College Malta",
     bio: "Professore Ordinario di Fisioterapia, Direttore del Corso di Laurea in Fisioterapia presso ACS Asomi College of Health Sciences, Direttore della Tactical Performance Academy e Head of Performance & Rehab Services della Nazionale Italiana di Pugilato.",
     courses: ["strength"],
     image_url: "/docenti/massimiliano-febbi.webp",
@@ -192,8 +192,8 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "luca-bondi",
     name: "Luca Bondi",
-    role: "Psicologo — Ospedale Maggiore Policlinico di Milano",
-    bio: "Psicologo clinico dell'Ospedale Maggiore Policlinico di Milano, esperto del rapporto tra movimento, mente e alimentazione.",
+    role: "Psicologo",
+    bio: "Psicologo con esperienza in ambito ospedaliero e privato, aiuta adolescenti, adulti e sportivi ad affrontare momenti di difficoltà, stress, cambiamento e crescita personale. Si occupa anche della gestione dell'ambulatorio di psico-oncologia, accompagnando pazienti e familiari lungo il percorso di cura.",
     courses: ["science"],
     image_url: "/docenti/luca-bondi.webp",
     color: BRAND,
@@ -224,8 +224,8 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "margherita-fonsato",
     name: "Margherita Fonsato",
-    role: "Specialista in attività fisica adattata",
-    bio: "Esperta dell'applicazione dell'attività fisica nei contesti delle malattie neurodegenerative.",
+    role: "Fisioterapista specializzata nei Disordini del Movimento",
+    bio: "Margherita Fonsato, Fisioterapista specializzata nei Disordini del Movimento: Laureata in Fisioterapia nel 2013 presso l'Università degli Studi di Ferrara, negli anni ha perfezionato la propria preparazione nel trattamento delle patologie neurologiche attraverso numerosi percorsi formativi. Recentemente, ha consolidato il suo profilo accademico conseguendo il Master di I Livello in Neuroscienze presso l'Università degli Studi di Genova. Svolge la propria attività clinica a Ferrara, dove si occupa del trattamento riabilitativo di pazienti con patologie neurologiche, con una specifica competenza nella Malattia di Parkinson. Parallelamente alla pratica professionale, ha ricoperto incarichi di docenza relativi alla Malattia di Parkinson per enti quali la Movement Disorder Society, Fondazione Limpe e FRESCO Foundation. Attualmente, collabora con l'Università di Ferrara in qualità di tutor per l'Attività Formativa Professionalizzante (AFP) rivolta agli studenti del terzo anno, approfondendo gli aspetti clinici legati alla Malattia di Parkinson.",
     courses: ["science"],
     image_url: "/docenti/margherita-fonsato.webp",
     color: BRAND,
@@ -242,7 +242,7 @@ export const TEACHERS: Teacher[] = [
   },
   {
     slug: "anna-desi",
-    name: "Anna Desi",
+    name: "Anna Deisi",
     role: "Co-Founder — Centro Aura",
     bio: "Co-founder del Centro Aura, struttura di riferimento per il benessere integrato.",
     courses: ["science"],
@@ -337,8 +337,8 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "marco-magnani",
     name: "Marco Magnani",
-    role: "Strength & Conditioning Coach — Federazione Italiana Nuoto",
-    bio: "Insieme a Riccardo Aimini ha fatto parte per oltre un decennio dello staff tecnico della Nazionale Italiana di Nuoto. Tra gli atleti seguiti: Nicolò Martinenghi (Campione Olimpico Parigi 2024), Matteo Rivolta (Campione del Mondo vasca corta), Simone Sabbioni, Alessandro Pinzuti, Ludovico Viberti. Affianca al lavoro con l'élite lo sviluppo di giovani talenti emergenti come Francesco e Davide Lazzari.",
+    role: "S&C Coach Nuoto",
+    bio: "Strength & Conditioning Coach specializzato nel nuoto agonistico. Segue da anni atleti del nuoto agonistico e giovani velocisti emergenti come Francesco Lazzari, Davide Lazzari e Mattia Morello. Il suo approccio integra forza, condizionamento e sviluppo della performance nel lungo termine.",
     courses: ["master-nuoto"],
     image_url: "/docenti/marco-magnani.webp",
     color: BRAND,
@@ -346,8 +346,8 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "riccardo-aimini",
     name: "Riccardo Aimini",
-    role: "Strength & Conditioning Coach — Federazione Italiana Nuoto",
-    bio: "Insieme a Marco Magnani ha fatto parte per oltre un decennio dello staff tecnico della Nazionale Italiana di Nuoto, lavorando al fianco di Marco Pedoja e partecipando a collegiali internazionali presso centri di eccellenza come Livigno, Gloria Sports Arena e Calella. Ha contribuito allo sviluppo di atleti olimpici e mondiali tra cui Nicolò Martinenghi e Matteo Rivolta.",
+    role: "S&C Coach Nuoto",
+    bio: "Strength & Conditioning Coach specializzato nel nuoto agonistico con atleti di interesse nazionale ed internazionale. Ha fatto parte in diverse occasioni dello staff tecnico della Nazionale Italiana di Nuoto lavorando al fianco di Marco Pedoja. Tra gli atleti seguiti: Nicolò Martinenghi (Oro Olimpico Parigi 2024), Matteo Rivolta, Alessandro Pinzuti e Ludovico Viberti.",
     courses: ["master-nuoto"],
     image_url: "/docenti/riccardo-aimini.webp",
     color: BRAND,

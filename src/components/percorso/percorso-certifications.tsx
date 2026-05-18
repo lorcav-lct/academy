@@ -6,6 +6,10 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CERTIFICATIONS } from "@/lib/constants/certifications";
+import {
+  FIPE_PROGRAM_HEADING,
+  FIPE_PROGRAM_META,
+} from "@/lib/constants/fipe-program";
 
 const ORANGE = "#F09226";
 
@@ -203,6 +207,81 @@ export function PercorsoCertifications() {
                 <p className="mt-4 text-[0.86rem] leading-[1.6] text-academy-gray-400">
                   {cert.shortDescription}
                 </p>
+
+                {/* FIPE — programma sintetico + CTA pagina dedicata */}
+                {isFipe && (
+                  <div
+                    className="mt-5 pt-5"
+                    style={{ borderTop: "1px dashed rgba(240,146,38,0.35)" }}
+                  >
+                    <p
+                      className="text-[0.55rem] font-black tracking-[0.32em] uppercase mb-3"
+                      style={{ color: ORANGE }}
+                    >
+                      {FIPE_PROGRAM_HEADING}
+                    </p>
+                    <div
+                      className="grid grid-cols-3 gap-px mb-4"
+                      style={{ background: "rgba(240,146,38,0.25)" }}
+                    >
+                      {[
+                        {
+                          v: FIPE_PROGRAM_META.weekends,
+                          l: "Weekend",
+                        },
+                        {
+                          v: `${FIPE_PROGRAM_META.hoursTheory}h`,
+                          l: "Teoria",
+                        },
+                        {
+                          v: `${FIPE_PROGRAM_META.hoursPractice}h`,
+                          l: "Pratica",
+                        },
+                      ].map((s) => (
+                        <div
+                          key={s.l}
+                          className="px-2 py-2.5"
+                          style={{ background: "#0a0a0a" }}
+                        >
+                          <div className="text-[1.1rem] font-black leading-none tabular-nums tracking-tight text-academy-gray-100">
+                            {s.v}
+                          </div>
+                          <div
+                            className="mt-1 text-[0.52rem] font-bold tracking-[0.22em] uppercase"
+                            style={{ color: "rgba(255,255,255,0.55)" }}
+                          >
+                            {s.l}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[0.78rem] leading-[1.55] text-academy-gray-400 mb-3">
+                      Istruttore Sala Pesi e Pesistica · Personal Trainer I
+                      Livello — 6 giornate tra teoria e pratica, esame finale al
+                      6° giorno.
+                    </p>
+                    <Link
+                      href="/percorso/fipe-personal-trainer"
+                      className="inline-flex items-center gap-1.5 text-[0.66rem] font-black tracking-[0.22em] uppercase transition-opacity hover:opacity-80"
+                      style={{ color: ORANGE }}
+                    >
+                      Vedi programma completo
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="h-3 w-3"
+                        aria-hidden
+                      >
+                        <path
+                          d="M4 8h8m0 0L8 4m4 4l-4 4"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="square"
+                        />
+                      </svg>
+                    </Link>
+                  </div>
+                )}
               </article>
             );
           })}

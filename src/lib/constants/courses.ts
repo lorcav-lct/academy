@@ -47,7 +47,7 @@ export const COURSES: Course[] = [
       "Studio del movimento umano applicato al Functional Training: leve, articolazioni, catene cinetiche e loro ottimizzazione nella pratica professionale.",
       "Tecniche avanzate (bioimpedenza, plicometria, antropometria) per misurare e monitorare la composizione corporea in ambito clinico e sportivo.",
       "Modello concettuale aggiornato per progettare, somministrare e monitorare l'allenamento fisico con rigore scientifico.",
-      "Strumenti strumentali di analisi del movimento per ottimizzare la performance e ridurre il rischio di infortuni negli esercizi cardine.",
+      "Strumenti di analisi del movimento per ottimizzare la performance e ridurre il rischio di infortuni negli esercizi cardine.",
       "Costruire programmi di allenamento funzionale efficaci e sostenibili per persone non atlete: principi, progressioni e applicazione pratica.",
       "Giornata di studio e pratica sui due tools cardinali della Forza Circolare: applicazioni, varianti e progressioni didattiche.",
     ],

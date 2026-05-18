@@ -15,6 +15,11 @@ import { getBundles, type AcademyProduct } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import { ProgramAccordion } from "@/components/packs/program-accordion";
+import { FipeProgramAccordion } from "@/components/shared/fipe-program-accordion";
+import {
+  FIPE_COURSE_TITLE,
+  FIPE_PROGRAM_HEADING,
+} from "@/lib/constants/fipe-program";
 import {
   CertificationsCards,
   CertificationsIconRow,
@@ -541,6 +546,32 @@ function PackModal({
             <div className="mt-7">
               <ProgramAccordion scopeId={`home-pack-${pack.slug}`} />
             </div>
+
+            {/* FIPE — programma certificazione (solo PRO ed ELITE) */}
+            {(isPro || isElite) && (
+              <div className="mt-10">
+                <div className="mb-4 flex items-baseline justify-between gap-3 flex-wrap">
+                  <div>
+                    <p
+                      className="text-[0.58rem] font-black tracking-[0.32em] uppercase"
+                      style={{ color: ORANGE }}
+                    >
+                      {FIPE_PROGRAM_HEADING}
+                    </p>
+                    <h4
+                      className="mt-1 text-[1.05rem] md:text-[1.15rem] font-black leading-tight tracking-[-0.005em]"
+                      style={{ color: lightTextH }}
+                    >
+                      {FIPE_COURSE_TITLE}
+                    </h4>
+                  </div>
+                </div>
+                <FipeProgramAccordion
+                  scopeId={`home-pack-${pack.slug}-fipe`}
+                  defaultOpen={null}
+                />
+              </div>
+            )}
 
             {valueStackExtras.length > 0 && (
               <div className="mt-8">

@@ -51,6 +51,7 @@ const NAV_LINKS: NavLink[] = [
             { href: "/percorso/function", label: "Function" },
             { href: "/percorso/strength", label: "Strength" },
             { href: "/percorso/science", label: "Science" },
+            { href: "/percorso/fipe-personal-trainer", label: "FIPE" },
           ],
         },
       ],
@@ -295,7 +296,8 @@ export function Navbar() {
   const isBlockDetailRoute =
     pathname === "/percorso/function" ||
     pathname === "/percorso/strength" ||
-    pathname === "/percorso/science";
+    pathname === "/percorso/science" ||
+    pathname === "/percorso/fipe-personal-trainer";
   const isMasterclassRoute =
     pathname === "/masterclass" || pathname.startsWith("/masterclass/");
   const isDarkHeroRoute =
