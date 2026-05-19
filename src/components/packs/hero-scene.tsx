@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { smoothScrollTo } from "@/lib/scroll";
 
 const BLOCKS = [
   {
@@ -58,9 +59,7 @@ interface HeroSceneProps {
 }
 
 function scrollToPacks() {
-  document
-    .getElementById("section-packs")
-    ?.scrollIntoView({ behavior: "smooth" });
+  smoothScrollTo("#section-packs");
 }
 
 // ── Mobile scene — only packs, simple entrance, no block phase ───────

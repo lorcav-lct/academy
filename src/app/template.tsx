@@ -3,11 +3,12 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { smoothScrollTo } from "@/lib/scroll";
 
 export default function Template({ children }: { children: ReactNode }) {
   // Reset scroll position on every page navigation
   useEffect(() => {
-    window.scrollTo(0, 0);
+    smoothScrollTo(0, { immediate: true });
   }, []);
 
   return (

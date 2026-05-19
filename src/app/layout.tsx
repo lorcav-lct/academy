@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { LenisProvider } from "@/components/providers/lenis-provider";
 import { CookieConsentProvider } from "@/components/providers/cookie-consent";
 import "./globals.css";
 
@@ -73,10 +74,12 @@ export default function RootLayout({
     >
       <body className="min-h-screen antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          <Navbar />
-          <main className="relative">{children}</main>
-          <Footer />
-          <WhatsAppFloat />
+          <LenisProvider>
+            <Navbar />
+            <main className="relative">{children}</main>
+            <Footer />
+            <WhatsAppFloat />
+          </LenisProvider>
         </ThemeProvider>
         <CookieConsentProvider />
       </body>

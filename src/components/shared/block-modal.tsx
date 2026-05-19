@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
+import { smoothScrollTo } from "@/lib/scroll";
 import { COURSES } from "@/lib/constants/courses";
 import { getTeachersByCourse } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
@@ -150,14 +151,10 @@ export function BlockModal({
             onClick={(e) => {
               if (ctaHref.startsWith("#")) {
                 e.preventDefault();
-                const target = document.querySelector(ctaHref);
                 close();
                 // Defer the scroll until the close animation finishes
                 window.setTimeout(() => {
-                  target?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
+                  smoothScrollTo(ctaHref);
                 }, 380);
                 return;
               }

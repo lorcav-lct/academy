@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
 import { PUBLIC_WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
+import { smoothScrollTo } from "@/lib/scroll";
 import { getPublicMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
@@ -980,7 +981,7 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
               href="#tutti-i-master"
               onClick={(e) => {
                 e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                smoothScrollTo(0);
               }}
               className="inline-flex items-center justify-center gap-2 px-6 py-4 text-[0.74rem] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
               style={{

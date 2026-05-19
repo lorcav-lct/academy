@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
+import { smoothScrollTo } from "@/lib/scroll";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroSlide, DEFAULT_HERO_SLIDES } from "@/lib/constants/hero-slides";
 import { VideoBlockMux } from "@/components/shared/video-block-mux";
@@ -1494,19 +1495,13 @@ export function HeroSection({
                 if (idx < 3) {
                   const nextPanel = nextRefs[idx]?.current;
                   if (nextPanel) {
-                    nextPanel.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    });
+                    smoothScrollTo(nextPanel);
                     return;
                   }
                 }
                 const target = document.getElementById("perche");
                 if (target) {
-                  target.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
+                  smoothScrollTo(target);
                 }
               }}
               className="group relative inline-flex items-center justify-between gap-5 font-black tracking-[0.2em] uppercase transition-colors duration-200"

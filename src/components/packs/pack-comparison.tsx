@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, useInView } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { smoothScrollTo } from "@/lib/scroll";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
@@ -2724,9 +2725,7 @@ export function PackComparison() {
         href="#section-packs"
         onClick={(e) => {
           e.preventDefault();
-          document
-            .getElementById("section-packs")
-            ?.scrollIntoView({ behavior: "smooth" });
+          smoothScrollTo("#section-packs");
         }}
         aria-label="Scegli il tuo pack"
         className="fixed left-0 z-40 md:hidden inline-flex items-center gap-2 active:scale-95 h-12 pl-3.5 pr-4 bottom-5"
