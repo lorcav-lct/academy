@@ -669,7 +669,7 @@ export function TeachersGrid() {
 
       {/* Filter bar — sticky-ish */}
       <div
-        className="sticky top-0 z-30 -mt-1"
+        className="sticky top-[62px] md:top-[64px] z-30 -mt-1"
         style={{
           background: isDark ? "rgba(10,10,14,0.92)" : "rgba(255,255,255,0.92)",
           backdropFilter: "blur(14px)",
