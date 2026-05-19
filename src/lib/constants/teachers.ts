@@ -192,7 +192,7 @@ export const TEACHERS: Teacher[] = [
     slug: "rosalba-romano",
     name: "Rosalba Romano",
     role: "Sport Psychologist",
-    bio: "Psicologa dello sport esperta in mindset, performance e gestione mentale dell'atleta.",
+    bio: 'Psicologa del Lavoro e delle Organizzazioni, Sport, Life e Business Coach ed Esperta in Psicologia dello Sport e della Prestazione Umana. Collabora con il Centro di Psicologia dello Sport e della Prestazione Umana "Umbro Marcaccioli" presso l\'ISEF Torino ed è docente per il corso di Perfezionamento in Psicologia dello Sport. Docente ai corsi di aggiornamento allenatori per FISI e Docente Alta Formazione CONI. Esperta in supporto psicologico per il recupero da infortunio e psicologa presso J Medical. Psicoterapeuta IPsiG — Istituto Internazionale di Psicopatologia e Psicoterapia della Gestalt.',
     courses: ["science"],
     image_url: "/docenti/rosalba-romano.webp",
     color: BRAND,
