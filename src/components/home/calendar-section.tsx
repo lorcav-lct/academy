@@ -40,21 +40,19 @@ const COLORS = {
 
 const EVENTS = [
   { label: "FUNCTION 1", dates: "11–12 Settembre", type: "function" },
-  { label: "Master Tennis", dates: "26 Settembre", type: "workshop" },
+  { label: "Master Bulgarian", dates: "18–20 Settembre", type: "workshop" },
   { label: "FUNCTION 2", dates: "9–10 Ottobre", type: "function" },
-  { label: "Master Calcio", dates: "24 Ottobre", type: "workshop" },
+  { label: "Master Volley", dates: "17 Ottobre", type: "workshop" },
   { label: "FIPE I", dates: "13–14 Novembre", type: "fipe" },
-  { label: "Master FT", dates: "28 Novembre", type: "workshop" },
+  { label: "Master Running", dates: "28 Novembre", type: "workshop" },
   { label: "STRENGTH 1", dates: "11–12 Dicembre", type: "strength" },
-  { label: "Master End.", dates: "19 Dicembre", type: "workshop" },
   { label: "STRENGTH 2", dates: "15–16 Gennaio", type: "strength" },
-  { label: "Master Nuoto", dates: "30 Gennaio", type: "workshop" },
+  { label: "Master Tennis", dates: "23 Gennaio", type: "workshop" },
   { label: "FIPE II", dates: "12–13 Febbraio", type: "fipe" },
-  { label: "Master Rugby", dates: "27 Febbraio", type: "workshop" },
+  { label: "Master Nuoto", dates: "27 Febbraio", type: "workshop" },
   { label: "SCIENCE 1", dates: "12–13 Marzo", type: "science" },
-  { label: "Master Volley", dates: "27 Marzo", type: "workshop" },
   { label: "SCIENCE 2", dates: "9–10 Aprile", type: "science" },
-  { label: "Master Running", dates: "24 Aprile", type: "workshop" },
+  { label: "Master Calcio", dates: "17 Aprile", type: "workshop" },
   { label: "FIPE III", dates: "14–15 Maggio", type: "fipe" },
 ];
 

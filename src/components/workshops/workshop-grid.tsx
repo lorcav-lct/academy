@@ -31,9 +31,9 @@ type Credential = {
 const CREDENTIALS: Record<string, Credential> = {
   "master-functional-bulgarian": {
     domain: "Functional × Bulgarian",
-    headline: "Ivan Ivanov + Pierluigi Mauro",
+    headline: "Ivan Ivanov",
     pitch:
-      "Specialista internazionale del metodo bulgaro × pioniere italiano di Macebell e Clubbell.",
+      "Specialista internazionale del metodo bulgaro applicato al functional training.",
     promise:
       "Pattern motori, protocolli del metodo bulgaro e applicazione del functional al massimo livello.",
     featured: true,
@@ -112,7 +112,7 @@ const CREDENTIALS: Record<string, Credential> = {
   },
   "master-rugby": {
     domain: "S&C Rugby",
-    headline: "Faculty da definire",
+    headline: "Ospite internazionale",
     pitch:
       "Programma in costruzione con preparatori atletici di livello internazionale.",
     promise:

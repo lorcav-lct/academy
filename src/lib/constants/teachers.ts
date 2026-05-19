@@ -79,18 +79,6 @@ export const TEACHERS: Teacher[] = [
     talkTitle:
       "Teoria e applicazione dell'allenamento funzionale per la general population",
   },
-  {
-    slug: "pierluigi-mauro",
-    name: "Pierluigi Mauro",
-    role: "Founder Crossout Method | Functional Training & Athletic Performance Coach",
-    bio: "Founder del Crossout Method e tra i principali esperti italiani di Clubbell e Macebell. Coach di Functional Training e Athletic Performance con un approccio ispirato alle radici della Forza Circolare.",
-    courses: ["function", "master-functional-bulgarian"],
-    image_url: "/docenti/pierluigi-mauro.webp",
-    color: BRAND,
-    talkTitle:
-      "Clubbell e Macebell: la Forza Circolare — movimenti balistici e armonici nel dominio funzionale e nella preparazione atletica",
-  },
-
   // ───────── STRENGTH ─────────
   {
     slug: "sandro-bartolomei",

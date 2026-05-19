@@ -15,7 +15,6 @@ const FILE_TO_SLUG = {
   "coratellagiuseppe.png": "giuseppe-coratella",
   "guidobelli.png": "guido-belli",
   "samuelemarcora.png": "samuele-marcora",
-  "pierluigimauro.png": "pierluigi-mauro",
   "marcomagnani.png": "marco-magnani",
   "riccardoaimini.png": "riccardo-aimini",
   // 30-04 batch

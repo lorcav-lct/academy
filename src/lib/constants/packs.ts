@@ -207,7 +207,7 @@ export const PRODUCTS: AcademyProduct[] = [
     workshopSlug: "master-functional-bulgarian",
     includes: [
       "1-2 giornate in presenza",
-      "Ivan Ivanov + Pierluigi Mauro",
+      "Ivan Ivanov",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],

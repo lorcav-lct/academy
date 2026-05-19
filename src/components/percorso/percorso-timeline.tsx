@@ -7,9 +7,6 @@ import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
 import { COURSES, FIPE_SESSIONS } from "@/lib/constants/courses";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
-// Extracts month name: "11-12 Settembre" → "Settembre"
-const monthOnly = (d: string) => d.split(" ").at(-1) ?? d;
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type BlockItem = {
@@ -133,7 +130,7 @@ function BlockPanel({
                 className="h-1.5 w-1.5 shrink-0"
                 style={{ background: `rgba(240,146,38,${0.5 + di * 0.3})` }}
               />
-              {monthOnly(d)}
+              {d}
             </span>
           ))}
         </div>
@@ -202,7 +199,7 @@ function FipePanel({ item }: { item: FipeItem }) {
                 border: "1px solid rgba(240,146,38,0.2)",
               }}
             >
-              {monthOnly(d)}
+              {d}
             </span>
           ))}
         </div>

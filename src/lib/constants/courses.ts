@@ -59,7 +59,6 @@ export const COURSES: Course[] = [
       "marco-bani",
       "matteo-romanazzi",
       "luca-cerri",
-      "pierluigi-mauro",
     ],
     sortOrder: 1,
   },

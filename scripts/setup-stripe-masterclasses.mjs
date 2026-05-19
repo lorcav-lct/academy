@@ -52,8 +52,7 @@ const MASTERCLASSES = [
     slug: "master-functional-bulgarian",
     productName:
       "Masterclass Functional Movement & Bulgarian — Lacertosus Academy",
-    description:
-      "Masterclass intensiva 1-2 giornate in presenza · Ivan Ivanov + Pierluigi Mauro",
+    description: "Masterclass intensiva 1-2 giornate in presenza · Ivan Ivanov",
     skipCreate: true, // già creato manualmente: cerco e leggo il Price
   },
   {

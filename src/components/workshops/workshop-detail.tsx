@@ -35,11 +35,11 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-functional-bulgarian": {
     domain: "Functional × Bulgarian",
     hook: "Il metodo bulgaro non è un esercizio. È un sistema. Chi lo conosce davvero allena diversamente.",
-    trainerHeadline: "Ivan Ivanov × Pierluigi Mauro",
+    trainerHeadline: "Ivan Ivanov",
     trainerPitch:
-      "Ivan Ivanov è uno dei riferimenti internazionali del metodo bulgaro applicato al functional training. Pierluigi Mauro è il pioniere italiano della Macebell e del lavoro con Clubbell e Kettlebell — ha portato in Italia metodologie che oggi sono standard a livello globale.",
+      "Ivan Ivanov, Founder e President di Suples, è uno dei riferimenti internazionali del metodo bulgaro applicato al functional training. Ha codificato il Bulgarian Bag Training System che oggi è standard a livello globale.",
     whatYouLearn:
-      "Due giornate intensive in cui i due specialisti smontano il metodo bulgaro e mostrano come integrarlo nel functional training avanzato. Niente teoria astratta — solo pattern, protocolli e applicazione pratica.",
+      "Due giornate intensive in cui Ivan Ivanov smonta il metodo bulgaro e mostra come integrarlo nel functional training avanzato. Niente teoria astratta — solo pattern, protocolli e applicazione pratica.",
     modules: [
       {
         num: "01",
@@ -84,7 +84,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha mai lavorato con carico significativo",
     ],
     included: [
-      "1-2 giornate in presenza con Ivan Ivanov e Pierluigi Mauro",
+      "1-2 giornate in presenza con Ivan Ivanov",
       "Materiale didattico digitale completo",
       "Schede e protocolli operativi",
       "Attestato di partecipazione Lacertosus Academy",
@@ -880,6 +880,13 @@ function HeroSection({
             {[
               { v: "100%", l: "In presenza" },
               { v: workshop.duration, l: "Durata" },
+              {
+                v:
+                  workshop.date && workshop.date !== "Da definire"
+                    ? workshop.date
+                    : "Da definire",
+                l: "Data",
+              },
               { v: priceLabel ?? "TBD", l: "Prezzo singolo" },
             ].map((s) => (
               <div key={s.l} className="flex flex-col">
@@ -890,7 +897,11 @@ function HeroSection({
                   {s.l}
                 </span>
                 <span
-                  className="mt-1 text-[1.6rem] font-black leading-none tabular-nums md:text-[1.85rem]"
+                  className={`mt-1 font-black leading-none tabular-nums ${
+                    s.l === "Data"
+                      ? "text-[1.6rem] md:text-[1.85rem]"
+                      : "text-[1.6rem] md:text-[1.85rem]"
+                  }`}
                   style={{ color: th }}
                 >
                   {s.v}

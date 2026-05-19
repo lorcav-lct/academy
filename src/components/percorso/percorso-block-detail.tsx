@@ -163,7 +163,7 @@ export function PercorsoBlockDetail({ course, prevCourse, nextCourse }: Props) {
               {course.objective}
             </p>
 
-            {/* Inline meta — minimal, no boxes, no precise dates */}
+            {/* Inline meta — minimal, no boxes */}
             <div
               data-hero-item
               className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 text-[0.7rem] font-bold tracking-[0.2em] uppercase"
@@ -204,6 +204,31 @@ export function PercorsoBlockDetail({ course, prevCourse, nextCourse }: Props) {
                 </span>
                 <span>in presenza</span>
               </span>
+            </div>
+
+            {/* Date esplicite del blocco */}
+            <div
+              data-hero-item
+              className="mt-6 flex flex-wrap items-center gap-2"
+            >
+              <span
+                className="text-[0.62rem] font-bold uppercase tracking-[0.28em] mr-2"
+                style={{ color: "rgba(220,220,235,0.55)" }}
+              >
+                Date
+              </span>
+              {course.dates.map((d) => (
+                <span
+                  key={d}
+                  className="inline-block px-3 py-1.5 text-[0.78rem] font-bold tracking-wider text-academy-orange uppercase tabular-nums"
+                  style={{
+                    background: "rgba(240,146,38,0.08)",
+                    border: "1px solid rgba(240,146,38,0.25)",
+                  }}
+                >
+                  {d}
+                </span>
+              ))}
             </div>
           </div>
         </div>
