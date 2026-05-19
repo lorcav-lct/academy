@@ -947,14 +947,14 @@ export function HeroSection({
                 </span>
               </div>
 
-              {/* 9 MASTERCLASS */}
+              {/* 8 MASTERCLASS */}
               <div
                 data-reveal
                 className="flex flex-col items-center text-center"
               >
                 <div className="relative">
                   <CountUp
-                    to={9}
+                    to={8}
                     duration={1.2}
                     active={countActive}
                     className="font-black leading-[0.85] tabular-nums"
@@ -1918,7 +1918,7 @@ export function HeroSection({
                 },
                 {
                   idx: "03",
-                  n: 9,
+                  n: 8,
                   label: "Masterclass",
                   sub: "Specialistiche",
                   primary: false,

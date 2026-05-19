@@ -97,7 +97,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
       {
         q: "Posso acquistarlo se sono iscritto al pack PRO/ELITE?",
-        a: "I pack PRO ed ELITE includono già 2 masterclass a scelta tra le 9. Se sei iscritto, contattaci per la selezione.",
+        a: "I pack PRO ed ELITE includono già 2 masterclass a scelta tra le 8. Se sei iscritto, contattaci per la selezione.",
       },
       {
         q: "Il materiale è disponibile dopo l'evento?",

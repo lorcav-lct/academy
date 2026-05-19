@@ -283,7 +283,7 @@ export function MasterclassSelector({
                 className="mt-4 max-w-[58ch] text-[0.92rem] leading-[1.65] md:text-[0.98rem]"
                 style={{ color: "rgba(255,255,255,0.78)" }}
               >
-                {count} master a scelta tra 9 specializzazioni. Featured = i top
+                {count} master a scelta tra 8 specializzazioni. Featured = i top
                 trainer della community. Puoi cambiare la tua selezione fino al
                 pagamento.
               </p>

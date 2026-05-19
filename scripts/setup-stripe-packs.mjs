@@ -58,7 +58,7 @@ const PACKS = [
     slug: "pro",
     productName: "Pack PRO — Lacertosus Academy",
     description:
-      "Pack PRO · Il percorso completo + Certificazione Personal Trainer FIPE × Lacertosus + 2 Masterclass a scelta tra le 9 disponibili. 9 mesi in presenza, attestazione Functional Strength Master Coach, materiale didattico digitale, accesso alla community.",
+      "Pack PRO · Il percorso completo + Certificazione Personal Trainer FIPE × Lacertosus + 2 Masterclass a scelta tra le 8 disponibili. 9 mesi in presenza, attestazione Functional Strength Master Coach, materiale didattico digitale, accesso alla community.",
     amountCents: 470000, // €4.700
     statementDescriptor: "LACERTOSUS PRO",
   },

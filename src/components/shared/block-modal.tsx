@@ -424,7 +424,7 @@ export function BlockModal({
                   PRO ed ELITE
                 </span>{" "}
                 aggiungono la certificazione ufficiale Personal Elite Trainer
-                FIPE e 2 Masterclass a scelta tra le 9 disponibili.
+                FIPE e 2 Masterclass a scelta tra le 8 disponibili.
               </p>
             </div>
           </div>

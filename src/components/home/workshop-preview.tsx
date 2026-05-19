@@ -74,8 +74,8 @@ export function WorkshopPreview() {
               className="text-[clamp(1.9rem,4vw,3.5rem)] font-black leading-[1.05] tracking-tight text-academy-gray-100"
               style={{ color: th }}
             >
-              9 Masterclass.{" "}
-              <span className="gradient-text">9 Specializzazioni.</span>
+              8 Masterclass.{" "}
+              <span className="gradient-text">8 Specializzazioni.</span>
             </h2>
             <p
               className="mt-3 max-w-lg text-sm text-academy-gray-400"
