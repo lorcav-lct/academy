@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-const WHATSAPP_NUMBER = "393454522094";
-const PHONE_NUMBER = "+390521607870";
+const WHATSAPP_NUMBER = "393487758065";
+const PHONE_NUMBER = "+393487758065";
 const PHONE_HREF = `tel:${PHONE_NUMBER}`;
 const WHATSAPP_GREEN = "#25D366";
 const WHATSAPP_GREEN_DARK = "#128C7E";
 const WHATSAPP_TEAL = "#075E54";
-const DEFAULT_MSG =
-  "Ciao Lacertosus Academy, vorrei avere informazioni sull'Academy.";
+const DEFAULT_MSG = "ACADEMY - ";
 
 function WhatsAppGlyph({ size = 22 }: { size?: number }) {
   return (
@@ -39,7 +38,7 @@ function WhatsAppGlyph({ size = 22 }: { size?: number }) {
 export function WhatsAppFloat() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState(DEFAULT_MSG);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +65,7 @@ export function WhatsAppFloat() {
   function send() {
     window.open(href, "_blank", "noopener,noreferrer");
     setOpen(false);
-    setTimeout(() => setMsg(""), 300);
+    setTimeout(() => setMsg(DEFAULT_MSG), 300);
   }
 
   return (
