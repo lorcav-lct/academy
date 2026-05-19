@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Saira } from "next/font/google";
+import { Lexend, Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
@@ -8,10 +8,15 @@ import { LenisProvider } from "@/components/providers/lenis-provider";
 import { CookieConsentProvider } from "@/components/providers/cookie-consent";
 import "./globals.css";
 
-const saira = Saira({
+const lexend = Lexend({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-saira",
+  variable: "--font-lexend",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -68,7 +73,7 @@ export default function RootLayout({
   return (
     <html
       lang="it"
-      className={saira.variable}
+      className={`${lexend.variable} ${geistMono.variable}`}
       data-theme="light"
       suppressHydrationWarning
     >
