@@ -114,7 +114,7 @@ Se serve nascondere il blocco senza revert completo: commenta/rimuovi la `<secti
 ## Batch 002 — Rinomina "Personal Elite Trainer FIPE" → "Personal Trainer FIPE"
 
 **Data**: 2026-05-22
-**Stato**: 🟡 in sviluppo (code complete, in attesa di test + commit)
+**Stato**: 🟢 in produzione — code deployato + label DB aggiornato
 **Obiettivo**: Rimuovere la parola "Elite" da tutti i riferimenti alla certificazione FIPE nel sito (la cert si chiama ufficialmente "Personal Trainer FIPE"). Toccare solo testi correlati a FIPE, nient'altro.
 
 ### Decisioni prese
@@ -202,7 +202,10 @@ WHERE product_slug = 'fipe-personal-trainer';
 
 ### Commit di riferimento
 
-- _da compilare al momento del commit_
+- `e4975f0` — refactor(fipe): rename Personal Elite Trainer to Personal Trainer in site copy
+- Branch: `staging` → merge fast-forward in `main`
+- Deploy: Vercel (staging + production)
+- DB: migration 025 eseguita manualmente via SQL Editor in Supabase prod (2026-05-22)
 
 ---
 
