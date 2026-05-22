@@ -123,6 +123,10 @@ export async function POST(request: NextRequest) {
     const effectivePromotionCodeId = couponId ? null : promotionCodeId || null;
 
     // Create Stripe Checkout Session
+    const cancelPath =
+      packId === "fipe-personal-trainer"
+        ? "/percorso/fipe-personal-trainer"
+        : undefined;
     const session = await createCheckoutSession({
       priceId,
       customerEmail: user.email!,
@@ -132,6 +136,7 @@ export async function POST(request: NextRequest) {
       masterclassIds: selectedAddonSlugs,
       promotionCodeId: effectivePromotionCodeId,
       couponId,
+      cancelPath,
     });
 
     // Update order with Stripe session ID via admin client.

@@ -192,6 +192,27 @@ export const PRODUCTS: AcademyProduct[] = [
     ],
     sortOrder: 13,
   },
+  {
+    slug: "fipe-personal-trainer",
+    name: "Personal Elite Trainer FIPE",
+    subtitle: "Certificazione FIPE I Livello — 3 weekend in presenza",
+    type: "certification",
+    priceCents: 79000,
+    stripePriceId: {
+      test: "", // Non disponibile in test mode — acquistabile solo in produzione
+      live: "price_1TZSugCE95vjZKhk8EFfwjBM",
+    },
+    hidden: true,
+    includes: [
+      "3 weekend in presenza (40 ore: 16h teoria + 24h pratica)",
+      "Esame finale FIPE",
+      "Certificazione Personal Elite Trainer FIPE I Livello",
+      "Riconoscimento nazionale e internazionale",
+      "Materiale didattico digitale",
+      "Accesso alla community Lacertosus",
+    ],
+    sortOrder: 14,
+  },
 
   // ─── Masterclass (acquistabili separatamente) ─────────────────────────────
   {

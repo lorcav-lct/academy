@@ -13,6 +13,9 @@ interface CreateCheckoutParams {
   /** Coupon id auto-applicato (es. promo di lancio). Ha precedenza su
    *  `promotionCodeId` perché Stripe non permette stacking di sconti. */
   couponId?: string | null;
+  /** Path relativo a `NEXT_PUBLIC_BASE_URL` per il redirect di cancellazione.
+   *  Default: `/pack`. Usato per prodotti hidden che non vivono lì. */
+  cancelPath?: string;
 }
 
 export async function createCheckoutSession(params: CreateCheckoutParams) {
@@ -29,7 +32,7 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
     tax_id_collection: { enabled: true },
     locale: "it",
     success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/conferma?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pack`,
+    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${params.cancelPath ?? "/pack"}`,
     metadata: {
       order_id: params.orderId,
       pack_id: params.packId,

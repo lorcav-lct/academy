@@ -1533,7 +1533,9 @@ export function CheckoutContent() {
             href={
               isBundle
                 ? "/pack"
-                : `/masterclass/${pack.workshopSlug ?? pack.slug}`
+                : pack.type === "certification"
+                  ? "/percorso/fipe-personal-trainer"
+                  : `/masterclass/${pack.workshopSlug ?? pack.slug}`
             }
             className="inline-flex items-center gap-2 text-[0.66rem] font-bold uppercase tracking-[0.22em] transition-opacity hover:opacity-70"
             style={{ color: t.tb }}
@@ -1660,7 +1662,9 @@ export function CheckoutContent() {
                             ? "Pack"
                             : pack.type === "course"
                               ? "Blocco"
-                              : "Masterclass"}
+                              : pack.type === "certification"
+                                ? "Certificazione"
+                                : "Masterclass"}
                           <span style={{ opacity: 0.5 }}>·</span>
                           <span style={{ color: t.ts }}>{tierLabel}</span>
                         </span>
@@ -1705,7 +1709,7 @@ export function CheckoutContent() {
                           ▾
                         </span>
                       </button>
-                    ) : (
+                    ) : pack.type === "certification" ? null : (
                       <Link
                         href="/masterclass"
                         className="shrink-0 text-[0.66rem] font-bold uppercase tracking-[0.22em] transition-opacity hover:opacity-70"
