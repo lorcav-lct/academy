@@ -186,7 +186,7 @@ function FipePanel({ item }: { item: FipeItem }) {
           {item.displayTitle}
         </h3>
         <p className="text-[0.7rem] font-bold tracking-[0.22em] text-academy-gray-400 uppercase mb-6">
-          Personal Elite Trainer FIPE
+          Personal Trainer FIPE
         </p>
 
         <div className="flex flex-wrap gap-2 justify-center">

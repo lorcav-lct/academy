@@ -420,8 +420,8 @@ export function BlockModal({
                 <span className="font-bold" style={{ color: accentColor }}>
                   PRO ed ELITE
                 </span>{" "}
-                aggiungono la certificazione ufficiale Personal Elite Trainer
-                FIPE e 2 Masterclass a scelta tra le 8 disponibili.
+                aggiungono la certificazione ufficiale Personal Trainer FIPE e 2
+                Masterclass a scelta tra le 8 disponibili.
               </p>
             </div>
           </div>

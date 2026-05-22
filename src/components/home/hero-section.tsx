@@ -1068,8 +1068,8 @@ export function HeroSection({
                 <strong>Functional Strength Master Trainer</strong> rilasciato
                 da CSEN e <strong>2.0 CEU NSCA</strong> di valore internazionale
                 — inclusi in tutti i pack. Con PRO ed ELITE ottieni anche il{" "}
-                <strong>Personal Elite Trainer FIPE</strong>, il titolo che apre
-                le porte del mercato professionale del fitness in Italia e
+                <strong>Personal Trainer FIPE</strong>, il titolo che apre le
+                porte del mercato professionale del fitness in Italia e
                 all&apos;estero.
               </p>
             </div>
@@ -1156,7 +1156,7 @@ export function HeroSection({
                 </p>
               </div>
 
-              {/* Cert 2 — Personal Elite Trainer FIPE */}
+              {/* Cert 2 — Personal Trainer FIPE */}
               <div
                 className="flex flex-col gap-4 p-7"
                 style={{
@@ -1187,7 +1187,7 @@ export function HeroSection({
                   className="text-[clamp(1.1rem,1.55vw,1.6rem)] font-black tracking-[-0.02em] leading-[1.05]"
                   style={{ color: "#ffffff" }}
                 >
-                  Personal Elite Trainer
+                  Personal Trainer
                   <br />
                   <span style={{ color: "#F09226" }}>FIPE</span>
                 </div>
@@ -1202,7 +1202,7 @@ export function HeroSection({
                   style={{ color: "rgba(255,255,255,0.85)" }}
                 >
                   Certificazione ufficiale della Federazione Italiana Pesistica.
-                  Specializzazione elite su Strength &amp; Conditioning,
+                  Specializzazione avanzata su Strength &amp; Conditioning,
                   programmazione avanzata della forza e applicazioni multi-sport
                   — con supporto diretto dei docenti FIPE.
                 </p>
@@ -2054,8 +2054,8 @@ export function HeroSection({
             Tre riconoscimenti che fanno la differenza:{" "}
             <strong>Master Trainer</strong> rilasciato da CSEN e{" "}
             <strong>2.0 CEU NSCA</strong> in tutti i pack. Con PRO ed ELITE
-            anche il <strong>Personal Elite Trainer FIPE</strong>, riconosciuto
-            in Italia e all&apos;estero.
+            anche il <strong>Personal Trainer FIPE</strong>, riconosciuto in
+            Italia e all&apos;estero.
           </p>
 
           {/* Logo row — 3 real issuer logos */}
@@ -2135,7 +2135,7 @@ export function HeroSection({
               </p>
             </div>
 
-            {/* Cert 2 — Personal Elite Trainer FIPE */}
+            {/* Cert 2 — Personal Trainer FIPE */}
             <div
               className="flex flex-col gap-3 p-5"
               style={{
@@ -2166,8 +2166,7 @@ export function HeroSection({
                 className="text-[1.05rem] font-black tracking-[-0.015em] leading-[1.1]"
                 style={{ color: "#ffffff" }}
               >
-                Personal Elite Trainer{" "}
-                <span style={{ color: "#F09226" }}>FIPE</span>
+                Personal Trainer <span style={{ color: "#F09226" }}>FIPE</span>
               </div>
               <p
                 className="text-[0.62rem] font-black tracking-[0.22em] uppercase"
@@ -2180,7 +2179,7 @@ export function HeroSection({
                 style={{ color: "rgba(255,255,255,0.85)" }}
               >
                 Certificazione ufficiale della Federazione Italiana Pesistica.
-                Specializzazione elite su Strength &amp; Conditioning,
+                Specializzazione avanzata su Strength &amp; Conditioning,
                 programmazione avanzata della forza e applicazioni multi-sport.
               </p>
               <ul className="mt-1 flex flex-col gap-1">

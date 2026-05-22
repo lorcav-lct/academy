@@ -156,7 +156,7 @@ export function PercorsoTirocinio() {
           >
             Il tirocinio è un&apos;opportunità riservata agli alumni certificati{" "}
             <span className="font-bold text-academy-orange">
-              Personal Elite Trainer FIPE
+              Personal Trainer FIPE
             </span>
             . I posti sono limitati e assegnati in base al percorso e alla
             disponibilità.

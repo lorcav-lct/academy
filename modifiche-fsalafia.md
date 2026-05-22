@@ -104,9 +104,105 @@ Se serve nascondere il blocco senza revert completo: commenta/rimuovi la `<secti
 ### Commit di riferimento
 
 - `21463ae` — feat(fipe): add standalone FIPE certification purchase flow
+- `6a5eb60` — docs(fipe): mark Batch 001 as deployed and verified in production
 - Branch: `staging` → merge fast-forward in `main`
 - Deploy: Vercel (staging + production)
 - DB: migration 024 eseguita manualmente via SQL Editor in Supabase prod (2026-05-22)
+
+---
+
+## Batch 002 — Rinomina "Personal Elite Trainer FIPE" → "Personal Trainer FIPE"
+
+**Data**: 2026-05-22
+**Stato**: 🟡 in sviluppo (code complete, in attesa di test + commit)
+**Obiettivo**: Rimuovere la parola "Elite" da tutti i riferimenti alla certificazione FIPE nel sito (la cert si chiama ufficialmente "Personal Trainer FIPE"). Toccare solo testi correlati a FIPE, nient'altro.
+
+### Decisioni prese
+
+- Rinomina `"Personal Elite Trainer FIPE"` → `"Personal Trainer FIPE"` (full match) ovunque nel sito
+- Varianti minori uniformate:
+  - `"FIPE Personal Elite Trainer"` → `"FIPE Personal Trainer"` (keywords/FAQ)
+  - `"FIPE Elite"` (abbreviato) → `"FIPE"`
+  - `"Personal Elite Trainer"` (senza FIPE, in `certifications.ts` title) → `"Personal Trainer"`
+  - `"elite firmato FIPE"` → `"di livello firmato FIPE"`
+  - `"Specializzazione elite [...]"` → `"Specializzazione avanzata [...]"`
+  - `"competenze elite nello Strength"` → `"competenze avanzate nello Strength"`
+- **NON toccati**:
+  - Slug DB `fipe-personal-trainer` (già senza Elite)
+  - Internal ID `fipe-elite` in `certifications.ts` e selettori (refactor fuori scope)
+  - Nome del pack "ELITE" e riferimenti tipo `"pack PRO ed ELITE"` (è il nome del pack, non la cert)
+  - `supabase/migrations/024_add_fipe_access_rule.sql` (storia già applicata; la nuova migration 025 fa l'UPDATE sul DB)
+
+### File modificati (17)
+
+| File                                                  | Modifica                                                                      |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `src/lib/constants/packs.ts`                          | Rinomina testi pack PRO/Elite + entry certification                           |
+| `src/lib/constants/hero-slides.ts`                    | Rinomina testo slide                                                          |
+| `src/lib/constants/certifications.ts`                 | `title` + descrizione (rimosso "elite")                                       |
+| `src/components/home/pack-preview.tsx`                | Rinomina 6 occorrenze                                                         |
+| `src/components/home/hero-section.tsx`                | Rinomina testi + JSX multi-riga + "Specializzazione elite → avanzata"         |
+| `src/components/home/why-lacertosus.tsx`              | Rinomina 2 occorrenze                                                         |
+| `src/components/home/faq-section.tsx`                 | Rinomina full match + "FIPE Personal Elite Trainer" → "FIPE Personal Trainer" |
+| `src/components/packs/pack-comparison.tsx`            | Rinomina 7 occorrenze + "FIPE Elite" → "FIPE"                                 |
+| `src/components/shared/certifications-cards.tsx`      | Commenti + JSX multi-riga + "Specializzazione elite → avanzata"               |
+| `src/components/shared/block-modal.tsx`               | JSX multi-riga                                                                |
+| `src/components/percorso/percorso-tirocinio.tsx`      | Rinomina 1 occorrenza                                                         |
+| `src/components/percorso/percorso-timeline.tsx`       | Rinomina 1 occorrenza                                                         |
+| `src/components/percorso/percorso-certifications.tsx` | "elite firmato FIPE" → "di livello firmato FIPE"                              |
+| `src/app/percorso/page.tsx`                           | Metadata title + description                                                  |
+| `src/app/layout.tsx`                                  | Description + keyword                                                         |
+| `src/app/certificazioni/page.tsx`                     | Description + keyword + testi + FAQ                                           |
+| `src/app/pack/page.tsx`                               | Description metadata                                                          |
+
+### File creati
+
+| File                                            | Scopo                                                                |
+| ----------------------------------------------- | -------------------------------------------------------------------- |
+| `supabase/migrations/025_rename_fipe_label.sql` | UPDATE `product_access_rules.label` per slug `fipe-personal-trainer` |
+
+### Modifiche esterne necessarie
+
+| Sistema       | Azione                                                                   | Stato      |
+| ------------- | ------------------------------------------------------------------------ | ---------- |
+| Supabase prod | Eseguire `025_rename_fipe_label.sql` via SQL Editor (UPDATE idempotente) | ⏳ da fare |
+| Stripe        | Nessuna azione                                                           | ✅ ok      |
+| Make.com      | Nessuna azione (slug invariato)                                          | ✅ ok      |
+
+### Procedura di test
+
+1. Deploy su staging → verifica visuale di:
+   - Home (hero, pack-preview, why-lacertosus, faq, certifications-cards)
+   - `/percorso` (page metadata + timeline + tirocinio + certifications)
+   - `/percorso/fipe-personal-trainer` (pagina FIPE, sezione acquisto)
+   - `/pack` (comparison)
+   - `/certificazioni` (card FIPE + FAQ)
+   - `/account/tickets` (label ticket FIPE — usa `getCourseLabel` che legge `packs.ts.name`)
+   - `/admin/scanner` (label dal DB → dopo migration 025 dovrebbe mostrare "Personal Trainer FIPE")
+2. Eseguire migration 025 su Supabase prod
+3. Deploy main → verifica visuale identica
+4. Verifica meta tag/SEO con browser devtools (description, keywords)
+
+### Rollback
+
+#### Code
+
+```bash
+git revert <COMMIT_HASH_BATCH_002>
+git push origin main
+```
+
+#### DB
+
+```sql
+UPDATE public.product_access_rules
+SET label = 'Personal Elite Trainer FIPE'
+WHERE product_slug = 'fipe-personal-trainer';
+```
+
+### Commit di riferimento
+
+- _da compilare al momento del commit_
 
 ---
 

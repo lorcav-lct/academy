@@ -119,7 +119,7 @@ const CARD_COPY: Record<string, CardCopy> = {
         sub: "Riconoscimento internazionale — Lacertosus è NSCA CEU Provider",
       },
       {
-        text: "Personal Elite Trainer FIPE",
+        text: "Personal Trainer FIPE",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
     ],
@@ -154,7 +154,7 @@ const CARD_COPY: Record<string, CardCopy> = {
         sub: "Riconoscimento internazionale — Lacertosus è NSCA CEU Provider",
       },
       {
-        text: "Personal Elite Trainer FIPE",
+        text: "Personal Trainer FIPE",
         sub: "Certificazione FIPE — riconoscimento nazionale e internazionale",
       },
       {
@@ -195,10 +195,10 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     headline:
       "La certificazione FIPE che fa la differenza nel mercato professionale.",
     promise:
-      "Tutto il percorso + la certificazione ufficiale Personal Elite Trainer FIPE (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 9 sessioni esclusive. Il pack scelto da chi punta in alto.",
+      "Tutto il percorso + la certificazione ufficiale Personal Trainer FIPE (riconosciuta a livello nazionale e internazionale) + 2 Masterclass a scelta tra 9 sessioni esclusive. Il pack scelto da chi punta in alto.",
     guarantees: [
       {
-        label: "Personal Elite Trainer FIPE",
+        label: "Personal Trainer FIPE",
         sub: "Riconoscimento nazionale e internazionale",
       },
       { label: "Master Trainer", sub: "Diploma CSEN + 2.0 CEU NSCA" },
@@ -214,7 +214,7 @@ const MODAL_COPY: Record<string, ModalCopy> = {
     guarantees: [
       { label: "Vitto & Alloggio", sub: "Inclusi per tutti i 6 weekend" },
       {
-        label: "Personal Elite Trainer FIPE",
+        label: "Personal Trainer FIPE",
         sub: "Riconoscimento nazionale e internazionale",
       },
       {
@@ -299,7 +299,7 @@ function PackModal({
   });
   if (isPro || isElite) {
     valueStackExtras.push({
-      label: "Personal Elite Trainer FIPE",
+      label: "Personal Trainer FIPE",
       sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale",
     });
     valueStackExtras.push({

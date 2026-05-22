@@ -61,8 +61,7 @@ export const PRODUCTS: AcademyProduct[] = [
   {
     slug: "pro",
     name: "PRO",
-    subtitle:
-      "Il percorso completo + Personal Elite Trainer FIPE + 2 Masterclass",
+    subtitle: "Il percorso completo + Personal Trainer FIPE + 2 Masterclass",
     type: "bundle",
     priceCents: 490000,
     stripePriceId: {
@@ -75,7 +74,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "SCIENCE — Blocco III: Business & Performance (2 weekend)",
       "Attestazione Functional Strength Master Trainer (rilasciata da CSEN)",
       "Riconoscimento NSCA · 2.0 CEU internazionali",
-      "Certificazione Personal Elite Trainer FIPE",
+      "Certificazione Personal Trainer FIPE",
       "2 Masterclass a scelta tra le 8 disponibili",
       "9 mesi di formazione in presenza",
       "Materiale didattico digitale",
@@ -101,7 +100,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "SCIENCE — Blocco III: Business & Performance (2 weekend)",
       "Attestazione Functional Strength Master Trainer (rilasciata da CSEN)",
       "Riconoscimento NSCA · 2.0 CEU internazionali",
-      "Certificazione Personal Elite Trainer FIPE",
+      "Certificazione Personal Trainer FIPE",
       "2 Masterclass a scelta tra le 8 disponibili",
       "Vitto e alloggio inclusi per tutta la durata",
       "9 mesi di formazione in presenza",
@@ -179,13 +178,13 @@ export const PRODUCTS: AcademyProduct[] = [
   // ─── Certificazione ───────────────────────────────────────────────────────
   {
     slug: "certificazione-fipe",
-    name: "Personal Elite Trainer FIPE",
+    name: "Personal Trainer FIPE",
     subtitle: "Riconoscimento nazionale e internazionale",
     type: "certification",
     priceCents: 0,
     stripePriceId: { test: "", live: "" },
     includes: [
-      "Esame di certificazione Personal Elite Trainer FIPE",
+      "Esame di certificazione Personal Trainer FIPE",
       "Riconoscimento nazionale e internazionale",
       "Spendibile in palestre e strutture sportive in Italia e all'estero",
       "Accesso al registro professionisti",
@@ -194,7 +193,7 @@ export const PRODUCTS: AcademyProduct[] = [
   },
   {
     slug: "fipe-personal-trainer",
-    name: "Personal Elite Trainer FIPE",
+    name: "Personal Trainer FIPE",
     subtitle: "Certificazione FIPE I Livello — 3 weekend in presenza",
     type: "certification",
     priceCents: 79000,
@@ -206,7 +205,7 @@ export const PRODUCTS: AcademyProduct[] = [
     includes: [
       "3 weekend in presenza (40 ore: 16h teoria + 24h pratica)",
       "Esame finale FIPE",
-      "Certificazione Personal Elite Trainer FIPE I Livello",
+      "Certificazione Personal Trainer FIPE I Livello",
       "Riconoscimento nazionale e internazionale",
       "Materiale didattico digitale",
       "Accesso alla community Lacertosus",

@@ -98,7 +98,7 @@ export function PercorsoCertifications() {
           <p className="text-[0.98rem] leading-relaxed text-academy-gray-400">
             Al termine del percorso esci con tre riconoscimenti distinti — uno
             interno firmato CSEN, uno internazionale dato dai crediti NSCA, uno
-            elite firmato FIPE per chi sceglie Pro o Elite.
+            di livello firmato FIPE per chi sceglie Pro o Elite.
           </p>
         </div>
 

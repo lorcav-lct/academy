@@ -16,11 +16,11 @@ const FAQS = [
   },
   {
     q: "Qual è la differenza tra START, PRO ed ELITE?",
-    a: "START (€3.900) include i 3 blocchi, l'attestazione Functional Strength Master Trainer (diploma CSEN) e il riconoscimento NSCA con 2.0 CEU internazionali. PRO (€4.900) aggiunge la certificazione Personal Elite Trainer FIPE e 2 masterclass a scelta tra le 8 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
+    a: "START (€3.900) include i 3 blocchi, l'attestazione Functional Strength Master Trainer (diploma CSEN) e il riconoscimento NSCA con 2.0 CEU internazionali. PRO (€4.900) aggiunge la certificazione Personal Trainer FIPE e 2 masterclass a scelta tra le 8 disponibili. ELITE (€7.000) è l'esperienza completa con vitto e alloggio inclusi per tutta la durata.",
   },
   {
     q: "Quali certificazioni ottengo al termine del percorso?",
-    a: "In tutti i pack ricevi due riconoscimenti: il diploma Functional Strength Master Trainer rilasciato da CSEN (con Tesserino tecnico e iscrizione all'albo nazionale degli istruttori sportivi) e i 2.0 CEU NSCA — Lacertosus Academy è ufficialmente NSCA CEU Provider. Nei pack PRO ed ELITE si aggiunge la certificazione Personal Elite Trainer FIPE, rilasciata dalla Federazione Italiana Pesistica.",
+    a: "In tutti i pack ricevi due riconoscimenti: il diploma Functional Strength Master Trainer rilasciato da CSEN (con Tesserino tecnico e iscrizione all'albo nazionale degli istruttori sportivi) e i 2.0 CEU NSCA — Lacertosus Academy è ufficialmente NSCA CEU Provider. Nei pack PRO ed ELITE si aggiunge la certificazione Personal Trainer FIPE, rilasciata dalla Federazione Italiana Pesistica.",
   },
   {
     q: "Cosa significa che Lacertosus è NSCA CEU Provider?",
@@ -31,7 +31,7 @@ const FAQS = [
     a: "Attesta competenze pratiche e teoriche avanzate in Functional Training, Strength & Conditioning, valutazione del movimento e gestione del cliente. Include Diploma da Istruttore, Tesserino tecnico e iscrizione nell'albo nazionale CSEN degli istruttori sportivi riconosciuti. È immediatamente spendibile in palestre, studi e centri fitness su tutto il territorio nazionale.",
   },
   {
-    q: "La certificazione FIPE Personal Elite Trainer è riconosciuta?",
+    q: "La certificazione FIPE Personal Trainer è riconosciuta?",
     a: "Sì. È rilasciata dalla FIPE (Federazione Italiana Pesistica) ed è spendibile in palestre e strutture sportive sia in Italia sia all'estero. Dà accesso al registro nazionale dei professionisti FIPE, attesta competenze avanzate di programmazione della forza e standard internazionali, ed è il titolo che fa la differenza per ruoli di responsabilità tecnica.",
   },
   {

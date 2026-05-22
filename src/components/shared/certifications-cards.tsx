@@ -8,7 +8,7 @@ import Image from "next/image";
  *      included in all packs).
  *   2. Two cert cards below:
  *        - Functional Strength Master Trainer (CSEN) — all packs
- *        - Personal Elite Trainer FIPE — PRO/ELITE only (emphasized)
+ *        - Personal Trainer FIPE — PRO/ELITE only (emphasized)
  *
  * Logos render without containers/boxes (bare image).
  *
@@ -179,7 +179,7 @@ export function CertificationsCards({ isDark }: Props) {
           </div>
         </article>
 
-        {/* ─── CARD 2 — Personal Elite Trainer FIPE (emphasized) ─────────── */}
+        {/* ─── CARD 2 — Personal Trainer FIPE (emphasized) ─────────── */}
         <article
           className="relative flex flex-col p-7 md:p-8 lg:p-10"
           style={{
@@ -215,7 +215,7 @@ export function CertificationsCards({ isDark }: Props) {
               color: th,
             }}
           >
-            Personal Elite Trainer
+            Personal Trainer
             <br />
             <span style={{ color: ORANGE }}>FIPE</span>
           </h4>
@@ -234,9 +234,10 @@ export function CertificationsCards({ isDark }: Props) {
             style={{ color: tb }}
           >
             Certificazione ufficiale rilasciata dalla Federazione Italiana
-            Pesistica al termine del modulo FIPE. Specializzazione elite sulle
-            metodiche avanzate di Strength &amp; Conditioning, programmazione
-            della forza e applicazioni in diversi contesti sportivi.
+            Pesistica al termine del modulo FIPE. Specializzazione avanzata
+            sulle metodiche avanzate di Strength &amp; Conditioning,
+            programmazione della forza e applicazioni in diversi contesti
+            sportivi.
           </p>
 
           {/* Divider */}

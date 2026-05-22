@@ -103,7 +103,7 @@ export const CERTIFICATIONS: Certification[] = [
   },
   {
     id: "fipe-elite",
-    title: "Personal Elite Trainer",
+    title: "Personal Trainer",
     titleAccent: "FIPE",
     issuer: "FIPE",
     issuerFull: "Federazione Italiana Pesistica",
@@ -115,7 +115,7 @@ export const CERTIFICATIONS: Certification[] = [
     description:
       "Certificazione ufficiale rilasciata dalla Federazione Italiana Pesistica al termine del modulo FIPE incluso nei pack Pro ed Elite. Attesta competenze avanzate di allenamento della forza, programmazione avanzata e tecnica del sollevamento, applicazioni pratiche per diversi sport e contesti professionali — con supporto diretto dei docenti FIPE durante il percorso.",
     shortDescription:
-      "Certificazione ufficiale FIPE che attesta competenze elite nello Strength & Conditioning. Spendibile in palestre, strutture federali e accademie internazionali.",
+      "Certificazione ufficiale FIPE che attesta competenze avanzate nello Strength & Conditioning. Spendibile in palestre, strutture federali e accademie internazionali.",
     attests: [
       "Competenze avanzate di allenamento della forza",
       "Programmazione avanzata e tecnica del sollevamento",

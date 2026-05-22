@@ -14,12 +14,12 @@ const ORANGE = "#F09226";
 export const metadata: Metadata = {
   title: "Le Certificazioni — CSEN · NSCA · FIPE",
   description:
-    "Le 3 certificazioni della Lacertosus Academy: diploma Functional Strength Master Trainer rilasciato da CSEN, 2.0 CEU NSCA di valore internazionale e certificazione Personal Elite Trainer FIPE. Riconoscimenti spendibili in Italia e all'estero.",
+    "Le 3 certificazioni della Lacertosus Academy: diploma Functional Strength Master Trainer rilasciato da CSEN, 2.0 CEU NSCA di valore internazionale e certificazione Personal Trainer FIPE. Riconoscimenti spendibili in Italia e all'estero.",
   keywords: [
     "certificazione personal trainer",
     "diploma CSEN istruttore",
     "NSCA CEU Italia",
-    "FIPE Personal Elite Trainer",
+    "FIPE Personal Trainer",
     "Functional Strength Master Trainer",
     "certificazione fitness riconosciuta",
   ],
@@ -454,8 +454,8 @@ export default function CertificazioniPage() {
             </h2>
             <p className="mt-4 text-[0.98rem] leading-relaxed text-academy-gray-400">
               Master Trainer e CEU NSCA sono inclusi in ogni pack. La
-              certificazione FIPE Personal Elite Trainer è riservata ai pack PRO
-              ed ELITE.
+              certificazione FIPE Personal Trainer è riservata ai pack PRO ed
+              ELITE.
             </p>
           </div>
 
@@ -755,7 +755,7 @@ export default function CertificazioniPage() {
 const CERT_FAQS = [
   {
     q: "Quali certificazioni ottengo al termine del percorso?",
-    a: "In tutti i pack ricevi il diploma Functional Strength Master Trainer rilasciato da CSEN (con Tesserino tecnico e iscrizione all'albo nazionale degli istruttori sportivi) e i 2.0 CEU NSCA — Lacertosus Academy è ufficialmente NSCA CEU Provider. Nei pack PRO ed ELITE si aggiunge la certificazione Personal Elite Trainer FIPE, rilasciata dalla Federazione Italiana Pesistica.",
+    a: "In tutti i pack ricevi il diploma Functional Strength Master Trainer rilasciato da CSEN (con Tesserino tecnico e iscrizione all'albo nazionale degli istruttori sportivi) e i 2.0 CEU NSCA — Lacertosus Academy è ufficialmente NSCA CEU Provider. Nei pack PRO ed ELITE si aggiunge la certificazione Personal Trainer FIPE, rilasciata dalla Federazione Italiana Pesistica.",
   },
   {
     q: "Cosa significa che Lacertosus è NSCA CEU Provider?",
@@ -766,7 +766,7 @@ const CERT_FAQS = [
     a: "Sì. Il Diploma da Istruttore CSEN, accompagnato dal Tesserino tecnico e dall'iscrizione nell'albo nazionale CSEN degli istruttori sportivi, è il riconoscimento standard nel settore fitness italiano. CSEN è un ente di promozione sportiva riconosciuto dal CONI dal 1976. È spendibile in palestre, studi e centri fitness su tutto il territorio nazionale.",
   },
   {
-    q: "La certificazione FIPE Personal Elite Trainer è valida anche all'estero?",
+    q: "La certificazione FIPE Personal Trainer è valida anche all'estero?",
     a: "Sì. È rilasciata dalla Federazione Italiana Pesistica, federazione sportiva nazionale affiliata al CONI e membro dell'IWF (International Weightlifting Federation). È spendibile in palestre, centri sportivi e strutture federali in Italia, e in accademie e strutture di performance internazionali. Dà accesso al registro nazionale dei professionisti FIPE.",
   },
   {

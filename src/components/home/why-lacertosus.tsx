@@ -40,7 +40,7 @@ const FOUNDER_PERKS = [
     label: "Dopo il Percorso",
     title: "3 Certificazioni Riconosciute",
     sub: "Spendibili in Italia e all'estero",
-    body: "Esci con il Diploma Functional Strength Master Trainer rilasciato da CSEN, 2.0 CEU NSCA di valore internazionale e — per i pack PRO ed ELITE — il Personal Elite Trainer FIPE. Tre titoli che aprono porte concrete: palestre, centri sportivi, training hub, strutture federali in Italia e all'estero.",
+    body: "Esci con il Diploma Functional Strength Master Trainer rilasciato da CSEN, 2.0 CEU NSCA di valore internazionale e — per i pack PRO ed ELITE — il Personal Trainer FIPE. Tre titoli che aprono porte concrete: palestre, centri sportivi, training hub, strutture federali in Italia e all'estero.",
   },
 ];
 
@@ -686,7 +686,7 @@ export function WhyLacertosus() {
                 },
                 {
                   pill: "Pro · Elite",
-                  title: "Personal Elite Trainer FIPE",
+                  title: "Personal Trainer FIPE",
                   sub: "Certificazione FIPE · Riconoscimento nazionale e internazionale.",
                 },
               ].map((cert) => (
