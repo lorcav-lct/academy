@@ -15,7 +15,7 @@ Ogni batch è auto-contenuto: applicabile e ripristinabile indipendentemente dag
 ## Batch 001 — Acquisto standalone certificazione FIPE
 
 **Data**: 2026-05-22
-**Stato**: 🟡 in sviluppo (code complete, in attesa di test + commit)
+**Stato**: 🟢 in produzione — smoke test live completato con successo
 **Obiettivo**: Permettere l'acquisto standalone della certificazione FIPE a €790 dalla pagina `/percorso/fipe-personal-trainer`, prima del blocco "Calendario sintetico". Acquisto via Stripe Checkout, ticket QR generato come per gli altri prodotti.
 
 ### Decisioni prese
@@ -103,7 +103,10 @@ Se serve nascondere il blocco senza revert completo: commenta/rimuovi la `<secti
 
 ### Commit di riferimento
 
-- _da compilare al momento del commit_
+- `21463ae` — feat(fipe): add standalone FIPE certification purchase flow
+- Branch: `staging` → merge fast-forward in `main`
+- Deploy: Vercel (staging + production)
+- DB: migration 024 eseguita manualmente via SQL Editor in Supabase prod (2026-05-22)
 
 ---
 
