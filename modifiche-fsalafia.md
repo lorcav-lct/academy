@@ -302,7 +302,7 @@ git push origin main
 ## Batch 005 — Masterclass Tennis: rimozione Piatti, badge "Prossimamente", no data
 
 **Data**: 2026-05-22
-**Stato**: 🟡 in sviluppo (in attesa di commit + deploy)
+**Stato**: 🟢 in produzione
 **Obiettivo**: Trasformare la masterclass Tennis nel pattern "Prossimamente" identico a Rugby. Rimuovere ogni riferimento a Riccardo Piatti e al Piatti Tennis Center dai testi UI, rimuovere la data, sostituire il badge "Elite" con "Prossimamente".
 
 ### Decisioni prese (concordate utente)
@@ -355,7 +355,9 @@ git push origin main
 
 ### Commit di riferimento
 
-- _da compilare al momento del commit_
+- `4e56717` — refactor(masterclass-tennis): switch to 'Prossimamente' pattern, remove Piatti
+- Branch: `staging` → merge fast-forward in `main`
+- Deploy: Vercel (staging + production)
 
 ---
 
