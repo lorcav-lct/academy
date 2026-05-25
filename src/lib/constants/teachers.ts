@@ -83,7 +83,7 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "sandro-bartolomei",
     name: "Sandro Bartolomei",
-    role: "Assistant Professor — Università di Bologna",
+    role: "Assistant Professor in Tenure Track — Università di Bologna",
     bio: "Assistant Professor in tenure track presso il Dipartimento di Scienze per la Qualità della Vita dell'Università di Bologna. PhD, MS, CPO.",
     courses: ["strength"],
     image_url: "/docenti/sandro-bartolomei.webp",
@@ -231,7 +231,7 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "anna-desi",
     name: "Anna Deisi",
-    role: "Co-Founder — Centro Aura",
+    role: "Co-Founder & Mental Coach — Centro Aura",
     bio: "Co-founder del Centro Aura, struttura di riferimento per il benessere integrato.",
     courses: ["science"],
     image_url: "/docenti/anna-desi.webp",

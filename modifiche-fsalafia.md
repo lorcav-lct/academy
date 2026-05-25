@@ -248,8 +248,51 @@ git push origin main
 ### Commit di riferimento
 
 - `a33dbc2` — refactor(masterclass): expand Ivan Pellizzari trainer pitch in running detail
+- `500bbe8` — docs: mark Batch 003 as deployed in production
 - Branch: `staging` → merge fast-forward in `main`
 - Deploy: Vercel (staging + production)
+
+---
+
+## Batch 004 — Aggiornamento role docenti (Sandro Bartolomei, Anna Deisi)
+
+**Data**: 2026-05-22
+**Stato**: 🟡 in sviluppo (in attesa di commit + deploy)
+**Obiettivo**: Aggiornare il campo `role` (label mostrata sotto il nome) di 2 docenti nelle pagine `/percorso/strength` e `/percorso/science`.
+
+### Decisioni prese
+
+- Modificate solo le righe `role` richieste in `teachers.ts`, niente altro
+- **NON toccati**:
+  - Campo `bio` dei due docenti
+  - Gionata Raffaelli (stesso role "Co-Founder — Centro Aura", non richiesto)
+  - Convenzione casing/punctuation (em-dash `—`, accenti su "Università") preservata: il CSS applica `text-transform: uppercase` in UI
+
+### File modificati
+
+| File                            | Modifica                                            |
+| ------------------------------- | --------------------------------------------------- |
+| `src/lib/constants/teachers.ts` | Riga 86 (Sandro Bartolomei) + riga 234 (Anna Deisi) |
+
+### Modifiche esterne necessarie
+
+Nessuna.
+
+### Procedura di test
+
+1. Deploy staging → apri `/percorso/strength` (verifica Sandro) e `/percorso/science` (verifica Anna)
+2. Deploy main → stessa verifica su produzione
+
+### Rollback
+
+```bash
+git revert <COMMIT_HASH_BATCH_004>
+git push origin main
+```
+
+### Commit di riferimento
+
+- _da compilare al momento del commit_
 
 ---
 
