@@ -203,9 +203,51 @@ WHERE product_slug = 'fipe-personal-trainer';
 ### Commit di riferimento
 
 - `e4975f0` — refactor(fipe): rename Personal Elite Trainer to Personal Trainer in site copy
+- `6020ef9` — docs(fipe): mark Batch 002 as deployed and verified in production
 - Branch: `staging` → merge fast-forward in `main`
 - Deploy: Vercel (staging + production)
 - DB: migration 025 eseguita manualmente via SQL Editor in Supabase prod (2026-05-22)
+
+---
+
+## Batch 003 — Aggiornamento trainerPitch Masterclass Running (Ivan Pellizzari)
+
+**Data**: 2026-05-22
+**Stato**: 🟡 in sviluppo (in attesa di commit + deploy)
+**Obiettivo**: Sostituire il `trainerPitch` di Ivan Pellizzari nella pagina `/masterclass/master-running` con l'elenco esteso delle qualifiche (Istruttore/Allenatore Triathlon FITRI, IRONMAN COACH, Preparatore atletico CONI).
+
+### Decisioni prese
+
+- Modificato solo `workshop-detail.tsx` (pagina detail), come da istruzione utente "non modificare nient'altro"
+- **NON toccati** gli altri 2 file con varianti del testo:
+  - `src/components/workshops/workshop-grid.tsx:95` (variante corta usata nella grid `/masterclass`)
+  - `src/lib/constants/teachers.ts:318` (bio sintetica usata altrove)
+
+### File modificati
+
+| File                                           | Modifica                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| `src/components/workshops/workshop-detail.tsx` | `trainerPitch` di `master-running` aggiornato con qualifiche complete |
+
+### Modifiche esterne necessarie
+
+Nessuna (no DB, no Stripe, no Make).
+
+### Procedura di test
+
+1. Deploy su staging → apri `/masterclass/master-running`, verifica nuovo `trainerPitch`
+2. Deploy main → stessa verifica su produzione
+
+### Rollback
+
+```bash
+git revert <COMMIT_HASH_BATCH_003>
+git push origin main
+```
+
+### Commit di riferimento
+
+- _da compilare al momento del commit_
 
 ---
 

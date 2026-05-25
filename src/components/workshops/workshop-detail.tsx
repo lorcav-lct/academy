@@ -428,7 +428,7 @@ const CONTENT: Record<string, MasterclassContent> = {
     hook: "Correre è l'80% testa, 20% gambe. Programmare bene il 20% libera tutto il resto.",
     trainerHeadline: "Ivan Pellizzari",
     trainerPitch:
-      "Tecnico Allenatore della Federazione Italiana Triathlon (F.I.T.R.I.). Specialista di running performance, tecnica e prevenzione infortuni dai 5K alla maratona.",
+      "Istruttore Triathlon FITRI, Allenatore Triathlon FITRI, Allenatore Specialista lunghe distanze Triathlon FITRI, Tecnico Nazionale Triathlon FITRI (Commissione Nazionale AGE GROUP), Allenatore IRONMAN COACH, Preparatore atletico primo e secondo liv. CONI",
     whatYouLearn:
       "Una giornata dedicata alla programmazione del runner: dalle zone fisiologiche alla periodizzazione, dalla forza per il corridore al tapering pre-gara.",
     modules: [
