@@ -213,7 +213,7 @@ WHERE product_slug = 'fipe-personal-trainer';
 ## Batch 003 — Aggiornamento trainerPitch Masterclass Running (Ivan Pellizzari)
 
 **Data**: 2026-05-22
-**Stato**: 🟡 in sviluppo (in attesa di commit + deploy)
+**Stato**: 🟢 in produzione
 **Obiettivo**: Sostituire il `trainerPitch` di Ivan Pellizzari nella pagina `/masterclass/master-running` con l'elenco esteso delle qualifiche (Istruttore/Allenatore Triathlon FITRI, IRONMAN COACH, Preparatore atletico CONI).
 
 ### Decisioni prese
@@ -247,7 +247,9 @@ git push origin main
 
 ### Commit di riferimento
 
-- _da compilare al momento del commit_
+- `a33dbc2` — refactor(masterclass): expand Ivan Pellizzari trainer pitch in running detail
+- Branch: `staging` → merge fast-forward in `main`
+- Deploy: Vercel (staging + production)
 
 ---
 
