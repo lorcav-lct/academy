@@ -306,7 +306,7 @@ export const PRODUCTS: AcademyProduct[] = [
     workshopSlug: "master-tennis",
     includes: [
       "1-2 giornate in presenza",
-      "Piatti Tennis Center",
+      "Trainer da definire",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],

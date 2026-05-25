@@ -344,7 +344,7 @@ export const TEACHERS: Teacher[] = [
     slug: "piatti-tennis-center",
     name: "Piatti Tennis Center",
     role: "Centro di Alta Specializzazione Tennistica",
-    bio: "Il Piatti Tennis Center, fondato da Riccardo Piatti, è un centro di riferimento internazionale per la formazione di tennisti d'élite, dove allenamento tecnico, preparazione fisica e performance management vengono integrati con un approccio scientifico al servizio del tennis di alto livello.",
+    bio: "Centro di riferimento internazionale per la formazione di tennisti d'élite, dove allenamento tecnico, preparazione fisica e performance management vengono integrati con un approccio scientifico al servizio del tennis di alto livello.",
     courses: ["master-tennis"],
     image_url: "/docenti/piatti-tennis-center.webp",
     color: BRAND,

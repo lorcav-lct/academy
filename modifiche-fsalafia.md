@@ -293,8 +293,69 @@ git push origin main
 ### Commit di riferimento
 
 - `c505c89` — refactor(teachers): update Sandro Bartolomei and Anna Deisi role labels
+- `157df97` — docs: mark Batch 004 as deployed in production
 - Branch: `staging` → merge fast-forward in `main`
 - Deploy: Vercel (staging + production)
+
+---
+
+## Batch 005 — Masterclass Tennis: rimozione Piatti, badge "Prossimamente", no data
+
+**Data**: 2026-05-22
+**Stato**: 🟡 in sviluppo (in attesa di commit + deploy)
+**Obiettivo**: Trasformare la masterclass Tennis nel pattern "Prossimamente" identico a Rugby. Rimuovere ogni riferimento a Riccardo Piatti e al Piatti Tennis Center dai testi UI, rimuovere la data, sostituire il badge "Elite" con "Prossimamente".
+
+### Decisioni prese (concordate utente)
+
+- Typo utente: "Riccardo Patti" = "Riccardo Piatti" (confermato)
+- Opzione B applicata: rimozione completa riferimenti a Piatti (persona + centro)
+- Opzione B1: entry teacher `piatti-tennis-center` lasciata in `teachers.ts` (ora orfana, non più referenziata da `teacherSlugs`). Bio aggiornata: rimosso "fondato da Riccardo Piatti"
+- Pattern allineato a `master-rugby`:
+  - `trainerLabel: "Ospite internazionale"`, `teacherSlugs: []`, `date: "Da definire"`
+  - Grid: badge "Prossimamente", headline/pitch/tooltip come Rugby
+  - Detail: `trainerHeadline: "Faculty in definizione"`, pitch generico
+  - Selector: pitch generico
+  - Pack includes: "Trainer da definire"
+
+### File modificati (6)
+
+| File                                            | Modifica                                                                                       |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `src/lib/constants/workshops.ts`                | master-tennis: date "Da definire", teacherSlugs [], trainerLabel "Ospite internazionale"       |
+| `src/components/workshops/workshop-grid.tsx`    | master-tennis credits: headline, pitch, badge "Elite"→"Prossimamente", badgeTooltip            |
+| `src/components/workshops/workshop-detail.tsx`  | master-tennis: trainerHeadline, trainerPitch, voce "included" (rimosso "Piatti Tennis Center") |
+| `src/components/packs/masterclass-selector.tsx` | master-tennis: pitch generico                                                                  |
+| `src/lib/constants/teachers.ts`                 | piatti-tennis-center bio: rimosso "fondato da Riccardo Piatti"                                 |
+| `src/lib/constants/packs.ts`                    | master-tennis includes: "Piatti Tennis Center" → "Trainer da definire"                         |
+
+### Modifiche esterne necessarie
+
+Nessuna (no DB, no Stripe, no Make).
+
+### NON toccati
+
+- `scripts/setup-stripe-masterclasses.mjs` (script, non UI)
+- `supabase/migrations/022_masterclass_catalog_update.sql` (history)
+- `teachers.ts` entry `piatti-tennis-center` (name + role lasciati; bio aggiornata) — orfano dopo le modifiche
+- Nome prodotto Stripe `master-tennis` (slug invariato, price invariato)
+
+### Procedura di test
+
+1. Deploy staging → `/masterclass` (n.05 Tennis: badge "Prossimamente", no data, no Piatti)
+2. `/masterclass/master-tennis` (detail page: faculty in definizione)
+3. `/pack` modali PRO/Elite → masterclass-selector mostra Tennis col nuovo pitch
+4. Deploy main → verifica identica in prod
+
+### Rollback
+
+```bash
+git revert <COMMIT_HASH_BATCH_005>
+git push origin main
+```
+
+### Commit di riferimento
+
+- _da compilare al momento del commit_
 
 ---
 

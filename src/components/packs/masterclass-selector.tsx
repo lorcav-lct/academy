@@ -37,7 +37,8 @@ const CREDENTIALS: Record<string, Cred> = {
   },
   "master-tennis": {
     domain: "Performance Tennis",
-    pitch: "Piatti Tennis Center — centro di alta specializzazione tennistica.",
+    pitch:
+      "Faculty in definizione — preparatori atletici di livello internazionale.",
   },
   "master-running": {
     domain: "Running Performance",

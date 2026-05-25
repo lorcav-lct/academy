@@ -347,9 +347,9 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-tennis": {
     domain: "Performance Tennis",
     hook: "Il tennis moderno si gioca al limite della performance fisica. Forza, esplosività, velocità e recupero fanno la differenza tra Top 100 e Top 10.",
-    trainerHeadline: "Piatti Tennis Center",
+    trainerHeadline: "Faculty in definizione",
     trainerPitch:
-      "Centro di alta specializzazione tennistica fondato da Riccardo Piatti, riferimento internazionale per la formazione di tennisti d'élite, dove allenamento tecnico, preparazione fisica e performance management vengono integrati con un approccio scientifico al servizio del tennis di alto livello.",
+      "Stiamo finalizzando la faculty con preparatori atletici di livello internazionale nel tennis. Annunceremo il roster appena confermato.",
     whatYouLearn:
       "Una o due giornate dentro il modello fisico del tennista moderno: forza esplosiva, cambi di direzione, gestione del carico in una stagione che non finisce mai e prevenzione degli infortuni tipici della racchetta.",
     modules: [
@@ -396,7 +396,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha contatto con sport con racchetta",
     ],
     included: [
-      "1-2 giornate con la faculty Piatti Tennis Center",
+      "1-2 giornate con faculty internazionale",
       "Template di programmazione stagionale per tennisti",
       "Schede di prevenzione spalla, gomito e ginocchio",
       "Slide e materiali operativi",

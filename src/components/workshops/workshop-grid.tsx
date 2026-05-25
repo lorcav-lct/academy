@@ -79,14 +79,14 @@ const CREDENTIALS: Record<string, Credential> = {
   },
   "master-tennis": {
     domain: "Performance Tennis",
-    headline: "Piatti Tennis Center",
+    headline: "Ospite internazionale",
     pitch:
-      "Centro di alta specializzazione tennistica fondato da Riccardo Piatti, riferimento internazionale per la formazione di tennisti d'élite.",
+      "Programma in costruzione con preparatori atletici di livello internazionale nel tennis.",
     promise:
       "Performance e preparazione atletica nel tennis di alto livello: integrazione di tecnica, fisico e programmazione su atleti d'élite.",
-    badge: "Elite",
+    badge: "Prossimamente",
     badgeTooltip:
-      "Piatti Tennis Center: centro di alta specializzazione che ha formato tennisti d'élite del circuito internazionale.",
+      "Faculty in finalizzazione: stiamo selezionando preparatori atletici di livello internazionale nel tennis.",
   },
   "master-running": {
     domain: "Running Performance",

@@ -69,9 +69,9 @@ export const WORKSHOPS: Workshop[] = [
     focus:
       "Preparazione fisica, performance e metodologie applicate al tennis di alto livello",
     duration: "1-2 giornate",
-    date: "Sabato 23 Gennaio 2027",
-    teacherSlugs: ["piatti-tennis-center"],
-    trainerLabel: "Piatti Tennis Center",
+    date: "Da definire",
+    teacherSlugs: [],
+    trainerLabel: "Ospite internazionale",
     sortOrder: 5,
   },
   {
