@@ -257,7 +257,7 @@ git push origin main
 ## Batch 004 — Aggiornamento role docenti (Sandro Bartolomei, Anna Deisi)
 
 **Data**: 2026-05-22
-**Stato**: 🟡 in sviluppo (in attesa di commit + deploy)
+**Stato**: 🟢 in produzione
 **Obiettivo**: Aggiornare il campo `role` (label mostrata sotto il nome) di 2 docenti nelle pagine `/percorso/strength` e `/percorso/science`.
 
 ### Decisioni prese
@@ -292,7 +292,9 @@ git push origin main
 
 ### Commit di riferimento
 
-- _da compilare al momento del commit_
+- `c505c89` — refactor(teachers): update Sandro Bartolomei and Anna Deisi role labels
+- Branch: `staging` → merge fast-forward in `main`
+- Deploy: Vercel (staging + production)
 
 ---
 
