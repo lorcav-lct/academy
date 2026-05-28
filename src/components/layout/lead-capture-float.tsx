@@ -174,7 +174,10 @@ export function LeadCaptureFloat() {
             <span className="hidden md:inline">
               🚀 Voglio rimanere aggiornato
             </span>
-            <span className="md:hidden">🚀 Rimani aggiornato</span>
+            <span className="hidden min-[350px]:inline md:hidden">
+              🚀 Rimani aggiornato
+            </span>
+            <span className="inline min-[350px]:hidden">🚀 Iscriviti</span>
           </span>
         </button>
       </div>
