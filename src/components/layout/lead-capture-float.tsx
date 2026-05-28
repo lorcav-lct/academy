@@ -191,7 +191,7 @@ export function LeadCaptureFloat() {
         className="fixed z-[46] inset-0 flex items-end sm:items-center justify-center p-4 pointer-events-none"
       >
         <div
-          className="w-full max-w-md pointer-events-auto"
+          className="w-full max-w-md"
           style={{
             background: "#ffffff",
             border: "1px solid rgba(0,0,0,0.08)",
@@ -199,6 +199,7 @@ export function LeadCaptureFloat() {
             boxShadow:
               "0 40px 100px rgba(0,0,0,0.25), 0 0 0 1px rgba(240,146,38,0.10)",
             opacity: open ? 1 : 0,
+            pointerEvents: open ? "auto" : "none",
             transform: open
               ? "translateY(0) scale(1)"
               : "translateY(24px) scale(0.96)",
