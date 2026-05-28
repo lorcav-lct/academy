@@ -52,6 +52,7 @@ export function LeadCaptureFloat() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [composerOpen, setComposerOpen] = useState(false);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -68,6 +69,17 @@ export function LeadCaptureFloat() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  useEffect(() => {
+    const onOpen = () => setComposerOpen(true);
+    const onClose = () => setComposerOpen(false);
+    window.addEventListener("lacertosus:composer-open", onOpen);
+    window.addEventListener("lacertosus:composer-close", onClose);
+    return () => {
+      window.removeEventListener("lacertosus:composer-open", onOpen);
+      window.removeEventListener("lacertosus:composer-close", onClose);
+    };
+  }, []);
 
   if (pathname.startsWith("/admin")) return null;
 
@@ -123,11 +135,12 @@ export function LeadCaptureFloat() {
       <div
         className="fixed left-0 z-50 flex items-center bottom-5 md:bottom-50"
         style={{
-          opacity: open ? 0 : 1,
-          transform: open
-            ? "translateX(-16px) scale(0.96)"
-            : "translateX(0) scale(1)",
-          pointerEvents: open ? "none" : "auto",
+          opacity: open || composerOpen ? 0 : 1,
+          transform:
+            open || composerOpen
+              ? "translateX(-16px) scale(0.96)"
+              : "translateX(0) scale(1)",
+          pointerEvents: open || composerOpen ? "none" : "auto",
           transition:
             "opacity 220ms ease, transform 280ms cubic-bezier(0.4,0,0.2,1)",
         }}

@@ -51,7 +51,7 @@ export function WhatsAppFloat() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeComposer();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -62,9 +62,19 @@ export function WhatsAppFloat() {
   const finalMsg = msg.trim().length > 0 ? msg.trim() : DEFAULT_MSG;
   const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(finalMsg)}`;
 
+  function openComposer() {
+    setOpen(true);
+    window.dispatchEvent(new Event("lacertosus:composer-open"));
+  }
+
+  function closeComposer() {
+    setOpen(false);
+    window.dispatchEvent(new Event("lacertosus:composer-close"));
+  }
+
   function send() {
     window.open(href, "_blank", "noopener,noreferrer");
-    setOpen(false);
+    closeComposer();
     setTimeout(() => setMsg(DEFAULT_MSG), 300);
   }
 
@@ -73,7 +83,7 @@ export function WhatsAppFloat() {
       {/* ── Mobile backdrop ─────────────────────────────────────── */}
       <div
         aria-hidden
-        onClick={() => setOpen(false)}
+        onClick={() => closeComposer()}
         className="fixed inset-0 z-[39] md:hidden transition-opacity duration-300"
         style={{
           background: "rgba(10,10,15,0.45)",
@@ -138,7 +148,7 @@ export function WhatsAppFloat() {
         {/* WhatsApp pill — attached to the right edge */}
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => openComposer()}
           aria-label="Scrivici su WhatsApp"
           title="Scrivici su WhatsApp"
           tabIndex={open ? -1 : 0}
@@ -238,7 +248,7 @@ export function WhatsAppFloat() {
           </div>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => closeComposer()}
             aria-label="Chiudi"
             className="relative shrink-0 inline-flex items-center justify-center h-8 w-8 transition-colors"
             style={{
