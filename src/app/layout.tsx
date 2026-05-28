@@ -3,6 +3,7 @@ import { Lexend, Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
+import { LeadCaptureFloat } from "@/components/layout/lead-capture-float";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import { CookieConsentProvider } from "@/components/providers/cookie-consent";
@@ -84,6 +85,7 @@ export default function RootLayout({
             <main className="relative">{children}</main>
             <Footer />
             <WhatsAppFloat />
+            <LeadCaptureFloat />
           </LenisProvider>
         </ThemeProvider>
         <CookieConsentProvider />
