@@ -167,15 +167,6 @@ export function LeadCaptureFloat() {
               `0 14px 36px rgba(240,146,38,0.30), 0 4px 12px rgba(0,0,0,0.18)`;
           }}
         >
-          {/* Animated pulse ring */}
-          <span
-            aria-hidden
-            className="absolute inset-0 rounded-r-full animate-ping"
-            style={{
-              background: `radial-gradient(circle at 70% 50%, rgba(240,146,38,0.18), transparent 70%)`,
-              animationDuration: "2s",
-            }}
-          />
           <span
             className="relative text-[12px] font-black tracking-[0.22em] uppercase leading-none"
             style={{ color: "#1a1a1a" }}

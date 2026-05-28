@@ -428,15 +428,15 @@ export function WhyLacertosus() {
         });
         const strikes = problemsRef.current?.querySelectorAll("[data-strike]");
         if (strikes?.length) {
-          gsap.set(strikes, { scaleX: 0, transformOrigin: "left center" });
+          gsap.set(strikes, { textDecorationColor: "transparent" });
           gsap.to(strikes, {
             scrollTrigger: {
               trigger: problemsRef.current,
               start: "top 72%",
               once: true,
             },
-            scaleX: 1,
-            duration: 0.55,
+            textDecorationColor: STRIKE_ORANGE,
+            duration: 0.45,
             stagger: 0.13,
             ease: "power2.inOut",
             delay: 0.3,
@@ -555,20 +555,16 @@ export function WhyLacertosus() {
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span
-                    className="relative text-[0.9rem] leading-snug"
-                    style={{ color: "rgba(17,17,17,0.8)" }}
+                    data-strike
+                    className="text-[0.9rem] leading-snug"
+                    style={{
+                      color: "rgba(17,17,17,0.8)",
+                      textDecoration: "line-through",
+                      textDecorationColor: "transparent",
+                      textDecorationThickness: "1px",
+                    }}
                   >
                     {p}
-                    <span
-                      data-strike
-                      className="absolute left-0 right-0"
-                      style={{
-                        top: "50%",
-                        height: "1px",
-                        background: STRIKE_ORANGE,
-                        transformOrigin: "left center",
-                      }}
-                    />
                   </span>
                 </li>
               ))}
