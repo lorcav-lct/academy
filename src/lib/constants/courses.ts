@@ -54,7 +54,6 @@ export const COURSES: Course[] = [
     dates: ["11-12 Settembre", "9-10 Ottobre"],
     teacherSlugs: [
       "guido-belli",
-      "francesco-campa",
       "samuele-marcora",
       "marco-bani",
       "matteo-romanazzi",

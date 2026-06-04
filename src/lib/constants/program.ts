@@ -38,11 +38,6 @@ export const PROGRAM_BLOCKS: ProgramBlock[] = [
       },
       {
         title:
-          "Metodologie avanzate per la valutazione della composizione corporea: applicazioni cliniche e sportive",
-        teacherSlugs: ["francesco-campa"],
-      },
-      {
-        title:
           "Framework concettuale aggiornato per la programmazione e il monitoraggio dell'allenamento fisico",
         teacherSlugs: ["samuele-marcora"],
       },

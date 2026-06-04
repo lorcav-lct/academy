@@ -25,17 +25,6 @@ export const TEACHERS: Teacher[] = [
     talkTitle: "Chinesiologia applicata al movimento",
   },
   {
-    slug: "francesco-campa",
-    name: "Francesco Campa",
-    role: "Professore Associato — Università degli Studi di Padova",
-    bio: "Responsabile dell'insegnamento di Composizione Corporea nel Corso di Laurea in Scienze Motorie all'Università di Padova. Autore di oltre 100 pubblicazioni scientifiche internazionali, è riconosciuto tra i principali esperti a livello globale nella metodologia di valutazione della composizione corporea. La sua ricerca integra rigore scientifico e applicazione pratica con implicazioni in ambito clinico, sportivo e della performance umana.",
-    courses: ["function"],
-    image_url: "/docenti/francesco-campa.webp",
-    color: BRAND,
-    talkTitle:
-      "Metodologie avanzate per la valutazione della composizione corporea e loro applicazioni in ambito clinico e sportivo",
-  },
-  {
     slug: "samuele-marcora",
     name: "Samuele Marcora",
     role: "Professore Ordinario di Scienze dell'Esercizio Fisico e dello Sport",
