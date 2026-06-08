@@ -53,7 +53,12 @@ export function LeadCaptureFloat() {
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [composerOpen, setComposerOpen] = useState(false);
+  const [viaExitIntent, setViaExitIntent] = useState(false);
   const firstInputRef = useRef<HTMLInputElement>(null);
+
+  // Snapshot dello stato corrente per l'handler exit-intent (deps stabili)
+  const stateRef = useRef({ open, composerOpen, success });
+  stateRef.current = { open, composerOpen, success };
 
   useEffect(() => {
     if (!open) return;
@@ -81,6 +86,36 @@ export function LeadCaptureFloat() {
     };
   }, []);
 
+  // Exit-intent: desktop only, una sola volta per sessione. Apre il modale
+  // quando il cursore esce dal bordo superiore della finestra.
+  useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return; // no touch
+    const KEY = "lacertosus:exit-intent-shown";
+    if (sessionStorage.getItem(KEY)) return;
+
+    let armed = false;
+    const armTimer = window.setTimeout(() => {
+      armed = true;
+    }, 3000);
+
+    const onMouseOut = (e: MouseEvent) => {
+      if (!armed) return;
+      if (e.clientY > 0 || e.relatedTarget) return; // solo uscita dall'alto
+      const { open: o, composerOpen: c, success: s } = stateRef.current;
+      if (o || c || s) return;
+      sessionStorage.setItem(KEY, "1");
+      setViaExitIntent(true);
+      setOpen(true);
+    };
+
+    document.addEventListener("mouseout", onMouseOut);
+    return () => {
+      window.clearTimeout(armTimer);
+      document.removeEventListener("mouseout", onMouseOut);
+    };
+  }, [pathname]);
+
   if (pathname.startsWith("/admin")) return null;
 
   function handleClose() {
@@ -89,6 +124,7 @@ export function LeadCaptureFloat() {
       setForm({});
       setError(null);
       setSuccess(false);
+      setViaExitIntent(false);
     }, 300);
   }
 
@@ -218,14 +254,17 @@ export function LeadCaptureFloat() {
                 className="text-[20px] font-black leading-tight"
                 style={{ color: "#1a1a1a" }}
               >
-                Inizia il tuo percorso
+                {viaExitIntent
+                  ? "Aspetta, prima di andare via"
+                  : "Inizia il tuo percorso"}
               </h2>
               <p
                 className="mt-1 text-[13px] leading-relaxed"
                 style={{ color: "rgba(0,0,0,0.45)" }}
               >
-                Lascia i tuoi contatti — ti raggiungiamo noi con tutti i
-                dettagli.
+                {viaExitIntent
+                  ? "Solo 30 posti per l'edizione 2026/27. Lascia i tuoi contatti: ti avvisiamo per primo su date, posti e novità del percorso."
+                  : "Lascia i tuoi contatti — ti raggiungiamo noi con tutti i dettagli."}
               </p>
             </div>
             <button
