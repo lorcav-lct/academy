@@ -617,7 +617,7 @@ export function WhyLacertosus() {
                 className="text-[clamp(1.3rem,2.2vw,1.9rem)] font-black leading-[1.15]"
                 style={{ color: DARK_TEXT_PRIMARY }}
               >
-                Un percorso unico e pluricertificato che unisce{" "}
+                Un percorso unico di 9 mesi pluricertificato che unisce{" "}
                 <span className="text-academy-orange">
                   tecnica, pratica, business e network
                 </span>
