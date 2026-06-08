@@ -1821,6 +1821,9 @@ function PackCard({
   const isStart = pack.slug === "start";
   const ORANGE = "#F09226";
 
+  // Weekend in presenza: START = 6 (3 blocchi), PRO/ELITE = 9 (3 blocchi + FIPE)
+  const weekendCount = isStart ? 6 : 9;
+
   /* ── Theme tokens per tier ─────────────────────────────────────
      - START: full white card, dark text
      - PRO: orange "head" + light off-white "body" with dark text
@@ -1855,6 +1858,14 @@ function PackCard({
     : isStart
       ? "rgba(180,80,0,0.85)"
       : "rgba(240,146,38,0.85)";
+  const headTagBorder = isPro
+    ? "rgba(17,17,17,0.12)"
+    : isStart
+      ? "rgba(240,146,38,0.18)"
+      : "rgba(240,146,38,0.25)";
+  // PRO ha testata arancione: meta/audience senza sfondo, solo bordo scuro + testo dark
+  const headMetaBg = isPro ? "transparent" : headTagBg;
+  const headMetaBorder = isPro ? "rgba(17,17,17,0.3)" : headTagBorder;
 
   // Body text colors
   const bodyText = isElite ? "#ffffff" : "#111111";
@@ -1948,18 +1959,40 @@ function PackCard({
           {copy.tagline}
         </p>
 
+        {/* Durata + weekend — meta di valore */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span
+            className="inline-flex items-baseline gap-1.5 px-2.5 py-1.5 text-[0.62rem] font-bold tracking-[0.04em]"
+            style={{
+              background: headMetaBg,
+              border: `1px solid ${headMetaBorder}`,
+              color: headText,
+            }}
+          >
+            <span className="text-[0.9rem] font-black leading-none">9</span>
+            mesi
+          </span>
+          <span
+            className="inline-flex items-baseline gap-1.5 px-2.5 py-1.5 text-[0.62rem] font-bold tracking-[0.04em]"
+            style={{
+              background: headMetaBg,
+              border: `1px solid ${headMetaBorder}`,
+              color: headText,
+            }}
+          >
+            <span className="text-[0.9rem] font-black leading-none">
+              {weekendCount}
+            </span>
+            weekend
+          </span>
+        </div>
+
         {/* Audience tag inside head */}
         <div
-          className="mt-4 inline-flex items-center gap-2 px-2.5 py-1.5"
+          className="mt-3 inline-flex items-center gap-2 px-2.5 py-1.5"
           style={{
-            background: headTagBg,
-            border: `1px solid ${
-              isPro
-                ? "rgba(17,17,17,0.12)"
-                : isStart
-                  ? "rgba(240,146,38,0.18)"
-                  : "rgba(240,146,38,0.25)"
-            }`,
+            background: headMetaBg,
+            border: `1px solid ${headMetaBorder}`,
           }}
         >
           <span
@@ -2024,7 +2057,7 @@ function PackCard({
             className="text-[0.58rem] font-black tracking-[0.32em] uppercase mb-3 block"
             style={{ color: bodyTextMuted }}
           >
-            Il Percorso · 9 mesi · 6 weekend
+            Il Percorso
           </span>
           <div className="flex flex-col gap-2">
             {BLOCK_SLUGS.map((slug, i) => (
