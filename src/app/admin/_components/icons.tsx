@@ -192,6 +192,24 @@ export function IconExternal(p: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconCopy(p: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...p}>
+      <rect x="9" y="9" width="11" height="11" rx="1.5" />
+      <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+    </svg>
+  );
+}
+
+export function IconTicket(p: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...p}>
+      <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" />
+      <path d="M13 6v12" />
+    </svg>
+  );
+}
+
 export function IconRefresh(p: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...p}>
