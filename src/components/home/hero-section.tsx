@@ -2269,7 +2269,7 @@ export function HeroSection({
     videoModalOpen && typeof document !== "undefined"
       ? createPortal(
           <div
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-10"
+            className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto p-4 sm:p-10"
             style={{
               background: "rgba(17,17,17,0.94)",
               backdropFilter: "blur(14px)",
@@ -2280,12 +2280,12 @@ export function HeroSection({
             aria-label="Video di presentazione"
           >
             <div
-              className="relative w-full max-w-5xl"
+              className="relative my-auto flex w-full max-w-5xl flex-col items-center"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setVideoModalOpen(false)}
-                className="absolute -top-12 right-0 flex items-center gap-2.5 text-[0.72rem] font-black tracking-[0.28em] uppercase text-white/60 hover:text-white transition-colors"
+                className="mb-3 flex items-center gap-2.5 self-end text-[0.72rem] font-black tracking-[0.28em] uppercase text-white/60 hover:text-white transition-colors"
                 aria-label="Chiudi video"
               >
                 <span>Chiudi</span>
@@ -2296,8 +2296,12 @@ export function HeroSection({
                   ×
                 </span>
               </button>
+              {/* Vertical (9/16) video: cap width by available viewport height so
+                  the player + controls + caption always fit without overflow. */}
               <div
+                className="mx-auto w-full"
                 style={{
+                  maxWidth: "min(480px, calc((100dvh - 10rem) * 9 / 16))",
                   boxShadow:
                     "0 0 0 1px rgba(240,146,38,0.22), 0 0 80px rgba(240,146,38,0.15), 0 0 180px rgba(240,146,38,0.05)",
                 }}
@@ -2308,7 +2312,7 @@ export function HeroSection({
                   poster="https://image.mux.com/czjfcHxFBiCTiw8gH9nw8Cx7fU02XPsRIgG6P4j00012cE/thumbnail.png?fit_mode=preserve&time=31"
                 />
               </div>
-              <div className="mt-4 flex items-center justify-between text-[0.62rem] font-black tracking-[0.28em] uppercase text-white/40">
+              <div className="mt-4 flex w-full items-center justify-between text-[0.62rem] font-black tracking-[0.28em] uppercase text-white/40">
                 <span>Lacertosus Academy · 2 min</span>
                 <span>Premi 🔊 per attivare l&apos;audio</span>
               </div>
