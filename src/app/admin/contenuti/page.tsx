@@ -8,6 +8,7 @@ import {
   IconEuro,
   IconScan,
   IconCalendar,
+  IconEye,
 } from "../_components/icons";
 
 const CONTENT_SECTIONS = [
@@ -34,6 +35,12 @@ const CONTENT_SECTIONS = [
     label: "Scadenze Pack & Caparra",
     desc: "Imposta fino a quando si può acquistare un pack, comprarlo con caparra e saldare. Le modalità di pagamento si adattano da sole.",
     Icon: IconCalendar,
+  },
+  {
+    href: "/admin/contenuti/masterclass",
+    label: "Visibilità Masterclass",
+    desc: "Attiva o nascondi singole masterclass dal catalogo e dai selettori pack, senza toccare il codice.",
+    Icon: IconEye,
   },
 ];
 

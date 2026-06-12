@@ -11,6 +11,7 @@ import { useTheme } from "@/components/providers/theme-provider";
 import {
   getBundles,
   getPublicMasterclassProducts,
+  getMasterclassProducts,
   isDepositEligible,
   DEPOSIT_PRICE_CENTS,
   type AcademyProduct,
@@ -28,7 +29,13 @@ import {
   CertificationsCards,
   CertificationsIconRow,
 } from "@/components/shared/certifications-cards";
-import { getWorkshopBySlug } from "@/lib/constants/workshops";
+import {
+  getWorkshopBySlug,
+  resolvePublicWorkshops,
+  PUBLIC_WORKSHOPS,
+  type Workshop,
+} from "@/lib/constants/workshops";
+import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
 import { COURSES } from "@/lib/constants/courses";
 import { formatPrice } from "@/lib/utils";
 import { usePromoForSlug } from "@/lib/promos/client";
@@ -2575,7 +2582,13 @@ function PacksSection({
 
 // ─── Masterclass Section — Horizontal Minimal List ──────────────────────────
 
-function MasterclassSection({ isDark }: { isDark: boolean }) {
+function MasterclassSection({
+  isDark,
+  availableWorkshops,
+}: {
+  isDark: boolean;
+  availableWorkshops?: Workshop[];
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-60px" });
 
@@ -2584,7 +2597,11 @@ function MasterclassSection({ isDark }: { isDark: boolean }) {
   const ts = isDark ? "rgba(120,120,140,0.5)" : "#888888";
   const rowBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)";
 
-  const masterclasses = getPublicMasterclassProducts();
+  const masterclasses = availableWorkshops
+    ? getMasterclassProducts().filter((p) =>
+        availableWorkshops.some((w) => w.slug === p.workshopSlug),
+      )
+    : getPublicMasterclassProducts();
 
   async function handleBuy(product: AcademyProduct) {
     const supabase = createClient();
@@ -2780,11 +2797,17 @@ export function PackComparison() {
   const [selectedPack, setSelectedPack] = useState<AcademyProduct | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
+  const [availableWorkshops, setAvailableWorkshops] =
+    useState<Workshop[]>(PUBLIC_WORKSHOPS);
 
   useEffect(() => {
     let cancelled = false;
-    getDeadlines(createClient()).then((d) => {
+    const supabase = createClient();
+    getDeadlines(supabase).then((d) => {
       if (!cancelled) setDeadlines(d);
+    });
+    getMasterclassVisibility(supabase).then((visibility) => {
+      if (!cancelled) setAvailableWorkshops(resolvePublicWorkshops(visibility));
     });
     return () => {
       cancelled = true;
@@ -2849,7 +2872,10 @@ export function PackComparison() {
         onOpenModal={setActiveModal}
         packClosed={packClosed}
       />
-      <MasterclassSection isDark={isDark} />
+      <MasterclassSection
+        isDark={isDark}
+        availableWorkshops={availableWorkshops}
+      />
 
       {/* Mobile-only floating CTA — mirrors the right WhatsApp/phone cluster.
           Pinned to the left edge, same bottom offset (bottom-5) and height (h-12). */}
@@ -2920,6 +2946,7 @@ export function PackComparison() {
           count={selectedPack.masterclassSelectionCount ?? 2}
           onConfirm={handleSelectorConfirm}
           onClose={() => setSelectorOpen(false)}
+          availableWorkshops={availableWorkshops}
         />
       )}
 

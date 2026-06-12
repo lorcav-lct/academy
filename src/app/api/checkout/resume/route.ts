@@ -7,7 +7,8 @@ import {
   resolveStripePriceId,
   resolveDepositPriceId,
 } from "@/lib/constants/packs";
-import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
+import { resolvePublicWorkshops } from "@/lib/constants/workshops";
+import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
 
 function normalizeSlugList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -93,7 +94,10 @@ export async function POST(request: NextRequest) {
       pack.type === "bundle" ? (pack.masterclassSelectionCount ?? 0) : 0;
 
     if (requiredMasterclasses > 0) {
-      const workshopSlugs = new Set(PUBLIC_WORKSHOPS.map((w) => w.slug));
+      const visibility = await getMasterclassVisibility(createAdminClient());
+      const workshopSlugs = new Set(
+        resolvePublicWorkshops(visibility).map((w) => w.slug),
+      );
       const invalidSelection =
         selectedMasterclassIds.length !== requiredMasterclasses ||
         selectedMasterclassIds.some((slug) => !workshopSlugs.has(slug));

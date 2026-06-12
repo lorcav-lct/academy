@@ -12,7 +12,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
 import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
-import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
+import { resolvePublicWorkshops } from "@/lib/constants/workshops";
+import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
 import { getDeadlines, isPastDeadline } from "@/lib/settings/deadlines";
 
 function normalizeSlugList(value: unknown): string[] {
@@ -95,7 +96,10 @@ export async function POST(request: NextRequest) {
       pack.type === "bundle" ? (pack.masterclassSelectionCount ?? 0) : 0;
 
     if (requiredMasterclasses > 0) {
-      const workshopSlugs = new Set(PUBLIC_WORKSHOPS.map((w) => w.slug));
+      const visibility = await getMasterclassVisibility(createAdminClient());
+      const workshopSlugs = new Set(
+        resolvePublicWorkshops(visibility).map((w) => w.slug),
+      );
       const invalidSelection =
         selectedMasterclassIds.length !== requiredMasterclasses ||
         selectedMasterclassIds.some((slug) => !workshopSlugs.has(slug));
