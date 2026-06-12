@@ -18,7 +18,13 @@ import {
   DEFAULT_DEADLINES,
   type Deadlines,
 } from "@/lib/settings/deadlines";
-import { getWorkshopBySlug, type Workshop } from "@/lib/constants/workshops";
+import {
+  getWorkshopBySlug,
+  resolvePublicWorkshops,
+  PUBLIC_WORKSHOPS,
+  type Workshop,
+} from "@/lib/constants/workshops";
+import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
 import {
@@ -1586,6 +1592,8 @@ export function CheckoutContent() {
   // unpaid): the server auto-applies the -500€ credit, so reflect it here.
   const [depositCredit, setDepositCredit] = useState(false);
   const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
+  const [availableWorkshops, setAvailableWorkshops] =
+    useState<Workshop[]>(PUBLIC_WORKSHOPS);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -1662,6 +1670,9 @@ export function CheckoutContent() {
         }
         const d = await getDeadlines(supabase);
         if (!cancelled) setDeadlines(d);
+        const visibility = await getMasterclassVisibility(supabase);
+        if (!cancelled)
+          setAvailableWorkshops(resolvePublicWorkshops(visibility));
       } catch {
         if (!cancelled) setUserLoading(false);
       }
@@ -2348,6 +2359,7 @@ export function CheckoutContent() {
           initialSelected={selectedMc.map((w) => w.slug)}
           onConfirm={handleSelectorConfirm}
           onClose={() => setEditorOpen(false)}
+          availableWorkshops={availableWorkshops}
         />
       )}
 

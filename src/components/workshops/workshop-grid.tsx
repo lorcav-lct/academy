@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
 import { PUBLIC_WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
 import { smoothScrollTo } from "@/lib/scroll";
-import { getPublicMasterclassProducts } from "@/lib/constants/packs";
+import { getMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 
 /* ──────────────────────────────────────────────────────────────
@@ -600,7 +600,7 @@ function MasterclassCard({
   isInView: boolean;
 }) {
   const cred = CREDENTIALS[workshop.slug];
-  const product = getPublicMasterclassProducts().find(
+  const product = getMasterclassProducts().find(
     (p) => p.workshopSlug === workshop.slug,
   );
   const isTbd = workshop.tbd || !product || product.priceCents === 0;
@@ -825,14 +825,20 @@ function MasterclassCard({
   );
 }
 
-function MasterclassListSection({ isDark }: { isDark: boolean }) {
+function MasterclassListSection({
+  isDark,
+  workshops,
+}: {
+  isDark: boolean;
+  workshops?: Workshop[];
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   const th = isDark ? "#f5f5fa" : "#0a0a1a";
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
 
-  const sorted = [...PUBLIC_WORKSHOPS].sort(
+  const sorted = [...(workshops ?? PUBLIC_WORKSHOPS)].sort(
     (a, b) => a.sortOrder - b.sortOrder,
   );
 
@@ -1035,7 +1041,7 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
 /* ──────────────────────────────────────────────────────────────
    ENTRY
 ─────────────────────────────────────────────────────────────── */
-export function WorkshopGrid() {
+export function WorkshopGrid({ workshops }: { workshops?: Workshop[] } = {}) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -1043,7 +1049,7 @@ export function WorkshopGrid() {
     <>
       <HeroSection />
       <ManifestoSection isDark={isDark} />
-      <MasterclassListSection isDark={isDark} />
+      <MasterclassListSection isDark={isDark} workshops={workshops} />
       <FinalCTA isDark={isDark} />
     </>
   );

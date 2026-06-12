@@ -2,6 +2,7 @@
  * Lacertosus Academy — Prodotti acquistabili.
  * Bundle (Start/Pro/Elite) come offerta principale + singoli blocchi e masterclass.
  */
+import type { MasterclassVisibilityMap } from "@/lib/settings/masterclass-visibility";
 export interface StripePriceMap {
   /** Price ID dell'account/mode di test (Sandbox) */
   test: string;
@@ -20,6 +21,8 @@ export interface AcademyProduct {
   /** Se true, escluso da listing pubbliche e selezione bundle.
    *  Acquistabile solo via URL diretto. */
   hidden?: boolean;
+  /** Se true, l'admin può abilitare/disabilitare questo prodotto dalla UI. */
+  adminToggleable?: boolean;
   includes: string[];
   /** Corso/blocco corrispondente (solo per type=course) */
   courseSlug?: string;
@@ -225,6 +228,7 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq9CE95vjZKhknKoRmtwV",
     },
     workshopSlug: "master-functional-bulgarian",
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Ivan Ivanov",
@@ -245,6 +249,7 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq9CE95vjZKhkkAzoXj88",
     },
     workshopSlug: "master-strength",
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Andrea Quarto",
@@ -265,6 +270,7 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq5CE95vjZKhkMx40Fiog",
     },
     workshopSlug: "master-calcio",
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Luca Collino — Sport Therapist Juventus",
@@ -285,6 +291,7 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq5CE95vjZKhkBBaDE4q2",
     },
     workshopSlug: "master-volley",
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Oscar Berti",
@@ -304,6 +311,8 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TWIDnCE95vjZKhk1psEVRqi",
     },
     workshopSlug: "master-tennis",
+    hidden: true,
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Trainer da definire",
@@ -323,6 +332,8 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq4CE95vjZKhkqzUqdQbe",
     },
     workshopSlug: "master-rugby",
+    hidden: true,
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Trainer da definire",
@@ -343,6 +354,7 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq5CE95vjZKhkVOefqx7O",
     },
     workshopSlug: "master-running",
+    adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
       "Ivan Pellizzari — Tecnico F.I.T.R.I.",
@@ -362,6 +374,7 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TUNq8CE95vjZKhkj1pp4mih",
     },
     workshopSlug: "master-nuoto",
+    adminToggleable: true,
     includes: [
       "1 giornata in presenza",
       "Marco Magnani + Riccardo Aimini",
@@ -411,6 +424,22 @@ export function getMasterclassProducts(): AcademyProduct[] {
 
 export function getPublicMasterclassProducts(): AcademyProduct[] {
   return PRODUCTS.filter((p) => p.type === "workshop" && !p.hidden);
+}
+
+/**
+ * Lista pubblica masterclass con visibilità admin-configurabile.
+ * Per ogni prodotto con adminToggleable=true, il valore in `visibility`
+ * (chiave = workshopSlug) ha priorità sul flag statico `hidden`.
+ */
+export function resolvePublicMasterclassProducts(
+  visibility: MasterclassVisibilityMap,
+): AcademyProduct[] {
+  return PRODUCTS.filter((p) => {
+    if (p.type !== "workshop") return false;
+    if (!p.adminToggleable) return !p.hidden;
+    const key = p.workshopSlug ?? p.slug;
+    return visibility[key] ?? !p.hidden;
+  });
 }
 
 export function getCourseProducts(): AcademyProduct[] {

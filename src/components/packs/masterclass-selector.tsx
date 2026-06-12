@@ -65,6 +65,8 @@ interface MasterclassSelectorProps {
   initialSelected?: string[];
   onConfirm: (selected: string[]) => void;
   onClose: () => void;
+  /** Override the default public workshops list (e.g. with admin-enabled ones). */
+  availableWorkshops?: Workshop[];
 }
 
 export function MasterclassSelector({
@@ -73,6 +75,7 @@ export function MasterclassSelector({
   initialSelected,
   onConfirm,
   onClose,
+  availableWorkshops,
 }: MasterclassSelectorProps) {
   const [selected, setSelected] = useState<string[]>(initialSelected ?? []);
   const [mounted, setMounted] = useState(false);
@@ -105,12 +108,14 @@ export function MasterclassSelector({
     });
   }
 
-  const sortedWorkshops = [...WORKSHOPS].sort((a, b) => {
-    const af = CREDENTIALS[a.slug]?.featured ? 0 : 1;
-    const bf = CREDENTIALS[b.slug]?.featured ? 0 : 1;
-    if (af !== bf) return af - bf;
-    return a.sortOrder - b.sortOrder;
-  });
+  const sortedWorkshops = [...(availableWorkshops ?? WORKSHOPS)].sort(
+    (a, b) => {
+      const af = CREDENTIALS[a.slug]?.featured ? 0 : 1;
+      const bf = CREDENTIALS[b.slug]?.featured ? 0 : 1;
+      if (af !== bf) return af - bf;
+      return a.sortOrder - b.sortOrder;
+    },
+  );
 
   const isComplete = selected.length === count;
   const initial = initialSelected ?? [];

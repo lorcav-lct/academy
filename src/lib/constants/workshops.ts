@@ -1,3 +1,5 @@
+import type { MasterclassVisibilityMap } from "@/lib/settings/masterclass-visibility";
+
 export interface Workshop {
   slug: string;
   title: string;
@@ -12,6 +14,8 @@ export interface Workshop {
   /** Se true, viene escluso da listing pubbliche e selezione bundle.
    *  La pagina detail resta accessibile via URL diretto. */
   hidden?: boolean;
+  /** Se true, l'admin può abilitare/disabilitare questa masterclass dalla UI. */
+  adminToggleable?: boolean;
 }
 
 export const WORKSHOPS: Workshop[] = [
@@ -25,6 +29,7 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["ivan-ivanov"],
     trainerLabel: "Ivan Ivanov",
     sortOrder: 1,
+    adminToggleable: true,
   },
   {
     slug: "master-strength",
@@ -33,10 +38,11 @@ export const WORKSHOPS: Workshop[] = [
       "Advanced Strength Programming — Programmazione dell'Allenamento della Forza",
     focus: "Tecnica avanzata di forza, programmazione e performance",
     duration: "1-2 giornate",
-    date: "Da definire",
+    date: "Sabato 23 Gennaio 2027",
     teacherSlugs: ["andrea-quarto"],
     trainerLabel: "Andrea Quarto",
     sortOrder: 2,
+    adminToggleable: true,
   },
   {
     slug: "master-calcio",
@@ -49,6 +55,7 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["luca-collino"],
     trainerLabel: "Luca Collino",
     sortOrder: 3,
+    adminToggleable: true,
   },
   {
     slug: "master-volley",
@@ -61,6 +68,7 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["oscar-berti"],
     trainerLabel: "Oscar Berti",
     sortOrder: 4,
+    adminToggleable: true,
   },
   {
     slug: "master-tennis",
@@ -73,6 +81,8 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: [],
     trainerLabel: "Ospite internazionale",
     sortOrder: 5,
+    hidden: true,
+    adminToggleable: true,
   },
   {
     slug: "master-rugby",
@@ -84,6 +94,8 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: [],
     trainerLabel: "Ospite internazionale",
     sortOrder: 6,
+    hidden: true,
+    adminToggleable: true,
   },
   {
     slug: "master-running",
@@ -96,6 +108,7 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["ivan-pellizzari"],
     trainerLabel: "Ivan Pellizzari",
     sortOrder: 7,
+    adminToggleable: true,
   },
   {
     slug: "master-nuoto",
@@ -108,8 +121,9 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["marco-magnani", "riccardo-aimini"],
     trainerLabel: "Marco Magnani + Riccardo Aimini",
     sortOrder: 9,
+    adminToggleable: true,
   },
-  // Hidden — accessibile solo via URL diretto /masterclass/sostieni-progetto
+  // Permanently hidden — not admin-toggleable
   {
     slug: "sostieni-progetto",
     title: "Sostieni il Progetto",
@@ -125,9 +139,28 @@ export const WORKSHOPS: Workshop[] = [
   },
 ];
 
-/** Lista pubblica — esclude le voci con `hidden: true`. Usare ovunque la lista
- *  è mostrata all'utente (grid, preview, selettori bundle, sitemap, footer). */
+/** Lista pubblica statica — esclude le voci con `hidden: true`. */
 export const PUBLIC_WORKSHOPS = WORKSHOPS.filter((w) => !w.hidden);
+
+/** Tutte le masterclass che l'admin può attivare/disattivare dalla UI. */
+export const ADMIN_TOGGLEABLE_WORKSHOPS = WORKSHOPS.filter(
+  (w) => w.adminToggleable,
+);
+
+/**
+ * Lista pubblica con visibilità admin-configurabile.
+ * Per ogni workshop con adminToggleable=true, il valore in `visibility` ha
+ * priorità sul flag statico `hidden`. Worksho senza chiave → default statico.
+ * Permanentemente hidden (sostieni-progetto) restano sempre esclusi.
+ */
+export function resolvePublicWorkshops(
+  visibility: MasterclassVisibilityMap,
+): Workshop[] {
+  return WORKSHOPS.filter((w) => {
+    if (!w.adminToggleable) return !w.hidden; // not toggleable: use static
+    return visibility[w.slug] ?? !w.hidden; // toggleable: DB value or static default
+  });
+}
 
 export function getWorkshopBySlug(slug: string): Workshop | undefined {
   return WORKSHOPS.find((w) => w.slug === slug);
