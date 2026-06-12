@@ -1,11 +1,20 @@
+/**
+ * Complete the balance of a paid caparra.
+ *
+ * Invoked from /account/orders on a deposit order awaiting its balance. Opens a
+ * full-price pack checkout with the dedicated -500€ promotion code auto-applied
+ * (and no other discount possible — Stripe forbids stacking once `discounts` is
+ * set). On payment the webhook generates tickets and closes the deposit order.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
+import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
 import {
   getProductBySlug,
   resolveStripePriceId,
-  resolveDepositPriceId,
+  DEPOSIT_BALANCE_DEADLINE,
 } from "@/lib/constants/packs";
 import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
 
@@ -19,6 +28,11 @@ function normalizeSlugList(value: unknown): string[] {
         .filter(Boolean),
     ),
   );
+}
+
+function deadlinePassed(): boolean {
+  const deadline = new Date(`${DEPOSIT_BALANCE_DEADLINE}T23:59:59`).getTime();
+  return Date.now() > deadline;
 }
 
 export async function POST(request: NextRequest) {
@@ -36,38 +50,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "orderId mancante" }, { status: 400 });
     }
 
-    // Fetch the pending order (must belong to this user)
-    const { data: order } = await supabase
+    // Fetch the deposit order (must belong to this user and await its balance)
+    const { data: deposit } = await supabase
       .from("orders")
       .select(
-        "id, pack_id, status, user_id, selected_workshop_ids, payment_plan",
+        "id, pack_id, status, payment_plan, balance_order_id, deposit_promotion_code_id, selected_workshop_ids",
       )
       .eq("id", orderId)
       .eq("user_id", user.id)
       .single();
 
-    if (!order || order.status !== "pending") {
+    if (
+      !deposit ||
+      deposit.payment_plan !== "deposit" ||
+      deposit.status !== "paid" ||
+      deposit.balance_order_id
+    ) {
       return NextResponse.json(
-        { error: "Ordine non trovato o non in attesa" },
+        { error: "Caparra non trovata o saldo già completato" },
         { status: 404 },
       );
     }
 
-    const admin = createAdminClient();
+    if (deadlinePassed()) {
+      return NextResponse.json(
+        { error: "Il termine per saldare la caparra è scaduto" },
+        { status: 410 },
+      );
+    }
 
-    // Cancel the old pending order and its tickets
-    await admin
-      .from("orders")
-      .update({ status: "cancelled", updated_at: new Date().toISOString() })
-      .eq("id", orderId);
-
-    await admin
-      .from("tickets")
-      .update({ is_used: true })
-      .eq("order_id", orderId);
-
-    // Look up pack from constants
-    const pack = getProductBySlug(order.pack_id);
+    const pack = getProductBySlug(deposit.pack_id);
     if (!pack) {
       return NextResponse.json(
         { error: "Prodotto non trovato" },
@@ -75,10 +87,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isDeposit = order.payment_plan === "deposit";
-    const priceId = isDeposit
-      ? resolveDepositPriceId()
-      : resolveStripePriceId(pack);
+    const priceId = resolveStripePriceId(pack);
     if (!priceId) {
       return NextResponse.json(
         { error: "Prodotto non disponibile in questa modalità" },
@@ -87,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     const selectedMasterclassIds = normalizeSlugList(
-      order.selected_workshop_ids,
+      deposit.selected_workshop_ids,
     );
     const requiredMasterclasses =
       pack.type === "bundle" ? (pack.masterclassSelectionCount ?? 0) : 0;
@@ -97,29 +106,48 @@ export async function POST(request: NextRequest) {
       const invalidSelection =
         selectedMasterclassIds.length !== requiredMasterclasses ||
         selectedMasterclassIds.some((slug) => !workshopSlugs.has(slug));
-
       if (invalidSelection) {
         return NextResponse.json(
           {
             error:
-              "Selezione masterclass mancante o non valida. Torna al checkout e scegli di nuovo le masterclass.",
+              "Selezione masterclass mancante o non valida. Contatta l'assistenza.",
           },
           { status: 400 },
         );
       }
     }
 
-    // Create a new order + Stripe session
+    const admin = createAdminClient();
+
+    // The -500€ coupon is normally issued by the webhook on deposit payment.
+    // Self-heal: if it's missing (webhook miss/error), create it now so the
+    // customer is never blocked from completing the balance.
+    let promotionCodeId = deposit.deposit_promotion_code_id as string | null;
+    if (!promotionCodeId) {
+      const { code, promotionCodeId: newId } = await createDepositBalanceCoupon(
+        deposit.pack_id,
+        deposit.id,
+      );
+      promotionCodeId = newId;
+      await admin
+        .from("orders")
+        .update({
+          deposit_promo_code: code,
+          deposit_promotion_code_id: newId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", deposit.id);
+    }
+
+    // Create the full-price balance order
     const { data: newOrder, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: user.id,
         pack_id: pack.slug,
-        // Kept empty for compatibility until the TEXT[] migration is applied.
-        // The checkout metadata still carries the selected masterclass slugs.
         selected_workshop_ids: [],
         status: "pending",
-        payment_plan: isDeposit ? "deposit" : "full",
+        payment_plan: "full",
         amount_cents: 0,
         billing_email: user.email,
         is_test: process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ?? false,
@@ -141,19 +169,21 @@ export async function POST(request: NextRequest) {
       packId: pack.slug,
       workshopIds: [],
       masterclassIds: selectedMasterclassIds,
-      paymentPlan: isDeposit ? "deposit" : "full",
+      // -500€ auto-applied; allow_promotion_codes stays off → no further discount.
+      promotionCodeId,
+      depositOrderId: deposit.id,
     });
 
-    await supabase
+    await admin
       .from("orders")
       .update({ stripe_checkout_session_id: session.id })
       .eq("id", newOrder.id);
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("Resume checkout error:", error);
+    console.error("Complete deposit error:", error);
     return NextResponse.json(
-      { error: "Errore durante il checkout" },
+      { error: "Errore durante il saldo" },
       { status: 500 },
     );
   }

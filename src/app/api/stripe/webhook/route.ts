@@ -4,10 +4,17 @@ import { getStripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { encryptPayload } from "@/lib/qr/encrypt";
 import { generateQRCodeBuffer } from "@/lib/qr/generate";
-import { PRODUCTS } from "@/lib/constants/packs";
+import { PRODUCTS, DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 import { sendEmail } from "@/lib/email/client";
 import { OrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
+import { DepositReceivedEmail } from "@/lib/email/templates/deposit-received";
+import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
 import React from "react";
+
+/** Canonical public domain for customer-facing email links. Hardcoded so that
+ *  emails sent from preview/staging deployments (NEXT_PUBLIC_BASE_URL =
+ *  *.vercel.app) still point at the production site. */
+const EMAIL_APP_URL = "https://academy.lacertosus.com";
 
 function parseMetadataList(value: string | undefined): string[] {
   if (!value) return [];
@@ -107,6 +114,7 @@ export async function POST(request: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
     const productSlug = session.metadata?.pack_id;
+    const depositOrderId = session.metadata?.deposit_order_id || null;
     const workshopIds = parseMetadataList(session.metadata?.workshop_ids);
     const masterclassIds = parseMetadataList(session.metadata?.masterclass_ids);
     const selectedAddonSlugs = Array.from(
@@ -147,6 +155,65 @@ export async function POST(request: NextRequest) {
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // ── Caparra (deposit) branch ──────────────────────────────────────────
+    // A deposit grants NO tickets/access: it only issues the -500€ balance
+    // coupon and emails the customer. Access is granted later when the balance
+    // is paid as a normal pack purchase.
+    //
+    // Gate on the persisted order row (not Stripe metadata): the DB column is
+    // the reliable source of truth and cannot be dropped/garbled in transit.
+    if (order.payment_plan === "deposit") {
+      if (!wasAlreadyPaid) {
+        const depositPackSlug = order.pack_id || "";
+        const pack = PRODUCTS.find((p) => p.slug === depositPackSlug);
+        const balanceCents = Math.max(
+          0,
+          (pack?.priceCents ?? 0) - DEPOSIT_PRICE_CENTS,
+        );
+        try {
+          const { code, promotionCodeId } = await createDepositBalanceCoupon(
+            depositPackSlug,
+            orderId,
+          );
+          await supabase
+            .from("orders")
+            .update({
+              deposit_promo_code: code,
+              deposit_promotion_code_id: promotionCodeId,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", orderId);
+
+          const customerEmail =
+            order.billing_email || session.customer_details?.email;
+          if (customerEmail) {
+            const appUrl = EMAIL_APP_URL;
+            await sendEmail({
+              to: customerEmail,
+              subject: `Caparra ricevuta — ${pack?.name ?? "Pack"}`,
+              react: React.createElement(DepositReceivedEmail, {
+                userName:
+                  (order.profiles as { full_name?: string } | null)
+                    ?.full_name ||
+                  order.billing_name ||
+                  "Cliente",
+                packName: pack?.name ?? "Pack",
+                balanceCode: code,
+                balanceTotal: new Intl.NumberFormat("it-IT", {
+                  style: "currency",
+                  currency: "EUR",
+                }).format(balanceCents / 100),
+                appUrl,
+              }),
+            }).catch(console.error);
+          }
+        } catch (err) {
+          console.error("Deposit coupon/email error:", err);
+        }
+      }
+      return NextResponse.json({ received: true });
     }
 
     // Determine which products to generate tickets for
@@ -209,12 +276,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // If this is a balance payment, close the originating deposit order by
+    // linking it to this full-price order.
+    if (depositOrderId && !wasAlreadyPaid) {
+      await supabase
+        .from("orders")
+        .update({
+          balance_order_id: orderId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", depositOrderId);
+    }
+
     // Send order confirmation email
     const customerEmail =
       order.billing_email || session.customer_details?.email;
     if (customerEmail && !wasAlreadyPaid) {
-      const appUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com";
+      const appUrl = EMAIL_APP_URL;
       const productName =
         PRODUCTS.find((p) => p.slug === productSlug)?.name ||
         productSlug ||

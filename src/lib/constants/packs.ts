@@ -433,6 +433,37 @@ export function resolveStripePriceId(product: AcademyProduct): string {
   return isLive ? product.stripePriceId.live : product.stripePriceId.test;
 }
 
+/* ─── Caparra (deposit) ──────────────────────────────────────────────────────
+ * A bundle seat can be secured with a fixed, non-refundable deposit instead of
+ * the full price. The deposit is a standalone 500€ product (IVA inclusa); the
+ * balance is paid later as a normal pack purchase with a dedicated -500€ coupon.
+ */
+export const DEPOSIT_PRICE_CENTS = 50000;
+
+/** Stripe Price ID of the 500€ deposit, per mode (tax behavior: inclusive). */
+export const DEPOSIT_STRIPE_PRICE_ID: StripePriceMap = {
+  test: "price_1Th8ymCGgXzYzpRpqdxSMAB4",
+  live: "price_1Th9BgCE95vjZKhk9x0g4BpE",
+};
+
+/** Deadline by which the balance must be paid. After this date the deposit is
+ *  forfeited and the -500€ coupon expires. ISO date (local Europe/Rome). */
+export const DEPOSIT_BALANCE_DEADLINE = "2026-07-15";
+
+/** Bundles eligible for the deposit flow. The deposit is only offered on these. */
+export function isDepositEligible(product: AcademyProduct): boolean {
+  return product.type === "bundle" && !product.hidden;
+}
+
+/** Resolve the deposit Price ID for the active Stripe mode (same rule as
+ *  resolveStripePriceId). */
+export function resolveDepositPriceId(): string {
+  const isLive =
+    typeof process !== "undefined" &&
+    process.env?.STRIPE_SECRET_KEY?.startsWith("sk_live_") === true;
+  return isLive ? DEPOSIT_STRIPE_PRICE_ID.live : DEPOSIT_STRIPE_PRICE_ID.test;
+}
+
 // Legacy aliases
 export const PACKS = PRODUCTS;
 export type Pack = AcademyProduct;

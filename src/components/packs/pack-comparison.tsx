@@ -11,6 +11,9 @@ import { useTheme } from "@/components/providers/theme-provider";
 import {
   getBundles,
   getPublicMasterclassProducts,
+  isDepositEligible,
+  DEPOSIT_PRICE_CENTS,
+  DEPOSIT_BALANCE_DEADLINE,
   type AcademyProduct,
 } from "@/lib/constants/packs";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
@@ -1114,6 +1117,40 @@ function PackModal({
                     ? "Sconto di lancio attivo fino al 30 giugno · Iscrizione vincolata? No."
                     : "Pagamento rateale disponibile · Iscrizione vincolata? No."}
                 </div>
+                {isDepositEligible(pack) && (
+                  <div
+                    className="mt-3 flex items-start gap-2.5 px-3.5 py-2.5"
+                    style={{
+                      border: "1px solid rgba(240,146,38,0.3)",
+                      background: "rgba(240,146,38,0.06)",
+                    }}
+                  >
+                    <span
+                      className="mt-0.5 shrink-0 text-[0.8rem]"
+                      style={{ color: ORANGE }}
+                      aria-hidden
+                    >
+                      ●
+                    </span>
+                    <p
+                      className="text-[0.74rem] leading-snug"
+                      style={{ color: textB }}
+                    >
+                      Puoi bloccare il posto con una{" "}
+                      <span className="font-bold" style={{ color: textH }}>
+                        caparra di {Math.round(DEPOSIT_PRICE_CENTS / 100)}€
+                      </span>{" "}
+                      (IVA inclusa, non rimborsabile): versi il saldo entro il{" "}
+                      {new Date(
+                        `${DEPOSIT_BALANCE_DEADLINE}T12:00:00`,
+                      ).toLocaleDateString("it-IT", {
+                        day: "numeric",
+                        month: "long",
+                      })}
+                      . Scegli la modalità al checkout.
+                    </p>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => onBuy(pack)}

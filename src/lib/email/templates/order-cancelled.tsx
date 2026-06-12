@@ -17,6 +17,8 @@ interface OrderCancelledEmailProps {
   packName: string;
   orderId: string;
   appUrl: string;
+  /** True for a forfeited caparra: no refund copy. */
+  isDeposit?: boolean;
 }
 
 export function OrderCancelledEmail({
@@ -24,6 +26,7 @@ export function OrderCancelledEmail({
   packName,
   orderId,
   appUrl,
+  isDeposit = false,
 }: OrderCancelledEmailProps) {
   const shortId = orderId.slice(0, 8).toUpperCase();
   const firstName = userName?.trim().split(/\s+/)[0] || "";
@@ -42,9 +45,9 @@ export function OrderCancelledEmail({
         il tuo ordine è stato annullato.
       </Heading>
       <BodyText muted style={{ marginTop: "12px" }}>
-        Abbiamo annullato l&apos;ordine come richiesto. Se l&apos;avevi pagato,
-        l&apos;eventuale rimborso viene gestito direttamente da Stripe sul
-        metodo originale entro 5–10 giorni lavorativi.
+        {isDeposit
+          ? "Abbiamo annullato la caparra come richiesto. Trattandosi di una caparra, l'importo versato non è rimborsabile e lo sconto collegato non è più valido."
+          : "Abbiamo annullato l'ordine come richiesto. Se l'avevi pagato, l'eventuale rimborso viene gestito direttamente da Stripe sul metodo originale entro 5–10 giorni lavorativi."}
       </BodyText>
 
       <div style={{ height: "12px" }} />

@@ -285,7 +285,8 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>
-                    {order.status === "paid" && (
+                    {(order.status === "paid" ||
+                      order.status === "pending") && (
                       <button
                         onClick={() => cancelOrder(order.id)}
                         disabled={cancelling === order.id}
