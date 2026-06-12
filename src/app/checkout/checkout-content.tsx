@@ -5,7 +5,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { getPackBySlug, type AcademyProduct } from "@/lib/constants/packs";
+import {
+  getPackBySlug,
+  isDepositEligible,
+  DEPOSIT_PRICE_CENTS,
+  type AcademyProduct,
+} from "@/lib/constants/packs";
+import {
+  getDeadlines,
+  formatDeadline,
+  isPastDeadline,
+  DEFAULT_DEADLINES,
+  type Deadlines,
+} from "@/lib/settings/deadlines";
 import { getWorkshopBySlug, type Workshop } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
@@ -391,6 +403,100 @@ function computeDiscountCents(
   return 0;
 }
 
+type PaymentPlan = "full" | "deposit";
+
+/* ──────────────────────────────────────────────────────────────
+   Payment plan toggle (bundle only) — full upfront vs 500€ deposit
+─────────────────────────────────────────────────────────────── */
+function PaymentPlanToggle({
+  value,
+  onChange,
+  balanceCents,
+  balanceDeadline,
+  t,
+}: {
+  value: PaymentPlan;
+  onChange: (p: PaymentPlan) => void;
+  balanceCents: number;
+  balanceDeadline: string;
+  t: TierTokens;
+}) {
+  const options: { id: PaymentPlan; title: string; sub: string }[] = [
+    { id: "full", title: "Tutto subito", sub: "Paghi l'intero importo ora" },
+    {
+      id: "deposit",
+      title: "Solo caparra · 500€",
+      sub: `Saldo ${formatEur(balanceCents)} entro il ${formatDeadline(balanceDeadline)}`,
+    },
+  ];
+  return (
+    <div className="mb-5">
+      <p
+        className="mb-2.5 text-[0.6rem] font-black uppercase tracking-[0.28em]"
+        style={{ color: t.ts }}
+      >
+        Modalità di pagamento
+      </p>
+      <div className="grid grid-cols-1 gap-2">
+        {options.map((o) => {
+          const active = value === o.id;
+          return (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => onChange(o.id)}
+              aria-pressed={active}
+              className="flex items-start gap-3 px-3.5 py-3 text-left transition-all"
+              style={{
+                background: active ? `rgba(${ORANGE_RGB},0.08)` : t.surface,
+                border: `1px solid ${active ? ORANGE : t.border}`,
+                outline: active ? `1px solid ${ORANGE}` : "none",
+              }}
+            >
+              <span
+                className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+                style={{
+                  border: `2px solid ${active ? ORANGE : t.border}`,
+                  background: active ? ORANGE : "transparent",
+                }}
+                aria-hidden
+              >
+                {active && (
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ background: "#111" }}
+                  />
+                )}
+              </span>
+              <span className="min-w-0">
+                <span
+                  className="block text-[0.82rem] font-bold leading-tight"
+                  style={{ color: t.th }}
+                >
+                  {o.title}
+                </span>
+                <span
+                  className="mt-0.5 block text-[0.7rem] leading-snug"
+                  style={{ color: t.ts }}
+                >
+                  {o.sub}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {value === "deposit" && (
+        <p className="mt-2 text-[0.66rem] leading-snug" style={{ color: t.ts }}>
+          La caparra di 500€ (IVA inclusa) blocca il posto ma{" "}
+          <strong style={{ color: t.tb }}>non è rimborsabile</strong>.
+          L&apos;iscrizione si attiva al saldo.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ──────────────────────────────────────────────────────────────
    Order Summary card (right column on desktop, top on mobile)
 ─────────────────────────────────────────────────────────────── */
@@ -408,6 +514,12 @@ function OrderSummary({
   onPromoInputChange,
   onApplyPromo,
   onRemovePromo,
+  paymentPlan,
+  onPaymentPlanChange,
+  depositCredit,
+  depositOpen,
+  packClosed,
+  balanceDeadline,
 }: {
   pack: AcademyProduct;
   selectedMc: Workshop[];
@@ -422,8 +534,26 @@ function OrderSummary({
   onPromoInputChange: (v: string) => void;
   onApplyPromo: () => void;
   onRemovePromo: () => void;
+  paymentPlan: PaymentPlan;
+  onPaymentPlanChange: (p: PaymentPlan) => void;
+  depositCredit: boolean;
+  /** Caparra purchase still open (before its deadline). */
+  depositOpen: boolean;
+  /** Pack purchase window closed (after pack deadline, not settling). */
+  packClosed: boolean;
+  balanceDeadline: string;
 }) {
   const grossCents = getDisplayCents(pack);
+  const depositEligible = isDepositEligible(pack);
+  // Settling an existing caparra: -500€ credit auto-applied by the server.
+  const showCredit = depositCredit && depositEligible;
+  // Offer the caparra only while its purchase window is open and no caparra is
+  // already being settled.
+  const canDeposit = depositEligible && !showCredit && depositOpen;
+  // Don't offer a new caparra while one is open.
+  const isDeposit = canDeposit && paymentPlan === "deposit";
+  const depositBalanceCents = Math.max(0, grossCents - DEPOSIT_PRICE_CENTS);
+  const creditedTotalCents = Math.max(0, grossCents - DEPOSIT_PRICE_CENTS);
   const launch = usePromoPricing(pack.slug, grossCents);
   // Auto-promo (server-side) overrides any manual user code (no stacking on Stripe).
   const launchDiscountCents = launch ? launch.discount : 0;
@@ -534,10 +664,22 @@ function OrderSummary({
         {/* Divider */}
         <div className="my-5 h-px w-full" style={{ background: t.border }} />
 
-        {/* Launch promo banner — auto-applied, no user action required */}
-        {launch && (
+        {/* Payment plan toggle — bundle only, while the caparra window is open
+            and no caparra is being settled. */}
+        {canDeposit && (
+          <PaymentPlanToggle
+            value={paymentPlan}
+            onChange={onPaymentPlanChange}
+            balanceCents={depositBalanceCents}
+            balanceDeadline={balanceDeadline}
+            t={t}
+          />
+        )}
+
+        {/* ── Deposit summary (caparra) ── */}
+        {showCredit ? (
           <div
-            className="mb-3 flex items-start gap-3 px-3 py-2.5"
+            className="flex items-start gap-3 px-3 py-2.5"
             style={{
               background: `rgba(${ORANGE_RGB},0.1)`,
               border: `1px solid rgba(${ORANGE_RGB},0.4)`,
@@ -547,80 +689,158 @@ function OrderSummary({
               className="mt-0.5 inline-flex items-center justify-center px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
               style={{ background: ORANGE, color: "#111" }}
             >
-              {launch.promo.name}
+              Caparra
             </span>
             <div className="min-w-0 flex-1">
               <p
                 className="text-[0.78rem] font-bold leading-tight"
                 style={{ color: t.th }}
               >
-                {launch.promo.headline ?? "Sconto applicato"}
+                Credito caparra applicato
               </p>
               <p
                 className="mt-0.5 text-[0.7rem] leading-snug"
                 style={{ color: t.ts }}
               >
-                Risparmi {formatEur(launch.discount)}
-                {launch.promo.subtitle ? ` · ${launch.promo.subtitle}` : ""}
+                Hai già versato {formatEur(DEPOSIT_PRICE_CENTS)}: lo scaliamo
+                dal saldo di questo pack.
               </p>
             </div>
-          </div>
-        )}
-
-        {/* Manual promo code section — hidden during launch (no stacking) */}
-        {grossCents > 0 && !launch && (
-          <PromoSection
-            t={t}
-            promo={promo}
-            input={promoInput}
-            error={promoError}
-            loading={promoLoading}
-            onChange={onPromoInputChange}
-            onApply={onApplyPromo}
-            onRemove={onRemovePromo}
-          />
-        )}
-
-        {/* Discount line — launch first, then manual */}
-        {launchDiscountCents > 0 && (
-          <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
-            <span style={{ color: ORANGE }}>Sconto · {launch?.promo.name}</span>
-            <span className="font-bold tabular-nums" style={{ color: ORANGE }}>
-              −{formatEur(launchDiscountCents, true)}
+            <span
+              className="shrink-0 text-[0.85rem] font-black tabular-nums"
+              style={{ color: ORANGE }}
+            >
+              −{formatEur(DEPOSIT_PRICE_CENTS)}
             </span>
           </div>
-        )}
-        {manualDiscountCents > 0 && (
-          <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
-            <span style={{ color: ORANGE }}>Sconto · {promo?.code ?? ""}</span>
-            <span className="font-bold tabular-nums" style={{ color: ORANGE }}>
-              −{formatEur(manualDiscountCents, true)}
-            </span>
-          </div>
-        )}
+        ) : isDeposit ? (
+          <>
+            <div className="space-y-1.5">
+              <div className="flex items-baseline justify-between text-[0.82rem]">
+                <span className="font-bold" style={{ color: t.th }}>
+                  Caparra oggi
+                </span>
+                <span
+                  className="font-black tabular-nums"
+                  style={{ color: t.th }}
+                >
+                  {formatEur(DEPOSIT_PRICE_CENTS)}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between text-[0.78rem]">
+                <span style={{ color: t.ts }}>
+                  Saldo entro il {formatDeadline(balanceDeadline)}
+                </span>
+                <span
+                  className="font-semibold tabular-nums"
+                  style={{ color: t.ts }}
+                >
+                  {formatEur(depositBalanceCents)}
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Launch promo banner — auto-applied, no user action required */}
+            {launch && (
+              <div
+                className="mb-3 flex items-start gap-3 px-3 py-2.5"
+                style={{
+                  background: `rgba(${ORANGE_RGB},0.1)`,
+                  border: `1px solid rgba(${ORANGE_RGB},0.4)`,
+                }}
+              >
+                <span
+                  className="mt-0.5 inline-flex items-center justify-center px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+                  style={{ background: ORANGE, color: "#111" }}
+                >
+                  {launch.promo.name}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="text-[0.78rem] font-bold leading-tight"
+                    style={{ color: t.th }}
+                  >
+                    {launch.promo.headline ?? "Sconto applicato"}
+                  </p>
+                  <p
+                    className="mt-0.5 text-[0.7rem] leading-snug"
+                    style={{ color: t.ts }}
+                  >
+                    Risparmi {formatEur(launch.discount)}
+                    {launch.promo.subtitle ? ` · ${launch.promo.subtitle}` : ""}
+                  </p>
+                </div>
+              </div>
+            )}
 
-        {/* VAT breakdown */}
-        {finalGrossCents > 0 && (
-          <div className="mt-3 space-y-1.5">
-            <div className="flex items-baseline justify-between text-[0.78rem]">
-              <span style={{ color: t.tb }}>Imponibile</span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: t.tb }}
-              >
-                {formatEur(net, true)}
-              </span>
-            </div>
-            <div className="flex items-baseline justify-between text-[0.78rem]">
-              <span style={{ color: t.tb }}>IVA 22%</span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: t.tb }}
-              >
-                {formatEur(vat, true)}
-              </span>
-            </div>
-          </div>
+            {/* Manual promo code section — hidden during launch (no stacking) */}
+            {grossCents > 0 && !launch && (
+              <PromoSection
+                t={t}
+                promo={promo}
+                input={promoInput}
+                error={promoError}
+                loading={promoLoading}
+                onChange={onPromoInputChange}
+                onApply={onApplyPromo}
+                onRemove={onRemovePromo}
+              />
+            )}
+
+            {/* Discount line — launch first, then manual */}
+            {launchDiscountCents > 0 && (
+              <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
+                <span style={{ color: ORANGE }}>
+                  Sconto · {launch?.promo.name}
+                </span>
+                <span
+                  className="font-bold tabular-nums"
+                  style={{ color: ORANGE }}
+                >
+                  −{formatEur(launchDiscountCents, true)}
+                </span>
+              </div>
+            )}
+            {manualDiscountCents > 0 && (
+              <div className="mt-3 flex items-baseline justify-between text-[0.78rem]">
+                <span style={{ color: ORANGE }}>
+                  Sconto · {promo?.code ?? ""}
+                </span>
+                <span
+                  className="font-bold tabular-nums"
+                  style={{ color: ORANGE }}
+                >
+                  −{formatEur(manualDiscountCents, true)}
+                </span>
+              </div>
+            )}
+
+            {/* VAT breakdown */}
+            {finalGrossCents > 0 && (
+              <div className="mt-3 space-y-1.5">
+                <div className="flex items-baseline justify-between text-[0.78rem]">
+                  <span style={{ color: t.tb }}>Imponibile</span>
+                  <span
+                    className="font-semibold tabular-nums"
+                    style={{ color: t.tb }}
+                  >
+                    {formatEur(net, true)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-[0.78rem]">
+                  <span style={{ color: t.tb }}>IVA 22%</span>
+                  <span
+                    className="font-semibold tabular-nums"
+                    style={{ color: t.tb }}
+                  >
+                    {formatEur(vat, true)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Total */}
@@ -632,10 +852,10 @@ function OrderSummary({
             className="text-[0.66rem] font-black uppercase tracking-[0.28em]"
             style={{ color: t.ts }}
           >
-            Totale
+            {isDeposit ? "Da pagare oggi" : showCredit ? "Saldo" : "Totale"}
           </span>
           <span className="flex items-baseline gap-2">
-            {totalDiscountCents > 0 && (
+            {((!isDeposit && totalDiscountCents > 0) || showCredit) && (
               <span
                 className="text-[0.85rem] font-semibold tabular-nums line-through"
                 style={{ color: t.ts }}
@@ -647,11 +867,17 @@ function OrderSummary({
               className="text-[1.6rem] font-black leading-none tracking-[-0.02em] tabular-nums"
               style={{ color: t.th }}
             >
-              {finalGrossCents > 0 ? formatEur(finalGrossCents) : "TBD"}
+              {isDeposit
+                ? formatEur(DEPOSIT_PRICE_CENTS)
+                : showCredit
+                  ? formatEur(creditedTotalCents)
+                  : finalGrossCents > 0
+                    ? formatEur(finalGrossCents)
+                    : "TBD"}
             </span>
           </span>
         </div>
-        {finalGrossCents > 0 && (
+        {(isDeposit || showCredit || finalGrossCents > 0) && (
           <p
             className="mt-1 text-right text-[0.62rem] font-semibold"
             style={{ color: t.ts }}
@@ -663,7 +889,7 @@ function OrderSummary({
         {/* Primary CTA */}
         <button
           onClick={onCheckout}
-          disabled={loading || unavailable}
+          disabled={loading || unavailable || packClosed}
           className="mt-6 inline-flex w-full items-center justify-between gap-3 px-6 py-4 text-[0.78rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ background: ORANGE, color: "#111" }}
         >
@@ -695,6 +921,13 @@ function OrderSummary({
                 </svg>
               </span>
             </>
+          ) : packClosed ? (
+            <>
+              <span>Iscrizioni chiuse</span>
+              <span aria-hidden className="text-base">
+                ·
+              </span>
+            </>
           ) : unavailable ? (
             <>
               <span>Prossimamente</span>
@@ -704,7 +937,13 @@ function OrderSummary({
             </>
           ) : (
             <>
-              <span>Paga con Stripe</span>
+              <span>
+                {isDeposit
+                  ? "Versa la caparra"
+                  : showCredit
+                    ? "Salda il pack"
+                    : "Paga con Stripe"}
+              </span>
               <span aria-hidden className="text-base">
                 →
               </span>
@@ -754,11 +993,17 @@ function OrderSummary({
             title: "Pagamento crittografato",
             desc: "Stripe · standard PCI-DSS Level 1",
           },
-          {
-            Icon: IconRefund,
-            title: "14 giorni di recesso",
-            desc: "Cancellazione gratuita prima dell'inizio",
-          },
+          isDeposit
+            ? {
+                Icon: IconRefund,
+                title: "Caparra non rimborsabile",
+                desc: `Saldo entro il ${formatDeadline(balanceDeadline)} per attivare l'iscrizione`,
+              }
+            : {
+                Icon: IconRefund,
+                title: "14 giorni di recesso",
+                desc: "Cancellazione gratuita prima dell'inizio",
+              },
           {
             Icon: IconShieldCheck,
             title: "Pagamento flessibile",
@@ -1090,16 +1335,28 @@ function MobileStickyBar({
   unavailable,
   visible,
   onCheckout,
+  isDeposit,
+  depositCredit,
 }: {
   pack: AcademyProduct;
   loading: boolean;
   unavailable: boolean;
   visible: boolean;
   onCheckout: () => void;
+  isDeposit: boolean;
+  depositCredit: boolean;
 }) {
   const grossCents = getDisplayCents(pack);
-  const launch = usePromoPricing(pack.slug, grossCents);
-  const finalCents = launch ? launch.final : grossCents;
+  const launchRaw = usePromoPricing(pack.slug, grossCents);
+  // No launch promo on the caparra or while settling it.
+  const launch = isDeposit || depositCredit ? null : launchRaw;
+  const finalCents = isDeposit
+    ? DEPOSIT_PRICE_CENTS
+    : depositCredit
+      ? Math.max(0, grossCents - DEPOSIT_PRICE_CENTS)
+      : launch
+        ? launch.final
+        : grossCents;
 
   return (
     <motion.div
@@ -1123,12 +1380,23 @@ function MobileStickyBar({
         <div className="min-w-0 flex flex-col">
           <span
             className="text-[0.55rem] font-bold uppercase tracking-[0.18em]"
-            style={{ color: launch ? ORANGE : "rgba(255,255,255,0.55)" }}
+            style={{
+              color:
+                launch || isDeposit || depositCredit
+                  ? ORANGE
+                  : "rgba(255,255,255,0.55)",
+            }}
           >
-            {launch ? `${launch.promo.name} · Totale` : "Totale"}
+            {isDeposit
+              ? "Caparra · Oggi"
+              : depositCredit
+                ? "Saldo · Caparra −500€"
+                : launch
+                  ? `${launch.promo.name} · Totale`
+                  : "Totale"}
           </span>
           <span className="flex items-baseline gap-2">
-            {launch && (
+            {(launch || depositCredit) && (
               <span
                 className="text-[0.7rem] font-semibold tabular-nums line-through"
                 style={{ color: "rgba(255,255,255,0.45)" }}
@@ -1150,7 +1418,15 @@ function MobileStickyBar({
           className="inline-flex shrink-0 items-center gap-2 px-5 py-3 text-[0.7rem] font-black uppercase tracking-[0.14em] transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: ORANGE, color: "#111" }}
         >
-          <span>{loading ? "..." : unavailable ? "Soon" : "Paga"}</span>
+          <span>
+            {loading
+              ? "..."
+              : unavailable
+                ? "Soon"
+                : isDeposit
+                  ? "Caparra"
+                  : "Paga"}
+          </span>
           {!loading && !unavailable && <span aria-hidden>→</span>}
         </button>
       </div>
@@ -1305,6 +1581,11 @@ export function CheckoutContent() {
   const [userLoading, setUserLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [paymentPlan, setPaymentPlan] = useState<PaymentPlan>("full");
+  // True when the logged-in user has an open caparra (deposit paid, balance
+  // unpaid): the server auto-applies the -500€ credit, so reflect it here.
+  const [depositCredit, setDepositCredit] = useState(false);
+  const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -1366,6 +1647,21 @@ export function CheckoutContent() {
           setUserEmail(user?.email ?? null);
           setUserLoading(false);
         }
+        // Detect an open caparra to surface the -500€ credit on a bundle checkout.
+        if (user) {
+          const { data: openDeposit } = await supabase
+            .from("orders")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("payment_plan", "deposit")
+            .eq("status", "paid")
+            .is("balance_order_id", null)
+            .limit(1)
+            .maybeSingle();
+          if (!cancelled) setDepositCredit(Boolean(openDeposit));
+        }
+        const d = await getDeadlines(supabase);
+        if (!cancelled) setDeadlines(d);
       } catch {
         if (!cancelled) setUserLoading(false);
       }
@@ -1438,6 +1734,13 @@ export function CheckoutContent() {
   const tierLabel = TIER_LABEL[pack.slug] ?? pack.name;
   const unavailable = pack.priceCents === 0; // bundles still TBD on Stripe side
 
+  // ── Deadline-driven availability (bundles only; masterclasses unrestricted) ─
+  const depositOpen = !isPastDeadline(deadlines.depositPurchase);
+  // A fresh pack purchase is closed past the pack deadline; settling an open
+  // caparra (depositCredit) is allowed within its own balance window.
+  const packClosed =
+    isBundle && !depositCredit && isPastDeadline(deadlines.packPurchase);
+
   // ── Build URL for post-auth return ────────────────────────────
   function buildCheckoutUrl() {
     const params = new URLSearchParams({ pack: packSlug });
@@ -1447,7 +1750,7 @@ export function CheckoutContent() {
   }
 
   async function handleCheckout() {
-    if (!pack || unavailable) return;
+    if (!pack || unavailable || packClosed) return;
     setLoading(true);
     setError(null);
 
@@ -1472,6 +1775,8 @@ export function CheckoutContent() {
           workshopIds: [],
           masterclassIds,
           promotionCodeId: promo?.id ?? null,
+          paymentPlan:
+            isDepositEligible(pack) && depositOpen ? paymentPlan : "full",
         }),
       });
       const data = await response.json();
@@ -2007,6 +2312,12 @@ export function CheckoutContent() {
                 onPromoInputChange={setPromoInput}
                 onApplyPromo={handleApplyPromo}
                 onRemovePromo={handleRemovePromo}
+                paymentPlan={paymentPlan}
+                onPaymentPlanChange={setPaymentPlan}
+                depositCredit={depositCredit}
+                depositOpen={depositOpen}
+                packClosed={packClosed}
+                balanceDeadline={deadlines.depositBalance}
               />
             </motion.aside>
           </div>
@@ -2017,9 +2328,16 @@ export function CheckoutContent() {
       <MobileStickyBar
         pack={pack}
         loading={loading}
-        unavailable={unavailable}
+        unavailable={unavailable || packClosed}
         visible={stickyVisible}
         onCheckout={handleCheckout}
+        isDeposit={
+          isDepositEligible(pack) &&
+          !depositCredit &&
+          depositOpen &&
+          paymentPlan === "deposit"
+        }
+        depositCredit={depositCredit && isDepositEligible(pack)}
       />
 
       {/* Inline masterclass editor — same modal as pack selection */}

@@ -8,6 +8,11 @@ import { motion } from "framer-motion";
 import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/client";
 import { getPackBySlug, type AcademyProduct } from "@/lib/constants/packs";
+import {
+  getDeadlines,
+  formatDeadline,
+  DEFAULT_DEADLINES,
+} from "@/lib/settings/deadlines";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { getCourseBySlug } from "@/lib/constants/courses";
 import {
@@ -31,6 +36,7 @@ interface OrderRow {
   amount_cents: number;
   tax_cents: number | null;
   pack_id: string | null;
+  payment_plan: string | null;
   selected_workshop_ids: string[] | null;
   stripe_checkout_session_id: string | null;
   stripe_payment_intent_id: string | null;
@@ -733,6 +739,64 @@ function NextSteps({
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Deposit balance card — shown after a caparra payment (no tickets yet)
+─────────────────────────────────────────────────────────────── */
+function DepositBalanceCard({
+  t,
+  deadlineIso,
+}: {
+  t: TierTokens;
+  deadlineIso: string;
+}) {
+  const deadline = formatDeadline(deadlineIso);
+
+  return (
+    <div
+      className="overflow-hidden"
+      style={{ background: t.surface, border: `1px solid ${t.border}` }}
+    >
+      <div
+        className="h-[2px] w-full"
+        style={{
+          background: `linear-gradient(90deg, ${ORANGE}, rgba(${ORANGE_RGB},0.05))`,
+        }}
+      />
+      <div className="p-6 md:p-7">
+        <p
+          className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
+          style={{ color: ORANGE }}
+        >
+          — Prossimo passo · Saldo
+        </p>
+        <h3
+          className="mt-2 text-[1.05rem] font-black leading-tight"
+          style={{ color: t.th }}
+        >
+          Completa il saldo per attivare l&apos;iscrizione
+        </h3>
+        <p
+          className="mt-2 text-[0.85rem] leading-[1.6]"
+          style={{ color: t.tb }}
+        >
+          La caparra blocca il posto ma non genera ancora i ticket. Salda
+          l&apos;importo rimanente <strong>entro il {deadline}</strong>: lo
+          sconto di 500€ è già collegato al tuo account e verrà applicato
+          automaticamente. Al pagamento riceverai i ticket QR.
+        </p>
+        <Link
+          href="/account/orders"
+          className="mt-5 inline-flex items-center gap-2 px-6 py-3.5 text-[0.74rem] font-black uppercase tracking-[0.16em] transition-opacity hover:opacity-90"
+          style={{ background: ORANGE, color: "#111" }}
+        >
+          <span>Completa il saldo</span>
+          <span aria-hidden>→</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
    Tickets card — list with QR preview
 ─────────────────────────────────────────────────────────────── */
 function TicketsCard({ tickets, t }: { tickets: TicketRow[]; t: TierTokens }) {
@@ -807,7 +871,7 @@ function TicketsCard({ tickets, t }: { tickets: TicketRow[]; t: TierTokens }) {
           </div>
         </div>
       ) : (
-        <ul className="grid gap-3 p-5 md:p-6 lg:grid-cols-2" >
+        <ul className="grid gap-3 p-5 md:p-6 lg:grid-cols-2">
           {tickets.map((ticket) => {
             const course = getCourseBySlug(ticket.course_id ?? "");
             const product = ticket.course_id
@@ -1020,6 +1084,19 @@ export function ConfermaContent() {
     "loading" | "polling" | "missing" | "notfound" | "ready"
   >(sessionId ? "loading" : "missing");
   const [copied, setCopied] = useState(false);
+  const [balanceDeadline, setBalanceDeadline] = useState(
+    DEFAULT_DEADLINES.depositBalance,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    getDeadlines(createClient()).then((d) => {
+      if (!cancelled) setBalanceDeadline(d.depositBalance);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Theme tokens — guess from URL fallback while loading, then update once order is in
   const packSlugForTheme = order?.pack_id ?? "default";
@@ -1037,7 +1114,7 @@ export function ConfermaContent() {
       const { data: orderRow } = await supabase
         .from("orders")
         .select(
-          "id, status, amount_cents, tax_cents, pack_id, selected_workshop_ids, stripe_checkout_session_id, stripe_payment_intent_id, billing_name, billing_email, created_at, updated_at",
+          "id, status, amount_cents, tax_cents, pack_id, payment_plan, selected_workshop_ids, stripe_checkout_session_id, stripe_payment_intent_id, billing_name, billing_email, created_at, updated_at",
         )
         .eq("stripe_checkout_session_id", sessionId)
         .maybeSingle();
@@ -1125,6 +1202,7 @@ export function ConfermaContent() {
   const customerName = firstName(order.billing_name);
   const selectedWorkshopSlugs = order.selected_workshop_ids ?? [];
   const isPolling = phase === "polling";
+  const isDeposit = order.payment_plan === "deposit";
 
   return (
     <>
@@ -1193,20 +1271,28 @@ export function ConfermaContent() {
             >
               {customerName ? `Grazie ${customerName}.` : "Grazie."}{" "}
               <span style={{ color: t.tb, fontWeight: 800 }}>
-                Il tuo posto è confermato.
+                {isDeposit
+                  ? "Il tuo posto è bloccato."
+                  : "Il tuo posto è confermato."}
               </span>
             </h1>
             <p
               className="mt-3 text-[0.95rem] leading-[1.65]"
               style={{ color: t.tb }}
             >
-              {pack
-                ? `Hai acquistato il ${
-                    pack.type === "bundle"
-                      ? `Pack ${TIER_LABEL[pack.slug] ?? pack.name}`
-                      : pack.name
-                  }. Sotto trovi i dettagli, i tuoi ticket e i prossimi passi.`
-                : "Sotto trovi i dettagli del tuo ordine, i tuoi ticket e i prossimi passi."}
+              {isDeposit
+                ? `Abbiamo ricevuto la caparra di 500€${
+                    pack
+                      ? ` per il Pack ${TIER_LABEL[pack.slug] ?? pack.name}`
+                      : ""
+                  }. L'iscrizione si attiva al saldo dell'importo rimanente: lo completi quando vuoi dalla tua area riservata.`
+                : pack
+                  ? `Hai acquistato il ${
+                      pack.type === "bundle"
+                        ? `Pack ${TIER_LABEL[pack.slug] ?? pack.name}`
+                        : pack.name
+                    }. Sotto trovi i dettagli, i tuoi ticket e i prossimi passi.`
+                  : "Sotto trovi i dettagli del tuo ordine, i tuoi ticket e i prossimi passi."}
             </p>
           </motion.div>
 
@@ -1246,8 +1332,9 @@ export function ConfermaContent() {
                 className="text-[0.78rem] leading-snug"
                 style={{ color: t.tb }}
               >
-                Stiamo finalizzando il pagamento con Stripe — i ticket
-                compariranno tra pochi secondi. Puoi rimanere su questa pagina.
+                {isDeposit
+                  ? "Stiamo finalizzando il pagamento con Stripe — un momento. Puoi rimanere su questa pagina."
+                  : "Stiamo finalizzando il pagamento con Stripe — i ticket compariranno tra pochi secondi. Puoi rimanere su questa pagina."}
               </p>
             </div>
           )}
@@ -1267,13 +1354,19 @@ export function ConfermaContent() {
                 copied={copied}
               />
 
-              <TicketsCard tickets={tickets} t={t} />
+              {isDeposit ? (
+                <DepositBalanceCard t={t} deadlineIso={balanceDeadline} />
+              ) : (
+                <>
+                  <TicketsCard tickets={tickets} t={t} />
 
-              <NextSteps
-                t={t}
-                email={order.billing_email}
-                ticketCount={tickets.length}
-              />
+                  <NextSteps
+                    t={t}
+                    email={order.billing_email}
+                    ticketCount={tickets.length}
+                  />
+                </>
+              )}
 
               {/* Support callout */}
               <div

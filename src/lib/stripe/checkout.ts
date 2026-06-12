@@ -16,9 +16,16 @@ interface CreateCheckoutParams {
   /** Path relativo a `NEXT_PUBLIC_BASE_URL` per il redirect di cancellazione.
    *  Default: `/pack`. Usato per prodotti hidden che non vivono lì. */
   cancelPath?: string;
+  /** `deposit` = caparra da 500€: usa il price caparra, niente sconti e niente
+   *  `pack_id` nei metadata (così il webhook NON genera ticket). Default `full`. */
+  paymentPlan?: "full" | "deposit";
+  /** Su una sessione di SALDO: id dell'ordine caparra da chiudere al pagamento. */
+  depositOrderId?: string | null;
 }
 
 export async function createCheckoutSession(params: CreateCheckoutParams) {
+  const isDeposit = params.paymentPlan === "deposit";
+
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
     customer_email: params.customerEmail,
@@ -35,13 +42,29 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${params.cancelPath ?? "/pack"}`,
     metadata: {
       order_id: params.orderId,
-      pack_id: params.packId,
-      workshop_ids: JSON.stringify(params.workshopIds),
-      masterclass_ids: JSON.stringify(params.masterclassIds ?? []),
+      // On a deposit session pack_id is intentionally empty so the webhook does
+      // not issue tickets; the linked bundle lives in deposit_pack_id instead.
+      pack_id: isDeposit ? "" : params.packId,
+      deposit_pack_id: isDeposit ? params.packId : "",
+      payment_plan: isDeposit ? "deposit" : "full",
+      deposit_order_id: params.depositOrderId ?? "",
+      // A deposit session carries NO ticketable slugs: this makes it impossible
+      // for the webhook to ever issue tickets for a caparra, regardless of the
+      // payment_plan gate. The masterclass selection is persisted on the deposit
+      // order itself (by the checkout route) for the later balance flow.
+      workshop_ids: JSON.stringify(isDeposit ? [] : params.workshopIds),
+      masterclass_ids: JSON.stringify(
+        isDeposit ? [] : (params.masterclassIds ?? []),
+      ),
       promotion_code: params.promotionCodeId ?? "",
       coupon: params.couponId ?? "",
     },
   };
+
+  // No discounts on the caparra itself.
+  if (isDeposit) {
+    return getStripe().checkout.sessions.create(sessionParams);
+  }
 
   // `discounts` and `allow_promotion_codes` are mutually exclusive on Stripe.
   // Priorità: coupon auto-applicato > promotion code utente > campo Stripe nativo.

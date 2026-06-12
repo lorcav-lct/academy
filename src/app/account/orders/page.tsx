@@ -12,6 +12,7 @@ import {
   ORDER_STATUS_LABEL,
   ORDER_STATUS_TONE,
 } from "@/lib/utils/account";
+import { getProductBySlug, DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 import {
   IconArrowRight,
   IconBag,
@@ -26,6 +27,22 @@ interface Order {
   amount_cents: number;
   created_at: string;
   pack_id: string | null;
+  payment_plan: string | null;
+  balance_order_id: string | null;
+  deposit_promo_code: string | null;
+}
+
+/** A paid deposit still awaiting its balance payment. */
+function isDepositPending(o: Order): boolean {
+  return (
+    o.payment_plan === "deposit" && o.status === "paid" && !o.balance_order_id
+  );
+}
+
+/** Remaining balance for a deposit order (pack price − 500€), in cents. */
+function balanceCents(o: Order): number {
+  const pack = getProductBySlug(o.pack_id ?? "");
+  return Math.max(0, (pack?.priceCents ?? 0) - DEPOSIT_PRICE_CENTS);
 }
 
 interface TicketRef {
@@ -48,6 +65,7 @@ export default function AccountOrdersPage() {
   const [ticketMap, setTicketMap] = useState<Record<string, TicketRef>>({});
   const [loading, setLoading] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
+  const [completing, setCompleting] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -62,7 +80,9 @@ export default function AccountOrdersPage() {
       const [{ data: ordersData }, { data: ticketsData }] = await Promise.all([
         supabase
           .from("orders")
-          .select("id, status, amount_cents, created_at, pack_id")
+          .select(
+            "id, status, amount_cents, created_at, pack_id, payment_plan, balance_order_id, deposit_promo_code",
+          )
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
         supabase
@@ -94,6 +114,21 @@ export default function AccountOrdersPage() {
     const data = await res.json();
     if (data.url) window.location.href = data.url;
     setResuming(null);
+  }
+
+  async function handleCompleteDeposit(orderId: string) {
+    setCompleting(orderId);
+    const res = await fetch("/api/checkout/complete-deposit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    setCompleting(null);
   }
 
   async function copyId(id: string) {
@@ -193,7 +228,13 @@ export default function AccountOrdersPage() {
             <ul className="space-y-3">
               {filtered.map((order) => {
                 const ticket = ticketMap[order.id];
-                const tone = ORDER_STATUS_TONE[order.status];
+                const depositPending = isDepositPending(order);
+                const tone = depositPending
+                  ? ORDER_STATUS_TONE.pending
+                  : ORDER_STATUS_TONE[order.status];
+                const statusLabel = depositPending
+                  ? "Caparra versata"
+                  : ORDER_STATUS_LABEL[order.status];
                 return (
                   <li
                     key={order.id}
@@ -203,13 +244,15 @@ export default function AccountOrdersPage() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="truncate text-base font-bold text-academy-gray-800">
-                            {getProductLabel(order.pack_id)}
+                            {order.payment_plan === "deposit"
+                              ? `Caparra · ${getProductLabel(order.pack_id)}`
+                              : getProductLabel(order.pack_id)}
                           </h3>
                           <span
                             className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
                           >
                             <span className={`h-1.5 w-1.5 ${tone.dot}`} />
-                            {ORDER_STATUS_LABEL[order.status]}
+                            {statusLabel}
                           </span>
                         </div>
 
@@ -252,9 +295,50 @@ export default function AccountOrdersPage() {
                             )}
                           </button>
                         </div>
+
+                        {depositPending && order.deposit_promo_code && (
+                          <div className="mt-3 flex flex-wrap items-center gap-2 border border-academy-orange/30 bg-academy-orange/[0.06] px-3 py-2">
+                            <span className="text-[10px] font-bold tracking-wider text-academy-gray-500 uppercase">
+                              Sconto saldo
+                            </span>
+                            <button
+                              onClick={() => copyId(order.deposit_promo_code!)}
+                              className="group flex items-center gap-1.5 font-mono text-[12px] font-bold text-academy-orange"
+                              title="Copia codice sconto"
+                            >
+                              <span>{order.deposit_promo_code}</span>
+                              {copied === order.deposit_promo_code ? (
+                                <IconCheck className="h-3 w-3 text-emerald-600" />
+                              ) : (
+                                <IconCopy className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                              )}
+                            </button>
+                            <span className="text-[11px] text-academy-gray-500">
+                              −500€ · si applica da solo al saldo
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                        {depositPending && (
+                          <button
+                            disabled={completing === order.id}
+                            onClick={() => handleCompleteDeposit(order.id)}
+                            className="flex items-center gap-1.5 bg-academy-orange px-4 py-2.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
+                          >
+                            {completing === order.id ? (
+                              "..."
+                            ) : (
+                              <>
+                                Completa il saldo ·{" "}
+                                {formatEUR(balanceCents(order))}
+                                <IconArrowRight className="h-3.5 w-3.5" />
+                              </>
+                            )}
+                          </button>
+                        )}
+
                         {order.status === "pending" && order.pack_id && (
                           <button
                             disabled={resuming === order.id}

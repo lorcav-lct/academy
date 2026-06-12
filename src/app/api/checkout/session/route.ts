@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
+import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
 import { getActivePromoForProduct } from "@/lib/promos/server";
-import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
+import {
+  getProductBySlug,
+  resolveStripePriceId,
+  resolveDepositPriceId,
+  isDepositEligible,
+} from "@/lib/constants/packs";
 import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
+import { getDeadlines, isPastDeadline } from "@/lib/settings/deadlines";
 
 function normalizeSlugList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -31,6 +38,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { packId, workshopIds, masterclassIds, promotionCodeId } = body;
+    const isDeposit = body.paymentPlan === "deposit";
 
     if (!packId) {
       return NextResponse.json({ error: "Pack non valido" }, { status: 400 });
@@ -44,12 +52,64 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const priceId = resolveStripePriceId(product);
+    if (isDeposit && !isDepositEligible(product)) {
+      return NextResponse.json(
+        { error: "La caparra è disponibile solo sui pack" },
+        { status: 400 },
+      );
+    }
+
+    const priceId = isDeposit
+      ? resolveDepositPriceId()
+      : resolveStripePriceId(product);
     if (!priceId) {
       return NextResponse.json(
         { error: "Prodotto non disponibile per l'acquisto in questa modalità" },
         { status: 400 },
       );
+    }
+
+    // ── Deadline gating ───────────────────────────────────────────────────
+    // Masterclasses (type=workshop) have no deadline. Bundles are bound by the
+    // configurable pack/caparra dates; settling an existing caparra is bound by
+    // the balance deadline instead of the pack one.
+    const deadlines = await getDeadlines(createAdminClient());
+
+    if (isDeposit && isPastDeadline(deadlines.depositPurchase)) {
+      return NextResponse.json(
+        {
+          error:
+            "L'acquisto con caparra non è più disponibile. Procedi con il pagamento intero.",
+        },
+        { status: 403 },
+      );
+    }
+
+    if (product.type === "bundle") {
+      const { data: openDepositGate } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("payment_plan", "deposit")
+        .eq("status", "paid")
+        .is("balance_order_id", null)
+        .limit(1)
+        .maybeSingle();
+      const isSettlement = !isDeposit && Boolean(openDepositGate);
+
+      if (isSettlement) {
+        if (isPastDeadline(deadlines.depositBalance)) {
+          return NextResponse.json(
+            { error: "Il termine per saldare la caparra è scaduto" },
+            { status: 403 },
+          );
+        }
+      } else if (isPastDeadline(deadlines.packPurchase)) {
+        return NextResponse.json(
+          { error: "Le iscrizioni ai pack sono chiuse" },
+          { status: 403 },
+        );
+      }
     }
 
     const legacyWorkshopIds = normalizeSlugList(workshopIds);
@@ -96,6 +156,7 @@ export async function POST(request: NextRequest) {
         // webhook when the DB column supports TEXT[].
         selected_workshop_ids: [],
         status: "pending",
+        payment_plan: isDeposit ? "deposit" : "full",
         amount_cents: 0, // Will be updated by Stripe webhook
         billing_email: user.email,
         is_test: process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ?? false,
@@ -115,12 +176,79 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Persist the masterclass selection on the deposit order. The deposit
+    // session carries no ticketable slugs (so it can never produce tickets),
+    // so the balance flow reads them from here instead of Stripe metadata.
+    // Tolerant: a returned error (e.g. legacy UUID[] column) is ignored.
+    if (isDeposit && selectedAddonSlugs.length > 0) {
+      await createAdminClient()
+        .from("orders")
+        .update({ selected_workshop_ids: selectedAddonSlugs })
+        .eq("id", order.id);
+    }
+
+    // ── Caparra credit ────────────────────────────────────────────────────
+    // If the user is buying a bundle full-price and has an open deposit (caparra
+    // paid, balance not yet settled), auto-apply its -500€ coupon here too —
+    // not only through the "Completa il saldo" CTA. It takes precedence over any
+    // launch promo (no stacking) and closes the deposit on payment.
+    let depositOrderId: string | null = null;
+    let depositPromotionCodeId: string | null = null;
+    if (!isDeposit && product.type === "bundle") {
+      const { data: openDeposit } = await supabase
+        .from("orders")
+        .select("id, deposit_promotion_code_id")
+        .eq("user_id", user.id)
+        .eq("payment_plan", "deposit")
+        .eq("status", "paid")
+        .is("balance_order_id", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (openDeposit) {
+        depositOrderId = openDeposit.id;
+        depositPromotionCodeId = openDeposit.deposit_promotion_code_id;
+        // Self-heal: issue the coupon if the webhook never did.
+        if (!depositPromotionCodeId) {
+          try {
+            const { code, promotionCodeId } = await createDepositBalanceCoupon(
+              packId,
+              openDeposit.id,
+            );
+            depositPromotionCodeId = promotionCodeId;
+            await createAdminClient()
+              .from("orders")
+              .update({
+                deposit_promo_code: code,
+                deposit_promotion_code_id: promotionCodeId,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", openDeposit.id);
+          } catch (err) {
+            console.error("Deposit credit self-heal error:", err);
+          }
+        }
+      }
+    }
+
     // Auto-apply active promo coupon for this product (DB-managed via /admin).
-    // Priority: product-specific > category-wide.
+    // Priority: caparra credit > product-specific/category promo > user code.
     // Stripe non permette stacking → ignoriamo eventuale promotionCodeId del client.
-    const activePromo = await getActivePromoForProduct(packId);
+    // Nessuno sconto sulla caparra stessa.
+    const hasDepositCredit = Boolean(depositPromotionCodeId);
+    const activePromo =
+      isDeposit || hasDepositCredit
+        ? null
+        : await getActivePromoForProduct(packId);
     const couponId = activePromo?.stripe_coupon_id ?? null;
-    const effectivePromotionCodeId = couponId ? null : promotionCodeId || null;
+    const effectivePromotionCodeId = isDeposit
+      ? null
+      : hasDepositCredit
+        ? depositPromotionCodeId
+        : couponId
+          ? null
+          : promotionCodeId || null;
 
     // Create Stripe Checkout Session
     const cancelPath =
@@ -137,6 +265,8 @@ export async function POST(request: NextRequest) {
       promotionCodeId: effectivePromotionCodeId,
       couponId,
       cancelPath,
+      paymentPlan: isDeposit ? "deposit" : "full",
+      depositOrderId,
     });
 
     // Update order with Stripe session ID via admin client.

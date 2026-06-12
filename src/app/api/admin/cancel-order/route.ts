@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getStripe } from "@/lib/stripe/client";
 import { sendEmail } from "@/lib/email/client";
 import { OrderCancelledEmail } from "@/lib/email/templates/order-cancelled";
 import { PRODUCTS } from "@/lib/constants/packs";
@@ -47,18 +48,36 @@ export async function POST(request: NextRequest) {
   // Invalidate all tickets belonging to this order
   await admin.from("tickets").update({ is_used: true }).eq("order_id", orderId);
 
+  // If this is a deposit order, void its -500€ balance coupon so it can no
+  // longer be redeemed (a cancelled caparra is forfeited).
+  const promotionCodeId = order?.deposit_promotion_code_id as string | null;
+  if (promotionCodeId) {
+    try {
+      const stripe = getStripe();
+      const pc = await stripe.promotionCodes.update(promotionCodeId, {
+        active: false,
+      });
+      const couponId =
+        typeof pc.coupon === "string" ? pc.coupon : pc.coupon?.id;
+      if (couponId) await stripe.coupons.del(couponId).catch(() => {});
+    } catch (err) {
+      console.error("Deposit coupon void error:", err);
+    }
+  }
+
   // Send cancellation email
   if (order) {
     const customerEmail =
       (order.profiles as { email?: string } | null)?.email ||
       order.billing_email;
     if (customerEmail) {
-      const appUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com";
-      const packName =
+      const appUrl = "https://academy.lacertosus.com";
+      const isDeposit = order.payment_plan === "deposit";
+      const baseName =
         PRODUCTS.find((p) => p.slug === order.pack_id)?.name ||
         (order.pack_id as string)?.toUpperCase() ||
         "Prodotto";
+      const packName = isDeposit ? `Caparra · ${baseName}` : baseName;
       await sendEmail({
         to: customerEmail,
         subject: `Ordine annullato — ${packName}`,
@@ -70,6 +89,7 @@ export async function POST(request: NextRequest) {
           packName,
           orderId: order.id,
           appUrl,
+          isDeposit,
         }),
       }).catch(console.error);
     }

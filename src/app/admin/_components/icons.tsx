@@ -220,3 +220,13 @@ export function IconRefresh(p: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconCalendar(p: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...p}>
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M8 3v3M16 3v3" />
+    </svg>
+  );
+}

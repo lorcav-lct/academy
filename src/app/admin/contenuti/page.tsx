@@ -7,6 +7,7 @@ import {
   IconArrowRight,
   IconEuro,
   IconScan,
+  IconCalendar,
 } from "../_components/icons";
 
 const CONTENT_SECTIONS = [
@@ -27,6 +28,12 @@ const CONTENT_SECTIONS = [
     label: "Accessi QR",
     desc: "Configura quante volte ogni QR resta valido per pack e masterclass prima di risultare terminato allo scanner.",
     Icon: IconScan,
+  },
+  {
+    href: "/admin/contenuti/scadenze",
+    label: "Scadenze Pack & Caparra",
+    desc: "Imposta fino a quando si può acquistare un pack, comprarlo con caparra e saldare. Le modalità di pagamento si adattano da sole.",
+    Icon: IconCalendar,
   },
 ];
 

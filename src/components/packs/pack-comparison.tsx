@@ -11,8 +11,17 @@ import { useTheme } from "@/components/providers/theme-provider";
 import {
   getBundles,
   getPublicMasterclassProducts,
+  isDepositEligible,
+  DEPOSIT_PRICE_CENTS,
   type AcademyProduct,
 } from "@/lib/constants/packs";
+import {
+  getDeadlines,
+  formatDeadline,
+  isPastDeadline,
+  DEFAULT_DEADLINES,
+  type Deadlines,
+} from "@/lib/settings/deadlines";
 import { getTeachersByCourse, type Teacher } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import {
@@ -27,6 +36,7 @@ import { computePromoPricing, type PromoRow } from "@/lib/promos/types";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "./masterclass-selector";
 import { BlockModal, type BlockSlug } from "@/components/shared/block-modal";
+import { RegistrationsClosed } from "./registrations-closed";
 import { ProgramAccordion } from "./program-accordion";
 import { FipeProgramAccordion } from "@/components/shared/fipe-program-accordion";
 import {
@@ -829,11 +839,17 @@ function PackModal({
   isDark,
   onClose,
   onBuy,
+  depositOpen,
+  balanceDeadline,
+  packClosed,
 }: {
   pack: AcademyProduct;
   isDark: boolean;
   onClose: () => void;
   onBuy: (pack: AcademyProduct) => void;
+  depositOpen: boolean;
+  balanceDeadline: string;
+  packClosed: boolean;
 }) {
   const tier = TIER[pack.slug] ?? TIER.start;
   const teachers = getBundleTeachers();
@@ -1114,15 +1130,56 @@ function PackModal({
                     ? "Sconto di lancio attivo fino al 30 giugno · Iscrizione vincolata? No."
                     : "Pagamento rateale disponibile · Iscrizione vincolata? No."}
                 </div>
+                {isDepositEligible(pack) && depositOpen && (
+                  <div
+                    className="mt-3 flex items-start gap-2.5 px-3.5 py-2.5"
+                    style={{
+                      border: "1px solid rgba(240,146,38,0.3)",
+                      background: "rgba(240,146,38,0.06)",
+                    }}
+                  >
+                    <span
+                      className="mt-0.5 shrink-0 text-[0.8rem]"
+                      style={{ color: ORANGE }}
+                      aria-hidden
+                    >
+                      ●
+                    </span>
+                    <p
+                      className="text-[0.74rem] leading-snug"
+                      style={{ color: textB }}
+                    >
+                      Puoi bloccare il posto con una{" "}
+                      <span className="font-bold" style={{ color: textH }}>
+                        caparra di {Math.round(DEPOSIT_PRICE_CENTS / 100)}€
+                      </span>{" "}
+                      (IVA inclusa, non rimborsabile): versi il saldo entro il{" "}
+                      {formatDeadline(balanceDeadline)}. Scegli la modalità al
+                      checkout.
+                    </p>
+                  </div>
+                )}
               </div>
               <button
-                onClick={() => onBuy(pack)}
-                className="inline-flex items-center justify-between gap-3 px-6 py-4 text-[0.78rem] font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-90"
-                style={{ background: ORANGE, color: "#111111" }}
+                onClick={() => !packClosed && onBuy(pack)}
+                disabled={packClosed}
+                className="inline-flex items-center justify-between gap-3 px-6 py-4 text-[0.78rem] font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                style={{
+                  background: packClosed
+                    ? isDark
+                      ? "rgba(255,255,255,0.12)"
+                      : "rgba(0,0,0,0.12)"
+                    : ORANGE,
+                  color: packClosed ? textB : "#111111",
+                }}
               >
-                <span>Riserva il tuo posto</span>
+                <span>
+                  {packClosed
+                    ? "Iscrizioni completate"
+                    : "Riserva il tuo posto"}
+                </span>
                 <span aria-hidden className="text-base">
-                  →
+                  {packClosed ? "·" : "→"}
                 </span>
               </button>
             </div>
@@ -1553,15 +1610,25 @@ function PackModal({
             </p>
             <div className="mt-7 flex flex-col items-center gap-2.5">
               <button
-                onClick={() => onBuy(pack)}
-                className="inline-flex items-center justify-between gap-3 px-7 py-4 text-[0.78rem] font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-90 min-w-[280px]"
-                style={{ background: ORANGE, color: "#111111" }}
+                onClick={() => !packClosed && onBuy(pack)}
+                disabled={packClosed}
+                className="inline-flex items-center justify-between gap-3 px-7 py-4 text-[0.78rem] font-black tracking-[0.16em] uppercase transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 min-w-[280px]"
+                style={{
+                  background: packClosed
+                    ? isDark
+                      ? "rgba(255,255,255,0.12)"
+                      : "rgba(0,0,0,0.12)"
+                    : ORANGE,
+                  color: packClosed ? textB : "#111111",
+                }}
               >
                 <span>
-                  Scegli {tier.label} · {priceDisplay}
+                  {packClosed
+                    ? "Iscrizioni completate"
+                    : `Scegli ${tier.label} · ${priceDisplay}`}
                 </span>
                 <span aria-hidden className="text-base">
-                  →
+                  {packClosed ? "·" : "→"}
                 </span>
               </button>
               <p
@@ -1618,12 +1685,20 @@ function PackModal({
             </span>
           </div>
           <button
-            onClick={() => onBuy(pack)}
-            className="shrink-0 inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-[0.7rem] font-black tracking-[0.14em] uppercase transition-opacity hover:opacity-90"
-            style={{ background: ORANGE, color: "#111111" }}
+            onClick={() => !packClosed && onBuy(pack)}
+            disabled={packClosed}
+            className="shrink-0 inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-[0.7rem] font-black tracking-[0.14em] uppercase transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            style={{
+              background: packClosed
+                ? isDark
+                  ? "rgba(255,255,255,0.12)"
+                  : "rgba(0,0,0,0.12)"
+                : ORANGE,
+              color: packClosed ? textB : "#111111",
+            }}
           >
-            <span>Riserva ora</span>
-            <span aria-hidden>→</span>
+            <span>{packClosed ? "Chiuse" : "Riserva ora"}</span>
+            <span aria-hidden>{packClosed ? "·" : "→"}</span>
           </button>
         </div>
       </div>
@@ -2222,9 +2297,11 @@ function PackCard({
 function PacksSection({
   isDark,
   onOpenModal,
+  packClosed,
 }: {
   isDark: boolean;
   onOpenModal: (pack: AcademyProduct) => void;
+  packClosed: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
@@ -2385,56 +2462,60 @@ function PacksSection({
           </div>
         </div>
 
-        {/* ── Scarcity strip — between title and pack grid ─────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mb-12 flex flex-col gap-3 md:flex-row md:items-center md:justify-between px-5 py-4"
-          style={{
-            border: "1px solid rgba(240,146,38,0.45)",
-            background: isDark
-              ? "rgba(240,146,38,0.07)"
-              : "rgba(240,146,38,0.06)",
-            boxShadow: "inset 0 0 32px rgba(240,146,38,0.05)",
-          }}
-        >
-          <div className="flex items-center gap-3">
-            {/* Pulsing dot */}
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
+        {/* ── Closed state vs scarcity strip ───────────────────── */}
+        {packClosed ? (
+          <RegistrationsClosed isDark={isDark} />
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="mb-12 flex flex-col gap-3 md:flex-row md:items-center md:justify-between px-5 py-4"
+            style={{
+              border: "1px solid rgba(240,146,38,0.45)",
+              background: isDark
+                ? "rgba(240,146,38,0.07)"
+                : "rgba(240,146,38,0.06)",
+              boxShadow: "inset 0 0 32px rgba(240,146,38,0.05)",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              {/* Pulsing dot */}
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span
+                  className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                  style={{ background: "#F09226" }}
+                />
+                <span
+                  className="relative inline-flex h-2.5 w-2.5 rounded-full"
+                  style={{
+                    background: "#F09226",
+                    boxShadow: "0 0 10px rgba(240,146,38,0.8)",
+                  }}
+                />
+              </span>
               <span
-                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
-                style={{ background: "#F09226" }}
-              />
+                className="text-[0.7rem] md:text-[0.78rem] font-black tracking-[0.18em] uppercase tabular-nums"
+                style={{ color: "#F09226" }}
+              >
+                Solo {SEATS_TOTAL} posti disponibili
+              </span>
               <span
-                className="relative inline-flex h-2.5 w-2.5 rounded-full"
-                style={{
-                  background: "#F09226",
-                  boxShadow: "0 0 10px rgba(240,146,38,0.8)",
-                }}
-              />
-            </span>
+                className="hidden md:inline text-[0.62rem] font-bold tracking-[0.18em] uppercase"
+                style={{ color: tb }}
+              >
+                · Edizione 2026/27 · Iscrizioni aperte
+              </span>
+            </div>
             <span
-              className="text-[0.7rem] md:text-[0.78rem] font-black tracking-[0.18em] uppercase tabular-nums"
-              style={{ color: "#F09226" }}
-            >
-              Solo {SEATS_TOTAL} posti disponibili
-            </span>
-            <span
-              className="hidden md:inline text-[0.62rem] font-bold tracking-[0.18em] uppercase"
+              className="md:hidden text-[0.6rem] font-bold tracking-[0.18em] uppercase"
               style={{ color: tb }}
             >
-              · Edizione 2026/27 · Iscrizioni aperte
+              Edizione 2026/27 · Iscrizioni aperte
             </span>
-          </div>
-          <span
-            className="md:hidden text-[0.6rem] font-bold tracking-[0.18em] uppercase"
-            style={{ color: tb }}
-          >
-            Edizione 2026/27 · Iscrizioni aperte
-          </span>
-        </motion.div>
+          </motion.div>
+        )}
 
         <div
           ref={cardsRef}
@@ -2698,6 +2779,20 @@ export function PackComparison() {
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectedPack, setSelectedPack] = useState<AcademyProduct | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDeadlines(createClient()).then((d) => {
+      if (!cancelled) setDeadlines(d);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const depositOpen = !isPastDeadline(deadlines.depositPurchase);
+  const packClosed = isPastDeadline(deadlines.packPurchase);
 
   useEffect(() => {
     if (!videoOpen) return;
@@ -2749,7 +2844,11 @@ export function PackComparison() {
         onOpenBlock={setOpenBlock}
         onOpenVideo={() => setVideoOpen(true)}
       />
-      <PacksSection isDark={isDark} onOpenModal={setActiveModal} />
+      <PacksSection
+        isDark={isDark}
+        onOpenModal={setActiveModal}
+        packClosed={packClosed}
+      />
       <MasterclassSection isDark={isDark} />
 
       {/* Mobile-only floating CTA — mirrors the right WhatsApp/phone cluster.
@@ -2808,6 +2907,9 @@ export function PackComparison() {
           isDark={isDark}
           onClose={() => setActiveModal(null)}
           onBuy={handleBuy}
+          depositOpen={depositOpen}
+          balanceDeadline={deadlines.depositBalance}
+          packClosed={packClosed}
         />
       )}
 
