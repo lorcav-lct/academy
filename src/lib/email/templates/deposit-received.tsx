@@ -11,7 +11,7 @@ import {
   COLORS,
   FONT,
 } from "./_shared";
-import { DEPOSIT_BALANCE_DEADLINE } from "@/lib/constants/packs";
+import { formatDeadline } from "@/lib/settings/deadlines";
 
 interface DepositReceivedEmailProps {
   userName: string;
@@ -20,14 +20,9 @@ interface DepositReceivedEmailProps {
   balanceCode: string;
   /** Pre-formatted remaining balance (e.g. "€ 4.400,00"). */
   balanceTotal: string;
+  /** ISO date (YYYY-MM-DD) of the balance deadline. */
+  balanceDeadline: string;
   appUrl: string;
-}
-
-function formatDeadline(): string {
-  return new Date(`${DEPOSIT_BALANCE_DEADLINE}T12:00:00`).toLocaleDateString(
-    "it-IT",
-    { day: "numeric", month: "long", year: "numeric" },
-  );
 }
 
 export function DepositReceivedEmail({
@@ -35,10 +30,11 @@ export function DepositReceivedEmail({
   packName,
   balanceCode,
   balanceTotal,
+  balanceDeadline,
   appUrl,
 }: DepositReceivedEmailProps) {
   const firstName = userName?.trim().split(/\s+/)[0] || "";
-  const deadline = formatDeadline();
+  const deadline = formatDeadline(balanceDeadline);
 
   return (
     <EmailShell

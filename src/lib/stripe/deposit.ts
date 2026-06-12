@@ -12,20 +12,17 @@
 import type Stripe from "stripe";
 import { getStripe } from "./client";
 import { findStripeProductBySlug } from "./products";
-import {
-  DEPOSIT_PRICE_CENTS,
-  DEPOSIT_BALANCE_DEADLINE,
-  getBundles,
-} from "@/lib/constants/packs";
+import { DEPOSIT_PRICE_CENTS, getBundles } from "@/lib/constants/packs";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getDeadlines } from "@/lib/settings/deadlines";
 
 const SOURCE = "academy-deposit-balance";
 
-/** Unix timestamp (seconds) for end-of-day at the balance deadline. */
-function deadlineUnix(): number {
+/** Unix timestamp (seconds) for end-of-day at the configured balance deadline. */
+async function balanceDeadlineUnix(): Promise<number> {
+  const { depositBalance } = await getDeadlines(createAdminClient());
   // Local Europe/Rome end of day; precision here is non-critical.
-  return Math.floor(
-    new Date(`${DEPOSIT_BALANCE_DEADLINE}T23:59:59`).getTime() / 1000,
-  );
+  return Math.floor(new Date(`${depositBalance}T23:59:59`).getTime() / 1000);
 }
 
 export interface DepositBalanceCoupon {
@@ -68,7 +65,7 @@ export async function createDepositBalanceCoupon(
   const promotionCode = await stripe.promotionCodes.create({
     coupon: coupon.id,
     max_redemptions: 1,
-    expires_at: deadlineUnix(),
+    expires_at: await balanceDeadlineUnix(),
     metadata: { source: SOURCE, order_id: orderId, pack_slug: packSlug },
   });
 

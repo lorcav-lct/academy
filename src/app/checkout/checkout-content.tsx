@@ -9,9 +9,15 @@ import {
   getPackBySlug,
   isDepositEligible,
   DEPOSIT_PRICE_CENTS,
-  DEPOSIT_BALANCE_DEADLINE,
   type AcademyProduct,
 } from "@/lib/constants/packs";
+import {
+  getDeadlines,
+  formatDeadline,
+  isPastDeadline,
+  DEFAULT_DEADLINES,
+  type Deadlines,
+} from "@/lib/settings/deadlines";
 import { getWorkshopBySlug, type Workshop } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
 import { MasterclassSelector } from "@/components/packs/masterclass-selector";
@@ -399,13 +405,6 @@ function computeDiscountCents(
 
 type PaymentPlan = "full" | "deposit";
 
-function formatDeadline(): string {
-  return new Date(`${DEPOSIT_BALANCE_DEADLINE}T12:00:00`).toLocaleDateString(
-    "it-IT",
-    { day: "numeric", month: "long", year: "numeric" },
-  );
-}
-
 /* ──────────────────────────────────────────────────────────────
    Payment plan toggle (bundle only) — full upfront vs 500€ deposit
 ─────────────────────────────────────────────────────────────── */
@@ -413,11 +412,13 @@ function PaymentPlanToggle({
   value,
   onChange,
   balanceCents,
+  balanceDeadline,
   t,
 }: {
   value: PaymentPlan;
   onChange: (p: PaymentPlan) => void;
   balanceCents: number;
+  balanceDeadline: string;
   t: TierTokens;
 }) {
   const options: { id: PaymentPlan; title: string; sub: string }[] = [
@@ -425,7 +426,7 @@ function PaymentPlanToggle({
     {
       id: "deposit",
       title: "Solo caparra · 500€",
-      sub: `Saldo ${formatEur(balanceCents)} entro il ${formatDeadline()}`,
+      sub: `Saldo ${formatEur(balanceCents)} entro il ${formatDeadline(balanceDeadline)}`,
     },
   ];
   return (
@@ -516,6 +517,9 @@ function OrderSummary({
   paymentPlan,
   onPaymentPlanChange,
   depositCredit,
+  depositOpen,
+  packClosed,
+  balanceDeadline,
 }: {
   pack: AcademyProduct;
   selectedMc: Workshop[];
@@ -533,13 +537,21 @@ function OrderSummary({
   paymentPlan: PaymentPlan;
   onPaymentPlanChange: (p: PaymentPlan) => void;
   depositCredit: boolean;
+  /** Caparra purchase still open (before its deadline). */
+  depositOpen: boolean;
+  /** Pack purchase window closed (after pack deadline, not settling). */
+  packClosed: boolean;
+  balanceDeadline: string;
 }) {
   const grossCents = getDisplayCents(pack);
   const depositEligible = isDepositEligible(pack);
   // Settling an existing caparra: -500€ credit auto-applied by the server.
   const showCredit = depositCredit && depositEligible;
+  // Offer the caparra only while its purchase window is open and no caparra is
+  // already being settled.
+  const canDeposit = depositEligible && !showCredit && depositOpen;
   // Don't offer a new caparra while one is open.
-  const isDeposit = depositEligible && !showCredit && paymentPlan === "deposit";
+  const isDeposit = canDeposit && paymentPlan === "deposit";
   const depositBalanceCents = Math.max(0, grossCents - DEPOSIT_PRICE_CENTS);
   const creditedTotalCents = Math.max(0, grossCents - DEPOSIT_PRICE_CENTS);
   const launch = usePromoPricing(pack.slug, grossCents);
@@ -652,12 +664,14 @@ function OrderSummary({
         {/* Divider */}
         <div className="my-5 h-px w-full" style={{ background: t.border }} />
 
-        {/* Payment plan toggle (bundle only, hidden while settling a caparra) */}
-        {depositEligible && !showCredit && (
+        {/* Payment plan toggle — bundle only, while the caparra window is open
+            and no caparra is being settled. */}
+        {canDeposit && (
           <PaymentPlanToggle
             value={paymentPlan}
             onChange={onPaymentPlanChange}
             balanceCents={depositBalanceCents}
+            balanceDeadline={balanceDeadline}
             t={t}
           />
         )}
@@ -715,7 +729,7 @@ function OrderSummary({
               </div>
               <div className="flex items-baseline justify-between text-[0.78rem]">
                 <span style={{ color: t.ts }}>
-                  Saldo entro il {formatDeadline()}
+                  Saldo entro il {formatDeadline(balanceDeadline)}
                 </span>
                 <span
                   className="font-semibold tabular-nums"
@@ -875,7 +889,7 @@ function OrderSummary({
         {/* Primary CTA */}
         <button
           onClick={onCheckout}
-          disabled={loading || unavailable}
+          disabled={loading || unavailable || packClosed}
           className="mt-6 inline-flex w-full items-center justify-between gap-3 px-6 py-4 text-[0.78rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ background: ORANGE, color: "#111" }}
         >
@@ -905,6 +919,13 @@ function OrderSummary({
                     strokeLinecap="round"
                   />
                 </svg>
+              </span>
+            </>
+          ) : packClosed ? (
+            <>
+              <span>Iscrizioni chiuse</span>
+              <span aria-hidden className="text-base">
+                ·
               </span>
             </>
           ) : unavailable ? (
@@ -976,7 +997,7 @@ function OrderSummary({
             ? {
                 Icon: IconRefund,
                 title: "Caparra non rimborsabile",
-                desc: `Saldo entro il ${formatDeadline()} per attivare l'iscrizione`,
+                desc: `Saldo entro il ${formatDeadline(balanceDeadline)} per attivare l'iscrizione`,
               }
             : {
                 Icon: IconRefund,
@@ -1564,6 +1585,7 @@ export function CheckoutContent() {
   // True when the logged-in user has an open caparra (deposit paid, balance
   // unpaid): the server auto-applies the -500€ credit, so reflect it here.
   const [depositCredit, setDepositCredit] = useState(false);
+  const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -1638,6 +1660,8 @@ export function CheckoutContent() {
             .maybeSingle();
           if (!cancelled) setDepositCredit(Boolean(openDeposit));
         }
+        const d = await getDeadlines(supabase);
+        if (!cancelled) setDeadlines(d);
       } catch {
         if (!cancelled) setUserLoading(false);
       }
@@ -1710,6 +1734,13 @@ export function CheckoutContent() {
   const tierLabel = TIER_LABEL[pack.slug] ?? pack.name;
   const unavailable = pack.priceCents === 0; // bundles still TBD on Stripe side
 
+  // ── Deadline-driven availability (bundles only; masterclasses unrestricted) ─
+  const depositOpen = !isPastDeadline(deadlines.depositPurchase);
+  // A fresh pack purchase is closed past the pack deadline; settling an open
+  // caparra (depositCredit) is allowed within its own balance window.
+  const packClosed =
+    isBundle && !depositCredit && isPastDeadline(deadlines.packPurchase);
+
   // ── Build URL for post-auth return ────────────────────────────
   function buildCheckoutUrl() {
     const params = new URLSearchParams({ pack: packSlug });
@@ -1719,7 +1750,7 @@ export function CheckoutContent() {
   }
 
   async function handleCheckout() {
-    if (!pack || unavailable) return;
+    if (!pack || unavailable || packClosed) return;
     setLoading(true);
     setError(null);
 
@@ -1744,7 +1775,8 @@ export function CheckoutContent() {
           workshopIds: [],
           masterclassIds,
           promotionCodeId: promo?.id ?? null,
-          paymentPlan: isDepositEligible(pack) ? paymentPlan : "full",
+          paymentPlan:
+            isDepositEligible(pack) && depositOpen ? paymentPlan : "full",
         }),
       });
       const data = await response.json();
@@ -2283,6 +2315,9 @@ export function CheckoutContent() {
                 paymentPlan={paymentPlan}
                 onPaymentPlanChange={setPaymentPlan}
                 depositCredit={depositCredit}
+                depositOpen={depositOpen}
+                packClosed={packClosed}
+                balanceDeadline={deadlines.depositBalance}
               />
             </motion.aside>
           </div>
@@ -2293,11 +2328,14 @@ export function CheckoutContent() {
       <MobileStickyBar
         pack={pack}
         loading={loading}
-        unavailable={unavailable}
+        unavailable={unavailable || packClosed}
         visible={stickyVisible}
         onCheckout={handleCheckout}
         isDeposit={
-          isDepositEligible(pack) && !depositCredit && paymentPlan === "deposit"
+          isDepositEligible(pack) &&
+          !depositCredit &&
+          depositOpen &&
+          paymentPlan === "deposit"
         }
         depositCredit={depositCredit && isDepositEligible(pack)}
       />

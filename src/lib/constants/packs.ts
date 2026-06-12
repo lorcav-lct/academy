@@ -446,9 +446,8 @@ export const DEPOSIT_STRIPE_PRICE_ID: StripePriceMap = {
   live: "price_1Th9BgCE95vjZKhk9x0g4BpE",
 };
 
-/** Deadline by which the balance must be paid. After this date the deposit is
- *  forfeited and the -500€ coupon expires. ISO date (local Europe/Rome). */
-export const DEPOSIT_BALANCE_DEADLINE = "2026-07-15";
+// Deadlines (pack purchase, caparra purchase, balance) are admin-configurable
+// and live in site_settings — see src/lib/settings/deadlines.ts.
 
 /** Bundles eligible for the deposit flow. The deposit is only offered on these. */
 export function isDepositEligible(product: AcademyProduct): boolean {

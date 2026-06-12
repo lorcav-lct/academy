@@ -11,12 +11,9 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
-import {
-  getProductBySlug,
-  resolveStripePriceId,
-  DEPOSIT_BALANCE_DEADLINE,
-} from "@/lib/constants/packs";
+import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
 import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
+import { getDeadlines, isPastDeadline } from "@/lib/settings/deadlines";
 
 function normalizeSlugList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -28,11 +25,6 @@ function normalizeSlugList(value: unknown): string[] {
         .filter(Boolean),
     ),
   );
-}
-
-function deadlinePassed(): boolean {
-  const deadline = new Date(`${DEPOSIT_BALANCE_DEADLINE}T23:59:59`).getTime();
-  return Date.now() > deadline;
 }
 
 export async function POST(request: NextRequest) {
@@ -72,7 +64,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (deadlinePassed()) {
+    const { depositBalance } = await getDeadlines(createAdminClient());
+    if (isPastDeadline(depositBalance)) {
       return NextResponse.json(
         { error: "Il termine per saldare la caparra è scaduto" },
         { status: 410 },

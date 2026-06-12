@@ -11,6 +11,7 @@ import {
   isDepositEligible,
 } from "@/lib/constants/packs";
 import { PUBLIC_WORKSHOPS } from "@/lib/constants/workshops";
+import { getDeadlines, isPastDeadline } from "@/lib/settings/deadlines";
 
 function normalizeSlugList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -66,6 +67,49 @@ export async function POST(request: NextRequest) {
         { error: "Prodotto non disponibile per l'acquisto in questa modalità" },
         { status: 400 },
       );
+    }
+
+    // ── Deadline gating ───────────────────────────────────────────────────
+    // Masterclasses (type=workshop) have no deadline. Bundles are bound by the
+    // configurable pack/caparra dates; settling an existing caparra is bound by
+    // the balance deadline instead of the pack one.
+    const deadlines = await getDeadlines(createAdminClient());
+
+    if (isDeposit && isPastDeadline(deadlines.depositPurchase)) {
+      return NextResponse.json(
+        {
+          error:
+            "L'acquisto con caparra non è più disponibile. Procedi con il pagamento intero.",
+        },
+        { status: 403 },
+      );
+    }
+
+    if (product.type === "bundle") {
+      const { data: openDepositGate } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("payment_plan", "deposit")
+        .eq("status", "paid")
+        .is("balance_order_id", null)
+        .limit(1)
+        .maybeSingle();
+      const isSettlement = !isDeposit && Boolean(openDepositGate);
+
+      if (isSettlement) {
+        if (isPastDeadline(deadlines.depositBalance)) {
+          return NextResponse.json(
+            { error: "Il termine per saldare la caparra è scaduto" },
+            { status: 403 },
+          );
+        }
+      } else if (isPastDeadline(deadlines.packPurchase)) {
+        return NextResponse.json(
+          { error: "Le iscrizioni ai pack sono chiuse" },
+          { status: 403 },
+        );
+      }
     }
 
     const legacyWorkshopIds = normalizeSlugList(workshopIds);

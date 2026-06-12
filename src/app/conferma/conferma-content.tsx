@@ -7,11 +7,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/client";
+import { getPackBySlug, type AcademyProduct } from "@/lib/constants/packs";
 import {
-  getPackBySlug,
-  DEPOSIT_BALANCE_DEADLINE,
-  type AcademyProduct,
-} from "@/lib/constants/packs";
+  getDeadlines,
+  formatDeadline,
+  DEFAULT_DEADLINES,
+} from "@/lib/settings/deadlines";
 import { getWorkshopBySlug } from "@/lib/constants/workshops";
 import { getCourseBySlug } from "@/lib/constants/courses";
 import {
@@ -740,14 +741,14 @@ function NextSteps({
 /* ──────────────────────────────────────────────────────────────
    Deposit balance card — shown after a caparra payment (no tickets yet)
 ─────────────────────────────────────────────────────────────── */
-function DepositBalanceCard({ t }: { t: TierTokens }) {
-  const deadline = new Date(
-    `${DEPOSIT_BALANCE_DEADLINE}T12:00:00`,
-  ).toLocaleDateString("it-IT", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+function DepositBalanceCard({
+  t,
+  deadlineIso,
+}: {
+  t: TierTokens;
+  deadlineIso: string;
+}) {
+  const deadline = formatDeadline(deadlineIso);
 
   return (
     <div
@@ -1083,6 +1084,19 @@ export function ConfermaContent() {
     "loading" | "polling" | "missing" | "notfound" | "ready"
   >(sessionId ? "loading" : "missing");
   const [copied, setCopied] = useState(false);
+  const [balanceDeadline, setBalanceDeadline] = useState(
+    DEFAULT_DEADLINES.depositBalance,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    getDeadlines(createClient()).then((d) => {
+      if (!cancelled) setBalanceDeadline(d.depositBalance);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Theme tokens — guess from URL fallback while loading, then update once order is in
   const packSlugForTheme = order?.pack_id ?? "default";
@@ -1341,7 +1355,7 @@ export function ConfermaContent() {
               />
 
               {isDeposit ? (
-                <DepositBalanceCard t={t} />
+                <DepositBalanceCard t={t} deadlineIso={balanceDeadline} />
               ) : (
                 <>
                   <TicketsCard tickets={tickets} t={t} />

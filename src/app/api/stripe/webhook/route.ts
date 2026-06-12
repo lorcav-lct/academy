@@ -9,6 +9,7 @@ import { sendEmail } from "@/lib/email/client";
 import { OrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 import { DepositReceivedEmail } from "@/lib/email/templates/deposit-received";
 import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
+import { getDeadlines } from "@/lib/settings/deadlines";
 import React from "react";
 
 /** Canonical public domain for customer-facing email links. Hardcoded so that
@@ -190,6 +191,7 @@ export async function POST(request: NextRequest) {
             order.billing_email || session.customer_details?.email;
           if (customerEmail) {
             const appUrl = EMAIL_APP_URL;
+            const { depositBalance } = await getDeadlines(supabase);
             await sendEmail({
               to: customerEmail,
               subject: `Caparra ricevuta — ${pack?.name ?? "Pack"}`,
@@ -205,6 +207,7 @@ export async function POST(request: NextRequest) {
                   style: "currency",
                   currency: "EUR",
                 }).format(balanceCents / 100),
+                balanceDeadline: depositBalance,
                 appUrl,
               }),
             }).catch(console.error);
