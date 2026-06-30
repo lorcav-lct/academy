@@ -67,6 +67,17 @@ export function IconUser(p: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconUsers(p: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...p}>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M3 20c1-3.5 3.5-5 6-5s5 1.5 6 5" />
+      <path d="M16 5.5a3.5 3.5 0 0 1 0 6.8" />
+      <path d="M18 15c2 .8 3.3 2.4 4 5" />
+    </svg>
+  );
+}
+
 export function IconArrowRight(p: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...p}>
