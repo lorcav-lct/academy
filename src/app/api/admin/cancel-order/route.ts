@@ -65,8 +65,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Send cancellation email
-  if (order) {
+  // Send cancellation email only for orders that were actually paid (a paid
+  // caparra counts). A `pending` order is an abandoned checkout the customer
+  // never paid — cancel it silently, no email.
+  if (order && order.status === "paid") {
     const customerEmail =
       (order.profiles as { email?: string } | null)?.email ||
       order.billing_email;
