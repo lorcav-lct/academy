@@ -12,6 +12,7 @@ import {
   IconLayout,
   IconLogout,
   IconUser,
+  IconUsers,
   IconExternal,
 } from "./icons";
 
@@ -34,6 +35,12 @@ const NAV: NavItem[] = [
     label: "Ordini",
     Icon: IconBag,
     match: (p) => p.startsWith("/admin/orders"),
+  },
+  {
+    href: "/admin/classi",
+    label: "Classi",
+    Icon: IconUsers,
+    match: (p) => p.startsWith("/admin/classi"),
   },
   {
     href: "/admin/scanner",
@@ -211,7 +218,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       {/* ─── Mobile bottom tab bar ─── */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-black/[0.08] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md shadow-[0_-2px_20px_rgba(0,0,0,0.06)] lg:hidden">
-        <ul className="mx-auto grid max-w-md grid-cols-4">
+        <ul className="mx-auto grid max-w-md grid-cols-5">
           {NAV.map((item) => {
             const active = item.match(pathname);
             return (
