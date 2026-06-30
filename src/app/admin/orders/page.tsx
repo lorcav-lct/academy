@@ -19,6 +19,13 @@ interface Order {
   balance_order_id: string | null;
   settled_externally: boolean | null;
   fulfilled_at: string | null;
+  profiles: { full_name: string | null } | null;
+}
+
+/** Display name: Stripe billing name, falling back to the account profile name
+ *  (deposit checkouts often don't capture a billing name → only email shows). */
+function displayName(o: Order): string {
+  return o.billing_name?.trim() || o.profiles?.full_name?.trim() || "—";
 }
 
 /** A paid caparra still awaiting its balance (online or external). */
@@ -112,7 +119,7 @@ export default function AdminOrdersPage() {
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at",
+        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, profiles(full_name)",
       )
       .order("created_at", { ascending: false });
     if (data) setOrders(data as unknown as Order[]);
@@ -200,6 +207,7 @@ export default function AdminOrdersPage() {
       list = list.filter(
         (o) =>
           o.billing_name?.toLowerCase().includes(q) ||
+          o.profiles?.full_name?.toLowerCase().includes(q) ||
           o.billing_email?.toLowerCase().includes(q) ||
           o.id.toLowerCase().includes(q) ||
           o.pack_id?.toLowerCase().includes(q),
@@ -330,7 +338,7 @@ export default function AdminOrdersPage() {
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-bold text-academy-gray-800">
-                        {order.billing_name || "—"}
+                        {displayName(order)}
                       </p>
                       <p className="truncate text-[12px] text-academy-gray-500">
                         {order.billing_email}
@@ -428,7 +436,7 @@ export default function AdminOrdersPage() {
                     >
                       <td className="px-5 py-4">
                         <p className="font-bold text-academy-gray-800">
-                          {order.billing_name || "—"}
+                          {displayName(order)}
                         </p>
                         <p className="text-[12px] text-academy-gray-500">
                           {order.billing_email}
