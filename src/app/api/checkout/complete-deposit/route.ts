@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const { data: deposit } = await supabase
       .from("orders")
       .select(
-        "id, pack_id, status, payment_plan, balance_order_id, deposit_promotion_code_id, selected_workshop_ids",
+        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, deposit_promotion_code_id, selected_workshop_ids",
       )
       .eq("id", orderId)
       .eq("user_id", user.id)
@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
       !deposit ||
       deposit.payment_plan !== "deposit" ||
       deposit.status !== "paid" ||
-      deposit.balance_order_id
+      deposit.balance_order_id ||
+      deposit.settled_externally
     ) {
       return NextResponse.json(
         { error: "Caparra non trovata o saldo già completato" },

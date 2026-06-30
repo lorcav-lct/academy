@@ -15,7 +15,35 @@ interface Order {
   created_at: string;
   pack_id: string | null;
   is_test: boolean;
+  payment_plan: string | null;
+  balance_order_id: string | null;
+  settled_externally: boolean | null;
+  fulfilled_at: string | null;
 }
+
+/** A paid caparra still awaiting its balance (online or external). */
+function isDepositPending(o: Order): boolean {
+  return (
+    o.payment_plan === "deposit" &&
+    o.status === "paid" &&
+    !o.balance_order_id &&
+    !o.settled_externally
+  );
+}
+
+/** Orders an admin can activate by hand (settled outside Stripe). */
+function canActivate(o: Order): boolean {
+  if (o.fulfilled_at || o.balance_order_id) return false;
+  return isDepositPending(o) || o.status === "pending";
+}
+
+const PAYMENT_METHODS = [
+  { id: "bonifico", label: "Bonifico" },
+  { id: "scalapay", label: "Scalapay" },
+  { id: "contanti", label: "Contanti" },
+  { id: "carta", label: "Carta (POS)" },
+  { id: "altro", label: "Altro" },
+];
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   pending: "In attesa",
@@ -72,13 +100,19 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [showTest, setShowTest] = useState(false);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [activateTarget, setActivateTarget] = useState<Order | null>(null);
+  const [activating, setActivating] = useState(false);
+  const [activateError, setActivateError] = useState<string | null>(null);
+  const [activateMethod, setActivateMethod] = useState("bonifico");
+  const [activateAmount, setActivateAmount] = useState("");
+  const [activateSilent, setActivateSilent] = useState(false);
 
   async function load() {
     const supabase = createClient();
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test",
+        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at",
       )
       .order("created_at", { ascending: false });
     if (data) setOrders(data as unknown as Order[]);
@@ -99,6 +133,42 @@ export default function AdminOrdersPage() {
     });
     await load();
     setCancelling(null);
+  }
+
+  function openActivate(order: Order) {
+    setActivateTarget(order);
+    setActivateError(null);
+    setActivateMethod("bonifico");
+    setActivateAmount("");
+    setActivateSilent(false);
+  }
+
+  async function submitActivate() {
+    if (!activateTarget) return;
+    setActivating(true);
+    setActivateError(null);
+    const parsed = parseFloat(activateAmount.replace(",", "."));
+    const amountCents =
+      Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
+    const res = await fetch("/api/admin/activate-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId: activateTarget.id,
+        silent: activateSilent,
+        paymentMethod: activateMethod,
+        amountCents,
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setActivateError(data.error || "Errore durante l'attivazione");
+      setActivating(false);
+      return;
+    }
+    setActivating(false);
+    setActivateTarget(null);
+    await load();
   }
 
   const scoped = useMemo(
@@ -241,7 +311,13 @@ export default function AdminOrdersPage() {
           {/* Mobile: card list */}
           <ul className="space-y-3 lg:hidden">
             {filtered.map((order) => {
-              const tone = ORDER_STATUS_TONE[order.status];
+              const depositPending = isDepositPending(order);
+              const tone = depositPending
+                ? ORDER_STATUS_TONE.pending
+                : ORDER_STATUS_TONE[order.status];
+              const statusLabel = depositPending
+                ? "Caparra · saldo atteso"
+                : ORDER_STATUS_LABEL[order.status];
               return (
                 <li
                   key={order.id}
@@ -270,7 +346,7 @@ export default function AdminOrdersPage() {
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
                       >
                         <span className={`h-1.5 w-1.5 ${tone.dot}`} />
-                        {ORDER_STATUS_LABEL[order.status]}
+                        {statusLabel}
                       </span>
                     </div>
                   </div>
@@ -285,17 +361,27 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>
-                    {(order.status === "paid" ||
-                      order.status === "pending") && (
-                      <button
-                        onClick={() => cancelOrder(order.id)}
-                        disabled={cancelling === order.id}
-                        className="flex shrink-0 items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
-                      >
-                        <IconTrash className="h-3 w-3" />
-                        {cancelling === order.id ? "..." : "Annulla"}
-                      </button>
-                    )}
+                    <div className="flex shrink-0 items-center gap-2">
+                      {canActivate(order) && (
+                        <button
+                          onClick={() => openActivate(order)}
+                          className="flex items-center gap-1.5 bg-academy-orange px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
+                        >
+                          Attiva
+                        </button>
+                      )}
+                      {(order.status === "paid" ||
+                        order.status === "pending") && (
+                        <button
+                          onClick={() => cancelOrder(order.id)}
+                          disabled={cancelling === order.id}
+                          className="flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
+                        >
+                          <IconTrash className="h-3 w-3" />
+                          {cancelling === order.id ? "..." : "Annulla"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </li>
               );
@@ -328,7 +414,13 @@ export default function AdminOrdersPage() {
               </thead>
               <tbody>
                 {filtered.map((order) => {
-                  const tone = ORDER_STATUS_TONE[order.status];
+                  const depositPending = isDepositPending(order);
+                  const tone = depositPending
+                    ? ORDER_STATUS_TONE.pending
+                    : ORDER_STATUS_TONE[order.status];
+                  const statusLabel = depositPending
+                    ? "Caparra · saldo atteso"
+                    : ORDER_STATUS_LABEL[order.status];
                   return (
                     <tr
                       key={order.id}
@@ -351,7 +443,7 @@ export default function AdminOrdersPage() {
                             className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
                           >
                             <span className={`h-1.5 w-1.5 ${tone.dot}`} />
-                            {ORDER_STATUS_LABEL[order.status]}
+                            {statusLabel}
                           </span>
                           {order.is_test && (
                             <span className="inline-flex items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
@@ -367,16 +459,27 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        {order.status === "paid" && (
-                          <button
-                            onClick={() => cancelOrder(order.id)}
-                            disabled={cancelling === order.id}
-                            className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
-                          >
-                            <IconTrash className="h-3 w-3" />
-                            {cancelling === order.id ? "..." : "Annulla"}
-                          </button>
-                        )}
+                        <div className="flex items-center justify-end gap-2">
+                          {canActivate(order) && (
+                            <button
+                              onClick={() => openActivate(order)}
+                              className="inline-flex items-center gap-1.5 bg-academy-orange px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
+                            >
+                              Attiva
+                            </button>
+                          )}
+                          {(order.status === "paid" ||
+                            order.status === "pending") && (
+                            <button
+                              onClick={() => cancelOrder(order.id)}
+                              disabled={cancelling === order.id}
+                              className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
+                            >
+                              <IconTrash className="h-3 w-3" />
+                              {cancelling === order.id ? "..." : "Annulla"}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -385,6 +488,104 @@ export default function AdminOrdersPage() {
             </table>
           </div>
         </>
+      )}
+
+      {activateTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => !activating && setActivateTarget(null)}
+        >
+          <div
+            className="w-full max-w-md border border-black/[0.08] bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-[11px] font-bold tracking-[0.3em] text-academy-orange uppercase">
+              {activateTarget.payment_plan === "deposit"
+                ? "Salda caparra"
+                : "Attiva ordine"}
+            </p>
+            <h2 className="text-xl font-black text-academy-gray-800">
+              {activateTarget.billing_name || activateTarget.billing_email}
+            </h2>
+            <p className="mt-1 text-[13px] text-academy-gray-500">
+              {activateTarget.pack_id?.toUpperCase() || "—"} · genera ticket e
+              QR e attiva l&apos;accesso del cliente.
+            </p>
+
+            <div className="mt-5 space-y-4">
+              <div>
+                <label className="mb-1.5 block text-[11px] font-bold tracking-wider text-academy-gray-500 uppercase">
+                  Metodo di pagamento
+                </label>
+                <select
+                  value={activateMethod}
+                  onChange={(e) => setActivateMethod(e.target.value)}
+                  className="w-full border border-black/[0.1] bg-white px-3 py-2.5 text-sm text-academy-gray-800 outline-none focus:border-academy-orange/50"
+                >
+                  {PAYMENT_METHODS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-[11px] font-bold tracking-wider text-academy-gray-500 uppercase">
+                  Importo saldato (€)
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={activateAmount}
+                  onChange={(e) => setActivateAmount(e.target.value)}
+                  placeholder="es. 1490"
+                  className="w-full border border-black/[0.1] bg-white px-3 py-2.5 text-sm text-academy-gray-800 placeholder-academy-gray-400 outline-none focus:border-academy-orange/50"
+                />
+                <p className="mt-1 text-[11px] text-academy-gray-400">
+                  Solo per registro interno. Lascia vuoto se non rilevante.
+                </p>
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm text-academy-gray-700">
+                <input
+                  type="checkbox"
+                  checked={!activateSilent}
+                  onChange={(e) => setActivateSilent(!e.target.checked)}
+                  className="h-4 w-4 accent-academy-orange"
+                />
+                Invia email di conferma al cliente
+              </label>
+            </div>
+
+            {activateError && (
+              <p className="mt-4 border border-red-500/30 bg-red-50 px-3 py-2 text-[13px] text-red-700">
+                {activateError}
+              </p>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setActivateTarget(null)}
+                disabled={activating}
+                className="border border-black/[0.1] bg-white px-4 py-2.5 text-[12px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800 disabled:opacity-50"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={submitActivate}
+                disabled={activating}
+                className="bg-academy-orange px-5 py-2.5 text-[12px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
+              >
+                {activating
+                  ? "Attivazione..."
+                  : activateSilent
+                    ? "Attiva senza email"
+                    : "Attiva e invia email"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

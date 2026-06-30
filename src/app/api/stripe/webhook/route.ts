@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { encryptPayload } from "@/lib/qr/encrypt";
-import { generateQRCodeBuffer } from "@/lib/qr/generate";
 import { PRODUCTS, DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 import { sendEmail } from "@/lib/email/client";
-import { OrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 import { DepositReceivedEmail } from "@/lib/email/templates/deposit-received";
 import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
+import { fulfillOrder } from "@/lib/orders/fulfill";
 import { getDeadlines } from "@/lib/settings/deadlines";
 import React from "react";
 
@@ -219,65 +217,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Determine which products to generate tickets for
-    const slugsToTicket: string[] = [];
-    if (productSlug) slugsToTicket.push(productSlug);
-    selectedAddonSlugs.forEach((s) => {
-      if (s && !slugsToTicket.includes(s)) slugsToTicket.push(s);
+    // Generate tickets/QR and send the confirmation email (shared with the
+    // admin manual-activation path). Pass the slugs from Stripe metadata so the
+    // backward-compat case (selected_workshop_ids failed to persist) still works.
+    const customerEmail =
+      order.billing_email || session.customer_details?.email;
+    await fulfillOrder(supabase, order, {
+      addonSlugs: selectedAddonSlugs,
+      sendConfirmationEmail: !!customerEmail && !wasAlreadyPaid,
+      emailTotalCents: session.amount_total || 0,
     });
-
-    // Second-level idempotency: if a ticket for (order, slug) already exists,
-    // skip — covers races where two webhook calls pass the status check together.
-    const { data: existingTickets } = await supabase
-      .from("tickets")
-      .select("course_id")
-      .eq("order_id", orderId);
-    const alreadyTicketed = new Set(
-      (existingTickets ?? []).map((t) => t.course_id),
-    );
-
-    // Generate one ticket per product slug
-    for (const slug of slugsToTicket) {
-      if (alreadyTicketed.has(slug)) continue;
-      const product = PRODUCTS.find((p) => p.slug === slug);
-      const productName = product?.name ?? slug;
-      const ticketId = crypto.randomUUID();
-
-      const payload = {
-        ticketId,
-        orderId: order.id,
-        courseId: slug,
-        userId: order.user_id,
-        userName:
-          (order.profiles as { full_name?: string } | null)?.full_name ||
-          order.billing_name ||
-          "",
-        courseName: productName,
-        eventDate: "",
-        issuedAt: new Date().toISOString(),
-      };
-
-      const encrypted = encryptPayload(payload);
-      const qrBuffer = await generateQRCodeBuffer(encrypted);
-
-      const qrPath = `tickets/${orderId}/${ticketId}.png`;
-      await supabase.storage
-        .from("tickets")
-        .upload(qrPath, qrBuffer, { contentType: "image/png" });
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("tickets").getPublicUrl(qrPath);
-
-      await supabase.from("tickets").insert({
-        id: ticketId,
-        order_id: orderId,
-        user_id: order.user_id,
-        course_id: slug,
-        qr_payload: encrypted,
-        qr_image_url: publicUrl,
-      });
-    }
 
     // If this is a balance payment, close the originating deposit order by
     // linking it to this full-price order.
@@ -289,37 +238,6 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq("id", depositOrderId);
-    }
-
-    // Send order confirmation email
-    const customerEmail =
-      order.billing_email || session.customer_details?.email;
-    if (customerEmail && !wasAlreadyPaid) {
-      const appUrl = EMAIL_APP_URL;
-      const productName =
-        PRODUCTS.find((p) => p.slug === productSlug)?.name ||
-        productSlug ||
-        "Pack";
-      const total = new Intl.NumberFormat("it-IT", {
-        style: "currency",
-        currency: "EUR",
-      }).format((session.amount_total || 0) / 100);
-
-      await sendEmail({
-        to: customerEmail,
-        subject: `Conferma ordine — ${productName}`,
-        react: React.createElement(OrderConfirmationEmail, {
-          userName:
-            (order.profiles as { full_name?: string } | null)?.full_name ||
-            order.billing_name ||
-            "Cliente",
-          packName: productName,
-          orderTotal: total,
-          orderId: order.id,
-          ticketCount: slugsToTicket.length,
-          appUrl,
-        }),
-      }).catch(console.error);
     }
 
     // Trigger Make.com webhook (async, don't await)

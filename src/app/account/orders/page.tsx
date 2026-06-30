@@ -29,13 +29,17 @@ interface Order {
   pack_id: string | null;
   payment_plan: string | null;
   balance_order_id: string | null;
+  settled_externally: boolean | null;
   deposit_promo_code: string | null;
 }
 
 /** A paid deposit still awaiting its balance payment. */
 function isDepositPending(o: Order): boolean {
   return (
-    o.payment_plan === "deposit" && o.status === "paid" && !o.balance_order_id
+    o.payment_plan === "deposit" &&
+    o.status === "paid" &&
+    !o.balance_order_id &&
+    !o.settled_externally
   );
 }
 
@@ -81,7 +85,7 @@ export default function AccountOrdersPage() {
         supabase
           .from("orders")
           .select(
-            "id, status, amount_cents, created_at, pack_id, payment_plan, balance_order_id, deposit_promo_code",
+            "id, status, amount_cents, created_at, pack_id, payment_plan, balance_order_id, settled_externally, deposit_promo_code",
           )
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
