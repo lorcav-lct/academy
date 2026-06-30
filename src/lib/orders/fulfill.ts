@@ -96,7 +96,7 @@ export async function fulfillOrder(
       ticketId,
       orderId: order.id,
       courseId: slug,
-      userId: order.user_id,
+      userId: order.user_id ?? "",
       userName,
       courseName: productName,
       eventDate: "",
