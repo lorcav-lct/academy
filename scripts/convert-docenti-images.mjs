@@ -47,6 +47,8 @@ const FILE_TO_SLUG = {
   "margheritafonsato.png": "margherita-fonsato",
   "oscarberti.png": "oscar-berti",
   "simonedoti.png": "simone-doti",
+  // 03-07 batch
+  "claudiopecorella.png": "claudio-pecorella",
 };
 
 const fmtKB = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;

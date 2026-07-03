@@ -25,6 +25,17 @@ export const TEACHERS: Teacher[] = [
     talkTitle: "Chinesiologia applicata al movimento",
   },
   {
+    slug: "claudio-pecorella",
+    name: "Claudio Pecorella",
+    role: "Biologo Nutrizionista | Sports Nutritionist | Scientific Advisor on Body Mass Composition",
+    bio: "Biologo Nutrizionista con esperienza specifica nella nutrizione dello sport, nella composizione corporea e nei disturbi del comportamento alimentare. Nutrizionista dell'Area Nutrizione FIGC, è Consigliere dell'Ordine dei Biologi della Calabria, Consigliere della Commissione Nazionale Nutrizione Sportiva della FNOB e Referente del Gruppo di Lavoro Nutrizione Sportiva della Commissione Alimentazione e Nutrizione dell'Ordine dei Biologi della Calabria. È docente in Master universitari e corsi di alta formazione, autore della metodologia Cyclicity Diet®️ e di pubblicazioni scientifiche nel campo della nutrizione clinica e sportiva.",
+    courses: ["function"],
+    image_url: "/docenti/claudio-pecorella.webp",
+    color: BRAND,
+    talkTitle:
+      "Nutrizione sportiva e composizione corporea: strategie applicate alla performance",
+  },
+  {
     slug: "samuele-marcora",
     name: "Samuele Marcora",
     role: "Professore Ordinario di Scienze dell'Esercizio Fisico e dello Sport",
