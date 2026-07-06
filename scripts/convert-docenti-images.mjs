@@ -49,8 +49,8 @@ const FILE_TO_SLUG = {
   "simonedoti.png": "simone-doti",
   // 03-07 batch
   "claudiopecorella.png": "claudio-pecorella",
-  // natalegentile.png superseded by 03-07/NataleGentile-edit.png
-  "natalegentile-edit.png": "natale-gentile",
+  // natalegentile.png superseded by 03-07/NataleGentile-edit2.png
+  "natalegentile-edit2.png": "natale-gentile",
 };
 
 const fmtKB = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
