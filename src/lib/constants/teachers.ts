@@ -36,6 +36,17 @@ export const TEACHERS: Teacher[] = [
       "Nutrizione sportiva e composizione corporea: strategie applicate alla performance",
   },
   {
+    slug: "natale-gentile",
+    name: "Natale Gentile",
+    role: "Specialista in Biochimica Clinica | Sports Nutritionist — FC Internazionale Milano",
+    bio: "Specialista in Biochimica Clinica, consulente del settore medico nell'area nutrizione di FC Internazionale Milano con la responsabilità della nutrizione e supplementazione della formazione U23. Dal 2017 al 2023 è stato nutrizionista della Nazionale A femminile, partecipando a due competizioni mondiali e due europee. È Consigliere della Commissione Nazionale Nutrizione Sportiva della FNOB e membro onorario di ESNS (European Sport Nutrition Society). È docente in Master universitari e corsi di alta formazione, relatore in convegni nazionali sulla nutrizione sportiva e autore di pubblicazioni scientifiche nel campo della nutrizione sportiva.",
+    courses: ["function"],
+    image_url: "/docenti/natale-gentile.webp",
+    color: BRAND,
+    talkTitle:
+      "Nutrizione e supplementazione nello sport di alto livello: dalla ricerca al campo",
+  },
+  {
     slug: "samuele-marcora",
     name: "Samuele Marcora",
     role: "Professore Ordinario di Scienze dell'Esercizio Fisico e dello Sport",
