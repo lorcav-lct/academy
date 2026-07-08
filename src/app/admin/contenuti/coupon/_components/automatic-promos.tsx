@@ -102,6 +102,7 @@ function getProductLabel(
   product_type: PromoProductType,
   slug: string | null,
 ): string {
+  if (product_type === "fipe") return "Personal Trainer FIPE";
   if (!slug) {
     return product_type === "pack" ? "Tutti i Pack" : "Tutte le Masterclass";
   }
@@ -129,6 +130,7 @@ function formatDate(iso: string | null): string {
 const PRODUCT_TYPE_LABEL: Record<PromoProductType, string> = {
   pack: "Pack",
   masterclass: "Masterclass",
+  fipe: "FIPE",
 };
 
 const inputClass =
@@ -240,7 +242,8 @@ export function AutomaticPromosPanel() {
   const grouped = useMemo(() => {
     const packs = promos.filter((p) => p.product_type === "pack");
     const mc = promos.filter((p) => p.product_type === "masterclass");
-    return { packs, mc };
+    const fipe = promos.filter((p) => p.product_type === "fipe");
+    return { packs, mc, fipe };
   }, [promos]);
 
   return (
@@ -284,6 +287,15 @@ export function AutomaticPromosPanel() {
               onDelete={remove}
             />
           )}
+          {grouped.fipe.length > 0 && (
+            <PromoGroup
+              title="FIPE"
+              promos={grouped.fipe}
+              onEdit={startEdit}
+              onToggle={toggleActive}
+              onDelete={remove}
+            />
+          )}
         </div>
       )}
 
@@ -313,8 +325,8 @@ export function AutomaticPromosPanel() {
             <div className="space-y-5 p-6">
               {/* Categoria target */}
               <Field label="Categoria">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {(["pack", "masterclass"] as const).map((cat) => {
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {(["pack", "masterclass", "fipe"] as const).map((cat) => {
                     const selected = editing.product_type === cat;
                     return (
                       <button
@@ -351,89 +363,92 @@ export function AutomaticPromosPanel() {
                 </div>
               </Field>
 
-              {/* Ambito: tutti vs singolo prodotto */}
-              <Field label="Ambito">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditing({ ...editing, scope: "all" })}
-                    className={`flex flex-col items-start gap-1 border px-4 py-3 text-left transition-all ${
-                      editing.scope === "all"
-                        ? "border-academy-orange bg-academy-orange/10"
-                        : "border-black/[0.12] bg-white hover:border-black/30"
-                    }`}
-                  >
-                    <span
-                      className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+              {/* Ambito: tutti vs singolo prodotto — non applicabile a FIPE
+                  (prodotto singolo), la promo copre l'unico corso FIPE. */}
+              {editing.product_type !== "fipe" && (
+                <Field label="Ambito">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditing({ ...editing, scope: "all" })}
+                      className={`flex flex-col items-start gap-1 border px-4 py-3 text-left transition-all ${
                         editing.scope === "all"
-                          ? "text-academy-orange"
-                          : "text-academy-gray-500"
+                          ? "border-academy-orange bg-academy-orange/10"
+                          : "border-black/[0.12] bg-white hover:border-black/30"
                       }`}
                     >
-                      {editing.scope === "all" ? "✓ Selezionato" : "Opzione"}
-                    </span>
-                    <span className="text-sm font-bold text-academy-gray-800">
-                      {editing.product_type === "pack"
-                        ? "Tutti i Pack"
-                        : "Tutte le Masterclass"}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Se passiamo a "singolo" ma scope è "all", pre-seleziona il primo
-                      const opts =
-                        editing.product_type === "pack"
-                          ? PACK_OPTIONS
-                          : MASTERCLASS_OPTIONS;
-                      const next =
-                        editing.scope === "all"
-                          ? (opts[0]?.slug ?? "all")
-                          : editing.scope;
-                      setEditing({ ...editing, scope: next });
-                    }}
-                    className={`flex flex-col items-start gap-1 border px-4 py-3 text-left transition-all ${
-                      editing.scope !== "all"
-                        ? "border-academy-orange bg-academy-orange/10"
-                        : "border-black/[0.12] bg-white hover:border-black/30"
-                    }`}
-                  >
-                    <span
-                      className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+                      <span
+                        className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+                          editing.scope === "all"
+                            ? "text-academy-orange"
+                            : "text-academy-gray-500"
+                        }`}
+                      >
+                        {editing.scope === "all" ? "✓ Selezionato" : "Opzione"}
+                      </span>
+                      <span className="text-sm font-bold text-academy-gray-800">
+                        {editing.product_type === "pack"
+                          ? "Tutti i Pack"
+                          : "Tutte le Masterclass"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Se passiamo a "singolo" ma scope è "all", pre-seleziona il primo
+                        const opts =
+                          editing.product_type === "pack"
+                            ? PACK_OPTIONS
+                            : MASTERCLASS_OPTIONS;
+                        const next =
+                          editing.scope === "all"
+                            ? (opts[0]?.slug ?? "all")
+                            : editing.scope;
+                        setEditing({ ...editing, scope: next });
+                      }}
+                      className={`flex flex-col items-start gap-1 border px-4 py-3 text-left transition-all ${
                         editing.scope !== "all"
-                          ? "text-academy-orange"
-                          : "text-academy-gray-500"
+                          ? "border-academy-orange bg-academy-orange/10"
+                          : "border-black/[0.12] bg-white hover:border-black/30"
                       }`}
                     >
-                      {editing.scope !== "all" ? "✓ Selezionato" : "Opzione"}
-                    </span>
-                    <span className="text-sm font-bold text-academy-gray-800">
-                      Solo un{" "}
-                      {editing.product_type === "pack"
-                        ? "Pack specifico"
-                        : "Masterclass specifica"}
-                    </span>
-                  </button>
-                </div>
-                {editing.scope !== "all" && (
-                  <select
-                    value={editing.scope}
-                    onChange={(e) =>
-                      setEditing({ ...editing, scope: e.target.value })
-                    }
-                    className={`${selectClass} mt-2`}
-                  >
-                    {(editing.product_type === "pack"
-                      ? PACK_OPTIONS
-                      : MASTERCLASS_OPTIONS
-                    ).map((opt) => (
-                      <option key={opt.slug} value={opt.slug}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </Field>
+                      <span
+                        className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+                          editing.scope !== "all"
+                            ? "text-academy-orange"
+                            : "text-academy-gray-500"
+                        }`}
+                      >
+                        {editing.scope !== "all" ? "✓ Selezionato" : "Opzione"}
+                      </span>
+                      <span className="text-sm font-bold text-academy-gray-800">
+                        Solo un{" "}
+                        {editing.product_type === "pack"
+                          ? "Pack specifico"
+                          : "Masterclass specifica"}
+                      </span>
+                    </button>
+                  </div>
+                  {editing.scope !== "all" && (
+                    <select
+                      value={editing.scope}
+                      onChange={(e) =>
+                        setEditing({ ...editing, scope: e.target.value })
+                      }
+                      className={`${selectClass} mt-2`}
+                    >
+                      {(editing.product_type === "pack"
+                        ? PACK_OPTIONS
+                        : MASTERCLASS_OPTIONS
+                      ).map((opt) => (
+                        <option key={opt.slug} value={opt.slug}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </Field>
+              )}
 
               {/* Name */}
               <Field label="Nome promo (mostrato in badge)">

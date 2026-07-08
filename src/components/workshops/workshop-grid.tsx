@@ -8,6 +8,9 @@ import { PUBLIC_WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
 import { smoothScrollTo } from "@/lib/scroll";
 import { getMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
+import { usePromoForSlug } from "@/lib/promos/client";
+import { computePromoPricing } from "@/lib/promos/types";
+import { PromoCountdown } from "@/components/shared/promo-countdown";
 
 /* ──────────────────────────────────────────────────────────────
    Sales credentials per masterclass — single source of truth
@@ -161,6 +164,10 @@ const FEATURED_NAMES = [
 
 const ORANGE = "#F09226";
 const ORANGE_RGB = "240,146,38";
+
+function formatPriceClean(cents: number): string {
+  return `€ ${new Intl.NumberFormat("it-IT").format(Math.round(cents / 100))}`;
+}
 
 /* ──────────────────────────────────────────────────────────────
    HERO
@@ -607,6 +614,14 @@ function MasterclassCard({
   const featured = cred?.featured;
   const num = String(index + 1).padStart(2, "0");
 
+  // Prezzo mostrato in card solo quando c'è una promo attiva sulla masterclass.
+  const promo = usePromoForSlug(product?.slug ?? "");
+  const pricing =
+    !isTbd && product && promo
+      ? computePromoPricing(promo, product.priceCents)
+      : null;
+  const hasDiscount = !!pricing && pricing.discount > 0;
+
   const th = isDark ? "#f5f5fa" : "#0a0a1a";
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
   const ts = isDark ? "rgba(120,120,140,0.5)" : "#888888";
@@ -770,6 +785,41 @@ function MasterclassCard({
                 >
                   {workshop.date}
                 </span>
+              </div>
+            )}
+
+            {/* Prezzo promo — visibile solo con promo attiva */}
+            {hasDiscount && pricing && (
+              <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                <span
+                  className="px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+                  style={{ background: ORANGE, color: "#111" }}
+                >
+                  {promo?.name ?? "PROMO"}
+                </span>
+                <span
+                  className="text-[0.95rem] font-semibold tabular-nums line-through"
+                  style={{ color: ts }}
+                >
+                  {formatPriceClean(pricing.original)}
+                </span>
+                <span
+                  className="text-[1.35rem] font-black leading-none tabular-nums"
+                  style={{ color: th }}
+                >
+                  {formatPriceClean(pricing.final)}
+                </span>
+                <span
+                  className="text-[0.6rem] font-bold uppercase tracking-[0.16em]"
+                  style={{ color: ts }}
+                >
+                  IVA incl.
+                </span>
+                <PromoCountdown
+                  endsAt={promo?.ends_at}
+                  color={ORANGE}
+                  mutedColor={ts}
+                />
               </div>
             )}
           </div>

@@ -9,9 +9,20 @@ import {
   FIPE_WEEKENDS,
   getWeekendHours,
 } from "@/lib/constants/fipe-program";
+import { getProductBySlug } from "@/lib/constants/packs";
+import { getActivePromoForProduct } from "@/lib/promos/server";
+import { computePromoPricing } from "@/lib/promos/types";
 
 const ORANGE = "#F09226";
 const ORANGE_RGB = "240,146,38";
+
+const FIPE_SLUG = "fipe-personal-trainer";
+
+function formatEuro(cents: number): string {
+  return `€${new Intl.NumberFormat("it-IT", {
+    maximumFractionDigits: 0,
+  }).format(Math.round(cents / 100))}`;
+}
 
 export const metadata: Metadata = {
   title: `${FIPE_COURSE_TITLE} — Lacertosus Academy`,
@@ -19,7 +30,12 @@ export const metadata: Metadata = {
     "Programma ufficiale FIPE: Istruttore Sala Pesi e Pesistica · Personal Trainer I Livello. 3 weekend, 16 ore di teoria, 24 ore di pratica, esame finale. Incluso nei pack Pro ed Elite.",
 };
 
-export default function FipePersonalTrainerPage() {
+export default async function FipePersonalTrainerPage() {
+  const originalCents = getProductBySlug(FIPE_SLUG)?.priceCents ?? 79000;
+  const promo = await getActivePromoForProduct(FIPE_SLUG);
+  const pricing = promo ? computePromoPricing(promo, originalCents) : null;
+  const hasDiscount = !!pricing && pricing.discount > 0;
+
   const stats = [
     { value: FIPE_PROGRAM_META.weekends, label: "Weekend in presenza" },
     { value: FIPE_PROGRAM_META.daysTotal, label: "Giornate" },
@@ -322,18 +338,38 @@ export default function FipePersonalTrainerPage() {
                 border: `1.5px solid rgba(${ORANGE_RGB},0.32)`,
               }}
             >
-              <span
-                className="text-[0.58rem] font-black tracking-[0.3em] uppercase mb-2 block"
-                style={{ color: ORANGE }}
-              >
-                Prezzo
-              </span>
-              <div className="flex items-baseline gap-2">
+              <div className="mb-2 flex items-center gap-2">
+                <span
+                  className="text-[0.58rem] font-black tracking-[0.3em] uppercase"
+                  style={{ color: ORANGE }}
+                >
+                  Prezzo
+                </span>
+                {hasDiscount && (
+                  <span
+                    className="px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em] uppercase"
+                    style={{ background: ORANGE, color: "#111" }}
+                  >
+                    {promo?.name ?? "PROMO"}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                {hasDiscount && pricing && (
+                  <span
+                    className="text-[1.5rem] md:text-[1.8rem] font-semibold leading-none tabular-nums line-through"
+                    style={{ color: "rgba(255,255,255,0.4)" }}
+                  >
+                    {formatEuro(pricing.original)}
+                  </span>
+                )}
                 <span
                   className="text-[3rem] md:text-[3.4rem] font-black leading-none tabular-nums tracking-tight"
                   style={{ color: "#f5f5fa" }}
                 >
-                  €790
+                  {hasDiscount && pricing
+                    ? formatEuro(pricing.final)
+                    : formatEuro(originalCents)}
                 </span>
                 <span
                   className="text-[0.78rem] font-bold tracking-wider uppercase"
@@ -342,6 +378,14 @@ export default function FipePersonalTrainerPage() {
                   IVA inclusa
                 </span>
               </div>
+              {hasDiscount && promo?.subtitle && (
+                <p
+                  className="mt-2 text-[0.78rem] font-semibold"
+                  style={{ color: ORANGE }}
+                >
+                  {promo.subtitle}
+                </p>
+              )}
               <p
                 className="mt-3 text-[0.86rem] leading-relaxed"
                 style={{ color: "rgba(255,255,255,0.66)" }}
