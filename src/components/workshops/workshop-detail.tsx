@@ -9,6 +9,9 @@ import { getMasterclassProducts } from "@/lib/constants/packs";
 import { getTeacherBySlug, type Teacher } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
+import { usePromoForSlug } from "@/lib/promos/client";
+import { computePromoPricing } from "@/lib/promos/types";
+import { PromoCountdown } from "@/components/shared/promo-countdown";
 
 /* ──────────────────────────────────────────────────────────────
    Sales content per masterclass
@@ -727,12 +730,18 @@ function HeroSection({
   workshop,
   content,
   priceLabel,
+  originalPriceLabel,
+  promoName,
+  promoEndsAt,
   isTbd,
   onBuy,
 }: {
   workshop: Workshop;
   content: MasterclassContent;
   priceLabel: string | null;
+  originalPriceLabel?: string | null;
+  promoName?: string | null;
+  promoEndsAt?: string | null;
   isTbd: boolean;
   onBuy: () => void;
 }) {
@@ -887,7 +896,10 @@ function HeroSection({
                     : "Da definire",
                 l: "Data",
               },
-              { v: priceLabel ?? "TBD", l: "Prezzo singolo" },
+              // Con promo attiva il prezzo passa al blocco prominente sotto.
+              ...(promoName
+                ? []
+                : [{ v: priceLabel ?? "TBD", l: "Prezzo singolo" }]),
             ].map((s) => (
               <div key={s.l} className="flex flex-col">
                 <span
@@ -897,11 +909,7 @@ function HeroSection({
                   {s.l}
                 </span>
                 <span
-                  className={`mt-1 font-black leading-none tabular-nums ${
-                    s.l === "Data"
-                      ? "text-[1.6rem] md:text-[1.85rem]"
-                      : "text-[1.6rem] md:text-[1.85rem]"
-                  }`}
+                  className="mt-1 font-black leading-none tabular-nums text-[1.6rem] md:text-[1.85rem]"
                   style={{ color: th }}
                 >
                   {s.v}
@@ -909,6 +917,52 @@ function HeroSection({
               </div>
             ))}
           </motion.div>
+
+          {/* Prezzo promo prominente — solo quando è attiva una promo */}
+          {promoName && (
+            <motion.div variants={fadeUp} className="mt-9">
+              <span
+                className="flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.28em]"
+                style={{ color: ts }}
+              >
+                Prezzo singolo
+                <span
+                  className="px-2 py-0.5 text-[0.55rem] font-black tracking-[0.18em]"
+                  style={{ background: ORANGE, color: "#111" }}
+                >
+                  {promoName}
+                </span>
+              </span>
+              <div className="mt-2 flex items-baseline gap-3 flex-wrap">
+                {originalPriceLabel && (
+                  <span
+                    className="text-[1.6rem] md:text-[2rem] font-semibold leading-none tabular-nums line-through"
+                    style={{ color: ts }}
+                  >
+                    {originalPriceLabel}
+                  </span>
+                )}
+                <span
+                  className="text-[clamp(2.8rem,6vw,4.2rem)] font-black leading-none tracking-[-0.025em] tabular-nums"
+                  style={{ color: th }}
+                >
+                  {priceLabel ?? "TBD"}
+                </span>
+                <span
+                  className="text-[0.7rem] font-bold uppercase tracking-[0.16em]"
+                  style={{ color: ts }}
+                >
+                  IVA incl.
+                </span>
+              </div>
+              <PromoCountdown
+                endsAt={promoEndsAt}
+                color={ORANGE}
+                mutedColor={ts}
+                className="mt-3"
+              />
+            </motion.div>
+          )}
 
           {/* CTA row */}
           <motion.div
@@ -920,9 +974,7 @@ function HeroSection({
               className="inline-flex items-center justify-between gap-3 px-7 py-4 text-[0.78rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90"
               style={{ background: ORANGE, color: "#111" }}
             >
-              <span>
-                {isTbd ? "Lascia il tuo interesse" : "Riserva il tuo posto"}
-              </span>
+              <span>{isTbd ? "Lascia il tuo interesse" : "Acquista"}</span>
               <span aria-hidden className="text-base">
                 →
               </span>
@@ -1599,6 +1651,8 @@ function ValueStackSection({
   workshop,
   content,
   priceLabel,
+  originalPriceLabel,
+  promoName,
   isTbd,
   isDark,
   onBuy,
@@ -1606,6 +1660,8 @@ function ValueStackSection({
   workshop: Workshop;
   content: MasterclassContent;
   priceLabel: string | null;
+  originalPriceLabel?: string | null;
+  promoName?: string | null;
   isTbd: boolean;
   isDark: boolean;
   onBuy: () => void;
@@ -1731,12 +1787,28 @@ function ValueStackSection({
 
                 <div className="mt-6">
                   <span
-                    className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
+                    className="flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-[0.32em]"
                     style={{ color: ts }}
                   >
                     {isTbd ? "Prezzo in definizione" : "Singolo masterclass"}
+                    {promoName && (
+                      <span
+                        className="px-1.5 py-0.5 text-[0.5rem] font-black tracking-[0.18em]"
+                        style={{ background: ORANGE, color: "#111" }}
+                      >
+                        {promoName}
+                      </span>
+                    )}
                   </span>
-                  <div className="mt-2 flex items-baseline gap-2">
+                  <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+                    {originalPriceLabel && (
+                      <span
+                        className="text-[1.4rem] md:text-[1.7rem] font-semibold leading-none tabular-nums line-through"
+                        style={{ color: ts }}
+                      >
+                        {originalPriceLabel}
+                      </span>
+                    )}
                     <span
                       className="text-[clamp(2.4rem,5vw,3.4rem)] font-black leading-none tracking-[-0.025em] tabular-nums"
                       style={{ color: th }}
@@ -2048,12 +2120,14 @@ function FinalCTA({
 function StickyBottomBar({
   workshop,
   priceLabel,
+  originalPriceLabel,
   isTbd,
   visible,
   onBuy,
 }: {
   workshop: Workshop;
   priceLabel: string | null;
+  originalPriceLabel?: string | null;
   isTbd: boolean;
   visible: boolean;
   onBuy: () => void;
@@ -2092,18 +2166,28 @@ function StickyBottomBar({
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <span
-            className="hidden text-[1rem] font-black tabular-nums sm:inline"
-            style={{ color: "#fff" }}
-          >
-            {priceLabel ?? "TBD"}
+          <span className="hidden items-baseline gap-2 sm:flex">
+            {originalPriceLabel && (
+              <span
+                className="text-[0.8rem] font-semibold tabular-nums line-through"
+                style={{ color: "rgba(255,255,255,0.5)" }}
+              >
+                {originalPriceLabel}
+              </span>
+            )}
+            <span
+              className="text-[1rem] font-black tabular-nums"
+              style={{ color: "#fff" }}
+            >
+              {priceLabel ?? "TBD"}
+            </span>
           </span>
           <button
             onClick={onBuy}
             className="inline-flex items-center gap-2 px-4 py-2.5 text-[0.7rem] font-black uppercase tracking-[0.14em] transition-opacity hover:opacity-90 sm:px-5 sm:py-3"
             style={{ background: ORANGE, color: "#111" }}
           >
-            <span>{isTbd ? "Interesse" : "Riserva"}</span>
+            <span>{isTbd ? "Interesse" : "Acquista"}</span>
             <span aria-hidden>→</span>
           </button>
         </div>
@@ -2257,8 +2341,24 @@ export function WorkshopDetail({
     (p) => p.workshopSlug === workshop.slug,
   );
   const isTbd = workshop.tbd || !product || product.priceCents === 0;
+
+  // Promo automatica attiva sulla masterclass → prezzo barrato + badge,
+  // coerente con pack e FIPE. Hook chiamato sempre (slug vuoto = nessuna promo).
+  const promo = usePromoForSlug(product?.slug ?? "");
+  const pricing =
+    !isTbd && product && promo
+      ? computePromoPricing(promo, product.priceCents)
+      : null;
+  const hasDiscount = !!pricing && pricing.discount > 0;
+
   const priceLabel =
-    !isTbd && product ? formatPriceClean(product.priceCents) : null;
+    !isTbd && product
+      ? formatPriceClean(hasDiscount ? pricing!.final : product.priceCents)
+      : null;
+  const originalPriceLabel =
+    hasDiscount && pricing ? formatPriceClean(pricing.original) : null;
+  const promoName = hasDiscount ? (promo?.name ?? null) : null;
+  const promoEndsAt = hasDiscount ? (promo?.ends_at ?? null) : null;
 
   const content = CONTENT[workshop.slug] ?? {
     domain: "Masterclass",
@@ -2302,6 +2402,9 @@ export function WorkshopDetail({
         workshop={workshop}
         content={content}
         priceLabel={priceLabel}
+        originalPriceLabel={originalPriceLabel}
+        promoName={promoName}
+        promoEndsAt={promoEndsAt}
         isTbd={isTbd}
         onBuy={handleBuy}
       />
@@ -2326,6 +2429,8 @@ export function WorkshopDetail({
         workshop={workshop}
         content={content}
         priceLabel={priceLabel}
+        originalPriceLabel={originalPriceLabel}
+        promoName={promoName}
         isTbd={isTbd}
         isDark={isDark}
         onBuy={handleBuy}
@@ -2349,6 +2454,7 @@ export function WorkshopDetail({
       <StickyBottomBar
         workshop={workshop}
         priceLabel={priceLabel}
+        originalPriceLabel={originalPriceLabel}
         isTbd={isTbd}
         visible={scrolled}
         onBuy={handleBuy}

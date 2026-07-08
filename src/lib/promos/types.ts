@@ -7,7 +7,7 @@
  */
 import { getPackBySlug } from "@/lib/constants/packs";
 
-export type PromoProductType = "pack" | "masterclass";
+export type PromoProductType = "pack" | "masterclass" | "fipe";
 export type PromoDiscountType = "amount" | "percent";
 
 export interface PromoRow {
@@ -70,8 +70,9 @@ export function isPromoLive(promo: PromoRow): boolean {
 
 /**
  * Mappa uno slug prodotto → categoria promo.
- * - bundle (start/pro/elite) → "pack"
- * - workshop (master-*)      → "masterclass"
+ * - bundle (start/pro/elite)       → "pack"
+ * - workshop (master-*)            → "masterclass"
+ * - certification (fipe-*)         → "fipe"
  * - course (function/strength/...) → null (no promo applicabile)
  */
 export function getPromoTypeForSlug(slug: string): PromoProductType | null {
@@ -79,5 +80,6 @@ export function getPromoTypeForSlug(slug: string): PromoProductType | null {
   if (!product) return null;
   if (product.type === "bundle") return "pack";
   if (product.type === "workshop") return "masterclass";
+  if (product.type === "certification") return "fipe";
   return null;
 }
