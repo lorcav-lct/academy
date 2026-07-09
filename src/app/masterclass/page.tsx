@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { WorkshopGrid } from "@/components/workshops/workshop-grid";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
+import { getMasterclassSalesMode } from "@/lib/settings/sales-mode";
 import { resolvePublicWorkshops } from "@/lib/constants/workshops";
 
 export const metadata: Metadata = {
@@ -12,7 +13,10 @@ export const metadata: Metadata = {
 
 export default async function MasterclassIndexPage() {
   const supabase = await createServerSupabaseClient();
-  const visibility = await getMasterclassVisibility(supabase);
+  const [visibility, salesMode] = await Promise.all([
+    getMasterclassVisibility(supabase),
+    getMasterclassSalesMode(supabase),
+  ]);
   const workshops = resolvePublicWorkshops(visibility);
-  return <WorkshopGrid workshops={workshops} />;
+  return <WorkshopGrid workshops={workshops} salesMode={salesMode} />;
 }
