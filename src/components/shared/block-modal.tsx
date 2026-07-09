@@ -184,6 +184,37 @@ export function BlockModal({
         <div className="overflow-y-auto flex-1 p-6 md:p-10">
           {/* ── Layout: 3 sezioni verticali ────────────────────────── */}
           <div className="flex flex-col gap-4">
+            {/* 0 ── DATE — near-title size for maximum visibility ─────── */}
+            <div
+              className="p-5 md:p-6"
+              style={{ background: cellBg, border: `1px solid ${cellBorder}` }}
+            >
+              <p
+                className="text-[0.68rem] font-black tracking-[0.3em] uppercase mb-4"
+                style={{ color: ts }}
+              >
+                Date del Blocco
+              </p>
+              <div className="flex flex-col gap-2">
+                {course.dates.map((d) => (
+                  <span
+                    key={d}
+                    className="flex items-center gap-3 font-black tracking-[-0.02em] leading-none uppercase"
+                    style={{
+                      fontSize: "clamp(1.35rem,2.6vw,1.9rem)",
+                      color: th,
+                    }}
+                  >
+                    <span
+                      className="h-[3px] w-6 shrink-0"
+                      style={{ background: "#F09226" }}
+                    />
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             {/* 1 ── OBIETTIVO ──────────────────────────────────────────── */}
             <div
               className="p-5 md:p-6"

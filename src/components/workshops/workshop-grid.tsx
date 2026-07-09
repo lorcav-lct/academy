@@ -3,14 +3,21 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import { PUBLIC_WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
 import { smoothScrollTo } from "@/lib/scroll";
 import { getMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 import { usePromoForSlug } from "@/lib/promos/client";
-import { computePromoPricing } from "@/lib/promos/types";
+import { computePromoPricing, type PromoRow } from "@/lib/promos/types";
 import { PromoCountdown } from "@/components/shared/promo-countdown";
+import {
+  SalesCountdown,
+  SalesExitModal,
+  SalesFloatingBar,
+  useMasterclassPromo,
+} from "./sales-mode";
 
 /* ──────────────────────────────────────────────────────────────
    Sales credentials per masterclass — single source of truth
@@ -169,12 +176,48 @@ function formatPriceClean(cents: number): string {
   return `€ ${new Intl.NumberFormat("it-IT").format(Math.round(cents / 100))}`;
 }
 
+/** Lowest masterclass price among displayed workshops, with promo applied
+ *  where applicable — the "da €" hook for hero and exit modal. */
+function getFromPricing(
+  workshops: Workshop[] | undefined,
+  promo: PromoRow | null,
+): { original: number; final: number } | null {
+  const list = workshops ?? PUBLIC_WORKSHOPS;
+  const products = getMasterclassProducts().filter(
+    (p) =>
+      p.priceCents > 0 && list.some((w) => w.slug === p.workshopSlug && !w.tbd),
+  );
+  if (products.length === 0) return null;
+
+  let original = Infinity;
+  let final = Infinity;
+  for (const p of products) {
+    const applies = promo && (promo.slug === null || promo.slug === p.slug);
+    const f = applies
+      ? computePromoPricing(promo, p.priceCents).final
+      : p.priceCents;
+    original = Math.min(original, p.priceCents);
+    final = Math.min(final, f);
+  }
+  return { original, final };
+}
+
 /* ──────────────────────────────────────────────────────────────
    HERO
 ─────────────────────────────────────────────────────────────── */
-function HeroSection() {
+function HeroSection({
+  salesMode,
+  workshops,
+}: {
+  salesMode?: boolean;
+  workshops?: Workshop[];
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-50px" });
+  const promo = useMasterclassPromo();
+  const fromPricing = salesMode ? getFromPricing(workshops, promo) : null;
+  const heroDiscount =
+    !!fromPricing && fromPricing.final < fromPricing.original;
 
   // Forced-dark hero (transparent navbar treatment with white nav text)
   const isDark = true;
@@ -280,10 +323,91 @@ function HeroSection() {
             <span className="gradient-text">IN AULA CON TE.</span>
           </motion.h1>
 
-          {/* Subline */}
+          {/* Sales mode — urgency banner: promo price + countdown, sized to content */}
+          {salesMode && fromPricing && (
+            <motion.div
+              variants={fadeUp}
+              className="mt-9 inline-flex w-fit max-w-full flex-wrap items-center gap-x-8 gap-y-5 px-5 py-4 md:px-6 md:py-5"
+              style={{
+                background: `linear-gradient(135deg, rgba(${ORANGE_RGB},0.12) 0%, rgba(10,10,14,0.9) 70%)`,
+                border: `1px solid rgba(${ORANGE_RGB},0.55)`,
+                boxShadow: `0 0 60px rgba(${ORANGE_RGB},0.1)`,
+              }}
+            >
+              <div>
+                <span
+                  className="inline-block px-2 py-0.5 text-[0.56rem] font-black uppercase tracking-[0.26em]"
+                  style={{ background: ORANGE, color: "#111" }}
+                >
+                  {promo?.name ?? "Offerta a tempo"}
+                </span>
+                <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                  <span
+                    className="text-[0.64rem] font-black uppercase tracking-[0.22em]"
+                    style={{ color: tb }}
+                  >
+                    Masterclass da
+                  </span>
+                  <span
+                    className="font-black leading-none tabular-nums"
+                    style={{
+                      fontSize: "clamp(1.9rem, 4vw, 2.8rem)",
+                      color: ORANGE,
+                    }}
+                  >
+                    {formatPriceClean(fromPricing.final)}
+                  </span>
+                  {heroDiscount && (
+                    <span
+                      className="text-[1rem] font-bold tabular-nums line-through"
+                      style={{ color: ts }}
+                    >
+                      {formatPriceClean(fromPricing.original)}
+                    </span>
+                  )}
+                  <span
+                    className="text-[0.58rem] font-bold uppercase tracking-[0.16em]"
+                    style={{ color: ts }}
+                  >
+                    IVA incl.
+                  </span>
+                </div>
+              </div>
+
+              {promo?.ends_at && (
+                <div>
+                  <span
+                    className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.26em]"
+                    style={{ color: tb }}
+                  >
+                    L&rsquo;offerta termina in
+                  </span>
+                  <SalesCountdown endsAt={promo.ends_at} size="md" />
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* CTA — anchor to the masterclass list */}
+          <motion.div variants={fadeUp} className="mt-9">
+            <a
+              href="#tutti-i-master"
+              onClick={(e) => {
+                e.preventDefault();
+                smoothScrollTo("#tutti-i-master", { offset: -70 });
+              }}
+              className="inline-flex items-center gap-3 px-8 py-4 text-[0.8rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90"
+              style={{ background: ORANGE, color: "#111" }}
+            >
+              <span>Acquista una Masterclass</span>
+              <span aria-hidden>↓</span>
+            </a>
+          </motion.div>
+
+          {/* Subline — below the CTA */}
           <motion.p
             variants={fadeUp}
-            className="mt-7 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
+            className="mt-8 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
             style={{ color: tb }}
           >
             8 masterclass intensive guidate da professionisti che operano ogni
@@ -600,12 +724,15 @@ function MasterclassCard({
   index,
   isDark,
   isInView,
+  salesMode,
 }: {
   workshop: Workshop;
   index: number;
   isDark: boolean;
   isInView: boolean;
+  salesMode?: boolean;
 }) {
+  const router = useRouter();
   const cred = CREDENTIALS[workshop.slug];
   const product = getMasterclassProducts().find(
     (p) => p.workshopSlug === workshop.slug,
@@ -621,6 +748,18 @@ function MasterclassCard({
       ? computePromoPricing(promo, product.priceCents)
       : null;
   const hasDiscount = !!pricing && pricing.discount > 0;
+  const discountPct =
+    hasDiscount && pricing
+      ? Math.round((pricing.discount / pricing.original) * 100)
+      : 0;
+
+  const buyHref = !isTbd && product ? `/checkout?pack=${product.slug}` : null;
+  // Card is wrapped in a Link — the buy CTA must intercept and redirect.
+  const goToCheckout = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (buyHref) router.push(buyHref);
+  };
 
   const th = isDark ? "#f5f5fa" : "#0a0a1a";
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
@@ -789,7 +928,7 @@ function MasterclassCard({
             )}
 
             {/* Prezzo promo — visibile solo con promo attiva */}
-            {hasDiscount && pricing && (
+            {!salesMode && hasDiscount && pricing && (
               <div className="mt-5 flex flex-wrap items-center gap-2.5">
                 <span
                   className="px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
@@ -825,50 +964,175 @@ function MasterclassCard({
           </div>
 
           {/* CTA right */}
-          <div className="hidden shrink-0 flex-col items-end gap-2 md:flex">
-            <span
-              className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
-              style={{ color: ts }}
-            >
-              Esplora
-            </span>
-            <div
-              className="flex h-12 w-12 items-center justify-center transition-all duration-300"
-              style={{
-                border: `1.5px solid rgba(${ORANGE_RGB},0.55)`,
-                background: isDark
-                  ? `rgba(${ORANGE_RGB},0.05)`
-                  : `rgba(${ORANGE_RGB},0.04)`,
-              }}
-            >
-              <svg
-                viewBox="0 0 16 16"
-                width="14"
-                height="14"
-                fill={ORANGE}
-                className="transition-transform duration-300 group-hover:translate-x-0.5"
-                aria-hidden="true"
-              >
-                <path d="M5 3l1.4-1.4L13 8l-6.6 6.4L5 13l5-5z" />
-              </svg>
-            </div>
+          <div className="hidden shrink-0 flex-col items-end gap-2.5 md:flex">
+            {salesMode && buyHref && product ? (
+              <>
+                {/* Prezzo — sopra la CTA */}
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="flex items-baseline gap-2.5">
+                    {hasDiscount && (
+                      <span
+                        className="px-1.5 py-0.5 text-[0.58rem] font-black uppercase tracking-[0.18em]"
+                        style={{ background: ORANGE, color: "#111" }}
+                      >
+                        -{discountPct}%
+                      </span>
+                    )}
+                    {hasDiscount && pricing && (
+                      <span
+                        className="text-[0.95rem] font-bold tabular-nums line-through"
+                        style={{ color: ts }}
+                      >
+                        {formatPriceClean(pricing.original)}
+                      </span>
+                    )}
+                    <span
+                      className="font-black leading-none tabular-nums"
+                      style={{
+                        fontSize: "clamp(3.6rem, 6vw, 5rem)",
+                        color: ORANGE,
+                      }}
+                    >
+                      {formatPriceClean(
+                        pricing ? pricing.final : product.priceCents,
+                      )}
+                    </span>
+                  </div>
+                  <span
+                    className="text-[0.56rem] font-bold uppercase tracking-[0.2em]"
+                    style={{ color: ts }}
+                  >
+                    IVA incl.
+                  </span>
+                </div>
+
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Acquista ${workshop.title}`}
+                  onClick={goToCheckout}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") goToCheckout(e);
+                  }}
+                  className="mt-1 inline-flex items-center gap-2.5 px-7 py-4 text-[0.76rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90"
+                  style={{ background: ORANGE, color: "#111" }}
+                >
+                  Acquista ora
+                  <span aria-hidden>→</span>
+                </span>
+                <span
+                  className="text-[0.58rem] font-bold uppercase tracking-[0.26em]"
+                  style={{ color: ts }}
+                >
+                  Oppure esplora il Master
+                </span>
+              </>
+            ) : (
+              <>
+                <span
+                  className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
+                  style={{ color: ts }}
+                >
+                  Esplora
+                </span>
+                <div
+                  className="flex h-12 w-12 items-center justify-center transition-all duration-300"
+                  style={{
+                    border: `1.5px solid rgba(${ORANGE_RGB},0.55)`,
+                    background: isDark
+                      ? `rgba(${ORANGE_RGB},0.05)`
+                      : `rgba(${ORANGE_RGB},0.04)`,
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="14"
+                    height="14"
+                    fill={ORANGE}
+                    className="transition-transform duration-300 group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 3l1.4-1.4L13 8l-6.6 6.4L5 13l5-5z" />
+                  </svg>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Mobile CTA */}
-          <div className="flex items-center gap-2 pt-1 md:hidden">
-            <span
-              className="text-[0.62rem] font-black uppercase tracking-[0.28em]"
-              style={{ color: ORANGE }}
-            >
-              Esplora il Master
-            </span>
-            <span
-              className="text-[0.85rem] font-black"
-              style={{ color: ORANGE }}
-            >
-              →
-            </span>
-          </div>
+          {salesMode && buyHref && product ? (
+            <div className="flex flex-col gap-3 pt-1 md:hidden">
+              {/* Prezzo — sopra la CTA */}
+              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                {hasDiscount && (
+                  <span
+                    className="px-1.5 py-0.5 text-[0.58rem] font-black uppercase tracking-[0.18em]"
+                    style={{ background: ORANGE, color: "#111" }}
+                  >
+                    -{discountPct}%
+                  </span>
+                )}
+                {hasDiscount && pricing && (
+                  <span
+                    className="text-[0.95rem] font-bold tabular-nums line-through"
+                    style={{ color: ts }}
+                  >
+                    {formatPriceClean(pricing.original)}
+                  </span>
+                )}
+                <span
+                  className="font-black leading-none tabular-nums"
+                  style={{ fontSize: "4rem", color: ORANGE }}
+                >
+                  {formatPriceClean(
+                    pricing ? pricing.final : product.priceCents,
+                  )}
+                </span>
+                <span
+                  className="text-[0.56rem] font-bold uppercase tracking-[0.2em]"
+                  style={{ color: ts }}
+                >
+                  IVA incl.
+                </span>
+              </div>
+
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label={`Acquista ${workshop.title}`}
+                onClick={goToCheckout}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") goToCheckout(e);
+                }}
+                className="inline-flex w-full items-center justify-center gap-2.5 px-6 py-4 text-[0.78rem] font-black uppercase tracking-[0.16em]"
+                style={{ background: ORANGE, color: "#111" }}
+              >
+                Acquista ora
+                <span aria-hidden>→</span>
+              </span>
+              <span
+                className="text-[0.6rem] font-bold uppercase tracking-[0.26em] text-center"
+                style={{ color: ts }}
+              >
+                Oppure esplora il Master
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 pt-1 md:hidden">
+              <span
+                className="text-[0.62rem] font-black uppercase tracking-[0.28em]"
+                style={{ color: ORANGE }}
+              >
+                Esplora il Master
+              </span>
+              <span
+                className="text-[0.85rem] font-black"
+                style={{ color: ORANGE }}
+              >
+                →
+              </span>
+            </div>
+          )}
         </div>
       </Link>
     </motion.div>
@@ -878,9 +1142,11 @@ function MasterclassCard({
 function MasterclassListSection({
   isDark,
   workshops,
+  salesMode,
 }: {
   isDark: boolean;
   workshops?: Workshop[];
+  salesMode?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
@@ -895,6 +1161,7 @@ function MasterclassListSection({
   return (
     <section
       ref={sectionRef}
+      id="tutti-i-master"
       className="themed-section relative overflow-hidden py-24 md:py-32"
     >
       <div className="absolute inset-0 section-bg" />
@@ -952,6 +1219,7 @@ function MasterclassListSection({
               index={i}
               isDark={isDark}
               isInView={isInView}
+              salesMode={salesMode}
             />
           ))}
         </div>
@@ -1037,7 +1305,7 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
               href="#tutti-i-master"
               onClick={(e) => {
                 e.preventDefault();
-                smoothScrollTo(0);
+                smoothScrollTo("#tutti-i-master", { offset: -70 });
               }}
               className="inline-flex items-center justify-center gap-2 px-6 py-4 text-[0.74rem] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
               style={{
@@ -1091,16 +1359,34 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
 /* ──────────────────────────────────────────────────────────────
    ENTRY
 ─────────────────────────────────────────────────────────────── */
-export function WorkshopGrid({ workshops }: { workshops?: Workshop[] } = {}) {
+export function WorkshopGrid({
+  workshops,
+  salesMode,
+}: { workshops?: Workshop[]; salesMode?: boolean } = {}) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const promo = useMasterclassPromo();
+  const fromPricing = salesMode ? getFromPricing(workshops, promo) : null;
 
   return (
     <>
-      <HeroSection />
+      <HeroSection salesMode={salesMode} workshops={workshops} />
       <ManifestoSection isDark={isDark} />
-      <MasterclassListSection isDark={isDark} workshops={workshops} />
+      <MasterclassListSection
+        isDark={isDark}
+        workshops={workshops}
+        salesMode={salesMode}
+      />
       <FinalCTA isDark={isDark} />
+      {salesMode && (
+        <>
+          <SalesFloatingBar promo={promo} />
+          <SalesExitModal
+            promo={promo}
+            fromPriceCents={fromPricing?.final ?? null}
+          />
+        </>
+      )}
     </>
   );
 }

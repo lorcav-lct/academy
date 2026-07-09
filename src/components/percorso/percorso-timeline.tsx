@@ -115,24 +115,24 @@ function BlockPanel({
           </p>
         </div>
 
-        {/* Month badges */}
-        <div className="flex flex-wrap gap-2">
-          {item.dates.map((d, di) => (
-            <span
-              key={d}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-[0.72rem] font-bold tracking-wider text-academy-orange uppercase"
-              style={{
-                background: "rgba(240,146,38,0.07)",
-                border: "1px solid rgba(240,146,38,0.2)",
-              }}
-            >
+        {/* Dates — near-title size for maximum visibility */}
+        <div>
+          <span className="label-tag mb-3 block">Date</span>
+          <div className="flex flex-col gap-1.5">
+            {item.dates.map((d) => (
               <span
-                className="h-1.5 w-1.5 shrink-0"
-                style={{ background: `rgba(240,146,38,${0.5 + di * 0.3})` }}
-              />
-              {d}
-            </span>
-          ))}
+                key={d}
+                className="flex items-center gap-3 font-black tracking-[-0.02em] leading-none text-academy-gray-100 uppercase"
+                style={{ fontSize: "clamp(1.5rem,3.4vw,2.5rem)" }}
+              >
+                <span
+                  className="h-[3px] w-6 shrink-0"
+                  style={{ background: "#F09226" }}
+                />
+                {d}
+              </span>
+            ))}
+          </div>
         </div>
 
         <button
@@ -189,15 +189,12 @@ function FipePanel({ item }: { item: FipeItem }) {
           Personal Trainer FIPE
         </p>
 
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-col items-center gap-1.5">
           {item.dates.map((d) => (
             <span
               key={d}
-              className="inline-block px-5 py-2 text-[0.75rem] font-bold tracking-wider text-academy-orange/80 uppercase"
-              style={{
-                background: "rgba(240,146,38,0.07)",
-                border: "1px solid rgba(240,146,38,0.2)",
-              }}
+              className="font-black tracking-[-0.02em] leading-none text-academy-gray-100 uppercase"
+              style={{ fontSize: "clamp(1.5rem,3.4vw,2.5rem)" }}
             >
               {d}
             </span>
