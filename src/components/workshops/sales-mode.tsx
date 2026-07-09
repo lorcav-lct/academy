@@ -162,25 +162,27 @@ export function SalesFloatingBar({ promo }: { promo: PromoRow | null }) {
               ×
             </button>
 
+            {/* Countdown — riga propria, sopra al testo */}
+            <div className="flex justify-center">
+              <SalesCountdown endsAt={promo.ends_at} size="sm" />
+            </div>
+
             {/* Titolo — riga propria, full width */}
             <p
-              className="pr-6 text-center text-[0.88rem] font-black uppercase tracking-[0.12em] leading-tight md:text-[0.95rem]"
+              className="mt-3 pr-6 text-center text-[0.88rem] font-black uppercase tracking-[0.12em] leading-tight md:text-[0.95rem]"
               style={{ color: "#f5f5fa" }}
             >
               Il prezzo scontato sta per scadere —{" "}
               <span style={{ color: ORANGE }}>blocca ora il tuo posto</span>
             </p>
 
-            {/* Due colonne: countdown + CTA */}
-            <div className="mt-4 grid grid-cols-1 items-center gap-3.5 sm:grid-cols-2">
-              <div className="flex justify-center sm:justify-start">
-                <SalesCountdown endsAt={promo.ends_at} size="sm" />
-              </div>
+            {/* CTA — riga propria, centrata */}
+            <div className="mt-4 flex justify-center">
               <button
                 onClick={() =>
                   smoothScrollTo("#tutti-i-master", { offset: -70 })
                 }
-                className="inline-flex w-full items-center justify-center gap-2 px-5 py-3.5 text-[0.76rem] font-black uppercase tracking-[0.14em] transition-all duration-200 hover:opacity-90"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 text-[0.76rem] font-black uppercase tracking-[0.14em] transition-all duration-200 hover:opacity-90"
                 style={{ background: ORANGE, color: "#111" }}
               >
                 <span>Acquista ora</span>
