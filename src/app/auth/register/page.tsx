@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { trackMetaRegistration } from "@/app/actions/meta-track";
 
 const PAGE_BG = "#f5f3ef";
 const TEXT_PRIMARY = "#111111";
@@ -101,6 +102,13 @@ function RegisterForm() {
       setLoading(false);
       return;
     }
+
+    // Meta CAPI: CompleteRegistration (fire-and-forget, server-side).
+    void trackMetaRegistration({
+      email: formData.email,
+      fullName: formData.fullName,
+      phone: formData.phone,
+    }).catch(() => {});
 
     if (next) {
       localStorage.setItem("pending_checkout", next);

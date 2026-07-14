@@ -1,6 +1,12 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  contextToUserData,
+  getMetaClientContext,
+  sendMetaEvent,
+} from "@/lib/meta/conversion";
 
 export type FairLeadInput = {
   first_name: string;
@@ -44,6 +50,21 @@ export async function saveFairLead(
     console.error("[saveFairLead]", error);
     return { success: false, error: "Errore durante il salvataggio." };
   }
+
+  // Meta CAPI: Lead. Rich PII (email + name + phone) → strong match quality.
+  const ctx = getMetaClientContext(await headers());
+  await sendMetaEvent({
+    eventName: "Lead",
+    eventSourceUrl: ctx.eventSourceUrl,
+    user: {
+      email: email.trim().toLowerCase(),
+      phone,
+      firstName: first_name,
+      lastName: last_name,
+      ...contextToUserData(ctx),
+    },
+    customData: { content_name: source },
+  });
 
   return { success: true };
 }

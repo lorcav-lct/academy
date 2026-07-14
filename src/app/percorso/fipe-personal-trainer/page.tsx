@@ -12,6 +12,7 @@ import {
 import { getProductBySlug } from "@/lib/constants/packs";
 import { getActivePromoForProduct } from "@/lib/promos/server";
 import { computePromoPricing } from "@/lib/promos/types";
+import { MetaViewContent } from "@/components/analytics/meta-view-content";
 
 const ORANGE = "#F09226";
 const ORANGE_RGB = "240,146,38";
@@ -45,6 +46,11 @@ export default async function FipePersonalTrainerPage() {
 
   return (
     <>
+      <MetaViewContent
+        contentId={FIPE_SLUG}
+        contentName={FIPE_COURSE_TITLE}
+        value={(hasDiscount && pricing ? pricing.final : originalCents) / 100}
+      />
       {/* HERO — dark */}
       <section
         className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-28"

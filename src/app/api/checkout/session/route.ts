@@ -9,7 +9,9 @@ import {
   resolveStripePriceId,
   resolveDepositPriceId,
   isDepositEligible,
+  DEPOSIT_PRICE_CENTS,
 } from "@/lib/constants/packs";
+import { getMetaClientContext, sendMetaEvent } from "@/lib/meta/conversion";
 import { resolvePublicWorkshops } from "@/lib/constants/workshops";
 import { getDeadlines, isPastDeadline } from "@/lib/settings/deadlines";
 import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
@@ -254,6 +256,10 @@ export async function POST(request: NextRequest) {
           ? null
           : promotionCodeId || null;
 
+    // Meta CAPI: capture the buyer's click/session signals here (this request
+    // comes from their browser); the webhook, called by Stripe, cannot.
+    const metaContext = getMetaClientContext(request.headers);
+
     // Create Stripe Checkout Session
     const cancelPath =
       packId === "fipe-personal-trainer"
@@ -271,6 +277,32 @@ export async function POST(request: NextRequest) {
       cancelPath,
       paymentPlan: isDeposit ? "deposit" : "full",
       depositOrderId,
+      metaContext,
+    });
+
+    // Meta CAPI: InitiateCheckout. event_id is namespaced so it never dedups
+    // against the Purchase event (which uses the bare order id).
+    const initiateValue =
+      (isDeposit ? DEPOSIT_PRICE_CENTS : (product.priceCents ?? 0)) / 100;
+    await sendMetaEvent({
+      eventName: "InitiateCheckout",
+      eventId: `${order.id}:ic`,
+      eventSourceUrl: metaContext.eventSourceUrl,
+      user: {
+        email: user.email,
+        externalId: user.id,
+        clientIpAddress: metaContext.clientIpAddress,
+        clientUserAgent: metaContext.clientUserAgent,
+        fbp: metaContext.fbp,
+        fbc: metaContext.fbc,
+      },
+      customData: {
+        currency: "EUR",
+        value: initiateValue,
+        content_type: "product",
+        content_ids: [packId],
+        content_name: product.name,
+      },
     });
 
     // Update order with Stripe session ID via admin client.
