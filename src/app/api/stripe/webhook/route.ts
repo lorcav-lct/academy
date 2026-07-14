@@ -8,6 +8,7 @@ import { DepositReceivedEmail } from "@/lib/email/templates/deposit-received";
 import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
 import { fulfillOrder } from "@/lib/orders/fulfill";
 import { getDeadlines } from "@/lib/settings/deadlines";
+import { sendMetaEvent } from "@/lib/meta/conversion";
 import React from "react";
 
 /** Canonical public domain for customer-facing email links. Hardcoded so that
@@ -154,6 +155,47 @@ export async function POST(request: NextRequest) {
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // ── Meta Conversions API: Purchase ────────────────────────────────────
+    // Fire once per confirmed payment (deposit or full/balance), before the
+    // deposit early-return. event_id = order id → dedups with any browser Pixel
+    // Purchase. Click/session signals were stashed in metadata at checkout.
+    if (!wasAlreadyPaid) {
+      const details = session.customer_details;
+      const address = details?.address;
+      const profile = order.profiles as {
+        full_name?: string | null;
+        phone?: string | null;
+      } | null;
+      const purchasedPack = PRODUCTS.find((p) => p.slug === order.pack_id);
+      await sendMetaEvent({
+        eventName: "Purchase",
+        eventId: order.id,
+        eventSourceUrl: session.metadata?.fb_src || undefined,
+        user: {
+          email: details?.email || order.billing_email,
+          phone: details?.phone || profile?.phone,
+          fullName: details?.name || order.billing_name || profile?.full_name,
+          city: address?.city,
+          state: address?.state,
+          zip: address?.postal_code,
+          country: address?.country,
+          externalId: order.user_id,
+          clientIpAddress: session.metadata?.fb_ip || undefined,
+          clientUserAgent: session.metadata?.fb_ua || undefined,
+          fbp: session.metadata?.fb_fbp || undefined,
+          fbc: session.metadata?.fb_fbc || undefined,
+        },
+        customData: {
+          currency: (session.currency || "eur").toUpperCase(),
+          value: (session.amount_total || 0) / 100,
+          content_type: "product",
+          content_ids: [order.pack_id].filter(Boolean),
+          content_name: purchasedPack?.name || order.pack_id || undefined,
+          order_id: order.id,
+        },
+      });
     }
 
     // ── Caparra (deposit) branch ──────────────────────────────────────────

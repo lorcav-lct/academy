@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { COURSES, getCourseBySlug } from "@/lib/constants/courses";
 import { PercorsoBlockDetail } from "@/components/percorso/percorso-block-detail";
+import { MetaViewContent } from "@/components/analytics/meta-view-content";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -44,10 +45,13 @@ export default async function BlockPage({ params }: PageProps) {
   const nextCourse = idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
   return (
-    <PercorsoBlockDetail
-      course={course}
-      prevCourse={prevCourse}
-      nextCourse={nextCourse}
-    />
+    <>
+      <MetaViewContent contentId={course.slug} contentName={course.title} />
+      <PercorsoBlockDetail
+        course={course}
+        prevCourse={prevCourse}
+        nextCourse={nextCourse}
+      />
+    </>
   );
 }

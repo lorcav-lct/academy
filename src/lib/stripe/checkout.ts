@@ -21,6 +21,22 @@ interface CreateCheckoutParams {
   paymentPlan?: "full" | "deposit";
   /** Su una sessione di SALDO: id dell'ordine caparra da chiudere al pagamento. */
   depositOrderId?: string | null;
+  /** Meta CAPI click/session signals captured from the buyer's browser at
+   *  checkout creation. Stashed in metadata so the (Stripe-called) webhook can
+   *  attach them to the server-side Purchase event for better match quality. */
+  metaContext?: {
+    clientIpAddress?: string;
+    clientUserAgent?: string;
+    fbp?: string;
+    fbc?: string;
+    eventSourceUrl?: string;
+  };
+}
+
+/** Stripe caps metadata values at 500 chars; keep UA/URL under the limit. */
+function clampMeta(value: string | undefined, max = 480): string {
+  if (!value) return "";
+  return value.length > max ? value.slice(0, max) : value;
 }
 
 export async function createCheckoutSession(params: CreateCheckoutParams) {
@@ -58,6 +74,12 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
       ),
       promotion_code: params.promotionCodeId ?? "",
       coupon: params.couponId ?? "",
+      // Meta CAPI signals (empty string when absent — Stripe rejects undefined).
+      fb_ip: clampMeta(params.metaContext?.clientIpAddress),
+      fb_ua: clampMeta(params.metaContext?.clientUserAgent),
+      fb_fbp: clampMeta(params.metaContext?.fbp),
+      fb_fbc: clampMeta(params.metaContext?.fbc),
+      fb_src: clampMeta(params.metaContext?.eventSourceUrl),
     },
   };
 

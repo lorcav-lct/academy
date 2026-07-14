@@ -5,7 +5,9 @@ import {
   PUBLIC_WORKSHOPS,
   getWorkshopBySlug,
 } from "@/lib/constants/workshops";
+import { getProductBySlug } from "@/lib/constants/packs";
 import { WorkshopDetail } from "@/components/workshops/workshop-detail";
+import { MetaViewContent } from "@/components/analytics/meta-view-content";
 
 interface MasterclassPageProps {
   params: Promise<{ slug: string }>;
@@ -40,6 +42,16 @@ export default async function MasterclassPage({
 
   // "Altri masterclass" mostra solo voci pubbliche, mai hidden.
   const otherWorkshops = PUBLIC_WORKSHOPS.filter((w) => w.slug !== slug);
+  const priceCents = getProductBySlug(slug)?.priceCents;
 
-  return <WorkshopDetail workshop={workshop} otherWorkshops={otherWorkshops} />;
+  return (
+    <>
+      <MetaViewContent
+        contentId={slug}
+        contentName={workshop.title}
+        value={priceCents !== undefined ? priceCents / 100 : undefined}
+      />
+      <WorkshopDetail workshop={workshop} otherWorkshops={otherWorkshops} />
+    </>
+  );
 }
