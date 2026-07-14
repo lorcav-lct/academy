@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 import { Lexend, Geist_Mono } from "next/font/google";
+import { MetaPixelPageView } from "@/components/analytics/meta-pixel";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
@@ -110,6 +112,9 @@ fbq('track', 'PageView');`}
             src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
           />
         </noscript>
+        <Suspense fallback={null}>
+          <MetaPixelPageView />
+        </Suspense>
         <ThemeProvider>
           <LenisProvider>
             <Navbar />
