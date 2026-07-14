@@ -84,7 +84,7 @@ export default function RootLayout({
       data-theme="light"
       suppressHydrationWarning
     >
-      <head>
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         {/* Meta Pixel Code */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`!function(f,b,e,v,n,t,s)
@@ -99,8 +99,6 @@ fbq('init', '${META_PIXEL_ID}');
 fbq('track', 'PageView');`}
         </Script>
         {/* End Meta Pixel Code */}
-      </head>
-      <body className="min-h-screen antialiased" suppressHydrationWarning>
         {/* Meta Pixel noscript fallback */}
         <noscript>
           {/* eslint-disable-next-line @next/next/no-img-element */}
