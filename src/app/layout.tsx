@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Lexend, Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -24,6 +25,8 @@ const geistMono = Geist_Mono({
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || "https://academy.lacertosus.com";
+
+const META_PIXEL_ID = "1739847650691729";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -79,7 +82,34 @@ export default function RootLayout({
       data-theme="light"
       suppressHydrationWarning
     >
+      <head>
+        {/* Meta Pixel Code */}
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '${META_PIXEL_ID}');
+fbq('track', 'PageView');`}
+        </Script>
+        {/* End Meta Pixel Code */}
+      </head>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
+        {/* Meta Pixel noscript fallback */}
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            alt=""
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          />
+        </noscript>
         <ThemeProvider>
           <LenisProvider>
             <Navbar />
