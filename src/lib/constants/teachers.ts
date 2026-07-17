@@ -372,6 +372,19 @@ export const TEACHERS: Teacher[] = [
     talkTitle:
       "Elite Football Rehab Master — Prevenzione, Recupero e Ritorno alla Massima Performance",
   },
+
+  // ───────── MASTERCLASS INTERNATIONAL ─────────
+  {
+    slug: "alexander-puig",
+    name: "Alexander Puig",
+    role: "Certified Personal Trainer & Strength Coach",
+    // Bio kept in English: international faculty, English-speaking masterclass.
+    bio: "Certified personal trainer and strength coach with over 7 years of strength and conditioning experience. Years spent interning in high-level facilities and countless hours studying and applying science-based, time-tested strength and conditioning methods.",
+    courses: ["master-strength-conditioning-int"],
+    image_url: "/docenti/alexander-puig.webp",
+    color: BRAND,
+    talkTitle: "Science-Based Strength & Conditioning",
+  },
 ];
 
 export function getTeacherBySlug(slug: string): Teacher | undefined {

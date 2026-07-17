@@ -1,11 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
-import { PUBLIC_WORKSHOPS, type Workshop } from "@/lib/constants/workshops";
+import {
+  PUBLIC_STANDARD_WORKSHOPS,
+  type Workshop,
+} from "@/lib/constants/workshops";
 import { smoothScrollTo } from "@/lib/scroll";
 import { getMasterclassProducts } from "@/lib/constants/packs";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
@@ -132,6 +135,18 @@ const CREDENTIALS: Record<string, Credential> = {
     badgeTooltip:
       "Faculty in finalizzazione: stiamo selezionando preparatori atletici di livello internazionale nel rugby.",
   },
+  "master-strength-conditioning-int": {
+    domain: "International — Strength & Conditioning",
+    headline: "Alexander Puig",
+    pitch:
+      "Certified personal trainer & strength coach: oltre 7 anni di esperienza in strength & conditioning basato sull'evidenza.",
+    promise:
+      "Metodi di forza e condizionamento science-based e time-tested, applicati alla performance reale sul campo.",
+    featured: true,
+    badge: "International",
+    badgeTooltip:
+      "Faculty internazionale: metodi science-based di strength & conditioning dall'esperienza sul campo negli USA.",
+  },
 };
 
 const STATS = [
@@ -182,7 +197,7 @@ function getFromPricing(
   workshops: Workshop[] | undefined,
   promo: PromoRow | null,
 ): { original: number; final: number } | null {
-  const list = workshops ?? PUBLIC_WORKSHOPS;
+  const list = workshops ?? PUBLIC_STANDARD_WORKSHOPS;
   const products = getMasterclassProducts().filter(
     (p) =>
       p.priceCents > 0 && list.some((w) => w.slug === p.workshopSlug && !w.tbd),
@@ -203,14 +218,114 @@ function getFromPricing(
 }
 
 /* ──────────────────────────────────────────────────────────────
+   CATEGORY NAV — Masterclass | International
+   Non è un toggle: entrambe le sezioni sono sempre visibili in pagina.
+   I due bottoni scrollano (link in-page) alla sezione dedicata; lo stato
+   "attivo" segue la sezione correntemente in vista (scrollspy).
+─────────────────────────────────────────────────────────────── */
+const SECTION_PRO = "tutti-i-master";
+const SECTION_INTL = "masterclass-international";
+
+const NAV_ITEMS: { id: string; label: string }[] = [
+  { id: SECTION_PRO, label: "Pro" },
+  { id: SECTION_INTL, label: "International" },
+];
+
+/** Ritorna l'id della sezione correntemente più in vista tra quelle passate. */
+function useActiveSection(ids: string[], fallback: string): string {
+  const [active, setActive] = useState(fallback);
+  const key = ids.join(",");
+
+  useEffect(() => {
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (els.length === 0) return;
+
+    const ratios = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          ratios.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
+        }
+        let best = fallback;
+        let bestRatio = -1;
+        for (const [id, r] of ratios) {
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = id;
+          }
+        }
+        if (bestRatio > 0) setActive(best);
+      },
+      { threshold: [0, 0.15, 0.35, 0.6, 1] },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, fallback]);
+
+  return active;
+}
+
+function CategoryNav({
+  activeId,
+  isDark,
+  className,
+}: {
+  activeId: string;
+  isDark: boolean;
+  className?: string;
+}) {
+  const trackBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
+  const trackBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+  const inactiveColor = isDark ? "rgba(180,180,200,0.7)" : "#555555";
+
+  return (
+    <nav
+      aria-label="Categorie masterclass"
+      className={`inline-flex flex-wrap gap-1 p-1 ${className ?? ""}`}
+      style={{ background: trackBg, border: `1px solid ${trackBorder}` }}
+    >
+      {NAV_ITEMS.map((o) => {
+        const active = activeId === o.id;
+        return (
+          <a
+            key={o.id}
+            href={`#${o.id}`}
+            aria-current={active ? "true" : undefined}
+            onClick={(e) => {
+              e.preventDefault();
+              smoothScrollTo(`#${o.id}`, { offset: -70 });
+            }}
+            className="px-4 py-2.5 text-[0.66rem] font-black uppercase tracking-[0.16em] transition-all duration-200 md:text-[0.72rem] md:tracking-[0.18em]"
+            style={
+              active
+                ? { background: ORANGE, color: "#111" }
+                : { color: inactiveColor, background: "transparent" }
+            }
+          >
+            {o.label}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
    HERO
 ─────────────────────────────────────────────────────────────── */
 function HeroSection({
   salesMode,
   workshops,
+  activeId,
+  hasInternational,
 }: {
   salesMode?: boolean;
   workshops?: Workshop[];
+  activeId: string;
+  hasInternational: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-50px" });
@@ -322,6 +437,13 @@ function HeroSection({
             <br />
             <span className="gradient-text">IN AULA CON TE.</span>
           </motion.h1>
+
+          {/* Category nav — Masterclass | International (link in-page) */}
+          {hasInternational && (
+            <motion.div variants={fadeUp} className="mt-8">
+              <CategoryNav activeId={activeId} isDark />
+            </motion.div>
+          )}
 
           {/* Sales mode — urgency banner: promo price + countdown, sized to content */}
           {salesMode && fromPricing && (
@@ -515,7 +637,15 @@ function HeroSection({
 /* ──────────────────────────────────────────────────────────────
    MANIFESTO — 3 reasons
 ─────────────────────────────────────────────────────────────── */
-function ManifestoSection({ isDark }: { isDark: boolean }) {
+function ManifestoSection({
+  isDark,
+  activeId,
+  hasInternational,
+}: {
+  isDark: boolean;
+  activeId: string;
+  hasInternational: boolean;
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
 
@@ -555,6 +685,12 @@ function ManifestoSection({ isDark }: { isDark: boolean }) {
           animate={isInView ? "visible" : "hidden"}
           className="mb-14 md:mb-20"
         >
+          {hasInternational && (
+            <motion.div variants={fadeUp} className="mb-6">
+              <CategoryNav activeId={activeId} isDark={isDark} />
+            </motion.div>
+          )}
+
           <motion.div
             variants={fadeUp}
             className="mb-5 flex items-center gap-3"
@@ -574,10 +710,7 @@ function ManifestoSection({ isDark }: { isDark: boolean }) {
           <motion.h2
             variants={fadeUp}
             className="max-w-4xl font-black leading-[0.98] tracking-[-0.025em]"
-            style={{
-              fontSize: "clamp(2rem, 5.2vw, 4.4rem)",
-              color: th,
-            }}
+            style={{ fontSize: "clamp(2rem, 5.2vw, 4.4rem)", color: th }}
           >
             La specializzazione verticale
             <br />
@@ -1143,10 +1276,20 @@ function MasterclassListSection({
   isDark,
   workshops,
   salesMode,
+  sectionId,
+  eyebrow,
+  title,
+  intro,
+  bgAlt = false,
 }: {
   isDark: boolean;
   workshops?: Workshop[];
   salesMode?: boolean;
+  sectionId: string;
+  eyebrow: string;
+  title: React.ReactNode;
+  intro: string;
+  bgAlt?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
@@ -1154,17 +1297,19 @@ function MasterclassListSection({
   const th = isDark ? "#f5f5fa" : "#0a0a1a";
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
 
-  const sorted = [...(workshops ?? PUBLIC_WORKSHOPS)].sort(
+  const sorted = [...(workshops ?? PUBLIC_STANDARD_WORKSHOPS)].sort(
     (a, b) => a.sortOrder - b.sortOrder,
   );
 
   return (
     <section
       ref={sectionRef}
-      id="tutti-i-master"
+      id={sectionId}
       className="themed-section relative overflow-hidden py-24 md:py-32"
     >
-      <div className="absolute inset-0 section-bg" />
+      <div
+        className={`absolute inset-0 ${bgAlt ? "section-bg-alt" : "section-bg"}`}
+      />
 
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.022]"
@@ -1186,43 +1331,49 @@ function MasterclassListSection({
             className="mb-5 block text-[0.7rem] font-black uppercase tracking-[0.34em]"
             style={{ color: ORANGE }}
           >
-            — Tutti i Masterclass
+            {eyebrow}
           </span>
           <h2
             className="font-black leading-[0.95] tracking-[-0.03em]"
-            style={{
-              fontSize: "clamp(2.2rem, 5vw, 4.2rem)",
-              color: th,
-            }}
+            style={{ fontSize: "clamp(2.2rem, 5vw, 4.2rem)", color: th }}
           >
-            Otto verticali.
-            <br />
-            <span className="gradient-text">Otto modi</span> di diventare il
-            riferimento.{" "}
+            {title}
           </h2>
           <p
             className="mt-6 max-w-2xl text-[1rem] leading-[1.7] md:text-[1.05rem]"
             style={{ color: tb }}
           >
-            Ogni Masterclass è acquistabile separatamente o incluso nel
-            pacchetto PRO/ELITE (2 a scelta). Verticali nel dominio, intensivi
-            nel formato, applicabili dal lunedì successivo.
+            {intro}
           </p>
         </motion.div>
 
         {/* Cards */}
-        <div className="flex flex-col gap-5 md:gap-6">
-          {sorted.map((ws, i) => (
-            <MasterclassCard
-              key={ws.slug}
-              workshop={ws}
-              index={i}
-              isDark={isDark}
-              isInView={isInView}
-              salesMode={salesMode}
-            />
-          ))}
-        </div>
+        {sorted.length > 0 ? (
+          <div className="flex flex-col gap-5 md:gap-6">
+            {sorted.map((ws, i) => (
+              <MasterclassCard
+                key={ws.slug}
+                workshop={ws}
+                index={i}
+                isDark={isDark}
+                isInView={isInView}
+                salesMode={salesMode}
+              />
+            ))}
+          </div>
+        ) : (
+          <p
+            className="border border-dashed px-6 py-10 text-center text-[0.95rem]"
+            style={{
+              color: tb,
+              borderColor: isDark
+                ? "rgba(255,255,255,0.12)"
+                : "rgba(0,0,0,0.12)",
+            }}
+          >
+            Nessuna masterclass disponibile in questa categoria al momento.
+          </p>
+        )}
       </div>
     </section>
   );
@@ -1361,23 +1512,76 @@ function FinalCTA({ isDark }: { isDark: boolean }) {
 ─────────────────────────────────────────────────────────────── */
 export function WorkshopGrid({
   workshops,
+  internationalWorkshops,
   salesMode,
-}: { workshops?: Workshop[]; salesMode?: boolean } = {}) {
+}: {
+  workshops?: Workshop[];
+  internationalWorkshops?: Workshop[];
+  salesMode?: boolean;
+} = {}) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const promo = useMasterclassPromo();
+
+  const hasInternational = (internationalWorkshops?.length ?? 0) > 0;
+  // Entrambe le sezioni sono sempre in pagina: i selettori sono link in-page,
+  // lo stato "attivo" segue la sezione in vista (scrollspy).
+  const activeId = useActiveSection(
+    hasInternational ? [SECTION_PRO, SECTION_INTL] : [SECTION_PRO],
+    SECTION_PRO,
+  );
+
+  // Sales-mode urgency (hero banner / floating bar / exit modal) è guidato dalla
+  // promo Masterclass Pro; non riguarda le Masterclass International.
   const fromPricing = salesMode ? getFromPricing(workshops, promo) : null;
 
   return (
     <>
-      <HeroSection salesMode={salesMode} workshops={workshops} />
-      <ManifestoSection isDark={isDark} />
+      <HeroSection
+        salesMode={salesMode}
+        workshops={workshops}
+        activeId={activeId}
+        hasInternational={hasInternational}
+      />
+      <ManifestoSection
+        isDark={isDark}
+        activeId={activeId}
+        hasInternational={hasInternational}
+      />
       <MasterclassListSection
         isDark={isDark}
         workshops={workshops}
         salesMode={salesMode}
+        sectionId={SECTION_PRO}
+        eyebrow="— Tutti i Masterclass"
+        title={
+          <>
+            Otto verticali.
+            <br />
+            <span className="gradient-text">Otto modi</span> di diventare il
+            riferimento.{" "}
+          </>
+        }
+        intro="Ogni Masterclass è acquistabile separatamente o inclusa nel pacchetto PRO/ELITE (2 a scelta). Verticali nel dominio, intensivi nel formato, applicabili dal lunedì successivo."
       />
       <FinalCTA isDark={isDark} />
+      {hasInternational && (
+        <MasterclassListSection
+          isDark={isDark}
+          workshops={internationalWorkshops}
+          sectionId={SECTION_INTL}
+          eyebrow="— Masterclass International"
+          title={
+            <>
+              L&rsquo;élite{" "}
+              <span className="gradient-text">internazionale</span>
+              <br />
+              in aula con te.
+            </>
+          }
+          intro="Masterclass guidate da coach e specialisti internazionali. Un percorso a sé: acquisto singolo, non incluso nei pack. Formazione in presenza con i riferimenti mondiali dello strength & conditioning."
+        />
+      )}
       {salesMode && (
         <>
           <SalesFloatingBar promo={promo} />

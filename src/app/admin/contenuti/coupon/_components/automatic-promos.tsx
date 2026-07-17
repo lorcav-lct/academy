@@ -94,9 +94,22 @@ const PACK_OPTIONS = PRODUCTS.filter((p) => p.type === "bundle").map((p) => ({
   slug: p.slug,
   label: `Pack ${p.name}`,
 }));
-const MASTERCLASS_OPTIONS = PRODUCTS.filter((p) => p.type === "workshop").map(
-  (p) => ({ slug: p.slug, label: p.name }),
-);
+const MASTERCLASS_OPTIONS = PRODUCTS.filter(
+  (p) => p.type === "workshop" && !p.international,
+).map((p) => ({ slug: p.slug, label: p.name }));
+const MASTERCLASS_INTL_OPTIONS = PRODUCTS.filter(
+  (p) => p.type === "workshop" && p.international,
+).map((p) => ({ slug: p.slug, label: p.name }));
+
+/** Opzioni prodotto (scope "singolo") per categoria. */
+function optionsForType(
+  product_type: PromoProductType,
+): { slug: string; label: string }[] {
+  if (product_type === "pack") return PACK_OPTIONS;
+  if (product_type === "masterclass_international")
+    return MASTERCLASS_INTL_OPTIONS;
+  return MASTERCLASS_OPTIONS;
+}
 
 function getProductLabel(
   product_type: PromoProductType,
@@ -104,10 +117,14 @@ function getProductLabel(
 ): string {
   if (product_type === "fipe") return "Personal Trainer FIPE";
   if (!slug) {
-    return product_type === "pack" ? "Tutti i Pack" : "Tutte le Masterclass";
+    if (product_type === "pack") return "Tutti i Pack";
+    if (product_type === "masterclass_international")
+      return "Tutte le Masterclass International";
+    return "Tutte le Masterclass";
   }
-  const opts = product_type === "pack" ? PACK_OPTIONS : MASTERCLASS_OPTIONS;
-  return opts.find((o) => o.slug === slug)?.label ?? slug;
+  return (
+    optionsForType(product_type).find((o) => o.slug === slug)?.label ?? slug
+  );
 }
 
 function formatEUR(cents: number): string {
@@ -130,6 +147,7 @@ function formatDate(iso: string | null): string {
 const PRODUCT_TYPE_LABEL: Record<PromoProductType, string> = {
   pack: "Pack",
   masterclass: "Masterclass",
+  masterclass_international: "Masterclass Int'l",
   fipe: "FIPE",
 };
 
@@ -242,8 +260,11 @@ export function AutomaticPromosPanel() {
   const grouped = useMemo(() => {
     const packs = promos.filter((p) => p.product_type === "pack");
     const mc = promos.filter((p) => p.product_type === "masterclass");
+    const mcIntl = promos.filter(
+      (p) => p.product_type === "masterclass_international",
+    );
     const fipe = promos.filter((p) => p.product_type === "fipe");
-    return { packs, mc, fipe };
+    return { packs, mc, mcIntl, fipe };
   }, [promos]);
 
   return (
@@ -287,6 +308,15 @@ export function AutomaticPromosPanel() {
               onDelete={remove}
             />
           )}
+          {grouped.mcIntl.length > 0 && (
+            <PromoGroup
+              title="Masterclass International"
+              promos={grouped.mcIntl}
+              onEdit={startEdit}
+              onToggle={toggleActive}
+              onDelete={remove}
+            />
+          )}
           {grouped.fipe.length > 0 && (
             <PromoGroup
               title="FIPE"
@@ -325,8 +355,15 @@ export function AutomaticPromosPanel() {
             <div className="space-y-5 p-6">
               {/* Categoria target */}
               <Field label="Categoria">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {(["pack", "masterclass", "fipe"] as const).map((cat) => {
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {(
+                    [
+                      "pack",
+                      "masterclass",
+                      "masterclass_international",
+                      "fipe",
+                    ] as const
+                  ).map((cat) => {
                     const selected = editing.product_type === cat;
                     return (
                       <button
@@ -387,19 +424,14 @@ export function AutomaticPromosPanel() {
                         {editing.scope === "all" ? "✓ Selezionato" : "Opzione"}
                       </span>
                       <span className="text-sm font-bold text-academy-gray-800">
-                        {editing.product_type === "pack"
-                          ? "Tutti i Pack"
-                          : "Tutte le Masterclass"}
+                        {getProductLabel(editing.product_type, null)}
                       </span>
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         // Se passiamo a "singolo" ma scope è "all", pre-seleziona il primo
-                        const opts =
-                          editing.product_type === "pack"
-                            ? PACK_OPTIONS
-                            : MASTERCLASS_OPTIONS;
+                        const opts = optionsForType(editing.product_type);
                         const next =
                           editing.scope === "all"
                             ? (opts[0]?.slug ?? "all")
@@ -422,10 +454,11 @@ export function AutomaticPromosPanel() {
                         {editing.scope !== "all" ? "✓ Selezionato" : "Opzione"}
                       </span>
                       <span className="text-sm font-bold text-academy-gray-800">
-                        Solo un{" "}
                         {editing.product_type === "pack"
-                          ? "Pack specifico"
-                          : "Masterclass specifica"}
+                          ? "Solo un Pack specifico"
+                          : editing.product_type === "masterclass_international"
+                            ? "Solo una Masterclass International"
+                            : "Solo una Masterclass specifica"}
                       </span>
                     </button>
                   </div>
@@ -437,10 +470,7 @@ export function AutomaticPromosPanel() {
                       }
                       className={`${selectClass} mt-2`}
                     >
-                      {(editing.product_type === "pack"
-                        ? PACK_OPTIONS
-                        : MASTERCLASS_OPTIONS
-                      ).map((opt) => (
+                      {optionsForType(editing.product_type).map((opt) => (
                         <option key={opt.slug} value={opt.slug}>
                           {opt.label}
                         </option>

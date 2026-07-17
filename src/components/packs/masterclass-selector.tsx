@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  PUBLIC_WORKSHOPS as WORKSHOPS,
+  PUBLIC_STANDARD_WORKSHOPS as WORKSHOPS,
   type Workshop,
 } from "@/lib/constants/workshops";
 import { getBundles } from "@/lib/constants/packs";

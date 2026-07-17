@@ -32,7 +32,7 @@ import {
 import {
   getWorkshopBySlug,
   resolvePublicWorkshops,
-  PUBLIC_WORKSHOPS,
+  PUBLIC_STANDARD_WORKSHOPS,
   type Workshop,
 } from "@/lib/constants/workshops";
 import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
@@ -2797,8 +2797,9 @@ export function PackComparison() {
   const [selectedPack, setSelectedPack] = useState<AcademyProduct | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
-  const [availableWorkshops, setAvailableWorkshops] =
-    useState<Workshop[]>(PUBLIC_WORKSHOPS);
+  const [availableWorkshops, setAvailableWorkshops] = useState<Workshop[]>(
+    PUBLIC_STANDARD_WORKSHOPS,
+  );
 
   useEffect(() => {
     let cancelled = false;
