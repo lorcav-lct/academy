@@ -23,8 +23,7 @@ export interface Workshop {
 }
 
 /** Sede unica di tutte le masterclass in presenza — mostrata sotto la data. */
-export const MASTERCLASS_LOCATION =
-  "Via Benjamin Franklin 31, 43122 Parma (PR)";
+export const MASTERCLASS_LOCATION = "Via Benjamin Franklin 31, Parma";
 
 export const WORKSHOPS: Workshop[] = [
   {
