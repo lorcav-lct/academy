@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/theme-provider";
-import type { Workshop } from "@/lib/constants/workshops";
+import { MASTERCLASS_LOCATION, type Workshop } from "@/lib/constants/workshops";
 import { getMasterclassProducts } from "@/lib/constants/packs";
 import { getTeacherBySlug, type Teacher } from "@/lib/constants/teachers";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
@@ -916,6 +916,37 @@ function HeroSection({
                 </span>
               </div>
             ))}
+          </motion.div>
+
+          {/* Sede — sempre indicata sotto la data */}
+          <motion.div
+            variants={fadeUp}
+            className="mt-6 flex items-center gap-2.5"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill={ORANGE}
+              aria-hidden="true"
+              className="shrink-0"
+            >
+              <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+            </svg>
+            <div className="flex flex-col">
+              <span
+                className="text-[0.58rem] font-bold uppercase tracking-[0.28em]"
+                style={{ color: ts }}
+              >
+                Luogo
+              </span>
+              <span
+                className="mt-0.5 text-[0.95rem] font-bold"
+                style={{ color: th }}
+              >
+                {MASTERCLASS_LOCATION}
+              </span>
+            </div>
           </motion.div>
 
           {/* Prezzo promo prominente — solo quando è attiva una promo */}

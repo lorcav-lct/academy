@@ -22,6 +22,10 @@ export interface Workshop {
   international?: boolean;
 }
 
+/** Sede unica di tutte le masterclass in presenza — mostrata sotto la data. */
+export const MASTERCLASS_LOCATION =
+  "Via Benjamin Franklin 31, 43122 Parma (PR)";
+
 export const WORKSHOPS: Workshop[] = [
   {
     slug: "master-functional-bulgarian",
@@ -29,7 +33,7 @@ export const WORKSHOPS: Workshop[] = [
     subtitle: "Masterclass — Metodo Bulgaro e Functional Training",
     focus: "Metodo bulgaro avanzato e pattern di movimento funzionale",
     duration: "1-2 giornate",
-    date: "18-19-20 Settembre 2026",
+    date: "Sabato 19 Settembre 2026",
     teacherSlugs: ["ivan-ivanov"],
     trainerLabel: "Ivan Ivanov",
     sortOrder: 1,
