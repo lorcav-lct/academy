@@ -1043,7 +1043,7 @@ function MasterclassCard({
           }}
         />
 
-        <div className="relative grid grid-cols-[5.5rem_1fr] items-start gap-x-4 gap-y-5 px-5 py-6 sm:grid-cols-[7rem_1fr] md:grid-cols-[17rem_1fr_auto] md:items-stretch md:gap-x-8 md:gap-y-0 md:p-0">
+        <div className="relative grid grid-cols-2 items-start gap-x-4 gap-y-5 px-5 py-6 md:grid-cols-[17rem_1fr_auto] md:items-stretch md:gap-x-8 md:gap-y-0 md:p-0">
           {/* Media — trainer portrait. Mobile: compact 4:5 thumbnail. Desktop:
               full-height, flush to the card's left edge; the wide (~4:5) column
               keeps the crop minimal and frames the subject from the top. */}
@@ -1071,96 +1071,128 @@ function MasterclassCard({
             )}
           </div>
 
-          {/* Body */}
-          <div className="min-w-0 md:py-9">
-            {/* Top row — domain + featured badge + tbd badge */}
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span
-                className="text-[0.62rem] font-black uppercase tracking-[0.28em]"
-                style={{ color: ORANGE }}
-              >
-                {cred?.domain ?? "Masterclass"}
-              </span>
-              {cred?.badge && (
+          {/* Body — on mobile the head (subtitle + title + trainer name) sits
+              beside the portrait; description, meta, price and the CTA span full
+              width. On desktop it stays a single column: display collapses to
+              `contents` on mobile so head/rest become direct grid cells. */}
+          <div className="contents md:block md:min-w-0 md:py-9">
+            {/* Head — beside the image on mobile (half/half) */}
+            <div className="min-w-0">
+              {/* Top row — domain + featured badge + tbd badge */}
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span
-                  title={cred.badgeTooltip}
-                  aria-label={cred.badgeTooltip}
-                  className="inline-flex cursor-help items-center gap-1.5 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
-                  style={
-                    featured
-                      ? { background: ORANGE, color: "#111" }
-                      : {
-                          background: `rgba(${ORANGE_RGB},0.14)`,
-                          color: ORANGE,
-                          border: `1px solid rgba(${ORANGE_RGB},0.45)`,
-                        }
-                  }
+                  className="text-[0.62rem] font-black uppercase tracking-[0.28em]"
+                  style={{ color: ORANGE }}
                 >
+                  {cred?.domain ?? "Masterclass"}
+                </span>
+                {cred?.badge && (
                   <span
-                    className="inline-block h-1 w-1 rounded-full"
-                    style={{ background: featured ? "#111" : ORANGE }}
-                  />
-                  {cred.badge}
-                </span>
-              )}
-              {isTbd && (
-                <span
-                  className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
-                  style={{
-                    border: `1px solid ${borderSubtle}`,
-                    color: ts,
-                  }}
-                >
-                  In definizione
-                </span>
-              )}
+                    title={cred.badgeTooltip}
+                    aria-label={cred.badgeTooltip}
+                    className="inline-flex cursor-help items-center gap-1.5 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+                    style={
+                      featured
+                        ? { background: ORANGE, color: "#111" }
+                        : {
+                            background: `rgba(${ORANGE_RGB},0.14)`,
+                            color: ORANGE,
+                            border: `1px solid rgba(${ORANGE_RGB},0.45)`,
+                          }
+                    }
+                  >
+                    <span
+                      className="inline-block h-1 w-1 rounded-full"
+                      style={{ background: featured ? "#111" : ORANGE }}
+                    />
+                    {cred.badge}
+                  </span>
+                )}
+                {isTbd && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+                    style={{
+                      border: `1px solid ${borderSubtle}`,
+                      color: ts,
+                    }}
+                  >
+                    In definizione
+                  </span>
+                )}
+              </div>
+
+              {/* Title — smaller on very small screens (<400px) */}
+              <h3
+                className="font-black leading-[0.98] tracking-[-0.025em] transition-colors group-hover:text-[#F09226] text-[length:clamp(1.6rem,3.4vw,2.6rem)] max-[399px]:text-[1.2rem]"
+                style={{ color: th }}
+              >
+                {workshop.title}
+              </h3>
+
+              {/* Trainer headline */}
+              <p
+                className="mt-3 text-[0.95rem] font-bold leading-snug md:text-[1.05rem]"
+                style={{ color: th }}
+              >
+                {cred?.headline ?? workshop.trainerLabel}
+              </p>
             </div>
 
-            {/* Title */}
-            <h3
-              className="font-black leading-[0.98] tracking-[-0.025em] transition-colors group-hover:text-[#F09226]"
-              style={{
-                fontSize: "clamp(1.6rem, 3.4vw, 2.6rem)",
-                color: th,
-              }}
-            >
-              {workshop.title}
-            </h3>
+            {/* Rest — full width on mobile */}
+            <div className="col-span-2 min-w-0">
+              {/* Trainer pitch */}
+              <p
+                className="max-w-[58ch] text-[0.85rem] leading-[1.55] md:mt-1 md:text-[0.9rem]"
+                style={{ color: tb }}
+              >
+                {cred?.pitch ?? ""}
+              </p>
 
-            {/* Trainer headline */}
-            <p
-              className="mt-3 text-[0.95rem] font-bold leading-snug md:text-[1.05rem]"
-              style={{ color: th }}
-            >
-              {cred?.headline ?? workshop.trainerLabel}
-            </p>
-            <p
-              className="mt-1 max-w-[58ch] text-[0.85rem] leading-[1.55] md:text-[0.9rem]"
-              style={{ color: tb }}
-            >
-              {cred?.pitch ?? ""}
-            </p>
+              {/* Body promise */}
+              <p
+                className="mt-4 max-w-[64ch] text-[0.92rem] leading-[1.65] md:text-[0.98rem]"
+                style={{ color: tb }}
+              >
+                {cred?.promise ?? workshop.focus}
+              </p>
 
-            {/* Body promise */}
-            <p
-              className="mt-4 max-w-[64ch] text-[0.92rem] leading-[1.65] md:text-[0.98rem]"
-              style={{ color: tb }}
-            >
-              {cred?.promise ?? workshop.focus}
-            </p>
-
-            {/* Meta — data (se definita) + luogo sempre indicato sotto la data */}
-            <div className="mt-5 flex flex-col gap-2.5">
-              {workshop.date && workshop.date !== "Da definire" && (
-                <div className="flex items-center gap-2">
+              {/* Meta — data (se definita) + luogo sempre indicato sotto la data */}
+              <div className="mt-5 flex flex-col gap-2.5">
+                {workshop.date && workshop.date !== "Da definire" && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-11 shrink-0 text-[0.6rem] font-black uppercase tracking-[0.28em]"
+                      style={{ color: ts }}
+                    >
+                      Data
+                    </span>
+                    <span
+                      className="inline-flex items-center gap-1.5 text-[0.85rem] font-bold tabular-nums"
+                      style={{ color: th }}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="12"
+                        height="12"
+                        fill={ORANGE}
+                        aria-hidden="true"
+                        className="shrink-0"
+                      >
+                        <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 7v10H5V9h14z" />
+                      </svg>
+                      {workshop.date}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-start gap-2">
                   <span
-                    className="w-11 shrink-0 text-[0.6rem] font-black uppercase tracking-[0.28em]"
+                    className="w-11 shrink-0 pt-0.5 text-[0.6rem] font-black uppercase tracking-[0.28em]"
                     style={{ color: ts }}
                   >
-                    Data
+                    Luogo
                   </span>
                   <span
-                    className="inline-flex items-center gap-1.5 text-[0.85rem] font-bold tabular-nums"
+                    className="inline-flex items-center gap-1.5 text-[0.85rem] font-bold"
                     style={{ color: th }}
                   >
                     <svg
@@ -1171,72 +1203,48 @@ function MasterclassCard({
                       aria-hidden="true"
                       className="shrink-0"
                     >
-                      <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 7v10H5V9h14z" />
+                      <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
                     </svg>
-                    {workshop.date}
+                    {MASTERCLASS_LOCATION}
                   </span>
                 </div>
-              )}
-              <div className="flex items-start gap-2">
-                <span
-                  className="w-11 shrink-0 pt-0.5 text-[0.6rem] font-black uppercase tracking-[0.28em]"
-                  style={{ color: ts }}
-                >
-                  Luogo
-                </span>
-                <span
-                  className="inline-flex items-center gap-1.5 text-[0.85rem] font-bold"
-                  style={{ color: th }}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="12"
-                    height="12"
-                    fill={ORANGE}
-                    aria-hidden="true"
-                    className="shrink-0"
-                  >
-                    <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
-                  </svg>
-                  {MASTERCLASS_LOCATION}
-                </span>
               </div>
-            </div>
 
-            {/* Prezzo promo — visibile solo con promo attiva */}
-            {!salesMode && hasDiscount && pricing && (
-              <div className="mt-5 flex flex-wrap items-center gap-2.5">
-                <span
-                  className="px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
-                  style={{ background: ORANGE, color: "#111" }}
-                >
-                  {promo?.name ?? "PROMO"}
-                </span>
-                <span
-                  className="text-[0.95rem] font-semibold tabular-nums line-through"
-                  style={{ color: ts }}
-                >
-                  {formatPriceClean(pricing.original)}
-                </span>
-                <span
-                  className="text-[1.35rem] font-black leading-none tabular-nums"
-                  style={{ color: th }}
-                >
-                  {formatPriceClean(pricing.final)}
-                </span>
-                <span
-                  className="text-[0.6rem] font-bold uppercase tracking-[0.16em]"
-                  style={{ color: ts }}
-                >
-                  IVA incl.
-                </span>
-                <PromoCountdown
-                  endsAt={promo?.ends_at}
-                  color={ORANGE}
-                  mutedColor={ts}
-                />
-              </div>
-            )}
+              {/* Prezzo promo — visibile solo con promo attiva */}
+              {!salesMode && hasDiscount && pricing && (
+                <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                  <span
+                    className="px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.22em]"
+                    style={{ background: ORANGE, color: "#111" }}
+                  >
+                    {promo?.name ?? "PROMO"}
+                  </span>
+                  <span
+                    className="text-[0.95rem] font-semibold tabular-nums line-through"
+                    style={{ color: ts }}
+                  >
+                    {formatPriceClean(pricing.original)}
+                  </span>
+                  <span
+                    className="text-[1.35rem] font-black leading-none tabular-nums"
+                    style={{ color: th }}
+                  >
+                    {formatPriceClean(pricing.final)}
+                  </span>
+                  <span
+                    className="text-[0.6rem] font-bold uppercase tracking-[0.16em]"
+                    style={{ color: ts }}
+                  >
+                    IVA incl.
+                  </span>
+                  <PromoCountdown
+                    endsAt={promo?.ends_at}
+                    color={ORANGE}
+                    mutedColor={ts}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* CTA right */}
