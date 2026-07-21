@@ -25,7 +25,7 @@ import {
   CertificationsIconRow,
 } from "@/components/shared/certifications-cards";
 import { TeacherPortrait } from "@/components/shared/teacher-portrait";
-import { PUBLIC_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
+import { PUBLIC_STANDARD_WORKSHOPS as WORKSHOPS } from "@/lib/constants/workshops";
 import { createClient } from "@/lib/supabase/client";
 
 // ─── Constants (mirror /pack page, simplified — no price) ───────────────────

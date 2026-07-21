@@ -40,8 +40,11 @@ export default async function MasterclassPage({
   const workshop = getWorkshopBySlug(slug);
   if (!workshop) notFound();
 
-  // "Altri masterclass" mostra solo voci pubbliche, mai hidden.
-  const otherWorkshops = PUBLIC_WORKSHOPS.filter((w) => w.slug !== slug);
+  // "Altri masterclass" mostra solo voci pubbliche della stessa categoria
+  // (Pro↔Pro, International↔International), mai hidden.
+  const otherWorkshops = PUBLIC_WORKSHOPS.filter(
+    (w) => w.slug !== slug && !!w.international === !!workshop.international,
+  );
   const priceCents = getProductBySlug(slug)?.priceCents;
 
   return (

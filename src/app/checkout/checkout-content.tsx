@@ -21,7 +21,7 @@ import {
 import {
   getWorkshopBySlug,
   resolvePublicWorkshops,
-  PUBLIC_WORKSHOPS,
+  PUBLIC_STANDARD_WORKSHOPS,
   type Workshop,
 } from "@/lib/constants/workshops";
 import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
@@ -1592,8 +1592,9 @@ export function CheckoutContent() {
   // unpaid): the server auto-applies the -500€ credit, so reflect it here.
   const [depositCredit, setDepositCredit] = useState(false);
   const [deadlines, setDeadlines] = useState<Deadlines>(DEFAULT_DEADLINES);
-  const [availableWorkshops, setAvailableWorkshops] =
-    useState<Workshop[]>(PUBLIC_WORKSHOPS);
+  const [availableWorkshops, setAvailableWorkshops] = useState<Workshop[]>(
+    PUBLIC_STANDARD_WORKSHOPS,
+  );
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -1743,7 +1744,11 @@ export function CheckoutContent() {
   const grossCents = getDisplayCents(pack);
   const isBundle = pack.type === "bundle";
   const tierLabel = TIER_LABEL[pack.slug] ?? pack.name;
-  const unavailable = pack.priceCents === 0; // bundles still TBD on Stripe side
+  // priceCents 0 (bundle TBD lato Stripe) oppure nessun Price ID configurato
+  // (es. Masterclass International prima del setup Stripe) → non acquistabile.
+  const unavailable =
+    pack.priceCents === 0 ||
+    (!pack.stripePriceId.test && !pack.stripePriceId.live);
 
   // ── Deadline-driven availability (bundles only; masterclasses unrestricted) ─
   const depositOpen = !isPastDeadline(deadlines.depositPurchase);

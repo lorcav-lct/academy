@@ -16,6 +16,10 @@ export interface Workshop {
   hidden?: boolean;
   /** Se true, l'admin può abilitare/disabilitare questa masterclass dalla UI. */
   adminToggleable?: boolean;
+  /** Se true, è una Masterclass International: categoria dedicata nella pagina
+   *  /masterclass, NON inclusa nei pack, offerte gestite separatamente
+   *  (promo product_type = "masterclass_international"). */
+  international?: boolean;
 }
 
 export const WORKSHOPS: Workshop[] = [
@@ -123,6 +127,27 @@ export const WORKSHOPS: Workshop[] = [
     sortOrder: 9,
     adminToggleable: true,
   },
+  // ───────── MASTERCLASS INTERNATIONAL ─────────
+  // Categoria dedicata: NON inclusa nei pack, offerte separate.
+  // TODO(go-live): confermare title/subtitle/focus/date e togliere `tbd`
+  // dopo aver creato il Price su Stripe (vedi packs.ts stripePriceId).
+  {
+    slug: "master-strength-conditioning-int",
+    title: "Science-Based Strength & Conditioning",
+    subtitle:
+      "International Masterclass — Strength & Conditioning basato sull'evidenza",
+    focus:
+      "Metodi di strength & conditioning basati sull'evidenza, applicati alla performance reale",
+    duration: "1-2 giornate",
+    date: "Da definire",
+    teacherSlugs: ["alexander-puig"],
+    trainerLabel: "Alexander Puig",
+    sortOrder: 1,
+    international: true,
+    adminToggleable: true,
+    tbd: true,
+  },
+
   // Permanently hidden — not admin-toggleable
   {
     slug: "sostieni-progetto",
@@ -139,27 +164,55 @@ export const WORKSHOPS: Workshop[] = [
   },
 ];
 
-/** Lista pubblica statica — esclude le voci con `hidden: true`. */
+/** Lista pubblica statica — TUTTE le voci pubbliche (Pro + International).
+ *  Usata da sitemap, griglia docenti, footer, preview home. */
 export const PUBLIC_WORKSHOPS = WORKSHOPS.filter((w) => !w.hidden);
+
+/** Solo le Masterclass Pro pubbliche (International escluse). */
+export const PUBLIC_STANDARD_WORKSHOPS = WORKSHOPS.filter(
+  (w) => !w.hidden && !w.international,
+);
+
+/** Solo le Masterclass International pubbliche. */
+export const PUBLIC_INTERNATIONAL_WORKSHOPS = WORKSHOPS.filter(
+  (w) => !w.hidden && !!w.international,
+);
 
 /** Tutte le masterclass che l'admin può attivare/disattivare dalla UI. */
 export const ADMIN_TOGGLEABLE_WORKSHOPS = WORKSHOPS.filter(
   (w) => w.adminToggleable,
 );
 
+/** Visibilità effettiva di un workshop dato l'override admin. */
+function isWorkshopVisible(
+  w: Workshop,
+  visibility: MasterclassVisibilityMap,
+): boolean {
+  if (!w.adminToggleable) return !w.hidden; // not toggleable: use static
+  return visibility[w.slug] ?? !w.hidden; // toggleable: DB value or static default
+}
+
 /**
- * Lista pubblica con visibilità admin-configurabile.
- * Per ogni workshop con adminToggleable=true, il valore in `visibility` ha
- * priorità sul flag statico `hidden`. Worksho senza chiave → default statico.
- * Permanentemente hidden (sostieni-progetto) restano sempre esclusi.
+ * Masterclass Pro pubbliche con visibilità admin-configurabile.
+ * NB: esclude le International — è la lista usata anche dalla selezione bundle
+ * (PRO/ELITE), che non deve mai includere le Masterclass International.
+ * Per le International usare `resolvePublicInternationalWorkshops`.
  */
 export function resolvePublicWorkshops(
   visibility: MasterclassVisibilityMap,
 ): Workshop[] {
-  return WORKSHOPS.filter((w) => {
-    if (!w.adminToggleable) return !w.hidden; // not toggleable: use static
-    return visibility[w.slug] ?? !w.hidden; // toggleable: DB value or static default
-  });
+  return WORKSHOPS.filter(
+    (w) => !w.international && isWorkshopVisible(w, visibility),
+  );
+}
+
+/** Masterclass International pubbliche con visibilità admin-configurabile. */
+export function resolvePublicInternationalWorkshops(
+  visibility: MasterclassVisibilityMap,
+): Workshop[] {
+  return WORKSHOPS.filter(
+    (w) => !!w.international && isWorkshopVisible(w, visibility),
+  );
 }
 
 export function getWorkshopBySlug(slug: string): Workshop | undefined {

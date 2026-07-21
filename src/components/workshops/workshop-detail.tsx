@@ -2215,6 +2215,9 @@ function OtherMasterclass({
   const borderSubtle = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
   const cardBg = isDark ? "rgba(6,6,16,0.55)" : "rgba(250,250,252,0.7)";
 
+  // Niente "altri masterclass" da mostrare (es. unica International) → sezione omessa.
+  if (others.length === 0) return null;
+
   return (
     <section
       ref={sectionRef}

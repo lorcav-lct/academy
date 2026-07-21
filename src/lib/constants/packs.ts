@@ -23,6 +23,9 @@ export interface AcademyProduct {
   hidden?: boolean;
   /** Se true, l'admin può abilitare/disabilitare questo prodotto dalla UI. */
   adminToggleable?: boolean;
+  /** Se true (solo type=workshop), è una Masterclass International: categoria
+   *  dedicata, NON inclusa nei pack, offerte gestite separatamente. */
+  international?: boolean;
   includes: string[];
   /** Corso/blocco corrispondente (solo per type=course) */
   courseSlug?: string;
@@ -384,6 +387,32 @@ export const PRODUCTS: AcademyProduct[] = [
     sortOrder: 28,
   },
 
+  // ─── Masterclass International (acquisto singolo, NON nei pack) ────────────
+  // TODO(go-live): creare Product+Price su Stripe (test + live) via
+  // scripts/setup-stripe-masterclasses.mjs e incollare qui gli ID; poi
+  // togliere `tbd: true` dal workshop in constants/workshops.ts.
+  {
+    slug: "master-strength-conditioning-int",
+    name: "Masterclass Science-Based Strength & Conditioning",
+    subtitle: "International Masterclass — Alexander Puig",
+    type: "workshop",
+    priceCents: 49000,
+    stripePriceId: {
+      test: "", // TODO: creare price su Stripe
+      live: "", // TODO: creare price su Stripe
+    },
+    workshopSlug: "master-strength-conditioning-int",
+    international: true,
+    adminToggleable: true,
+    includes: [
+      "1-2 giornate in presenza",
+      "Alexander Puig — Strength Coach internazionale",
+      "Materiale didattico",
+      "Attestato di partecipazione",
+    ],
+    sortOrder: 30,
+  },
+
   // ─── Hidden — accessibile solo via URL diretto ────────────────────────────
   {
     slug: "sostieni-progetto",
@@ -415,27 +444,36 @@ export function getBundles(): AcademyProduct[] {
   return PRODUCTS.filter((p) => p.type === "bundle" && !p.hidden);
 }
 
-/** Tutti i prodotti masterclass, inclusi quelli hidden. Utile per lookup
- *  per slug nelle pagine detail. Per le listing pubbliche usare
- *  `getPublicMasterclassProducts()`. */
+/** Tutti i prodotti masterclass, inclusi quelli hidden e International.
+ *  Utile per lookup per slug nelle pagine detail e per i roster admin.
+ *  Per le listing pubbliche usare `getPublicMasterclassProducts()`. */
 export function getMasterclassProducts(): AcademyProduct[] {
   return PRODUCTS.filter((p) => p.type === "workshop");
 }
 
+/** Solo i prodotti masterclass International (inclusi hidden). */
+export function getInternationalMasterclassProducts(): AcademyProduct[] {
+  return PRODUCTS.filter((p) => p.type === "workshop" && !!p.international);
+}
+
+/** Masterclass Pro pubbliche (International escluse — categoria/offerte a sé). */
 export function getPublicMasterclassProducts(): AcademyProduct[] {
-  return PRODUCTS.filter((p) => p.type === "workshop" && !p.hidden);
+  return PRODUCTS.filter(
+    (p) => p.type === "workshop" && !p.hidden && !p.international,
+  );
 }
 
 /**
- * Lista pubblica masterclass con visibilità admin-configurabile.
- * Per ogni prodotto con adminToggleable=true, il valore in `visibility`
- * (chiave = workshopSlug) ha priorità sul flag statico `hidden`.
+ * Masterclass Pro pubbliche con visibilità admin-configurabile.
+ * Esclude le International (categoria/offerte separate); per ogni prodotto con
+ * adminToggleable=true, il valore in `visibility` (chiave = workshopSlug) ha
+ * priorità sul flag statico `hidden`.
  */
 export function resolvePublicMasterclassProducts(
   visibility: MasterclassVisibilityMap,
 ): AcademyProduct[] {
   return PRODUCTS.filter((p) => {
-    if (p.type !== "workshop") return false;
+    if (p.type !== "workshop" || p.international) return false;
     if (!p.adminToggleable) return !p.hidden;
     const key = p.workshopSlug ?? p.slug;
     return visibility[key] ?? !p.hidden;

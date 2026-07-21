@@ -97,6 +97,16 @@ const MASTERCLASSES = [
     description:
       "Masterclass intensiva 1-2 giornate in presenza · Marco Magnani + Riccardo Aimini",
   },
+  {
+    // Masterclass International (acquisto singolo, NON nei pack).
+    // Dopo il run: incollare il priceId in src/lib/constants/packs.ts
+    // (stripePriceId.test/live) e togliere `tbd: true` dal workshop.
+    slug: "master-strength-conditioning-int",
+    productName:
+      "Masterclass Science-Based Strength & Conditioning (International) — Lacertosus Academy",
+    description:
+      "International Masterclass intensiva 1-2 giornate in presenza · Alexander Puig",
+  },
 ];
 
 async function findProductByName(name) {

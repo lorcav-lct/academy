@@ -71,7 +71,11 @@ export async function POST(request: NextRequest) {
   } = body ?? {};
 
   // Validation
-  if (!["pack", "masterclass", "fipe"].includes(product_type)) {
+  if (
+    !["pack", "masterclass", "masterclass_international", "fipe"].includes(
+      product_type,
+    )
+  ) {
     return NextResponse.json(
       { error: "product_type non valido" },
       { status: 400 },
