@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { AnimatePresence, motion, useInView } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
+  MASTERCLASS_LOCATION,
   PUBLIC_STANDARD_WORKSHOPS,
   type Workshop,
 } from "@/lib/constants/workshops";
 import { smoothScrollTo } from "@/lib/scroll";
 import { getMasterclassProducts } from "@/lib/constants/packs";
+import { getTeacherBySlug } from "@/lib/constants/teachers";
+import { TeacherPortrait } from "@/components/shared/teacher-portrait";
 import { fadeUp, staggerContainer } from "@/lib/animations/variants";
 import { usePromoForSlug } from "@/lib/promos/client";
 import { computePromoPricing, type PromoRow } from "@/lib/promos/types";
@@ -184,6 +188,15 @@ const FEATURED_NAMES = [
   "Antonio Squillante",
 ];
 
+/* Trainer portraits shown in the desktop hero (right column) — fills the space
+   with the actual faculty, the strongest social proof for a masterclass page. */
+const HERO_FACULTY: { slug: string; tag: string }[] = [
+  { slug: "luca-collino", tag: "Sport Therapist · Juventus" },
+  { slug: "oscar-berti", tag: "S&C · Modena Volley" },
+  { slug: "andrea-quarto", tag: "Nazionale Para Powerlifting" },
+  { slug: "ivan-ivanov", tag: "Founder · Suples" },
+];
+
 const ORANGE = "#F09226";
 const ORANGE_RGB = "240,146,38";
 
@@ -314,6 +327,49 @@ function CategoryNav({
 }
 
 /* ──────────────────────────────────────────────────────────────
+   HERO FACULTY CLUSTER — desktop-only right column visual
+─────────────────────────────────────────────────────────────── */
+function HeroFacultyCluster() {
+  const items = HERO_FACULTY.map((f) => ({
+    ...f,
+    teacher: getTeacherBySlug(f.slug),
+  })).filter((x) => x.teacher);
+  if (items.length === 0) return null;
+
+  return (
+    <div className="relative">
+      {/* Accent frame */}
+      <div
+        className="pointer-events-none absolute -left-4 -top-4 h-16 w-16 border-l border-t"
+        style={{ borderColor: `rgba(${ORANGE_RGB},0.5)` }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-4 -right-4 h-16 w-16 border-b border-r"
+        style={{ borderColor: `rgba(${ORANGE_RGB},0.5)` }}
+      />
+
+      <div className="grid grid-cols-2 items-start gap-4">
+        {items.map((it, i) => (
+          <div
+            key={it.slug}
+            className={`relative overflow-hidden ${i % 2 === 1 ? "mt-10" : ""}`}
+            style={{ border: `1px solid rgba(${ORANGE_RGB},0.22)` }}
+          >
+            <TeacherPortrait
+              teacher={it.teacher!}
+              overlayName
+              overlayRole={it.tag}
+              sizes="13rem"
+              fallbackTheme="dark"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
    HERO
 ─────────────────────────────────────────────────────────────── */
 function HeroSection({
@@ -333,6 +389,9 @@ function HeroSection({
   const fromPricing = salesMode ? getFromPricing(workshops, promo) : null;
   const heroDiscount =
     !!fromPricing && fromPricing.final < fromPricing.original;
+  // Secondary details (description, stats, faculty names) collapsed behind an
+  // "Info" toggle to keep the hero clean and conversion-focused.
+  const [infoOpen, setInfoOpen] = useState(false);
 
   // Forced-dark hero (transparent navbar treatment with white nav text)
   const isDark = true;
@@ -404,231 +463,282 @@ function HeroSection({
 
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-[1440px] px-[5%] py-24 md:px-10 md:py-32">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="max-w-4xl"
-        >
-          {/* Eyebrow */}
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_26rem] xl:gap-16">
           <motion.div
-            variants={fadeUp}
-            className="mb-7 flex items-center gap-4"
+            variants={staggerContainer}
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            className="max-w-3xl"
           >
-            <div className="h-px w-10" style={{ background: ORANGE }} />
-            <span
-              className="text-[0.7rem] font-black tracking-[0.34em] uppercase"
-              style={{ color: ORANGE }}
-            >
-              — Specializzazioni Verticali
-            </span>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            variants={fadeUp}
-            className="font-black tracking-[-0.025em] leading-[0.92]"
-            style={{
-              fontSize: "clamp(2.6rem, 8vw, 6.4rem)",
-              color: th,
-            }}
-          >
-            L&rsquo;ELITE
-            <br />
-            <span className="gradient-text">IN AULA CON TE.</span>
-          </motion.h1>
-
-          {/* Category nav — Masterclass | International (link in-page) */}
-          {hasInternational && (
-            <motion.div variants={fadeUp} className="mt-8">
-              <CategoryNav activeId={activeId} isDark />
-            </motion.div>
-          )}
-
-          {/* Sales mode — urgency banner: promo price + countdown, sized to content */}
-          {salesMode && fromPricing && (
+            {/* Eyebrow */}
             <motion.div
               variants={fadeUp}
-              className="mt-9 inline-flex w-fit max-w-full flex-wrap items-center gap-x-8 gap-y-5 px-5 py-4 md:px-6 md:py-5"
-              style={{
-                background: `linear-gradient(135deg, rgba(${ORANGE_RGB},0.12) 0%, rgba(10,10,14,0.9) 70%)`,
-                border: `1px solid rgba(${ORANGE_RGB},0.55)`,
-                boxShadow: `0 0 60px rgba(${ORANGE_RGB},0.1)`,
-              }}
+              className="mb-7 flex items-center gap-4"
             >
-              <div>
-                <span
-                  className="inline-block px-2 py-0.5 text-[0.56rem] font-black uppercase tracking-[0.26em]"
-                  style={{ background: ORANGE, color: "#111" }}
-                >
-                  {promo?.name ?? "Offerta a tempo"}
-                </span>
-                <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                  <span
-                    className="text-[0.64rem] font-black uppercase tracking-[0.22em]"
-                    style={{ color: tb }}
-                  >
-                    Masterclass da
-                  </span>
-                  <span
-                    className="font-black leading-none tabular-nums"
-                    style={{
-                      fontSize: "clamp(1.9rem, 4vw, 2.8rem)",
-                      color: ORANGE,
-                    }}
-                  >
-                    {formatPriceClean(fromPricing.final)}
-                  </span>
-                  {heroDiscount && (
-                    <span
-                      className="text-[1rem] font-bold tabular-nums line-through"
-                      style={{ color: ts }}
-                    >
-                      {formatPriceClean(fromPricing.original)}
-                    </span>
-                  )}
-                  <span
-                    className="text-[0.58rem] font-bold uppercase tracking-[0.16em]"
-                    style={{ color: ts }}
-                  >
-                    IVA incl.
-                  </span>
-                </div>
-              </div>
-
-              {promo?.ends_at && (
-                <div>
-                  <span
-                    className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.26em]"
-                    style={{ color: tb }}
-                  >
-                    L&rsquo;offerta termina in
-                  </span>
-                  <SalesCountdown endsAt={promo.ends_at} size="md" />
-                </div>
-              )}
+              <div className="h-px w-10" style={{ background: ORANGE }} />
+              <span
+                className="text-[0.7rem] font-black tracking-[0.34em] uppercase"
+                style={{ color: ORANGE }}
+              >
+                — Specializzazioni Verticali
+              </span>
             </motion.div>
-          )}
 
-          {/* CTA — anchor to the masterclass list */}
-          <motion.div variants={fadeUp} className="mt-9">
-            <a
-              href="#tutti-i-master"
-              onClick={(e) => {
-                e.preventDefault();
-                smoothScrollTo("#tutti-i-master", { offset: -70 });
+            {/* Headline */}
+            <motion.h1
+              variants={fadeUp}
+              className="font-black tracking-[-0.025em] leading-[0.92]"
+              style={{
+                fontSize: "clamp(2.6rem, 8vw, 6.4rem)",
+                color: th,
               }}
-              className="inline-flex items-center gap-3 px-8 py-4 text-[0.8rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90"
-              style={{ background: ORANGE, color: "#111" }}
             >
-              <span>Acquista una Masterclass</span>
-              <span aria-hidden>↓</span>
-            </a>
-          </motion.div>
+              L&rsquo;ELITE
+              <br />
+              <span className="gradient-text">IN AULA CON TE.</span>
+            </motion.h1>
 
-          {/* Subline — below the CTA */}
-          <motion.p
-            variants={fadeUp}
-            className="mt-8 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
-            style={{ color: tb }}
-          >
-            8 masterclass intensive guidate da professionisti che operano ogni
-            giorno sul campo della performance reale. Performance coach di
-            Nazionali, Strength &amp; Conditioning coach di squadre di SuperLega
-            e ricercatori universitari tra i più autorevoli a livello
-            internazionale: un corpo docenti che unisce pratica d&rsquo;élite e
-            ricerca scientifica applicata. Un confronto diretto con chi
-            definisce gli standard del settore, oggi.
-          </motion.p>
+            {/* Category nav — Masterclass | International (link in-page) */}
+            {hasInternational && (
+              <motion.div variants={fadeUp} className="mt-8">
+                <CategoryNav activeId={activeId} isDark />
+              </motion.div>
+            )}
 
-          {/* Stats */}
-          <motion.div variants={fadeUp} className="mt-10 flex flex-wrap gap-3">
-            {STATS.map((s) => (
-              <div
-                key={s.label}
-                className="flex flex-col items-start px-5 py-3"
+            {/* Sales mode — urgency banner: promo price + countdown, sized to content */}
+            {salesMode && fromPricing && (
+              <motion.div
+                variants={fadeUp}
+                className="mt-9 inline-flex w-fit max-w-full flex-wrap items-center gap-x-8 gap-y-5 px-5 py-4 md:px-6 md:py-5"
                 style={{
-                  border: `1px solid ${borderSubtle}`,
-                  background: isDark
-                    ? "rgba(255,255,255,0.03)"
-                    : "rgba(0,0,0,0.02)",
-                  minWidth: "150px",
+                  background: `linear-gradient(135deg, rgba(${ORANGE_RGB},0.12) 0%, rgba(10,10,14,0.9) 70%)`,
+                  border: `1px solid rgba(${ORANGE_RGB},0.55)`,
+                  boxShadow: `0 0 60px rgba(${ORANGE_RGB},0.1)`,
                 }}
               >
-                <span
-                  className="text-[1.6rem] font-black leading-none tabular-nums"
-                  style={{ color: ORANGE }}
-                >
-                  {s.value}
-                </span>
-                <span
-                  className="mt-1.5 text-[0.62rem] font-bold uppercase tracking-[0.2em]"
-                  style={{ color: ts }}
-                >
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Headline names — social proof */}
-          <motion.div
-            variants={fadeUp}
-            className="mt-10 flex max-w-3xl flex-wrap items-center gap-x-5 gap-y-2.5"
-          >
-            <span
-              className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
-              style={{ color: ORANGE }}
-            >
-              In aula
-            </span>
-            {FEATURED_NAMES.map((n, i) => (
-              <span key={n} className="flex items-center gap-5">
-                <span
-                  className="text-[0.95rem] font-bold tracking-tight"
-                  style={{ color: th }}
-                >
-                  {n}
-                </span>
-                {i < FEATURED_NAMES.length - 1 && (
+                <div>
                   <span
-                    className="text-[0.7rem] leading-none"
-                    style={{ color: ts }}
+                    className="inline-block px-2 py-0.5 text-[0.56rem] font-black uppercase tracking-[0.26em]"
+                    style={{ background: ORANGE, color: "#111" }}
                   >
-                    •
+                    {promo?.name ?? "Offerta a tempo"}
                   </span>
+                  <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                    <span
+                      className="text-[0.64rem] font-black uppercase tracking-[0.22em]"
+                      style={{ color: tb }}
+                    >
+                      Masterclass da
+                    </span>
+                    <span
+                      className="font-black leading-none tabular-nums"
+                      style={{
+                        fontSize: "clamp(1.9rem, 4vw, 2.8rem)",
+                        color: ORANGE,
+                      }}
+                    >
+                      {formatPriceClean(fromPricing.final)}
+                    </span>
+                    {heroDiscount && (
+                      <span
+                        className="text-[1rem] font-bold tabular-nums line-through"
+                        style={{ color: ts }}
+                      >
+                        {formatPriceClean(fromPricing.original)}
+                      </span>
+                    )}
+                    <span
+                      className="text-[0.58rem] font-bold uppercase tracking-[0.16em]"
+                      style={{ color: ts }}
+                    >
+                      IVA incl.
+                    </span>
+                  </div>
+                </div>
+
+                {promo?.ends_at && (
+                  <div>
+                    <span
+                      className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.26em]"
+                      style={{ color: tb }}
+                    >
+                      L&rsquo;offerta termina in
+                    </span>
+                    <SalesCountdown endsAt={promo.ends_at} size="md" />
+                  </div>
                 )}
-              </span>
-            ))}
-            <span
-              className="text-[0.85rem] font-semibold"
-              style={{ color: tb }}
+              </motion.div>
+            )}
+
+            {/* CTA row — primary buy + white "Info" toggle */}
+            <motion.div
+              variants={fadeUp}
+              className="mt-9 flex flex-wrap items-center gap-4"
             >
-              + altri 8 specialisti
-            </span>
+              <a
+                href="#tutti-i-master"
+                onClick={(e) => {
+                  e.preventDefault();
+                  smoothScrollTo("#tutti-i-master", { offset: -70 });
+                }}
+                className="inline-flex items-center gap-3 px-8 py-4 text-[0.8rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90"
+                style={{ background: ORANGE, color: "#111" }}
+              >
+                <span>Acquista una Masterclass</span>
+                <span aria-hidden>↓</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setInfoOpen((v) => !v)}
+                aria-expanded={infoOpen}
+                aria-controls="hero-info-panel"
+                className="inline-flex items-center gap-2.5 px-7 py-4 text-[0.8rem] font-black uppercase tracking-[0.16em] transition-all duration-200 hover:opacity-90"
+                style={{ background: "#f5f5fa", color: "#111" }}
+              >
+                <span>Info</span>
+                <span
+                  aria-hidden
+                  className="text-[1.1rem] leading-none transition-transform duration-300"
+                  style={{ transform: infoOpen ? "rotate(45deg)" : "none" }}
+                >
+                  +
+                </span>
+              </button>
+            </motion.div>
+
+            {/* Collapsible details — description, stats, faculty names */}
+            <AnimatePresence initial={false}>
+              {infoOpen && (
+                <motion.div
+                  id="hero-info-panel"
+                  key="hero-info-panel"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{
+                    duration: 0.42,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
+                  className="overflow-hidden"
+                >
+                  {/* Description */}
+                  <p
+                    className="mt-8 max-w-xl text-[1.05rem] leading-[1.65] md:text-[1.1rem]"
+                    style={{ color: th }}
+                  >
+                    8 masterclass intensive guidate da professionisti che
+                    operano ogni giorno sul campo della performance reale.
+                    Performance coach di Nazionali, Strength &amp; Conditioning
+                    coach di squadre di SuperLega e ricercatori universitari tra
+                    i più autorevoli a livello internazionale: un corpo docenti
+                    che unisce pratica d&rsquo;élite e ricerca scientifica
+                    applicata. Un confronto diretto con chi definisce gli
+                    standard del settore, oggi.
+                  </p>
+
+                  {/* Stats */}
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    {STATS.map((s) => (
+                      <div
+                        key={s.label}
+                        className="flex flex-col items-start px-5 py-3"
+                        style={{
+                          border: `1px solid ${borderSubtle}`,
+                          background: isDark
+                            ? "rgba(255,255,255,0.03)"
+                            : "rgba(0,0,0,0.02)",
+                          minWidth: "150px",
+                        }}
+                      >
+                        <span
+                          className="text-[1.6rem] font-black leading-none tabular-nums"
+                          style={{ color: ORANGE }}
+                        >
+                          {s.value}
+                        </span>
+                        <span
+                          className="mt-1.5 text-[0.62rem] font-bold uppercase tracking-[0.2em]"
+                          style={{ color: ts }}
+                        >
+                          {s.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Faculty names — social proof */}
+                  <div className="mt-8 flex max-w-3xl flex-wrap items-center gap-x-5 gap-y-2.5">
+                    <span
+                      className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
+                      style={{ color: ORANGE }}
+                    >
+                      In aula
+                    </span>
+                    {FEATURED_NAMES.map((n, i) => (
+                      <span key={n} className="flex items-center gap-5">
+                        <span
+                          className="text-[0.95rem] font-bold tracking-tight"
+                          style={{ color: th }}
+                        >
+                          {n}
+                        </span>
+                        {i < FEATURED_NAMES.length - 1 && (
+                          <span
+                            className="text-[0.7rem] leading-none"
+                            style={{ color: ts }}
+                          >
+                            •
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                    <span
+                      className="text-[0.85rem] font-semibold"
+                      style={{ color: tb }}
+                    >
+                      + altri 8 specialisti
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Scroll indicator */}
+            <motion.div
+              variants={fadeUp}
+              className="mt-14 hidden items-center gap-3 text-[0.62rem] font-bold uppercase tracking-[0.3em] md:flex"
+              style={{ color: ts }}
+            >
+              <motion.div
+                animate={{ y: [0, 6, 0] }}
+                transition={{
+                  duration: 1.6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="h-8 w-px"
+                style={{
+                  background: `linear-gradient(to bottom, ${ts}, transparent)`,
+                }}
+              />
+              Scopri tutti i Master
+            </motion.div>
           </motion.div>
 
-          {/* Scroll indicator */}
+          {/* Faculty visual — desktop only */}
           <motion.div
-            variants={fadeUp}
-            className="mt-14 hidden items-center gap-3 text-[0.62rem] font-bold uppercase tracking-[0.3em] md:flex"
-            style={{ color: ts }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{
+              duration: 0.8,
+              delay: 0.35,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            className="hidden lg:block"
           >
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{
-                duration: 1.6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="h-8 w-px"
-              style={{
-                background: `linear-gradient(to bottom, ${ts}, transparent)`,
-              }}
-            />
-            Scopri tutti i Master
+            <HeroFacultyCluster />
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -637,15 +747,7 @@ function HeroSection({
 /* ──────────────────────────────────────────────────────────────
    MANIFESTO — 3 reasons
 ─────────────────────────────────────────────────────────────── */
-function ManifestoSection({
-  isDark,
-  activeId,
-  hasInternational,
-}: {
-  isDark: boolean;
-  activeId: string;
-  hasInternational: boolean;
-}) {
+function ManifestoSection({ isDark }: { isDark: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
 
@@ -685,12 +787,6 @@ function ManifestoSection({
           animate={isInView ? "visible" : "hidden"}
           className="mb-14 md:mb-20"
         >
-          {hasInternational && (
-            <motion.div variants={fadeUp} className="mb-6">
-              <CategoryNav activeId={activeId} isDark={isDark} />
-            </motion.div>
-          )}
-
           <motion.div
             variants={fadeUp}
             className="mb-5 flex items-center gap-3"
@@ -870,9 +966,18 @@ function MasterclassCard({
   const product = getMasterclassProducts().find(
     (p) => p.workshopSlug === workshop.slug,
   );
+  // Trainer portrait for the listing card — first faculty member, with a
+  // brand-logo fallback when the masterclass has no teacher yet.
+  const teacher = workshop.teacherSlugs[0]
+    ? getTeacherBySlug(workshop.teacherSlugs[0])
+    : undefined;
+  const cardTeacher = teacher ?? {
+    name: cred?.headline ?? workshop.trainerLabel,
+    image_url: undefined,
+    color: ORANGE,
+  };
   const isTbd = workshop.tbd || !product || product.priceCents === 0;
   const featured = cred?.featured;
-  const num = String(index + 1).padStart(2, "0");
 
   // Prezzo mostrato in card solo quando c'è una promo attiva sulla masterclass.
   const promo = usePromoForSlug(product?.slug ?? "");
@@ -898,9 +1003,6 @@ function MasterclassCard({
   const tb = isDark ? "rgba(180,180,200,0.65)" : "#555555";
   const ts = isDark ? "rgba(120,120,140,0.5)" : "#888888";
   const borderSubtle = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
-  const numFaint = isDark
-    ? `rgba(${ORANGE_RGB},0.18)`
-    : `rgba(${ORANGE_RGB},0.32)`;
 
   const cardBg = featured
     ? isDark
@@ -941,31 +1043,36 @@ function MasterclassCard({
           }}
         />
 
-        <div className="relative grid grid-cols-1 items-start gap-5 px-6 py-7 md:grid-cols-[auto_1fr_auto] md:gap-10 md:px-10 md:py-9 md:items-center">
-          {/* Numeral block */}
-          <div className="flex items-baseline gap-3 md:flex-col md:items-start md:gap-1">
-            <span
-              className="font-black leading-[0.85] tabular-nums tracking-[-0.04em]"
-              style={{
-                fontSize: "clamp(3.6rem, 7vw, 6rem)",
-                color: numFaint,
-                textShadow: featured
-                  ? `0 0 40px rgba(${ORANGE_RGB},0.18)`
-                  : `0 0 40px rgba(${ORANGE_RGB},0.06)`,
-              }}
-            >
-              {num}
-            </span>
-            <span
-              className="text-[0.6rem] font-black uppercase tracking-[0.32em]"
-              style={{ color: ts }}
-            >
-              Master
-            </span>
+        <div className="relative grid grid-cols-[5.5rem_1fr] items-start gap-x-4 gap-y-5 px-5 py-6 sm:grid-cols-[7rem_1fr] md:grid-cols-[17rem_1fr_auto] md:items-stretch md:gap-x-8 md:gap-y-0 md:p-0">
+          {/* Media — trainer portrait. Mobile: compact 4:5 thumbnail. Desktop:
+              full-height, flush to the card's left edge; the wide (~4:5) column
+              keeps the crop minimal and frames the subject from the top. */}
+          <div
+            className="relative aspect-[4/5] w-full overflow-hidden md:aspect-auto md:min-h-[18rem]"
+            style={{
+              borderRight: `1px solid ${featured ? `rgba(${ORANGE_RGB},0.5)` : borderSubtle}`,
+            }}
+          >
+            {cardTeacher.image_url ? (
+              <Image
+                src={cardTeacher.image_url}
+                alt={cardTeacher.name}
+                fill
+                sizes="(max-width: 768px) 28vw, 17rem"
+                className="object-cover object-top"
+              />
+            ) : (
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(155deg, rgba(${ORANGE_RGB},0.14) 0%, rgba(20,20,24,0.95) 60%, rgba(10,10,14,1) 100%)`,
+                }}
+              />
+            )}
           </div>
 
           {/* Body */}
-          <div className="min-w-0">
+          <div className="min-w-0 md:py-9">
             {/* Top row — domain + featured badge + tbd badge */}
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span
@@ -1042,23 +1149,59 @@ function MasterclassCard({
               {cred?.promise ?? workshop.focus}
             </p>
 
-            {/* Date inline — solo data, senza pill prezzo / durata / trainer */}
-            {workshop.date && workshop.date !== "Da definire" && (
-              <div className="mt-5 flex items-center gap-2">
+            {/* Meta — data (se definita) + luogo sempre indicato sotto la data */}
+            <div className="mt-5 flex flex-col gap-2.5">
+              {workshop.date && workshop.date !== "Da definire" && (
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-11 shrink-0 text-[0.6rem] font-black uppercase tracking-[0.28em]"
+                    style={{ color: ts }}
+                  >
+                    Data
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[0.85rem] font-bold tabular-nums"
+                    style={{ color: th }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="12"
+                      height="12"
+                      fill={ORANGE}
+                      aria-hidden="true"
+                      className="shrink-0"
+                    >
+                      <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 7v10H5V9h14z" />
+                    </svg>
+                    {workshop.date}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-start gap-2">
                 <span
-                  className="text-[0.6rem] font-black uppercase tracking-[0.28em]"
+                  className="w-11 shrink-0 pt-0.5 text-[0.6rem] font-black uppercase tracking-[0.28em]"
                   style={{ color: ts }}
                 >
-                  Data
+                  Luogo
                 </span>
                 <span
-                  className="text-[0.85rem] font-bold tabular-nums"
+                  className="inline-flex items-center gap-1.5 text-[0.85rem] font-bold"
                   style={{ color: th }}
                 >
-                  {workshop.date}
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="12"
+                    height="12"
+                    fill={ORANGE}
+                    aria-hidden="true"
+                    className="shrink-0"
+                  >
+                    <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+                  </svg>
+                  {MASTERCLASS_LOCATION}
                 </span>
               </div>
-            )}
+            </div>
 
             {/* Prezzo promo — visibile solo con promo attiva */}
             {!salesMode && hasDiscount && pricing && (
@@ -1097,7 +1240,7 @@ function MasterclassCard({
           </div>
 
           {/* CTA right */}
-          <div className="hidden shrink-0 flex-col items-end gap-2.5 md:flex">
+          <div className="hidden shrink-0 flex-col items-end justify-center gap-2.5 md:flex md:py-9 md:pr-10">
             {salesMode && buyHref && product ? (
               <>
                 {/* Prezzo — sopra la CTA */}
@@ -1194,7 +1337,7 @@ function MasterclassCard({
 
           {/* Mobile CTA */}
           {salesMode && buyHref && product ? (
-            <div className="flex flex-col gap-3 pt-1 md:hidden">
+            <div className="col-span-2 flex flex-col gap-3 pt-1 md:hidden">
               {/* Prezzo — sopra la CTA */}
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
                 {hasDiscount && (
@@ -1251,7 +1394,7 @@ function MasterclassCard({
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 pt-1 md:hidden">
+            <div className="col-span-2 flex items-center gap-2 pt-1 md:hidden">
               <span
                 className="text-[0.62rem] font-black uppercase tracking-[0.28em]"
                 style={{ color: ORANGE }}
@@ -1543,11 +1686,7 @@ export function WorkshopGrid({
         activeId={activeId}
         hasInternational={hasInternational}
       />
-      <ManifestoSection
-        isDark={isDark}
-        activeId={activeId}
-        hasInternational={hasInternational}
-      />
+      <ManifestoSection isDark={isDark} />
       <MasterclassListSection
         isDark={isDark}
         workshops={workshops}
