@@ -286,7 +286,7 @@ export const PRODUCTS: AcademyProduct[] = [
     slug: "master-volley",
     name: "Masterclass Pallavolo",
     subtitle:
-      "Jump Higher, Play Stronger — la preparazione atletica nella pallavolo",
+      "Il lavoro atletico e la programmazione nella pallavolo di alto livello",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {

@@ -88,7 +88,7 @@ const CREDENTIALS: Record<string, Credential> = {
     pitch:
       "Strength & Conditioning Coach di Modena Volley e della Nazionale Italiana di Pallavolo.",
     promise:
-      "Il modello S&C di una squadra di SuperLega: forza esplosiva, salto, gestione del carico stagionale.",
+      "Il lavoro atletico e la programmazione di una squadra di SuperLega: forza, salto e gestione del carico stagionale.",
     featured: true,
     badge: "SuperLega",
     badgeTooltip:
