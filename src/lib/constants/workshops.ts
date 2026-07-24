@@ -68,10 +68,11 @@ export const WORKSHOPS: Workshop[] = [
     slug: "master-volley",
     title: "Preparazione Fisica Pallavolo",
     subtitle:
-      "Jump Higher, Play Stronger — la Preparazione Atletica nella Pallavolo",
-    focus: "Strength & Conditioning specifico per la pallavolo di alto livello",
+      "Masterclass — Il lavoro atletico e la programmazione nella pallavolo di alto livello",
+    focus:
+      "Lavoro atletico e programmazione della preparazione fisica nella pallavolo di alto livello",
     duration: "1-2 giornate",
-    date: "Sabato 17 Ottobre 2026",
+    date: "Sabato 3 Ottobre 2026",
     teacherSlugs: ["oscar-berti"],
     trainerLabel: "Oscar Berti",
     sortOrder: 4,

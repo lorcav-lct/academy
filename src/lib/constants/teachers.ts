@@ -320,7 +320,7 @@ export const TEACHERS: Teacher[] = [
     image_url: "/docenti/oscar-berti.webp",
     color: BRAND,
     talkTitle:
-      "Jump Higher, Play Stronger: la preparazione atletica nella pallavolo",
+      "Il lavoro atletico e la programmazione nella pallavolo di alto livello",
   },
   {
     slug: "ivan-pellizzari",

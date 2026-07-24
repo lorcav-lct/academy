@@ -41,8 +41,8 @@ const COLORS = {
 const EVENTS = [
   { label: "FUNCTION 1", dates: "11–12 Settembre", type: "function" },
   { label: "Master Bulgarian", dates: "18–20 Settembre", type: "workshop" },
+  { label: "Master Volley", dates: "3 Ottobre", type: "workshop" },
   { label: "FUNCTION 2", dates: "9–10 Ottobre", type: "function" },
-  { label: "Master Volley", dates: "17 Ottobre", type: "workshop" },
   { label: "FIPE I", dates: "13–14 Novembre", type: "fipe" },
   { label: "Master Running", dates: "28 Novembre", type: "workshop" },
   { label: "STRENGTH 1", dates: "11–12 Dicembre", type: "strength" },

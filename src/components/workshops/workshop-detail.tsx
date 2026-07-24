@@ -270,12 +270,12 @@ const CONTENT: Record<string, MasterclassContent> = {
   },
   "master-volley": {
     domain: "S&C Pallavolo",
-    hook: "Il salto è la moneta della pallavolo. Ogni dettaglio fisico decide chi spicca davvero a rete.",
+    hook: "Nella pallavolo di alto livello vince chi programma. Il lavoro atletico giusto, nel momento giusto della stagione.",
     trainerHeadline: "Oscar Berti",
     trainerPitch:
       "Strength & Conditioning Coach di Modena Volley (SuperLega) e della Nazionale Italiana di Pallavolo. Oscar è uno dei riferimenti italiani della preparazione fisica nella pallavolo di alto livello.",
     whatYouLearn:
-      "Una giornata dedicata al modello S&C di una squadra di SuperLega: come si lavora la forza esplosiva, come si gestisce il salto, come si sopravvive a una stagione doppia (club + nazionale).",
+      "Una giornata dedicata al lavoro atletico e alla programmazione di una squadra di SuperLega: come si costruisce la forza esplosiva, come si distribuisce il carico nella stagione, come si sopravvive a un doppio impegno (club + nazionale).",
     modules: [
       {
         num: "01",
