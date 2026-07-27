@@ -98,6 +98,7 @@ export default function AdminClassiPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [deposits, setDeposits] = useState<DepositRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showTest, setShowTest] = useState(false);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -105,12 +106,15 @@ export default function AdminClassiPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const [{ data: ticketData }, { data: depositData }] = await Promise.all([
-        supabase
-          .from("tickets")
-          .select(
-            "user_id, course_id, is_used, created_at, orders(is_test), profiles(full_name, email, phone, fiscal_code)",
-          ),
+      const [
+        { data: ticketData, error: ticketError },
+        { data: depositData, error: depositError },
+      ] = await Promise.all([
+        supabase.from("tickets").select(
+          // tickets has two FKs to profiles (user_id, scanned_by): the embed
+          // must name the relationship or PostgREST fails with PGRST201.
+          "user_id, course_id, is_used, created_at, orders(is_test), profiles!tickets_user_id_fkey(full_name, email, phone, fiscal_code)",
+        ),
         supabase
           .from("orders")
           .select(
@@ -121,6 +125,10 @@ export default function AdminClassiPage() {
       ]);
       if (ticketData) setTickets(ticketData as unknown as TicketRow[]);
       if (depositData) setDeposits(depositData as unknown as DepositRow[]);
+      // Surface query failures: a silent error here renders an empty roster
+      // that looks like "nobody enrolled".
+      const failure = ticketError ?? depositError;
+      setLoadError(failure ? failure.message : null);
       setLoading(false);
     }
     load();
@@ -287,6 +295,12 @@ export default function AdminClassiPage() {
           className="w-full border border-black/[0.08] bg-white py-2.5 pr-3 pl-10 text-sm text-academy-gray-800 placeholder-academy-gray-400 outline-none transition-colors focus:border-academy-orange/50"
         />
       </div>
+
+      {loadError && (
+        <div className="border border-red-500/30 bg-red-500/[0.06] px-4 py-3 text-[13px] text-red-700">
+          Errore nel caricamento dei roster: {loadError}
+        </div>
+      )}
 
       {loading ? (
         <div className="border border-black/[0.08] bg-white p-12 text-center text-sm text-academy-gray-500 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
