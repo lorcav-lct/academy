@@ -407,7 +407,7 @@ export default function AdminOrdersPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <p className="text-sm font-bold text-academy-orange tabular-nums">
                         {formatEUR(order.amount_cents)}
@@ -417,7 +417,8 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2">
+                    {/* wraps below the amount when three actions don't fit */}
+                    <div className="flex flex-wrap items-center gap-2">
                       {isDepositPending(order) && (
                         <button
                           onClick={() => openPrice(order)}
@@ -455,7 +456,9 @@ export default function AdminOrdersPage() {
           </ul>
 
           {/* Desktop: table */}
-          <div className="hidden overflow-hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:block">
+          {/* overflow-x-auto, not hidden: with 3 actions + badges a narrow
+              laptop would clip the last button instead of letting it scroll. */}
+          <div className="hidden overflow-x-auto border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:block">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-black/[0.06] bg-black/[0.015]">
@@ -469,7 +472,7 @@ export default function AdminOrdersPage() {
                   ].map((h, i) => (
                     <th
                       key={i}
-                      className={`px-5 py-3 text-[10px] font-bold tracking-[0.2em] text-academy-gray-500 uppercase ${
+                      className={`px-4 py-3 text-[10px] font-bold tracking-[0.2em] whitespace-nowrap text-academy-gray-500 uppercase ${
                         h.align === "right" ? "text-right" : "text-left"
                       }`}
                     >
@@ -484,15 +487,17 @@ export default function AdminOrdersPage() {
                   const tone = depositPending
                     ? ORDER_STATUS_TONE.pending
                     : ORDER_STATUS_TONE[order.status];
+                  // Short label in the table: the full wording wrapped onto
+                  // three lines and blew the row width.
                   const statusLabel = depositPending
-                    ? "Caparra · saldo atteso"
+                    ? "Saldo atteso"
                     : ORDER_STATUS_LABEL[order.status];
                   return (
                     <tr
                       key={order.id}
                       className="border-b border-black/[0.04] transition-colors hover:bg-black/[0.015] last:border-b-0"
                     >
-                      <td className="px-5 py-4">
+                      <td className="px-4 py-4">
                         <p className="font-bold text-academy-gray-800">
                           {displayName(order)}
                         </p>
@@ -500,37 +505,39 @@ export default function AdminOrdersPage() {
                           {order.billing_email}
                         </p>
                       </td>
-                      <td className="px-5 py-4 text-sm text-academy-gray-700">
+                      <td className="px-4 py-4 text-sm text-academy-gray-700">
                         {order.pack_id?.toUpperCase() || "—"}
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
+                            className={`inline-flex shrink-0 items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
                           >
-                            <span className={`h-1.5 w-1.5 ${tone.dot}`} />
+                            <span
+                              className={`h-1.5 w-1.5 shrink-0 ${tone.dot}`}
+                            />
                             {statusLabel}
                           </span>
                           {order.is_test && (
-                            <span className="inline-flex items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
+                            <span className="inline-flex shrink-0 items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
                               Test
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-right text-sm font-bold text-academy-gray-800 tabular-nums">
+                      <td className="px-4 py-4 text-right text-sm font-bold text-academy-gray-800 tabular-nums">
                         {formatEUR(order.amount_cents)}
                       </td>
-                      <td className="px-5 py-4 text-right text-[12px] text-academy-gray-500 tabular-nums">
+                      <td className="px-4 py-4 text-right text-[12px] text-academy-gray-500 tabular-nums">
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </td>
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="w-px px-4 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                           {isDepositPending(order) && (
                             <button
                               onClick={() => openPrice(order)}
                               title="Prezzo totale concordato con il cliente"
-                              className="inline-flex items-center gap-1.5 border border-black/[0.12] bg-white px-3 py-1.5 text-[11px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800"
+                              className="inline-flex items-center gap-1.5 border border-black/[0.12] bg-white px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800"
                             >
                               {order.agreed_total_cents != null
                                 ? formatEUR(order.agreed_total_cents)
@@ -540,7 +547,7 @@ export default function AdminOrdersPage() {
                           {canActivate(order) && (
                             <button
                               onClick={() => openActivate(order)}
-                              className="inline-flex items-center gap-1.5 bg-academy-orange px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
+                              className="inline-flex items-center gap-1.5 bg-academy-orange px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
                             >
                               Attiva
                             </button>
@@ -550,7 +557,7 @@ export default function AdminOrdersPage() {
                             <button
                               onClick={() => cancelOrder(order.id)}
                               disabled={cancelling === order.id}
-                              className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
                             >
                               <IconTrash className="h-3 w-3" />
                               {cancelling === order.id ? "..." : "Annulla"}
