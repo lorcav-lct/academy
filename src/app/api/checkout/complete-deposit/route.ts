@@ -11,7 +11,10 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getStripe } from "@/lib/stripe/client";
-import { ensureDepositPromotionCode } from "@/lib/stripe/deposit";
+import {
+  ensureDepositPromotionCode,
+  WrongStripeEnvError,
+} from "@/lib/stripe/deposit";
 import {
   BalanceDiscountError,
   ensureBalanceDiscountCode,
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { data: deposit } = await supabase
       .from("orders")
       .select(
-        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, deposit_promotion_code_id, selected_workshop_ids, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
+        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, deposit_promotion_code_id, selected_workshop_ids, is_test, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
       )
       .eq("id", orderId)
       .eq("user_id", user.id)
@@ -184,14 +187,31 @@ export async function POST(request: NextRequest) {
     // Plain deposit credit → the standard code (self-healed if missing or no
     // longer usable, so a customer is never locked out). Anything else needs a
     // combined coupon carrying the deposit credit plus the negotiated discount.
-    const promotionCodeId =
-      discount.source === "deposit"
-        ? await ensureDepositPromotionCode({
-            orderId: deposit.id,
-            packSlug: deposit.pack_id,
-            promotionCodeId: deposit.deposit_promotion_code_id as string | null,
-          })
-        : await ensureBalanceDiscountCode({ deposit, discount });
+    let promotionCodeId: string;
+    try {
+      promotionCodeId =
+        discount.source === "deposit"
+          ? await ensureDepositPromotionCode({
+              orderId: deposit.id,
+              packSlug: deposit.pack_id,
+              promotionCodeId: deposit.deposit_promotion_code_id as
+                | string
+                | null,
+              orderIsTest: deposit.is_test,
+            })
+          : await ensureBalanceDiscountCode({ deposit, discount });
+    } catch (err) {
+      if (err instanceof WrongStripeEnvError) {
+        return NextResponse.json(
+          {
+            error:
+              "Questo ordine appartiene a un altro ambiente di pagamento. Contatta l'assistenza.",
+          },
+          { status: 409 },
+        );
+      }
+      throw err;
+    }
 
     // Create the full-price balance order
     const { data: newOrder, error: orderError } = await supabase

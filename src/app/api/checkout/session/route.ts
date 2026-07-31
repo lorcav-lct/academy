@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
       const { data: openDeposit } = await supabase
         .from("orders")
         .select(
-          "id, pack_id, deposit_promotion_code_id, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
+          "id, pack_id, is_test, deposit_promotion_code_id, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
         )
         .eq("user_id", user.id)
         .eq("payment_plan", "deposit")
@@ -238,6 +238,7 @@ export async function POST(request: NextRequest) {
                   orderId: openDeposit.id,
                   packSlug: packId,
                   promotionCodeId: openDeposit.deposit_promotion_code_id,
+                  orderIsTest: openDeposit.is_test,
                 })
               : await ensureBalanceDiscountCode({
                   deposit: { ...openDeposit, pack_id: packId },

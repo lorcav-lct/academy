@@ -21,7 +21,7 @@
 import type Stripe from "stripe";
 import { getStripe } from "./client";
 import { findStripeProductBySlug } from "./products";
-import { balanceDeadlineUnix } from "./deposit";
+import { assertSameStripeEnv, balanceDeadlineUnix } from "./deposit";
 import {
   DEPOSIT_PRICE_CENTS,
   getBundles,
@@ -39,6 +39,7 @@ const ADMIN_CODE_SOURCE = "academy-admin-code";
 export interface DepositOrderRef {
   id: string;
   pack_id: string;
+  is_test: boolean | null;
   agreed_total_cents: number | null;
   commercial_promo_code: string | null;
   balance_discount_cents: number | null;
@@ -201,6 +202,9 @@ export async function ensureBalanceDiscountCode(params: {
       // fall through and reissue
     }
   }
+
+  // Shared DB across envs: never mint a test coupon onto a live order.
+  assertSameStripeEnv(deposit.is_test);
 
   const bundles = getBundles();
   const bundleProductIds = (

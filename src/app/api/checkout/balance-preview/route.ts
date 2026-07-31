@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const { data: deposit } = await supabase
       .from("orders")
       .select(
-        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
+        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, is_test, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
       )
       .eq("id", orderId)
       .eq("user_id", user.id)
