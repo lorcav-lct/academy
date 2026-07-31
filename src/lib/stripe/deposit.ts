@@ -27,7 +27,7 @@ import { getDeadlines } from "@/lib/settings/deadlines";
 const SOURCE = "academy-deposit-balance";
 
 /** Unix timestamp (seconds) for end-of-day at the configured balance deadline. */
-async function balanceDeadlineUnix(): Promise<number> {
+export async function balanceDeadlineUnix(): Promise<number> {
   const { depositBalance } = await getDeadlines(createAdminClient());
   // Local Europe/Rome end of day; precision here is non-critical.
   return Math.floor(new Date(`${depositBalance}T23:59:59`).getTime() / 1000);

@@ -283,16 +283,19 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq("id", depositOrderId)
-        .select("deposit_promotion_code_id")
+        .select("deposit_promotion_code_id, balance_discount_promotion_code_id")
         .maybeSingle();
 
-      // The -500€ code has done its job: retire it. This is the anti-reuse
-      // guard that replaces `max_redemptions` (which Stripe burns on merely
-      // opened checkout sessions, locking customers out of their own balance).
-      if (depositOrder?.deposit_promotion_code_id) {
-        await deactivateDepositPromotionCode(
-          depositOrder.deposit_promotion_code_id,
-        );
+      // The discount codes have done their job: retire them. This is the
+      // anti-reuse guard that replaces `max_redemptions` (which Stripe burns on
+      // merely opened checkout sessions, locking customers out of their own
+      // balance). Both are retired: the customer may have settled through the
+      // plain -500€ code or through a combined negotiated one.
+      for (const codeId of [
+        depositOrder?.deposit_promotion_code_id,
+        depositOrder?.balance_discount_promotion_code_id,
+      ]) {
+        if (codeId) await deactivateDepositPromotionCode(codeId);
       }
     }
 

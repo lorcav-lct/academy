@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GradientText } from "@/components/shared/gradient-text";
 import { IconBag, IconScan, IconSearch, IconTrash } from "../_components/icons";
+import { DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 
 interface Order {
   id: string;
@@ -19,6 +20,7 @@ interface Order {
   balance_order_id: string | null;
   settled_externally: boolean | null;
   fulfilled_at: string | null;
+  agreed_total_cents: number | null;
   profiles: { full_name: string | null } | null;
 }
 
@@ -113,13 +115,17 @@ export default function AdminOrdersPage() {
   const [activateMethod, setActivateMethod] = useState("bonifico");
   const [activateAmount, setActivateAmount] = useState("");
   const [activateSilent, setActivateSilent] = useState(false);
+  const [priceTarget, setPriceTarget] = useState<Order | null>(null);
+  const [priceValue, setPriceValue] = useState("");
+  const [priceSaving, setPriceSaving] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
 
   async function load() {
     const supabase = createClient();
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, profiles(full_name)",
+        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, agreed_total_cents, profiles(full_name)",
       )
       .order("created_at", { ascending: false });
     if (data) setOrders(data as unknown as Order[]);
@@ -175,6 +181,48 @@ export default function AdminOrdersPage() {
     }
     setActivating(false);
     setActivateTarget(null);
+    await load();
+  }
+
+  function openPrice(order: Order) {
+    setPriceTarget(order);
+    setPriceValue(
+      order.agreed_total_cents != null
+        ? String(order.agreed_total_cents / 100)
+        : "",
+    );
+    setPriceError(null);
+  }
+
+  /** Save (or clear, when the field is empty) the negotiated total price. */
+  async function submitPrice() {
+    if (!priceTarget) return;
+    setPriceSaving(true);
+    setPriceError(null);
+    const raw = priceValue.trim();
+    let agreedTotalCents: number | null = null;
+    if (raw) {
+      const parsed = parseFloat(raw.replace(",", "."));
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        setPriceError("Importo non valido");
+        setPriceSaving(false);
+        return;
+      }
+      agreedTotalCents = Math.round(parsed * 100);
+    }
+    const res = await fetch("/api/admin/agreed-total", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: priceTarget.id, agreedTotalCents }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setPriceError(data.error || "Errore durante il salvataggio");
+      setPriceSaving(false);
+      return;
+    }
+    setPriceSaving(false);
+    setPriceTarget(null);
     await load();
   }
 
@@ -370,6 +418,16 @@ export default function AdminOrdersPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
+                      {isDepositPending(order) && (
+                        <button
+                          onClick={() => openPrice(order)}
+                          className="flex items-center gap-1.5 border border-black/[0.12] bg-white px-3 py-1.5 text-[11px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800"
+                        >
+                          {order.agreed_total_cents != null
+                            ? formatEUR(order.agreed_total_cents)
+                            : "Prezzo"}
+                        </button>
+                      )}
                       {canActivate(order) && (
                         <button
                           onClick={() => openActivate(order)}
@@ -468,6 +526,17 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {isDepositPending(order) && (
+                            <button
+                              onClick={() => openPrice(order)}
+                              title="Prezzo totale concordato con il cliente"
+                              className="inline-flex items-center gap-1.5 border border-black/[0.12] bg-white px-3 py-1.5 text-[11px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800"
+                            >
+                              {order.agreed_total_cents != null
+                                ? formatEUR(order.agreed_total_cents)
+                                : "Prezzo"}
+                            </button>
+                          )}
                           {canActivate(order) && (
                             <button
                               onClick={() => openActivate(order)}
@@ -590,6 +659,89 @@ export default function AdminOrdersPage() {
                   : activateSilent
                     ? "Attiva senza email"
                     : "Attiva e invia email"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {priceTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => !priceSaving && setPriceTarget(null)}
+        >
+          <div
+            className="w-full max-w-md border border-black/[0.08] bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-[11px] font-bold tracking-[0.3em] text-academy-orange uppercase">
+              Prezzo concordato
+            </p>
+            <h2 className="text-xl font-black text-academy-gray-800">
+              {priceTarget.billing_name || priceTarget.billing_email}
+            </h2>
+            <p className="mt-1 text-[13px] text-academy-gray-500">
+              {priceTarget.pack_id?.toUpperCase() || "—"} · totale pattuito per
+              il pack, caparra inclusa.
+            </p>
+
+            <div className="mt-5">
+              <label className="mb-1.5 block text-[11px] font-bold tracking-wider text-academy-gray-500 uppercase">
+                Totale concordato (€)
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                autoFocus
+                value={priceValue}
+                onChange={(e) => setPriceValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !priceSaving) submitPrice();
+                }}
+                placeholder="es. 2000"
+                className="w-full border border-black/[0.1] bg-white px-3 py-2.5 text-sm text-academy-gray-800 placeholder-academy-gray-400 outline-none focus:border-academy-orange/50"
+              />
+              <p className="mt-1.5 text-[11px] text-academy-gray-400">
+                Il cliente pagherà questo importo meno i{" "}
+                {formatEUR(DEPOSIT_PRICE_CENTS)} di caparra già versati
+                {priceValue.trim() &&
+                Number.isFinite(parseFloat(priceValue.replace(",", "."))) ? (
+                  <>
+                    {" "}
+                    → saldo{" "}
+                    <span className="font-bold text-academy-gray-600">
+                      {formatEUR(
+                        Math.round(
+                          parseFloat(priceValue.replace(",", ".")) * 100,
+                        ) - DEPOSIT_PRICE_CENTS,
+                      )}
+                    </span>
+                  </>
+                ) : null}
+                . Svuota il campo per tornare al prezzo di listino.
+              </p>
+            </div>
+
+            {priceError && (
+              <p className="mt-4 border border-red-500/30 bg-red-50 px-3 py-2 text-[13px] text-red-700">
+                {priceError}
+              </p>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setPriceTarget(null)}
+                disabled={priceSaving}
+                className="border border-black/[0.1] bg-white px-4 py-2.5 text-[12px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800 disabled:opacity-50"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={submitPrice}
+                disabled={priceSaving}
+                className="bg-academy-orange px-5 py-2.5 text-[12px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
+              >
+                {priceSaving ? "Salvataggio..." : "Salva"}
               </button>
             </div>
           </div>
