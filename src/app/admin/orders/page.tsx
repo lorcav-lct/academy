@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactElement, SVGProps } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GradientText } from "@/components/shared/gradient-text";
-import { IconBag, IconDots, IconScan, IconSearch } from "../_components/icons";
+import {
+  IconBag,
+  IconCheck,
+  IconEuro,
+  IconScan,
+  IconSearch,
+  IconTrash,
+} from "../_components/icons";
 import { DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 
 interface Order {
@@ -120,8 +127,6 @@ export default function AdminOrdersPage() {
   const [priceValue, setPriceValue] = useState("");
   const [priceSaving, setPriceSaving] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
-  /** Only one row menu open at a time. */
-  const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   async function load() {
     const supabase = createClient();
@@ -235,30 +240,39 @@ export default function AdminOrdersPage() {
 
     if (isDepositPending(order)) {
       actions.push({
-        label: "Prezzo concordato",
+        label: "Prezzo",
+        icon: IconEuro,
+        // The negotiated total stays visible without hovering: it's state, not
+        // just an action.
+        badge:
+          order.agreed_total_cents != null
+            ? formatEUR(order.agreed_total_cents)
+            : undefined,
         hint:
           order.agreed_total_cents != null
-            ? `${formatEUR(order.agreed_total_cents)} · saldo ${formatEUR(order.agreed_total_cents - DEPOSIT_PRICE_CENTS)}`
-            : "Prezzo di listino — imposta un totale personalizzato",
+            ? `concordato ${formatEUR(order.agreed_total_cents)}, saldo ${formatEUR(order.agreed_total_cents - DEPOSIT_PRICE_CENTS)}`
+            : "prezzo di listino, imposta un totale personalizzato",
         onClick: () => openPrice(order),
       });
     }
 
     if (canActivate(order)) {
       actions.push({
-        label: order.payment_plan === "deposit" ? "Salda caparra" : "Attiva",
-        hint: "Pagato fuori Stripe: genera ticket e QR",
+        label: order.payment_plan === "deposit" ? "Salda" : "Attiva",
+        icon: IconCheck,
+        hint: "pagato fuori Stripe: genera ticket e QR",
         onClick: () => openActivate(order),
       });
     }
 
     if (order.status === "paid" || order.status === "pending") {
       actions.push({
-        label: "Annulla ordine",
+        label: "Annulla",
+        icon: IconTrash,
         hint:
           order.status === "paid"
-            ? "Invalida i ticket e avvisa il cliente"
-            : "Checkout mai pagato: nessuna email",
+            ? "invalida i ticket e avvisa il cliente"
+            : "checkout mai pagato: nessuna email",
         onClick: () => cancelOrder(order.id),
         danger: true,
         disabled: cancelling === order.id,
@@ -459,11 +473,7 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>
-                    <RowActions
-                      actions={actionsFor(order)}
-                      open={menuOpen === order.id}
-                      onOpenChange={(o) => setMenuOpen(o ? order.id : null)}
-                    />
+                    <RowActions actions={actionsFor(order)} />
                   </div>
                 </li>
               );
@@ -547,11 +557,7 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </td>
                       <td className="w-px px-4 py-4 text-right">
-                        <RowActions
-                          actions={actionsFor(order)}
-                          open={menuOpen === order.id}
-                          onOpenChange={(o) => setMenuOpen(o ? order.id : null)}
-                        />
+                        <RowActions actions={actionsFor(order)} />
                       </td>
                     </tr>
                   );
@@ -748,149 +754,67 @@ export default function AdminOrdersPage() {
 
 interface RowAction {
   label: string;
-  /** Secondary line: what the action actually does to the order. */
+  icon: (p: SVGProps<SVGSVGElement>) => ReactElement;
+  /** Shown in the tooltip: what the action actually does to the order. */
   hint?: string;
+  /** Always-visible value next to the icon (e.g. the negotiated price). */
+  badge?: string;
   onClick: () => void;
   danger?: boolean;
   disabled?: boolean;
 }
 
 /**
- * Per-row actions collapsed behind a single trigger.
+ * Inline row action: icon only, label revealed on hover/focus.
  *
- * Three inline buttons plus the status badges outgrew the table row, so the
- * actions live in a menu that only lists what applies to that order (a settled
- * order offers nothing and renders no trigger at all).
- *
- * The menu is rendered in a portal with fixed positioning: inside a table cell
- * an absolutely positioned menu is painted under the following rows, which then
- * swallow the clicks — the menu looked fine but every entry was dead.
+ * Three full-width buttons outgrew the row, and a dropdown was worse: the menu
+ * is mounted twice per order (mobile card + table row) and a portal escapes the
+ * `display:none` of the hidden one, so a ghost copy showed up in the corner.
+ * Icons keep the row narrow while the label still explains the action.
  */
-function RowActions({
-  actions,
-  open,
-  onOpenChange,
+function ActionButton({
+  action,
+  icon: Icon,
 }: {
-  actions: RowAction[];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  action: RowAction;
+  icon: (p: SVGProps<SVGSVGElement>) => ReactElement;
 }) {
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(
-    null,
-  );
-
-  // Place the menu under the trigger, flipping above it when it wouldn't fit.
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current || !menuRef.current) return;
-    const trigger = triggerRef.current.getBoundingClientRect();
-    const height = menuRef.current.offsetHeight;
-    const width = menuRef.current.offsetWidth;
-    const below = trigger.bottom + 4;
-    const flip = below + height > window.innerHeight - 8;
-    setAnchor({
-      top: flip ? Math.max(8, trigger.top - height - 4) : below,
-      left: Math.max(8, trigger.right - width),
-    });
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    function onPointerDown(e: MouseEvent) {
-      const target = e.target as Node;
-      if (
-        !triggerRef.current?.contains(target) &&
-        !menuRef.current?.contains(target)
-      ) {
-        onOpenChange(false);
-      }
-    }
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onOpenChange(false);
-    }
-    // A fixed menu would drift away from its row on scroll.
-    function close() {
-      onOpenChange(false);
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    window.addEventListener("scroll", close, true);
-    window.addEventListener("resize", close);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("scroll", close, true);
-      window.removeEventListener("resize", close);
-    };
-  }, [open, onOpenChange]);
-
-  if (actions.length === 0) return null;
-
   return (
-    <>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => {
-          if (!open) setAnchor(null);
-          onOpenChange(!open);
-        }}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label="Azioni ordine"
-        className={`inline-flex h-8 w-8 items-center justify-center border transition-colors ${
-          open
-            ? "border-academy-orange/40 bg-academy-orange/10 text-academy-orange"
-            : "border-black/[0.12] bg-white text-academy-gray-500 hover:text-academy-gray-800"
-        }`}
-      >
-        <IconDots className="h-4 w-4" />
-      </button>
+    <button
+      type="button"
+      onClick={action.onClick}
+      disabled={action.disabled}
+      title={action.hint ? `${action.label} — ${action.hint}` : action.label}
+      aria-label={action.label}
+      className={`group inline-flex h-8 shrink-0 items-center border px-2 transition-all disabled:opacity-40 ${
+        action.danger
+          ? "border-red-500/30 bg-red-50 text-red-700 hover:bg-red-100"
+          : "border-black/[0.12] bg-white text-academy-gray-500 hover:border-academy-orange/40 hover:text-academy-orange"
+      }`}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      {/* Label stays in the DOM for screen readers, revealed on hover/focus. */}
+      <span className="max-w-0 overflow-hidden text-[11px] font-bold tracking-wider whitespace-nowrap uppercase opacity-0 transition-all duration-200 group-hover:ml-1.5 group-hover:max-w-[9rem] group-hover:opacity-100 group-focus-visible:ml-1.5 group-focus-visible:max-w-[9rem] group-focus-visible:opacity-100">
+        {action.label}
+      </span>
+      {action.badge && (
+        <span className="ml-1.5 text-[11px] font-bold tracking-wider tabular-nums">
+          {action.badge}
+        </span>
+      )}
+    </button>
+  );
+}
 
-      {open &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            ref={menuRef}
-            role="menu"
-            style={{
-              top: anchor?.top ?? -9999,
-              left: anchor?.left ?? -9999,
-              // Hidden until measured, so it never flashes in the wrong spot.
-              visibility: anchor ? "visible" : "hidden",
-            }}
-            className="fixed z-50 w-56 border border-black/[0.1] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-          >
-            {actions.map((action) => (
-              <button
-                key={action.label}
-                role="menuitem"
-                disabled={action.disabled}
-                onClick={() => {
-                  onOpenChange(false);
-                  action.onClick();
-                }}
-                className={`block w-full px-3 py-2 text-left transition-colors disabled:opacity-40 ${
-                  action.danger
-                    ? "text-red-700 hover:bg-red-50"
-                    : "text-academy-gray-700 hover:bg-black/[0.04]"
-                }`}
-              >
-                <span className="block text-[12px] font-bold tracking-wider uppercase">
-                  {action.label}
-                </span>
-                {action.hint && (
-                  <span className="mt-0.5 block text-[11px] text-academy-gray-500 normal-case">
-                    {action.hint}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>,
-          document.body,
-        )}
-    </>
+/** The actions of one order, rendered inline. */
+function RowActions({ actions }: { actions: RowAction[] }) {
+  if (actions.length === 0) return null;
+  return (
+    <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+      {actions.map((action) => (
+        <ActionButton key={action.label} action={action} icon={action.icon} />
+      ))}
+    </div>
   );
 }
 
