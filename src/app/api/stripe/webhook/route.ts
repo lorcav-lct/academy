@@ -5,7 +5,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PRODUCTS, DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 import { sendEmail } from "@/lib/email/client";
 import { DepositReceivedEmail } from "@/lib/email/templates/deposit-received";
-import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
+import {
+  createDepositBalanceCoupon,
+  deactivateDepositPromotionCode,
+} from "@/lib/stripe/deposit";
 import { fulfillOrder } from "@/lib/orders/fulfill";
 import { getDeadlines } from "@/lib/settings/deadlines";
 import { sendMetaEvent } from "@/lib/meta/conversion";
@@ -273,13 +276,24 @@ export async function POST(request: NextRequest) {
     // If this is a balance payment, close the originating deposit order by
     // linking it to this full-price order.
     if (depositOrderId && !wasAlreadyPaid) {
-      await supabase
+      const { data: depositOrder } = await supabase
         .from("orders")
         .update({
           balance_order_id: orderId,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", depositOrderId);
+        .eq("id", depositOrderId)
+        .select("deposit_promotion_code_id")
+        .maybeSingle();
+
+      // The -500€ code has done its job: retire it. This is the anti-reuse
+      // guard that replaces `max_redemptions` (which Stripe burns on merely
+      // opened checkout sessions, locking customers out of their own balance).
+      if (depositOrder?.deposit_promotion_code_id) {
+        await deactivateDepositPromotionCode(
+          depositOrder.deposit_promotion_code_id,
+        );
+      }
     }
 
     // Trigger Make.com webhook (async, don't await)

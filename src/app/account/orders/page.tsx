@@ -70,6 +70,10 @@ export default function AccountOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
   const [completing, setCompleting] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<{
+    orderId: string;
+    message: string;
+  } | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -108,31 +112,47 @@ export default function AccountOrdersPage() {
     load();
   }, []);
 
+  /** Never leave the customer with a spinner that ends in silence: any failure
+   *  to open the checkout must say so, with a way out. */
+  async function openCheckout(endpoint: string, orderId: string) {
+    setActionError(null);
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return true;
+      }
+      setActionError({
+        orderId,
+        message:
+          data.error ??
+          "Non siamo riusciti ad aprire il pagamento. Riprova tra qualche minuto o scrivici a academy@lacertosus.com.",
+      });
+    } catch {
+      setActionError({
+        orderId,
+        message:
+          "Connessione non riuscita. Controlla la rete e riprova, oppure scrivici a academy@lacertosus.com.",
+      });
+    }
+    return false;
+  }
+
   async function handleResume(orderId: string) {
     setResuming(orderId);
-    const res = await fetch("/api/checkout/resume", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId }),
-    });
-    const data = await res.json();
-    if (data.url) window.location.href = data.url;
+    await openCheckout("/api/checkout/resume", orderId);
     setResuming(null);
   }
 
   async function handleCompleteDeposit(orderId: string) {
     setCompleting(orderId);
-    const res = await fetch("/api/checkout/complete-deposit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-      return;
-    }
-    setCompleting(null);
+    const ok = await openCheckout("/api/checkout/complete-deposit", orderId);
+    if (!ok) setCompleting(null);
   }
 
   async function copyId(id: string) {
@@ -374,6 +394,15 @@ export default function AccountOrdersPage() {
                           </Link>
                         )}
                       </div>
+
+                      {actionError?.orderId === order.id && (
+                        <p
+                          role="alert"
+                          className="border border-red-500/30 bg-red-50 px-3 py-2 text-[11px] leading-relaxed text-red-700 md:col-span-2"
+                        >
+                          {actionError.message}
+                        </p>
+                      )}
                     </div>
                   </li>
                 );
