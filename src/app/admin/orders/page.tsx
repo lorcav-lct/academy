@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GradientText } from "@/components/shared/gradient-text";
-import { IconBag, IconScan, IconSearch, IconTrash } from "../_components/icons";
+import { IconBag, IconDots, IconScan, IconSearch } from "../_components/icons";
 import { DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 
 interface Order {
@@ -119,6 +119,8 @@ export default function AdminOrdersPage() {
   const [priceValue, setPriceValue] = useState("");
   const [priceSaving, setPriceSaving] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
+  /** Only one row menu open at a time. */
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   async function load() {
     const supabase = createClient();
@@ -224,6 +226,45 @@ export default function AdminOrdersPage() {
     setPriceSaving(false);
     setPriceTarget(null);
     await load();
+  }
+
+  /** Actions that actually apply to this order, in order of usefulness. */
+  function actionsFor(order: Order): RowAction[] {
+    const actions: RowAction[] = [];
+
+    if (isDepositPending(order)) {
+      actions.push({
+        label: "Prezzo concordato",
+        hint:
+          order.agreed_total_cents != null
+            ? `${formatEUR(order.agreed_total_cents)} · saldo ${formatEUR(order.agreed_total_cents - DEPOSIT_PRICE_CENTS)}`
+            : "Prezzo di listino — imposta un totale personalizzato",
+        onClick: () => openPrice(order),
+      });
+    }
+
+    if (canActivate(order)) {
+      actions.push({
+        label: order.payment_plan === "deposit" ? "Salda caparra" : "Attiva",
+        hint: "Pagato fuori Stripe: genera ticket e QR",
+        onClick: () => openActivate(order),
+      });
+    }
+
+    if (order.status === "paid" || order.status === "pending") {
+      actions.push({
+        label: "Annulla ordine",
+        hint:
+          order.status === "paid"
+            ? "Invalida i ticket e avvisa il cliente"
+            : "Checkout mai pagato: nessuna email",
+        onClick: () => cancelOrder(order.id),
+        danger: true,
+        disabled: cancelling === order.id,
+      });
+    }
+
+    return actions;
   }
 
   const scoped = useMemo(
@@ -417,38 +458,11 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>
-                    {/* wraps below the amount when three actions don't fit */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {isDepositPending(order) && (
-                        <button
-                          onClick={() => openPrice(order)}
-                          className="flex items-center gap-1.5 border border-black/[0.12] bg-white px-3 py-1.5 text-[11px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800"
-                        >
-                          {order.agreed_total_cents != null
-                            ? formatEUR(order.agreed_total_cents)
-                            : "Prezzo"}
-                        </button>
-                      )}
-                      {canActivate(order) && (
-                        <button
-                          onClick={() => openActivate(order)}
-                          className="flex items-center gap-1.5 bg-academy-orange px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
-                        >
-                          Attiva
-                        </button>
-                      )}
-                      {(order.status === "paid" ||
-                        order.status === "pending") && (
-                        <button
-                          onClick={() => cancelOrder(order.id)}
-                          disabled={cancelling === order.id}
-                          className="flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
-                        >
-                          <IconTrash className="h-3 w-3" />
-                          {cancelling === order.id ? "..." : "Annulla"}
-                        </button>
-                      )}
-                    </div>
+                    <RowActions
+                      actions={actionsFor(order)}
+                      open={menuOpen === order.id}
+                      onOpenChange={(o) => setMenuOpen(o ? order.id : null)}
+                    />
                   </div>
                 </li>
               );
@@ -456,9 +470,9 @@ export default function AdminOrdersPage() {
           </ul>
 
           {/* Desktop: table */}
-          {/* overflow-x-auto, not hidden: with 3 actions + badges a narrow
-              laptop would clip the last button instead of letting it scroll. */}
-          <div className="hidden overflow-x-auto border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:block">
+          {/* No overflow clipping here: the row menu is absolutely positioned
+              and would be cut off. With a single trigger the row always fits. */}
+          <div className="hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:block">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-black/[0.06] bg-black/[0.015]">
@@ -532,38 +546,11 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </td>
                       <td className="w-px px-4 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                          {isDepositPending(order) && (
-                            <button
-                              onClick={() => openPrice(order)}
-                              title="Prezzo totale concordato con il cliente"
-                              className="inline-flex items-center gap-1.5 border border-black/[0.12] bg-white px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800"
-                            >
-                              {order.agreed_total_cents != null
-                                ? formatEUR(order.agreed_total_cents)
-                                : "Prezzo"}
-                            </button>
-                          )}
-                          {canActivate(order) && (
-                            <button
-                              onClick={() => openActivate(order)}
-                              className="inline-flex items-center gap-1.5 bg-academy-orange px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
-                            >
-                              Attiva
-                            </button>
-                          )}
-                          {(order.status === "paid" ||
-                            order.status === "pending") && (
-                            <button
-                              onClick={() => cancelOrder(order.id)}
-                              disabled={cancelling === order.id}
-                              className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
-                            >
-                              <IconTrash className="h-3 w-3" />
-                              {cancelling === order.id ? "..." : "Annulla"}
-                            </button>
-                          )}
-                        </div>
+                        <RowActions
+                          actions={actionsFor(order)}
+                          open={menuOpen === order.id}
+                          onOpenChange={(o) => setMenuOpen(o ? order.id : null)}
+                        />
                       </td>
                     </tr>
                   );
@@ -752,6 +739,122 @@ export default function AdminOrdersPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface RowAction {
+  label: string;
+  /** Secondary line: what the action actually does to the order. */
+  hint?: string;
+  onClick: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+}
+
+/**
+ * Per-row actions collapsed behind a single trigger.
+ *
+ * Three inline buttons plus the status badges outgrew the table row, so the
+ * actions live in a menu that only lists what applies to that order (a settled
+ * order offers nothing and renders no trigger at all). Opens upwards when the
+ * row sits low on screen.
+ */
+function RowActions({
+  actions,
+  open,
+  onOpenChange,
+}: {
+  actions: RowAction[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [dropUp, setDropUp] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onOpenChange(false);
+      }
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onOpenChange(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange]);
+
+  if (actions.length === 0) return null;
+
+  function toggle(e: React.MouseEvent<HTMLButtonElement>) {
+    if (!open) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      // ~56px per entry + padding: flip up when the menu wouldn't fit below.
+      setDropUp(
+        window.innerHeight - rect.bottom < actions.length * 56 + 24 &&
+          rect.top > window.innerHeight / 2,
+      );
+    }
+    onOpenChange(!open);
+  }
+
+  return (
+    <div ref={ref} className="relative inline-block text-left">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Azioni ordine"
+        className={`inline-flex h-8 w-8 items-center justify-center border transition-colors ${
+          open
+            ? "border-academy-orange/40 bg-academy-orange/10 text-academy-orange"
+            : "border-black/[0.12] bg-white text-academy-gray-500 hover:text-academy-gray-800"
+        }`}
+      >
+        <IconDots className="h-4 w-4" />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className={`absolute right-0 z-30 w-56 border border-black/[0.1] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${
+            dropUp ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
+        >
+          {actions.map((action) => (
+            <button
+              key={action.label}
+              role="menuitem"
+              disabled={action.disabled}
+              onClick={() => {
+                onOpenChange(false);
+                action.onClick();
+              }}
+              className={`block w-full px-3 py-2 text-left transition-colors disabled:opacity-40 ${
+                action.danger
+                  ? "text-red-700 hover:bg-red-50"
+                  : "text-academy-gray-700 hover:bg-black/[0.04]"
+              }`}
+            >
+              <span className="block text-[12px] font-bold tracking-wider uppercase">
+                {action.label}
+              </span>
+              {action.hint && (
+                <span className="mt-0.5 block text-[11px] normal-case text-academy-gray-500">
+                  {action.hint}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       )}
     </div>
