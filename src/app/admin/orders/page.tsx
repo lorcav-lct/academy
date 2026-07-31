@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GradientText } from "@/components/shared/gradient-text";
@@ -759,8 +760,11 @@ interface RowAction {
  *
  * Three inline buttons plus the status badges outgrew the table row, so the
  * actions live in a menu that only lists what applies to that order (a settled
- * order offers nothing and renders no trigger at all). Opens upwards when the
- * row sits low on screen.
+ * order offers nothing and renders no trigger at all).
+ *
+ * The menu is rendered in a portal with fixed positioning: inside a table cell
+ * an absolutely positioned menu is painted under the following rows, which then
+ * swallow the clicks — the menu looked fine but every entry was dead.
  */
 function RowActions({
   actions,
@@ -771,46 +775,67 @@ function RowActions({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [dropUp, setDropUp] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(
+    null,
+  );
+
+  // Place the menu under the trigger, flipping above it when it wouldn't fit.
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current || !menuRef.current) return;
+    const trigger = triggerRef.current.getBoundingClientRect();
+    const height = menuRef.current.offsetHeight;
+    const width = menuRef.current.offsetWidth;
+    const below = trigger.bottom + 4;
+    const flip = below + height > window.innerHeight - 8;
+    setAnchor({
+      top: flip ? Math.max(8, trigger.top - height - 4) : below,
+      left: Math.max(8, trigger.right - width),
+    });
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     function onPointerDown(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        !triggerRef.current?.contains(target) &&
+        !menuRef.current?.contains(target)
+      ) {
         onOpenChange(false);
       }
     }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onOpenChange(false);
     }
+    // A fixed menu would drift away from its row on scroll.
+    function close() {
+      onOpenChange(false);
+    }
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
     return () => {
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
     };
   }, [open, onOpenChange]);
 
   if (actions.length === 0) return null;
 
-  function toggle(e: React.MouseEvent<HTMLButtonElement>) {
-    if (!open) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      // ~56px per entry + padding: flip up when the menu wouldn't fit below.
-      setDropUp(
-        window.innerHeight - rect.bottom < actions.length * 56 + 24 &&
-          rect.top > window.innerHeight / 2,
-      );
-    }
-    onOpenChange(!open);
-  }
-
   return (
-    <div ref={ref} className="relative inline-block text-left">
+    <>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={toggle}
+        onClick={() => {
+          if (!open) setAnchor(null);
+          onOpenChange(!open);
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Azioni ordine"
@@ -823,41 +848,49 @@ function RowActions({
         <IconDots className="h-4 w-4" />
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className={`absolute right-0 z-30 w-56 border border-black/[0.1] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${
-            dropUp ? "bottom-full mb-1" : "top-full mt-1"
-          }`}
-        >
-          {actions.map((action) => (
-            <button
-              key={action.label}
-              role="menuitem"
-              disabled={action.disabled}
-              onClick={() => {
-                onOpenChange(false);
-                action.onClick();
-              }}
-              className={`block w-full px-3 py-2 text-left transition-colors disabled:opacity-40 ${
-                action.danger
-                  ? "text-red-700 hover:bg-red-50"
-                  : "text-academy-gray-700 hover:bg-black/[0.04]"
-              }`}
-            >
-              <span className="block text-[12px] font-bold tracking-wider uppercase">
-                {action.label}
-              </span>
-              {action.hint && (
-                <span className="mt-0.5 block text-[11px] normal-case text-academy-gray-500">
-                  {action.hint}
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            style={{
+              top: anchor?.top ?? -9999,
+              left: anchor?.left ?? -9999,
+              // Hidden until measured, so it never flashes in the wrong spot.
+              visibility: anchor ? "visible" : "hidden",
+            }}
+            className="fixed z-50 w-56 border border-black/[0.1] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+          >
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                role="menuitem"
+                disabled={action.disabled}
+                onClick={() => {
+                  onOpenChange(false);
+                  action.onClick();
+                }}
+                className={`block w-full px-3 py-2 text-left transition-colors disabled:opacity-40 ${
+                  action.danger
+                    ? "text-red-700 hover:bg-red-50"
+                    : "text-academy-gray-700 hover:bg-black/[0.04]"
+                }`}
+              >
+                <span className="block text-[12px] font-bold tracking-wider uppercase">
+                  {action.label}
                 </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+                {action.hint && (
+                  <span className="mt-0.5 block text-[11px] text-academy-gray-500 normal-case">
+                    {action.hint}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 
