@@ -3,6 +3,10 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { ensureDepositPromotionCode } from "@/lib/stripe/deposit";
+import {
+  ensureBalanceDiscountCode,
+  resolveBalanceDiscount,
+} from "@/lib/stripe/balance-discount";
 import { getActivePromoForProduct } from "@/lib/promos/server";
 import {
   getProductBySlug,
@@ -203,7 +207,9 @@ export async function POST(request: NextRequest) {
     if (!isDeposit && product.type === "bundle") {
       const { data: openDeposit } = await supabase
         .from("orders")
-        .select("id, deposit_promotion_code_id")
+        .select(
+          "id, pack_id, is_test, deposit_promotion_code_id, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
+        )
         .eq("user_id", user.id)
         .eq("payment_plan", "deposit")
         .eq("status", "paid")
@@ -217,12 +223,27 @@ export async function POST(request: NextRequest) {
         // Self-heal: issue the coupon if the webhook never did, or reissue it
         // if it is no longer usable (deactivated/expired/spent) — otherwise
         // Stripe rejects the whole session and the customer can't buy at all.
+        // A negotiated total (agreed_total_cents) is honoured here too, so the
+        // customer gets the same price whether they come from /account/orders
+        // or straight from /pack. Commercial CODES instead only live in the
+        // balance flow, where the customer can type them.
         try {
-          depositPromotionCodeId = await ensureDepositPromotionCode({
-            orderId: openDeposit.id,
-            packSlug: packId,
-            promotionCodeId: openDeposit.deposit_promotion_code_id,
+          const discount = await resolveBalanceDiscount({
+            deposit: { ...openDeposit, pack_id: packId },
+            pack: product,
           });
+          depositPromotionCodeId =
+            discount.source === "deposit"
+              ? await ensureDepositPromotionCode({
+                  orderId: openDeposit.id,
+                  packSlug: packId,
+                  promotionCodeId: openDeposit.deposit_promotion_code_id,
+                  orderIsTest: openDeposit.is_test,
+                })
+              : await ensureBalanceDiscountCode({
+                  deposit: { ...openDeposit, pack_id: packId },
+                  discount,
+                });
         } catch (err) {
           console.error("Deposit credit self-heal error:", err);
         }

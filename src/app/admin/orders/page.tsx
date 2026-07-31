@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactElement, SVGProps } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GradientText } from "@/components/shared/gradient-text";
-import { IconBag, IconScan, IconSearch, IconTrash } from "../_components/icons";
+import {
+  IconBag,
+  IconCheck,
+  IconEuro,
+  IconScan,
+  IconSearch,
+  IconTrash,
+} from "../_components/icons";
+import { DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
 
 interface Order {
   id: string;
@@ -19,6 +28,7 @@ interface Order {
   balance_order_id: string | null;
   settled_externally: boolean | null;
   fulfilled_at: string | null;
+  agreed_total_cents: number | null;
   profiles: { full_name: string | null } | null;
 }
 
@@ -113,13 +123,17 @@ export default function AdminOrdersPage() {
   const [activateMethod, setActivateMethod] = useState("bonifico");
   const [activateAmount, setActivateAmount] = useState("");
   const [activateSilent, setActivateSilent] = useState(false);
+  const [priceTarget, setPriceTarget] = useState<Order | null>(null);
+  const [priceValue, setPriceValue] = useState("");
+  const [priceSaving, setPriceSaving] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
 
   async function load() {
     const supabase = createClient();
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, profiles(full_name)",
+        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, agreed_total_cents, profiles(full_name)",
       )
       .order("created_at", { ascending: false });
     if (data) setOrders(data as unknown as Order[]);
@@ -176,6 +190,96 @@ export default function AdminOrdersPage() {
     setActivating(false);
     setActivateTarget(null);
     await load();
+  }
+
+  function openPrice(order: Order) {
+    setPriceTarget(order);
+    setPriceValue(
+      order.agreed_total_cents != null
+        ? String(order.agreed_total_cents / 100)
+        : "",
+    );
+    setPriceError(null);
+  }
+
+  /** Save (or clear, when the field is empty) the negotiated total price. */
+  async function submitPrice() {
+    if (!priceTarget) return;
+    setPriceSaving(true);
+    setPriceError(null);
+    const raw = priceValue.trim();
+    let agreedTotalCents: number | null = null;
+    if (raw) {
+      const parsed = parseFloat(raw.replace(",", "."));
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        setPriceError("Importo non valido");
+        setPriceSaving(false);
+        return;
+      }
+      agreedTotalCents = Math.round(parsed * 100);
+    }
+    const res = await fetch("/api/admin/agreed-total", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: priceTarget.id, agreedTotalCents }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setPriceError(data.error || "Errore durante il salvataggio");
+      setPriceSaving(false);
+      return;
+    }
+    setPriceSaving(false);
+    setPriceTarget(null);
+    await load();
+  }
+
+  /** Actions that actually apply to this order, in order of usefulness. */
+  function actionsFor(order: Order): RowAction[] {
+    const actions: RowAction[] = [];
+
+    if (isDepositPending(order)) {
+      actions.push({
+        label: "Prezzo",
+        icon: IconEuro,
+        // The negotiated total stays visible without hovering: it's state, not
+        // just an action.
+        badge:
+          order.agreed_total_cents != null
+            ? formatEUR(order.agreed_total_cents)
+            : undefined,
+        hint:
+          order.agreed_total_cents != null
+            ? `concordato ${formatEUR(order.agreed_total_cents)}, saldo ${formatEUR(order.agreed_total_cents - DEPOSIT_PRICE_CENTS)}`
+            : "prezzo di listino, imposta un totale personalizzato",
+        onClick: () => openPrice(order),
+      });
+    }
+
+    if (canActivate(order)) {
+      actions.push({
+        label: order.payment_plan === "deposit" ? "Salda" : "Attiva",
+        icon: IconCheck,
+        hint: "pagato fuori Stripe: genera ticket e QR",
+        onClick: () => openActivate(order),
+      });
+    }
+
+    if (order.status === "paid" || order.status === "pending") {
+      actions.push({
+        label: "Annulla",
+        icon: IconTrash,
+        hint:
+          order.status === "paid"
+            ? "invalida i ticket e avvisa il cliente"
+            : "checkout mai pagato: nessuna email",
+        onClick: () => cancelOrder(order.id),
+        danger: true,
+        disabled: cancelling === order.id,
+      });
+    }
+
+    return actions;
   }
 
   const scoped = useMemo(
@@ -359,7 +463,7 @@ export default function AdminOrdersPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <p className="text-sm font-bold text-academy-orange tabular-nums">
                         {formatEUR(order.amount_cents)}
@@ -369,27 +473,7 @@ export default function AdminOrdersPage() {
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      {canActivate(order) && (
-                        <button
-                          onClick={() => openActivate(order)}
-                          className="flex items-center gap-1.5 bg-academy-orange px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
-                        >
-                          Attiva
-                        </button>
-                      )}
-                      {(order.status === "paid" ||
-                        order.status === "pending") && (
-                        <button
-                          onClick={() => cancelOrder(order.id)}
-                          disabled={cancelling === order.id}
-                          className="flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
-                        >
-                          <IconTrash className="h-3 w-3" />
-                          {cancelling === order.id ? "..." : "Annulla"}
-                        </button>
-                      )}
-                    </div>
+                    <RowActions actions={actionsFor(order)} />
                   </div>
                 </li>
               );
@@ -397,7 +481,9 @@ export default function AdminOrdersPage() {
           </ul>
 
           {/* Desktop: table */}
-          <div className="hidden overflow-hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:block">
+          {/* No overflow clipping here: the row menu is absolutely positioned
+              and would be cut off. With a single trigger the row always fits. */}
+          <div className="hidden border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] lg:block">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-black/[0.06] bg-black/[0.015]">
@@ -411,7 +497,7 @@ export default function AdminOrdersPage() {
                   ].map((h, i) => (
                     <th
                       key={i}
-                      className={`px-5 py-3 text-[10px] font-bold tracking-[0.2em] text-academy-gray-500 uppercase ${
+                      className={`px-4 py-3 text-[10px] font-bold tracking-[0.2em] whitespace-nowrap text-academy-gray-500 uppercase ${
                         h.align === "right" ? "text-right" : "text-left"
                       }`}
                     >
@@ -426,15 +512,17 @@ export default function AdminOrdersPage() {
                   const tone = depositPending
                     ? ORDER_STATUS_TONE.pending
                     : ORDER_STATUS_TONE[order.status];
+                  // Short label in the table: the full wording wrapped onto
+                  // three lines and blew the row width.
                   const statusLabel = depositPending
-                    ? "Caparra · saldo atteso"
+                    ? "Saldo atteso"
                     : ORDER_STATUS_LABEL[order.status];
                   return (
                     <tr
                       key={order.id}
                       className="border-b border-black/[0.04] transition-colors hover:bg-black/[0.015] last:border-b-0"
                     >
-                      <td className="px-5 py-4">
+                      <td className="px-4 py-4">
                         <p className="font-bold text-academy-gray-800">
                           {displayName(order)}
                         </p>
@@ -442,52 +530,34 @@ export default function AdminOrdersPage() {
                           {order.billing_email}
                         </p>
                       </td>
-                      <td className="px-5 py-4 text-sm text-academy-gray-700">
+                      <td className="px-4 py-4 text-sm text-academy-gray-700">
                         {order.pack_id?.toUpperCase() || "—"}
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
+                            className={`inline-flex shrink-0 items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${tone.bg} ${tone.text}`}
                           >
-                            <span className={`h-1.5 w-1.5 ${tone.dot}`} />
+                            <span
+                              className={`h-1.5 w-1.5 shrink-0 ${tone.dot}`}
+                            />
                             {statusLabel}
                           </span>
                           {order.is_test && (
-                            <span className="inline-flex items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
+                            <span className="inline-flex shrink-0 items-center bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase">
                               Test
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-right text-sm font-bold text-academy-gray-800 tabular-nums">
+                      <td className="px-4 py-4 text-right text-sm font-bold text-academy-gray-800 tabular-nums">
                         {formatEUR(order.amount_cents)}
                       </td>
-                      <td className="px-5 py-4 text-right text-[12px] text-academy-gray-500 tabular-nums">
+                      <td className="px-4 py-4 text-right text-[12px] text-academy-gray-500 tabular-nums">
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </td>
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {canActivate(order) && (
-                            <button
-                              onClick={() => openActivate(order)}
-                              className="inline-flex items-center gap-1.5 bg-academy-orange px-3 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
-                            >
-                              Attiva
-                            </button>
-                          )}
-                          {(order.status === "paid" ||
-                            order.status === "pending") && (
-                            <button
-                              onClick={() => cancelOrder(order.id)}
-                              disabled={cancelling === order.id}
-                              className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-50 px-3 py-1.5 text-[11px] font-bold tracking-wider text-red-700 uppercase transition-all hover:bg-red-100 disabled:opacity-50"
-                            >
-                              <IconTrash className="h-3 w-3" />
-                              {cancelling === order.id ? "..." : "Annulla"}
-                            </button>
-                          )}
-                        </div>
+                      <td className="w-px px-4 py-4 text-right">
+                        <RowActions actions={actionsFor(order)} />
                       </td>
                     </tr>
                   );
@@ -595,6 +665,155 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+
+      {priceTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => !priceSaving && setPriceTarget(null)}
+        >
+          <div
+            className="w-full max-w-md border border-black/[0.08] bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-[11px] font-bold tracking-[0.3em] text-academy-orange uppercase">
+              Prezzo concordato
+            </p>
+            <h2 className="text-xl font-black text-academy-gray-800">
+              {priceTarget.billing_name || priceTarget.billing_email}
+            </h2>
+            <p className="mt-1 text-[13px] text-academy-gray-500">
+              {priceTarget.pack_id?.toUpperCase() || "—"} · totale pattuito per
+              il pack, caparra inclusa.
+            </p>
+
+            <div className="mt-5">
+              <label className="mb-1.5 block text-[11px] font-bold tracking-wider text-academy-gray-500 uppercase">
+                Totale concordato (€)
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                autoFocus
+                value={priceValue}
+                onChange={(e) => setPriceValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !priceSaving) submitPrice();
+                }}
+                placeholder="es. 2000"
+                className="w-full border border-black/[0.1] bg-white px-3 py-2.5 text-sm text-academy-gray-800 placeholder-academy-gray-400 outline-none focus:border-academy-orange/50"
+              />
+              <p className="mt-1.5 text-[11px] text-academy-gray-400">
+                Il cliente pagherà questo importo meno i{" "}
+                {formatEUR(DEPOSIT_PRICE_CENTS)} di caparra già versati
+                {priceValue.trim() &&
+                Number.isFinite(parseFloat(priceValue.replace(",", "."))) ? (
+                  <>
+                    {" "}
+                    → saldo{" "}
+                    <span className="font-bold text-academy-gray-600">
+                      {formatEUR(
+                        Math.round(
+                          parseFloat(priceValue.replace(",", ".")) * 100,
+                        ) - DEPOSIT_PRICE_CENTS,
+                      )}
+                    </span>
+                  </>
+                ) : null}
+                . Svuota il campo per tornare al prezzo di listino.
+              </p>
+            </div>
+
+            {priceError && (
+              <p className="mt-4 border border-red-500/30 bg-red-50 px-3 py-2 text-[13px] text-red-700">
+                {priceError}
+              </p>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setPriceTarget(null)}
+                disabled={priceSaving}
+                className="border border-black/[0.1] bg-white px-4 py-2.5 text-[12px] font-bold tracking-wider text-academy-gray-600 uppercase transition-colors hover:text-academy-gray-800 disabled:opacity-50"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={submitPrice}
+                disabled={priceSaving}
+                className="bg-academy-orange px-5 py-2.5 text-[12px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
+              >
+                {priceSaving ? "Salvataggio..." : "Salva"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface RowAction {
+  label: string;
+  icon: (p: SVGProps<SVGSVGElement>) => ReactElement;
+  /** Shown in the tooltip: what the action actually does to the order. */
+  hint?: string;
+  /** Always-visible value next to the icon (e.g. the negotiated price). */
+  badge?: string;
+  onClick: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+}
+
+/**
+ * Inline row action: icon only, label revealed on hover/focus.
+ *
+ * Three full-width buttons outgrew the row, and a dropdown was worse: the menu
+ * is mounted twice per order (mobile card + table row) and a portal escapes the
+ * `display:none` of the hidden one, so a ghost copy showed up in the corner.
+ * Icons keep the row narrow while the label still explains the action.
+ */
+function ActionButton({
+  action,
+  icon: Icon,
+}: {
+  action: RowAction;
+  icon: (p: SVGProps<SVGSVGElement>) => ReactElement;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={action.onClick}
+      disabled={action.disabled}
+      title={action.hint ? `${action.label} — ${action.hint}` : action.label}
+      aria-label={action.label}
+      className={`group inline-flex h-8 shrink-0 items-center border px-2 transition-all disabled:opacity-40 ${
+        action.danger
+          ? "border-red-500/30 bg-red-50 text-red-700 hover:bg-red-100"
+          : "border-black/[0.12] bg-white text-academy-gray-500 hover:border-academy-orange/40 hover:text-academy-orange"
+      }`}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      {/* Label stays in the DOM for screen readers, revealed on hover/focus. */}
+      <span className="max-w-0 overflow-hidden text-[11px] font-bold tracking-wider whitespace-nowrap uppercase opacity-0 transition-all duration-200 group-hover:ml-1.5 group-hover:max-w-[9rem] group-hover:opacity-100 group-focus-visible:ml-1.5 group-focus-visible:max-w-[9rem] group-focus-visible:opacity-100">
+        {action.label}
+      </span>
+      {action.badge && (
+        <span className="ml-1.5 text-[11px] font-bold tracking-wider tabular-nums">
+          {action.badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+/** The actions of one order, rendered inline. */
+function RowActions({ actions }: { actions: RowAction[] }) {
+  if (actions.length === 0) return null;
+  return (
+    <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+      {actions.map((action) => (
+        <ActionButton key={action.label} action={action} icon={action.icon} />
+      ))}
     </div>
   );
 }

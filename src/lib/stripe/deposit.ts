@@ -27,7 +27,7 @@ import { getDeadlines } from "@/lib/settings/deadlines";
 const SOURCE = "academy-deposit-balance";
 
 /** Unix timestamp (seconds) for end-of-day at the configured balance deadline. */
-async function balanceDeadlineUnix(): Promise<number> {
+export async function balanceDeadlineUnix(): Promise<number> {
   const { depositBalance } = await getDeadlines(createAdminClient());
   // Local Europe/Rome end of day; precision here is non-critical.
   return Math.floor(new Date(`${depositBalance}T23:59:59`).getTime() / 1000);
@@ -112,6 +112,32 @@ export async function isDepositPromotionCodeUsable(
 }
 
 /**
+ * Guard for the shared Supabase project: staging talks to Stripe **test** while
+ * production talks to **live**, so a live promotion code simply doesn't exist
+ * for a test key. Without this check, opening a live customer's balance from
+ * staging would "self-heal" their working code into a test one and overwrite it
+ * on the live order.
+ */
+export class WrongStripeEnvError extends Error {
+  constructor() {
+    super(
+      "Ordine di un altro ambiente Stripe: impossibile emettere il codice qui.",
+    );
+  }
+}
+
+function isStripeTestMode(): boolean {
+  return process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ?? false;
+}
+
+/** Throws when the order and the active Stripe key belong to different envs. */
+export function assertSameStripeEnv(orderIsTest: boolean | null | undefined) {
+  if ((orderIsTest ?? false) !== isStripeTestMode()) {
+    throw new WrongStripeEnvError();
+  }
+}
+
+/**
  * Return a promotion code id that is guaranteed usable for this deposit,
  * reissuing (and persisting) a fresh one when the current is missing or spent.
  * Self-heal: the customer is never locked out of settling their balance.
@@ -120,6 +146,8 @@ export async function ensureDepositPromotionCode(params: {
   orderId: string;
   packSlug: string;
   promotionCodeId: string | null;
+  /** `orders.is_test` — reissuing across environments would corrupt the order. */
+  orderIsTest: boolean | null;
 }): Promise<string> {
   const { orderId, packSlug, promotionCodeId } = params;
 
@@ -129,6 +157,8 @@ export async function ensureDepositPromotionCode(params: {
   ) {
     return promotionCodeId;
   }
+
+  assertSameStripeEnv(params.orderIsTest);
 
   const { code, promotionCodeId: newId } = await createDepositBalanceCoupon(
     packSlug,

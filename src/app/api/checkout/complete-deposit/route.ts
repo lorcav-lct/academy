@@ -11,7 +11,15 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { getStripe } from "@/lib/stripe/client";
-import { ensureDepositPromotionCode } from "@/lib/stripe/deposit";
+import {
+  ensureDepositPromotionCode,
+  WrongStripeEnvError,
+} from "@/lib/stripe/deposit";
+import {
+  BalanceDiscountError,
+  ensureBalanceDiscountCode,
+  resolveBalanceDiscount,
+} from "@/lib/stripe/balance-discount";
 import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
 import { resolvePublicWorkshops } from "@/lib/constants/workshops";
 import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
@@ -39,7 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
     }
 
-    const { orderId } = await request.json();
+    const { orderId, discountCode } = await request.json();
     if (!orderId) {
       return NextResponse.json({ error: "orderId mancante" }, { status: 400 });
     }
@@ -48,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { data: deposit } = await supabase
       .from("orders")
       .select(
-        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, deposit_promotion_code_id, selected_workshop_ids",
+        "id, pack_id, status, payment_plan, balance_order_id, settled_externally, deposit_promotion_code_id, selected_workshop_ids, is_test, agreed_total_cents, commercial_promo_code, balance_discount_cents, balance_discount_promotion_code_id",
       )
       .eq("id", orderId)
       .eq("user_id", user.id)
@@ -119,10 +127,28 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient();
     const stripe = getStripe();
 
+    // How much comes off the list price: the 500€ credit alone, or a combined
+    // discount when the pack price was negotiated / a commercial code applies.
+    // Stripe can't stack discounts, so everything lands in a single coupon.
+    let discount;
+    try {
+      discount = await resolveBalanceDiscount({
+        deposit,
+        pack,
+        commercialCode: typeof discountCode === "string" ? discountCode : null,
+      });
+    } catch (err) {
+      if (err instanceof BalanceDiscountError) {
+        return NextResponse.json({ error: err.message }, { status: 400 });
+      }
+      throw err;
+    }
+
     // Reuse the balance checkout the customer already has open, instead of
-    // opening a new one on every click. Each session applies the -500€ code and
-    // holds a redemption on it, so piling them up is what used to burn the code
-    // out and lock the customer out of the balance for good.
+    // opening a new one on every click. Each session applies the discount code
+    // and holds a redemption on it, so piling them up is what used to burn the
+    // code out and lock the customer out of the balance for good. Only reuse a
+    // session that carries the same discount we just resolved.
     const { data: pendingBalance } = await supabase
       .from("orders")
       .select("id, stripe_checkout_session_id")
@@ -140,23 +166,52 @@ export async function POST(request: NextRequest) {
         const existing = await stripe.checkout.sessions.retrieve(
           pendingBalance.stripe_checkout_session_id,
         );
-        if (existing.status === "open" && existing.url) {
-          return NextResponse.json({ url: existing.url });
+        if (existing.status === "open") {
+          const sameDiscount =
+            (existing.total_details?.amount_discount ?? 0) ===
+            discount.amountOffCents;
+          if (sameDiscount && existing.url) {
+            return NextResponse.json({ url: existing.url });
+          }
+          // Stale discount (deal or code changed): close it so it can't be paid
+          // at the old price and release whatever it was holding.
+          await stripe.checkout.sessions
+            .expire(existing.id)
+            .catch(() => undefined);
         }
       } catch (err) {
         console.error("Balance session reuse error:", err);
       }
     }
 
-    // The -500€ coupon is normally issued by the webhook on deposit payment.
-    // Self-heal: reissue it when missing (webhook miss) or no longer usable
-    // (deactivated, expired, or burnt by a legacy max_redemptions: 1) so the
-    // customer is never blocked from completing the balance.
-    const promotionCodeId = await ensureDepositPromotionCode({
-      orderId: deposit.id,
-      packSlug: deposit.pack_id,
-      promotionCodeId: deposit.deposit_promotion_code_id as string | null,
-    });
+    // Plain deposit credit → the standard code (self-healed if missing or no
+    // longer usable, so a customer is never locked out). Anything else needs a
+    // combined coupon carrying the deposit credit plus the negotiated discount.
+    let promotionCodeId: string;
+    try {
+      promotionCodeId =
+        discount.source === "deposit"
+          ? await ensureDepositPromotionCode({
+              orderId: deposit.id,
+              packSlug: deposit.pack_id,
+              promotionCodeId: deposit.deposit_promotion_code_id as
+                | string
+                | null,
+              orderIsTest: deposit.is_test,
+            })
+          : await ensureBalanceDiscountCode({ deposit, discount });
+    } catch (err) {
+      if (err instanceof WrongStripeEnvError) {
+        return NextResponse.json(
+          {
+            error:
+              "Questo ordine appartiene a un altro ambiente di pagamento. Contatta l'assistenza.",
+          },
+          { status: 409 },
+        );
+      }
+      throw err;
+    }
 
     // Create the full-price balance order
     const { data: newOrder, error: orderError } = await supabase
