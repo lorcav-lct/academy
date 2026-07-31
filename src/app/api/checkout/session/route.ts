@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
-import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
+import { ensureDepositPromotionCode } from "@/lib/stripe/deposit";
 import { getActivePromoForProduct } from "@/lib/promos/server";
 import {
   getProductBySlug,
@@ -214,26 +214,17 @@ export async function POST(request: NextRequest) {
 
       if (openDeposit) {
         depositOrderId = openDeposit.id;
-        depositPromotionCodeId = openDeposit.deposit_promotion_code_id;
-        // Self-heal: issue the coupon if the webhook never did.
-        if (!depositPromotionCodeId) {
-          try {
-            const { code, promotionCodeId } = await createDepositBalanceCoupon(
-              packId,
-              openDeposit.id,
-            );
-            depositPromotionCodeId = promotionCodeId;
-            await createAdminClient()
-              .from("orders")
-              .update({
-                deposit_promo_code: code,
-                deposit_promotion_code_id: promotionCodeId,
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", openDeposit.id);
-          } catch (err) {
-            console.error("Deposit credit self-heal error:", err);
-          }
+        // Self-heal: issue the coupon if the webhook never did, or reissue it
+        // if it is no longer usable (deactivated/expired/spent) — otherwise
+        // Stripe rejects the whole session and the customer can't buy at all.
+        try {
+          depositPromotionCodeId = await ensureDepositPromotionCode({
+            orderId: openDeposit.id,
+            packSlug: packId,
+            promotionCodeId: openDeposit.deposit_promotion_code_id,
+          });
+        } catch (err) {
+          console.error("Deposit credit self-heal error:", err);
         }
       }
     }

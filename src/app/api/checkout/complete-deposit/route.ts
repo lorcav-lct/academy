@@ -10,7 +10,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
-import { createDepositBalanceCoupon } from "@/lib/stripe/deposit";
+import { getStripe } from "@/lib/stripe/client";
+import { ensureDepositPromotionCode } from "@/lib/stripe/deposit";
 import { getProductBySlug, resolveStripePriceId } from "@/lib/constants/packs";
 import { resolvePublicWorkshops } from "@/lib/constants/workshops";
 import { getMasterclassVisibility } from "@/lib/settings/masterclass-visibility";
@@ -116,26 +117,46 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = createAdminClient();
+    const stripe = getStripe();
+
+    // Reuse the balance checkout the customer already has open, instead of
+    // opening a new one on every click. Each session applies the -500€ code and
+    // holds a redemption on it, so piling them up is what used to burn the code
+    // out and lock the customer out of the balance for good.
+    const { data: pendingBalance } = await supabase
+      .from("orders")
+      .select("id, stripe_checkout_session_id")
+      .eq("user_id", user.id)
+      .eq("pack_id", pack.slug)
+      .eq("payment_plan", "full")
+      .eq("status", "pending")
+      .not("stripe_checkout_session_id", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (pendingBalance?.stripe_checkout_session_id) {
+      try {
+        const existing = await stripe.checkout.sessions.retrieve(
+          pendingBalance.stripe_checkout_session_id,
+        );
+        if (existing.status === "open" && existing.url) {
+          return NextResponse.json({ url: existing.url });
+        }
+      } catch (err) {
+        console.error("Balance session reuse error:", err);
+      }
+    }
 
     // The -500€ coupon is normally issued by the webhook on deposit payment.
-    // Self-heal: if it's missing (webhook miss/error), create it now so the
+    // Self-heal: reissue it when missing (webhook miss) or no longer usable
+    // (deactivated, expired, or burnt by a legacy max_redemptions: 1) so the
     // customer is never blocked from completing the balance.
-    let promotionCodeId = deposit.deposit_promotion_code_id as string | null;
-    if (!promotionCodeId) {
-      const { code, promotionCodeId: newId } = await createDepositBalanceCoupon(
-        deposit.pack_id,
-        deposit.id,
-      );
-      promotionCodeId = newId;
-      await admin
-        .from("orders")
-        .update({
-          deposit_promo_code: code,
-          deposit_promotion_code_id: newId,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", deposit.id);
-    }
+    const promotionCodeId = await ensureDepositPromotionCode({
+      orderId: deposit.id,
+      packSlug: deposit.pack_id,
+      promotionCodeId: deposit.deposit_promotion_code_id as string | null,
+    });
 
     // Create the full-price balance order
     const { data: newOrder, error: orderError } = await supabase
@@ -160,17 +181,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const session = await createCheckoutSession({
-      priceId,
-      customerEmail: user.email!,
-      orderId: newOrder.id,
-      packId: pack.slug,
-      workshopIds: [],
-      masterclassIds: selectedMasterclassIds,
-      // -500€ auto-applied; allow_promotion_codes stays off → no further discount.
-      promotionCodeId,
-      depositOrderId: deposit.id,
-    });
+    let session;
+    try {
+      session = await createCheckoutSession({
+        priceId,
+        customerEmail: user.email!,
+        orderId: newOrder.id,
+        packId: pack.slug,
+        workshopIds: [],
+        masterclassIds: selectedMasterclassIds,
+        // -500€ auto-applied; allow_promotion_codes stays off → no further discount.
+        promotionCodeId,
+        depositOrderId: deposit.id,
+      });
+    } catch (err) {
+      // Don't leave an orphan pending order behind on a failed checkout.
+      await admin.from("orders").delete().eq("id", newOrder.id);
+      throw err;
+    }
 
     await admin
       .from("orders")
@@ -181,7 +209,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Complete deposit error:", error);
     return NextResponse.json(
-      { error: "Errore durante il saldo" },
+      {
+        error:
+          "Non siamo riusciti ad aprire il pagamento del saldo. Riprova tra qualche minuto: se il problema persiste scrivici a academy@lacertosus.com indicando il tuo ordine.",
+      },
       { status: 500 },
     );
   }
