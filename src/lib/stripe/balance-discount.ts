@@ -95,7 +95,14 @@ export async function resolveBalanceDiscount(params: {
         "Il prezzo concordato per questo ordine non è valido. Contatta l'assistenza.",
       );
     }
-    return build(listPrice - agreed, "agreed_total", null);
+    // The deposit is part of the agreed total, not on top of it: the customer
+    // owes `agreed - 500€`, so the coupon must also wipe the deposit itself.
+    // (PRO at 3900 with 500 already paid → 1500 off → 3400 to pay.)
+    return build(
+      listPrice - agreed + DEPOSIT_PRICE_CENTS,
+      "agreed_total",
+      null,
+    );
   }
 
   const typed = (params.commercialCode ?? "").trim();
