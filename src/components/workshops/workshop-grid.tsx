@@ -106,15 +106,15 @@ const CREDENTIALS: Record<string, Credential> = {
       "Faculty in finalizzazione: stiamo selezionando preparatori atletici di livello internazionale nel tennis.",
   },
   "master-running": {
-    domain: "Running Performance",
-    headline: "Ivan Pellizzari",
+    domain: "Triathlon & Endurance",
+    headline: "Ivan Pelizzari",
     pitch:
-      "Tecnico Allenatore della Federazione Italiana Triathlon (F.I.T.R.I.), specialista in running performance.",
+      "Tecnico Nazionale Triathlon F.I.T.R.I. e IRONMAN Coach, specialista delle lunghe distanze.",
     promise:
-      "Tecnica, performance e prevenzione infortuni nella corsa: zone, ritmi, periodizzazione e dosaggio della fatica.",
-    badge: "Federale",
+      "Swim, bike & run nella lunga distanza: fisiologia delle tre discipline, forza per l'endurance e bike fitting.",
+    badge: "IRONMAN Coach",
     badgeTooltip:
-      "Tecnico Allenatore F.I.T.R.I. — Federazione Italiana Triathlon: metodologia federale applicata al running.",
+      "Tecnico Nazionale Triathlon F.I.T.R.I. (Commissione Nazionale AGE GROUP) e Allenatore IRONMAN COACH.",
   },
   "master-nuoto": {
     domain: "S&C Nuoto",

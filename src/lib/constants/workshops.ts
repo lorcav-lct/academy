@@ -107,14 +107,14 @@ export const WORKSHOPS: Workshop[] = [
   },
   {
     slug: "master-running",
-    title: "Running",
-    subtitle:
-      "Running Science Master — Tecnica, Performance e Prevenzione Infortuni",
-    focus: "Performance e metodologia di allenamento per la corsa",
+    title: "Triathlon Swim Bike Run",
+    subtitle: "Swim Bike & Run — Endurance e Long Distance",
+    focus:
+      "Fisiologia, forza e bike fitting nel triathlon di lunga distanza e nell'endurance",
     duration: "1-2 giornate",
     date: "Sabato 28 Novembre 2026",
     teacherSlugs: ["ivan-pellizzari"],
-    trainerLabel: "Ivan Pellizzari",
+    trainerLabel: "Ivan Pelizzari",
     sortOrder: 7,
     adminToggleable: true,
   },

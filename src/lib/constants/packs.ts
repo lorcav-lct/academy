@@ -347,9 +347,8 @@ export const PRODUCTS: AcademyProduct[] = [
   },
   {
     slug: "master-running",
-    name: "Masterclass Running",
-    subtitle:
-      "Running Science Master — Tecnica, Performance e Prevenzione Infortuni",
+    name: "Masterclass Triathlon",
+    subtitle: "Swim Bike & Run — Endurance e Long Distance",
     type: "workshop",
     priceCents: 49000,
     stripePriceId: {
@@ -360,7 +359,7 @@ export const PRODUCTS: AcademyProduct[] = [
     adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
-      "Ivan Pellizzari — Tecnico F.I.T.R.I.",
+      "Ivan Pelizzari — Tecnico Nazionale Triathlon F.I.T.R.I.",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],

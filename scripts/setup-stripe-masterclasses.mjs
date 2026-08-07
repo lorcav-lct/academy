@@ -86,10 +86,13 @@ const MASTERCLASSES = [
     archiveOldPrice: "price_1T7u0LCGgXzYzpRp2XeH0tZ8",
   },
   {
+    // Il Product su Stripe si chiama ancora "Masterclass Running — Lacertosus
+    // Academy": va rinominato a mano in Dashboard (test + live) PRIMA di un
+    // rerun, altrimenti findProductByName non lo trova e crea un duplicato.
     slug: "master-running",
-    productName: "Masterclass Running — Lacertosus Academy",
+    productName: "Masterclass Triathlon — Lacertosus Academy",
     description:
-      "Masterclass intensiva 1-2 giornate in presenza · Ivan Pellizzari",
+      "Masterclass intensiva 1-2 giornate in presenza · Ivan Pelizzari",
   },
   {
     slug: "master-nuoto",
