@@ -44,7 +44,7 @@ const EVENTS = [
   { label: "Master Volley", dates: "3 Ottobre", type: "workshop" },
   { label: "FUNCTION 2", dates: "9–10 Ottobre", type: "function" },
   { label: "FIPE I", dates: "13–14 Novembre", type: "fipe" },
-  { label: "Master Running", dates: "28 Novembre", type: "workshop" },
+  { label: "Master Triathlon", dates: "28 Novembre", type: "workshop" },
   { label: "STRENGTH 1", dates: "11–12 Dicembre", type: "strength" },
   { label: "STRENGTH 2", dates: "15–16 Gennaio", type: "strength" },
   { label: "Master Tennis", dates: "23 Gennaio", type: "workshop" },

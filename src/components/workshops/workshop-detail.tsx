@@ -427,83 +427,76 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Una o due giornate dentro un centro che ha formato tennisti d'élite internazionali: un livello di metodo difficile da trovare altrove.",
   },
   "master-running": {
-    domain: "Running Performance",
-    hook: "Correre è l'80% testa, 20% gambe. Programmare bene il 20% libera tutto il resto.",
-    trainerHeadline: "Ivan Pellizzari",
+    domain: "Triathlon & Endurance",
+    hook: "Tre discipline, un solo atleta. Nella lunga distanza vince chi sa allenarle come un sistema unico.",
+    trainerHeadline: "Ivan Pelizzari",
     trainerPitch:
       "Istruttore Triathlon FITRI, Allenatore Triathlon FITRI, Allenatore Specialista lunghe distanze Triathlon FITRI, Tecnico Nazionale Triathlon FITRI (Commissione Nazionale AGE GROUP), Allenatore IRONMAN COACH, Preparatore atletico primo e secondo liv. CONI",
     whatYouLearn:
-      "Una giornata dedicata alla programmazione del runner: dalle zone fisiologiche alla periodizzazione, dalla forza per il corridore al tapering pre-gara.",
+      "Swim, bike & run nel triathlon di lunga distanza: la fisiologia delle tre discipline, il ruolo della forza nell'endurance e il bike fitting come leva di performance.",
     modules: [
       {
         num: "01",
-        title: "Fisiologia della corsa",
-        body: "Zone di intensità, soglie e bioenergetica: cosa misurare e cosa significa davvero.",
+        title:
+          "La fisiologia del nuoto, bike e corsa nel triathlon di lunga distanza",
+        body: "Come rispondono i tre gesti sul piano metabolico e neuromuscolare: soglie, zone, costo energetico e gestione dell'intensità sulle lunghe distanze.",
       },
       {
         num: "02",
-        title: "Periodizzazione del runner",
-        body: "Come strutturare un blocco di preparazione dal 5K alla maratona. Fasi, microcicli, settimane chiave.",
+        title:
+          "L'importanza della forza nell'endurance e nel triathlon di lunga distanza",
+        body: "Perché la forza non toglie tempo all'endurance ma lo protegge: quando inserirla, con quali carichi e come integrarla nel volume delle tre discipline.",
       },
       {
         num: "03",
-        title: "Forza per il corridore",
-        body: "Come e quanto inserire la forza in un programma di corsa senza compromettere la performance.",
-      },
-      {
-        num: "04",
-        title: "Tapering e gara",
-        body: "Le ultime 3 settimane prima della gara: come affilarsi senza perdere fitness. Race day execution.",
-      },
-      {
-        num: "05",
-        title: "Recupero e cross-training",
-        body: "Recupero attivo, prevenzione infortuni e cross-training intelligente per il runner di volume.",
+        title:
+          "Il bike fitting e l'importanza di una corretta posizione in sella",
+        body: "Posizione in sella, aerodinamica e comfort sulle lunghe distanze: come una regolazione corretta cambia potenza espressa, economia e capacità di correre dopo la bici.",
       },
     ],
     outcomes: [
-      "Costruire un programma di corsa per ogni distanza (5K → maratona)",
-      "Inserire la forza nel piano del runner senza interferenze",
-      "Pianificare un tapering efficace pre-gara",
-      "Identificare e prevenire gli infortuni più frequenti",
-      "Coachare un atleta nella gestione mentale del passo",
+      "Leggere la fisiologia di nuoto, bici e corsa come un unico sistema",
+      "Dosare intensità e volume nel triathlon di lunga distanza",
+      "Inserire la forza nel piano dell'endurance senza interferenze",
+      "Riconoscere gli errori di posizione in sella che costano performance",
+      "Impostare il lavoro di un atleta verso una gara long distance",
     ],
     forWho: [
-      "Coach di atletica e running",
-      "PT che lavorano con runner amatori e agonisti",
-      "Runner avanzati che vogliono autoallenarsi seriamente",
+      "Coach e preparatori di triatleti e atleti di endurance",
+      "PT che seguono atleti su lunghe distanze",
+      "Triatleti e atleti endurance avanzati che vogliono capire il metodo",
     ],
     notFor: [
-      "Chi cerca workout HIIT generici",
-      "Chi corre solo per dimagrimento occasionale",
+      "Chi cerca workout generici di condizionamento",
+      "Chi non lavora con sport di endurance",
     ],
     included: [
-      "1 giornata con Ivan Pellizzari",
-      "Template di programmazione per 5K/10K/mezza/maratona",
-      "Schede di tapering e race week",
+      "1 giornata con Ivan Pelizzari",
+      "Riferimenti pratici per la programmazione swim/bike/run",
+      "Criteri operativi di bike fitting e posizione in sella",
       "Slide e materiali operativi",
       "Attestato di partecipazione",
     ],
     faq: [
       {
-        q: "Bisogna essere runner per partecipare?",
-        a: "Aiuta, ma non è obbligatorio. Il master è pensato anche per coach che lavorano con runner senza correre loro stessi.",
+        q: "Bisogna essere triatleti per partecipare?",
+        a: "No. Il master è pensato anche per coach e preparatori che seguono atleti di endurance senza gareggiare loro stessi.",
       },
       {
-        q: "Si parla anche di trail running?",
-        a: "I principi base sono gli stessi. Le specificità del trail vengono toccate dove rilevante.",
+        q: "Vale anche per chi lavora solo con la corsa o solo con il nuoto?",
+        a: "Sì. La fisiologia e il lavoro di forza vengono trattati disciplina per disciplina, poi integrati nel modello del triathlon.",
       },
       {
-        q: "I template sono adattabili?",
-        a: "Sì, sono progettati per essere personalizzati su livello, distanza obiettivo e disponibilità di tempo.",
+        q: "Il bike fitting è teorico o pratico?",
+        a: "Si parte dai criteri di valutazione della posizione in sella per arrivare alle correzioni applicabili sull'atleta.",
       },
       {
-        q: "Va bene anche per chi prepara una prima maratona?",
-        a: "Assolutamente sì. C'è una sezione dedicata alla prima maratona da affrontare con criterio.",
+        q: "Si parla anche di distanze olimpiche e sprint?",
+        a: "Il focus è la lunga distanza, ma i principi fisiologici e di forza sono trasferibili alle distanze più brevi.",
       },
     ],
     finalHook:
-      "Una giornata con un Tecnico Allenatore F.I.T.R.I. vale anni di tentativi ed errori sul tuo programma.",
+      "Una giornata con un Tecnico Nazionale Triathlon F.I.T.R.I. e IRONMAN Coach: il metodo con cui si preparano davvero le lunghe distanze.",
   },
   "master-rugby": {
     domain: "S&C Rugby",

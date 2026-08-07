@@ -11,7 +11,7 @@ import {
 export const metadata: Metadata = {
   title: "Masterclass Specialistici",
   description:
-    "8 masterclass specialistici con professionisti del settore: Functional & Bulgarian, Strength, Calcio, Pallavolo, Tennis, Rugby, Running, Nuoto.",
+    "8 masterclass specialistici con professionisti del settore: Functional & Bulgarian, Strength, Calcio, Pallavolo, Tennis, Rugby, Triathlon, Nuoto.",
 };
 
 export default async function MasterclassIndexPage() {

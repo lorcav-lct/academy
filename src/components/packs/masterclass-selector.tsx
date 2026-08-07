@@ -41,8 +41,8 @@ const CREDENTIALS: Record<string, Cred> = {
       "Faculty in definizione — preparatori atletici di livello internazionale.",
   },
   "master-running": {
-    domain: "Running Performance",
-    pitch: "Ivan Pellizzari — Tecnico Allenatore F.I.T.R.I.",
+    domain: "Triathlon & Endurance",
+    pitch: "Ivan Pelizzari — Tecnico Nazionale Triathlon F.I.T.R.I.",
   },
   "master-nuoto": {
     domain: "S&C Nuoto",

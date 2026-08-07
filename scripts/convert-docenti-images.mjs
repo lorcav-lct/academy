@@ -39,7 +39,7 @@ const FILE_TO_SLUG = {
   "giacomozennaro.png": "giacomo-zennaro",
   "gionataraffaelli.png": "gionata-raffaelli",
   "ivanivanov.png": "ivan-ivanov",
-  "ivanpellizzari.png": "ivan-pellizzari",
+  // ivanpellizzari.png superseded by 03-07/IvanPellizzari-edit2.png
   "lucacollino.png": "luca-collino",
   "lucabondi.png": "luca-bondi",
   // marcobani.png from 31-04 superseded by 08-05/Marco_Bani.png
@@ -49,6 +49,7 @@ const FILE_TO_SLUG = {
   "simonedoti.png": "simone-doti",
   // 03-07 batch
   "claudiopecorella.png": "claudio-pecorella",
+  "ivanpellizzari-edit2.png": "ivan-pellizzari",
   // natalegentile.png superseded by 03-07/NataleGentile-edit2.png
   "natalegentile-edit2.png": "natale-gentile",
 };

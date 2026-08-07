@@ -36,7 +36,7 @@ const FAQS = [
   },
   {
     q: "Posso acquistare un singolo blocco o una sola masterclass?",
-    a: "Sì. Ogni blocco (FUNCTION, STRENGTH, SCIENCE) è acquistabile separatamente, così come ciascuna delle 8 masterclass specialistiche (Functional & Bulgarian, Strength, Calcio, Pallavolo, Tennis, Rugby, Running, Nuoto). Le certificazioni complete (CSEN, NSCA, FIPE) sono però vincolate al percorso integrale: NSCA e Master Trainer richiedono i 3 blocchi, FIPE è inclusa nei bundle PRO ed ELITE.",
+    a: "Sì. Ogni blocco (FUNCTION, STRENGTH, SCIENCE) è acquistabile separatamente, così come ciascuna delle 8 masterclass specialistiche (Functional & Bulgarian, Strength, Calcio, Pallavolo, Tennis, Rugby, Triathlon, Nuoto). Le certificazioni complete (CSEN, NSCA, FIPE) sono però vincolate al percorso integrale: NSCA e Master Trainer richiedono i 3 blocchi, FIPE è inclusa nei bundle PRO ed ELITE.",
   },
   {
     q: "C'è un test d'ingresso per accedere all'Academy?",

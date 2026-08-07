@@ -324,14 +324,13 @@ export const TEACHERS: Teacher[] = [
   },
   {
     slug: "ivan-pellizzari",
-    name: "Ivan Pellizzari",
-    role: "Tecnico Allenatore F.I.T.R.I.",
-    bio: "Tecnico Allenatore della Federazione Italiana Triathlon, specialista in running performance, tecnica e prevenzione infortuni.",
+    name: "Ivan Pelizzari",
+    role: "Tecnico Nazionale Triathlon F.I.T.R.I. | IRONMAN Coach",
+    bio: "Istruttore Triathlon FITRI, Allenatore Triathlon FITRI e Allenatore Specialista lunghe distanze Triathlon FITRI. Tecnico Nazionale Triathlon FITRI (Commissione Nazionale AGE GROUP), Allenatore IRONMAN COACH e Preparatore atletico di primo e secondo livello CONI.",
     courses: ["master-running"],
     image_url: "/docenti/ivan-pellizzari.webp",
     color: BRAND,
-    talkTitle:
-      "Running Science Master — Tecnica, Performance e Prevenzione Infortuni",
+    talkTitle: "Swim Bike & Run — Endurance e Long Distance",
   },
   {
     slug: "marco-magnani",

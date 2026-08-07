@@ -401,3 +401,72 @@ git push origin main
 
 - _hash_
 ```
+
+---
+
+## Batch 004 — Masterclass Running → Triathlon Swim Bike Run (Ivan Pelizzari)
+
+**Data**: 2026-08-07
+**Stato**: 🟡 in sviluppo
+**Obiettivo**: Riposizionare la Masterclass Running come **Triathlon Swim Bike Run** (endurance e lunga distanza), con nuova immagine docente e programma allineato ai 3 argomenti forniti da Cristiano Cappi.
+
+### Decisioni prese
+
+- **Slug `master-running` invariato** in tutto lo stack (workshop, pack, `workshopSlug`, `product_access_rules`, price Stripe): chi ha già acquistato mantiene ticket, QR e ordine, e vede automaticamente il nuovo titolo
+- Docente: slug `ivan-pellizzari` e `image_url` invariati — sostituito solo il binario `.webp`
+- Nome docente corretto in **"Ivan Pelizzari"** (una L, confermato dall'utente). Slug `ivan-pellizzari`,
+  `image_url` e nome del file immagine **restano con la doppia L**: sono identificatori interni, non
+  compaiono in URL pubblici (non esiste una route `/docenti/[slug]`)
+- 3 moduli (non 5) — solo gli argomenti effettivamente confermati dal docente
+- Rimossa tutta la copy running-only ormai fuori tema (5K/maratona, tapering, trail running)
+
+### File modificati
+
+| File                                            | Modifica                                                                    |
+| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| `src/lib/constants/workshops.ts`                | `title`/`subtitle`/`focus` di `master-running`                              |
+| `src/lib/constants/teachers.ts`                 | `role`, `bio` (qualifiche complete FITRI/IRONMAN/CONI), `talkTitle`         |
+| `src/lib/constants/packs.ts`                    | `name` → "Masterclass Triathlon", `subtitle`, `includes`                    |
+| `src/components/workshops/workshop-detail.tsx`  | `master-running`: domain, hook, whatYouLearn, 3 moduli, outcomes, FAQ, hook |
+| `src/components/workshops/workshop-grid.tsx`    | domain, pitch, promise, badge "IRONMAN Coach"                               |
+| `src/components/packs/masterclass-selector.tsx` | domain e pitch                                                              |
+| `src/components/home/calendar-section.tsx`      | label "Master Running" → "Master Triathlon"                                 |
+| `src/components/home/faq-section.tsx`           | elenco masterclass                                                          |
+| `src/app/masterclass/page.tsx`                  | meta description                                                            |
+| `scripts/setup-stripe-masterclasses.mjs`        | `productName` + nota anti-duplicato su `findProductByName`                  |
+| `scripts/convert-docenti-images.mjs`            | mapping `ivanpellizzari-edit2.png` (il vecchio 31-04 è superseded)          |
+| `public/docenti/ivan-pellizzari.webp`           | nuova foto (da `ACADEMY-FILES/docenti-edit/03-07/IvanPellizzari-edit2.png`) |
+
+### File creati
+
+| File                                                          | Scopo                                            |
+| ------------------------------------------------------------- | ------------------------------------------------ |
+| `supabase/migrations/033_rename_master_running_triathlon.sql` | label `product_access_rules` (scanner QR, admin) |
+
+### Modifiche esterne necessarie (manuali, fuori repo)
+
+1. **Stripe** — rinominare il Product esistente (test + live, dietro `price_1TUNq5CE95vjZKhkVOefqx7O`) in
+   "Masterclass Triathlon — Lacertosus Academy". Finché non lo si fa, il Checkout mostra ancora
+   "Masterclass Running". **Non rieseguire `setup-stripe-masterclasses.mjs` prima del rename**:
+   `findProductByName` non troverebbe il prodotto e creerebbe un duplicato con nuovi price ID.
+2. **Supabase** — eseguire la migration 033 (DB condiviso staging/prod: la label cambia subito anche in produzione).
+
+### Procedura di test
+
+1. `/masterclass` → card "Triathlon Swim Bike Run", badge IRONMAN Coach, foto nuova
+2. `/masterclass/master-running` → 3 moduli, qualifiche docente, foto nuova
+3. `/pack` → selettore masterclass: voce "Triathlon & Endurance"
+4. Account di un acquirente esistente → `/account/tickets` mostra il nuovo titolo, QR invariato
+5. `/admin/scanner` → validazione QR di un ticket `master-running` esistente
+
+### Rollback
+
+```bash
+git revert <COMMIT_HASH_BATCH_004>
+```
+
+```sql
+UPDATE public.product_access_rules
+SET label = 'Masterclass Running — Running Science Master'
+WHERE product_slug = 'master-running';
+```
