@@ -325,7 +325,7 @@ export const TEACHERS: Teacher[] = [
   {
     slug: "ivan-pellizzari",
     name: "Ivan Pelizzari",
-    role: "Tecnico Nazionale Triathlon F.I.T.R.I. | IRONMAN Coach",
+    role: "Tecnico Nazionale F.I.T.R.I. della commissione AGE GROUP | IRONMAN Coach",
     bio: "Istruttore Triathlon FITRI, Allenatore Triathlon FITRI e Allenatore Specialista lunghe distanze Triathlon FITRI. Tecnico Nazionale Triathlon FITRI (Commissione Nazionale AGE GROUP), Allenatore IRONMAN COACH e Preparatore atletico di primo e secondo livello CONI.",
     courses: ["master-running"],
     image_url: "/docenti/ivan-pellizzari.webp",
