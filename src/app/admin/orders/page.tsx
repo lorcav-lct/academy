@@ -9,11 +9,13 @@ import {
   IconBag,
   IconCheck,
   IconEuro,
+  IconPlus,
   IconScan,
   IconSearch,
   IconTrash,
 } from "../_components/icons";
 import { DEPOSIT_PRICE_CENTS } from "@/lib/constants/packs";
+import { CreateOrderModal } from "./_components/create-order-modal";
 
 interface Order {
   id: string;
@@ -29,7 +31,30 @@ interface Order {
   settled_externally: boolean | null;
   fulfilled_at: string | null;
   agreed_total_cents: number | null;
+  external_payment_cents: number | null;
+  external_payment_method: string | null;
   profiles: { full_name: string | null } | null;
+}
+
+/**
+ * What the customer actually paid for this order.
+ *
+ * `amount_cents` only records what Stripe charged: on a deposit settled by bank
+ * transfer it stays at the 500€ caparra, which read as "paid 500€" in the list
+ * even when the balance had been collected and recorded. The off-Stripe part
+ * lives in `external_payment_cents`, so the real total is the sum.
+ */
+function paidTotalCents(o: Order): number {
+  return (o.amount_cents ?? 0) + (o.external_payment_cents ?? 0);
+}
+
+/** Breakdown shown next to the total when part of it was collected off-Stripe. */
+function paymentBreakdown(o: Order): string | null {
+  if (!o.external_payment_cents) return null;
+  const method = o.external_payment_method ?? "fuori Stripe";
+  if (!o.amount_cents)
+    return `${formatEUR(o.external_payment_cents)} ${method}`;
+  return `${formatEUR(o.amount_cents)} caparra + ${formatEUR(o.external_payment_cents)} ${method}`;
 }
 
 /** Display name: Stripe billing name, falling back to the account profile name
@@ -127,13 +152,14 @@ export default function AdminOrdersPage() {
   const [priceValue, setPriceValue] = useState("");
   const [priceSaving, setPriceSaving] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   async function load() {
     const supabase = createClient();
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, agreed_total_cents, profiles(full_name)",
+        "id, status, amount_cents, billing_name, billing_email, created_at, pack_id, is_test, payment_plan, balance_order_id, settled_externally, fulfilled_at, agreed_total_cents, external_payment_cents, external_payment_method, profiles(full_name)",
       )
       .order("created_at", { ascending: false });
     if (data) setOrders(data as unknown as Order[]);
@@ -342,6 +368,14 @@ export default function AdminOrdersPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setCreating(true)}
+            className="flex items-center gap-2 bg-academy-orange px-4 py-2.5 text-[12px] font-bold tracking-wider text-white uppercase transition-all hover:brightness-110"
+            title="Crea un ordine per un pagamento concluso fuori Stripe"
+          >
+            <IconPlus className="h-3.5 w-3.5" />
+            Nuovo ordine
+          </button>
+          <button
             onClick={() => setShowTest((v) => !v)}
             className={`flex items-center gap-2 border px-4 py-2.5 text-[12px] font-bold tracking-wider uppercase transition-colors ${
               showTest
@@ -466,12 +500,17 @@ export default function AdminOrdersPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <p className="text-sm font-bold text-academy-orange tabular-nums">
-                        {formatEUR(order.amount_cents)}
+                        {formatEUR(paidTotalCents(order))}
                       </p>
                       <p className="text-[11px] text-academy-gray-500">
                         {order.pack_id?.toUpperCase() || "—"} ·{" "}
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
                       </p>
+                      {paymentBreakdown(order) && (
+                        <p className="text-[11px] text-academy-gray-400">
+                          {paymentBreakdown(order)}
+                        </p>
+                      )}
                     </div>
                     <RowActions actions={actionsFor(order)} />
                   </div>
@@ -551,7 +590,12 @@ export default function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-right text-sm font-bold text-academy-gray-800 tabular-nums">
-                        {formatEUR(order.amount_cents)}
+                        {formatEUR(paidTotalCents(order))}
+                        {paymentBreakdown(order) && (
+                          <span className="block text-[11px] font-normal text-academy-gray-400">
+                            {paymentBreakdown(order)}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-right text-[12px] text-academy-gray-500 tabular-nums">
                         {new Date(order.created_at).toLocaleDateString("it-IT")}
@@ -566,6 +610,16 @@ export default function AdminOrdersPage() {
             </table>
           </div>
         </>
+      )}
+
+      {creating && (
+        <CreateOrderModal
+          onClose={() => setCreating(false)}
+          onCreated={async () => {
+            setCreating(false);
+            await load();
+          }}
+        />
       )}
 
       {activateTarget && (
