@@ -40,6 +40,9 @@ export interface FulfillOptions {
   sendConfirmationEmail?: boolean;
   /** Total shown in the confirmation email, in cents. */
   emailTotalCents?: number;
+  /** Product name shown in the confirmation email. Defaults to the pack name;
+   *  set it for orders without a pack (e.g. masterclass-only manual orders). */
+  emailProductName?: string;
 }
 
 export interface FulfillResult {
@@ -130,6 +133,7 @@ export async function fulfillOrder(
     const customerEmail = order.billing_email || order.profiles?.email;
     if (customerEmail) {
       const productName =
+        options.emailProductName ||
         PRODUCTS.find((p) => p.slug === order.pack_id)?.name ||
         order.pack_id ||
         "Pack";
