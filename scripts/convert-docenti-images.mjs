@@ -17,6 +17,7 @@ const FILE_TO_SLUG = {
   "samuelemarcora.png": "samuele-marcora",
   "marcomagnani.png": "marco-magnani",
   "riccardoaimini.png": "riccardo-aimini",
+  "pierluigimauro.png": "pierluigi-mauro",
   // 30-04 batch
   "alexlodovisi.png": "alex-lodovisi",
   "andreaquarto.png": "andrea-quarto",

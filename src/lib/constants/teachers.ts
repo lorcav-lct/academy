@@ -90,6 +90,16 @@ export const TEACHERS: Teacher[] = [
     talkTitle:
       "Teoria e applicazione dell'allenamento funzionale per la general population",
   },
+  {
+    slug: "pierluigi-mauro",
+    name: "Pierluigi Mauro",
+    role: "Ideatore del metodo Forza Circolare | Macebell, Clubbell & Kettlebell",
+    bio: "È stato il primo ad introdurre in Italia l'utilizzo della Macebell, oltre che ideare un metodo basato su esercizi e protocolli a corpo libero, con Clubbell e Kettlebell.",
+    courses: ["function"],
+    image_url: "/docenti/pierluigi-mauro.webp",
+    color: BRAND,
+    talkTitle: "La Forza Circolare: i due tools cardinali",
+  },
   // ───────── STRENGTH ─────────
   {
     slug: "sandro-bartolomei",
