@@ -56,6 +56,11 @@ export const PROGRAM_BLOCKS: ProgramBlock[] = [
           "Teoria e applicazione dell'allenamento funzionale per la general population",
         teacherSlugs: ["luca-cerri"],
       },
+      {
+        title:
+          "La Forza Circolare: una giornata di studio e pratica alla scoperta dei due tools cardinali",
+        teacherSlugs: ["pierluigi-mauro"],
+      },
     ],
   },
   {
