@@ -50,10 +50,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non autorizzato" }, { status: 403 });
     }
 
-    const { qrData, eventId } = await request.json();
+    const { qrData, eventId, expectedType, expectedSlug, allowMismatch } =
+      await request.json();
     if (!qrData) {
       return NextResponse.json({ error: "Codice mancante" }, { status: 400 });
     }
+
+    // Whitelist the scanner filter: known product types, only real slugs.
+    const filterType =
+      expectedType === "bundle" || expectedType === "workshop"
+        ? expectedType
+        : null;
+    const filterSlug =
+      typeof expectedSlug === "string" && getProductBySlug(expectedSlug)
+        ? expectedSlug
+        : null;
 
     // Accept either a plain ticket UUID or an encrypted QR payload.
     const isUuid = /^[0-9a-f-]{36}$/i.test(qrData.trim());
@@ -96,6 +107,38 @@ export async function POST(request: NextRequest) {
     const ticketName =
       payload?.courseName || getTicketProductName(ticket.course_id);
     const productSlug = (ticket.course_id as string | null) ?? "";
+
+    // Scanner filter: reject before touching the check-in ledger, so a wrong
+    // scan never burns an entry. The operator can retry with allowMismatch.
+    if (!allowMismatch && (filterSlug || filterType)) {
+      const matches = filterSlug
+        ? productSlug === filterSlug
+        : getProductBySlug(productSlug)?.type === filterType;
+
+      if (!matches) {
+        const expectedName = filterSlug
+          ? (getProductBySlug(filterSlug)?.name ?? filterSlug)
+          : filterType === "bundle"
+            ? "Percorso Academy"
+            : "Masterclass";
+
+        return NextResponse.json(
+          {
+            valid: false,
+            mismatch: true,
+            error: `Ticket per "${ticketName}", non per "${expectedName}"`,
+            ticket: {
+              id: ticket.id,
+              userName: payload?.userName || ticket.user_id,
+              courseName: ticketName,
+              eventDate: payload?.eventDate || "",
+              orderId: payload?.orderId || ticket.order_id,
+            },
+          },
+          { status: 200 },
+        );
+      }
+    }
 
     const { data: accessRuleData } = productSlug
       ? await supabase
@@ -171,12 +214,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { error: checkinError } = await supabase.from("ticket_checkins").insert({
-      ticket_id: ticket.id,
-      product_slug: productSlug || ticketName,
-      scanned_by: user.id,
-      event_id: eventId || null,
-    });
+    const { error: checkinError } = await supabase
+      .from("ticket_checkins")
+      .insert({
+        ticket_id: ticket.id,
+        product_slug: productSlug || ticketName,
+        scanned_by: user.id,
+        event_id: eventId || null,
+      });
 
     if (checkinError) {
       return NextResponse.json(
@@ -190,7 +235,10 @@ export async function POST(request: NextRequest) {
       maxEntries === null ? null : Math.max(0, maxEntries - nextUsed);
 
     if (maxEntries !== null && nextUsed >= maxEntries) {
-      await supabase.from("tickets").update({ is_used: true }).eq("id", ticket.id);
+      await supabase
+        .from("tickets")
+        .update({ is_used: true })
+        .eq("id", ticket.id);
     }
 
     return NextResponse.json({
