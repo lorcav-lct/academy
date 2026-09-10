@@ -3,12 +3,14 @@
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { GradientText } from "@/components/shared/gradient-text";
+import { IconRefresh, IconSearch } from "../_components/icons";
 import {
-  IconCheck,
-  IconClose,
-  IconRefresh,
-  IconSearch,
-} from "../_components/icons";
+  EventFilter,
+  filterLabel,
+  filterPayload,
+  type ScannerFilter,
+} from "./_components/event-filter";
+import { ScanResultCard, type ScanResult } from "./_components/scan-result";
 
 const QRScanner = dynamic(() => import("@/components/admin/qr-scanner"), {
   ssr: false,
@@ -19,48 +21,45 @@ const QRScanner = dynamic(() => import("@/components/admin/qr-scanner"), {
   ),
 });
 
-interface ScanResult {
-  valid: boolean;
-  error?: string;
-  ticket?: {
-    id: string;
-    userName: string;
-    courseName: string;
-    eventDate: string;
-    orderId: string;
-    usedEntries?: number;
-    maxEntries?: number | null;
-    remainingEntries?: number | null;
-  };
-}
-
 export default function ScannerPage() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [scanning, setScanning] = useState(true);
   const [manualInput, setManualInput] = useState("");
   const [validating, setValidating] = useState(false);
+  const [filter, setFilter] = useState<ScannerFilter>({ mode: "all" });
+  const [lastCode, setLastCode] = useState("");
 
-  const handleScan = useCallback(async (data: string) => {
-    setScanning(false);
-    setValidating(true);
-    try {
-      const response = await fetch("/api/qr/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qrData: data }),
-      });
-      const result = await response.json();
-      setResult(result);
-    } catch {
-      setResult({ valid: false, error: "Errore di connessione" });
-    }
-    setValidating(false);
-  }, []);
+  const handleScan = useCallback(
+    async (data: string, allowMismatch = false) => {
+      setScanning(false);
+      setValidating(true);
+      setLastCode(data);
+      try {
+        const response = await fetch("/api/qr/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            qrData: data,
+            ...filterPayload(filter),
+            allowMismatch,
+          }),
+        });
+        const result = await response.json();
+        setResult(result);
+      } catch {
+        setResult({ valid: false, error: "Errore di connessione" });
+      }
+      setValidating(false);
+    },
+    [filter],
+  );
 
   function resetScanner() {
     setResult(null);
     setScanning(true);
   }
+
+  const activeFilter = filterLabel(filter);
 
   async function handleManualValidation() {
     if (!manualInput.trim()) return;
@@ -83,10 +82,23 @@ export default function ScannerPage() {
         </p>
       </header>
 
+      <EventFilter
+        value={filter}
+        onChange={(next) => {
+          setFilter(next);
+          resetScanner();
+        }}
+      />
+
       {/* Scanner */}
       {scanning && !result && !validating && (
-        <div>
+        <div className="space-y-2">
           <QRScanner onScan={handleScan} />
+          {activeFilter && (
+            <p className="text-center text-[11px] font-bold tracking-[0.15em] text-academy-orange uppercase">
+              Filtro attivo · {activeFilter}
+            </p>
+          )}
         </div>
       )}
 
@@ -104,79 +116,11 @@ export default function ScannerPage() {
 
       {/* Result */}
       {result && (
-        <div
-          className={`relative overflow-hidden border-2 p-8 text-center shadow-[0_4px_24px_rgba(0,0,0,0.06)] ${
-            result.valid
-              ? "border-emerald-500 bg-emerald-50"
-              : "border-red-500 bg-red-50"
-          }`}
-        >
-          {result.valid ? (
-            <>
-              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center bg-emerald-500 text-white">
-                <IconCheck className="h-10 w-10" strokeWidth={3} />
-              </div>
-              <h2 className="mb-1 text-3xl font-black text-emerald-700">
-                Valido
-              </h2>
-              <p className="mb-5 text-[12px] font-bold tracking-[0.2em] text-emerald-700/80 uppercase">
-                Check-in autorizzato
-              </p>
-              <div className="mx-auto max-w-xs space-y-2 border border-emerald-500/20 bg-white p-4">
-                <Field label="Nome" value={result.ticket?.userName || "—"} />
-                <Field label="Corso" value={result.ticket?.courseName || "—"} />
-                {typeof result.ticket?.usedEntries === "number" && (
-                  <Field
-                    label="Ingressi"
-                    value={
-                      result.ticket.maxEntries == null
-                        ? `${result.ticket.usedEntries} / illimitati`
-                        : `${result.ticket.usedEntries} / ${result.ticket.maxEntries}`
-                    }
-                  />
-                )}
-                {typeof result.ticket?.remainingEntries === "number" && (
-                  <Field
-                    label="Residui"
-                    value={result.ticket.remainingEntries.toString()}
-                  />
-                )}
-                {result.ticket?.eventDate && (
-                  <Field label="Data" value={result.ticket.eventDate} />
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center bg-red-500 text-white">
-                <IconClose className="h-10 w-10" strokeWidth={3} />
-              </div>
-              <h2 className="mb-1 text-3xl font-black text-red-700">
-                Non valido
-              </h2>
-              <p className="mb-5 text-[12px] font-bold tracking-[0.2em] text-red-700/80 uppercase">
-                Accesso negato
-              </p>
-              <p className="text-sm text-red-700">
-                {result.error || "Codice non riconosciuto"}
-              </p>
-              {typeof result.ticket?.usedEntries === "number" && (
-                <div className="mx-auto mt-5 max-w-xs space-y-2 border border-red-500/20 bg-white p-4">
-                  <Field label="Nome" value={result.ticket.userName || "—"} />
-                  <Field label="Corso" value={result.ticket.courseName || "—"} />
-                  <Field
-                    label="Ingressi"
-                    value={
-                      result.ticket.maxEntries == null
-                        ? `${result.ticket.usedEntries} / illimitati`
-                        : `${result.ticket.usedEntries} / ${result.ticket.maxEntries}`
-                    }
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        <ScanResultCard
+          result={result}
+          filterLabel={activeFilter}
+          onForce={() => handleScan(lastCode, true)}
+        />
       )}
 
       {/* Reset */}
@@ -228,19 +172,6 @@ export default function ScannerPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <span className="text-[10px] font-bold tracking-[0.2em] text-academy-gray-500 uppercase">
-        {label}
-      </span>
-      <span className="truncate text-right text-sm font-bold text-academy-gray-800">
-        {value}
-      </span>
     </div>
   );
 }
