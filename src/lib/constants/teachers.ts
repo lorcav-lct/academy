@@ -333,6 +333,17 @@ export const TEACHERS: Teacher[] = [
       "Il lavoro atletico e la programmazione nella pallavolo di alto livello",
   },
   {
+    slug: "giuseppe-ferruccio",
+    name: "Giuseppe Ferruccio",
+    role: "CEO & Founder — GF4 Sport Academy",
+    bio: "CEO e founder di GF4 Sport Academy, realtà dedicata alla preparazione fisica e allo sviluppo atletico nella pallavolo.",
+    courses: ["master-volley"],
+    image_url: "/docenti/giuseppe-ferruccio.webp",
+    color: BRAND,
+    talkTitle:
+      "Il lavoro atletico e la programmazione nella pallavolo di alto livello",
+  },
+  {
     slug: "ivan-pellizzari",
     name: "Ivan Pelizzari",
     role: "Tecnico Nazionale F.I.T.R.I. della commissione AGE GROUP | IRONMAN Coach",

@@ -297,7 +297,7 @@ export const PRODUCTS: AcademyProduct[] = [
     adminToggleable: true,
     includes: [
       "1-2 giornate in presenza",
-      "Oscar Berti",
+      "Oscar Berti + Giuseppe Ferruccio",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],

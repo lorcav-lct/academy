@@ -53,6 +53,7 @@ const FILE_TO_SLUG = {
   "ivanpellizzari-edit2.png": "ivan-pellizzari",
   // natalegentile.png superseded by 03-07/NataleGentile-edit2.png
   "natalegentile-edit2.png": "natale-gentile",
+  "giuseppe ferruccio.png": "giuseppe-ferruccio",
 };
 
 const fmtKB = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
