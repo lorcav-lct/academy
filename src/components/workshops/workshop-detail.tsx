@@ -942,6 +942,39 @@ function HeroSection({
             </div>
           </motion.div>
 
+          {/* Orari — solo se definiti per questa masterclass */}
+          {workshop.schedule && workshop.schedule.length > 0 && (
+            <motion.div
+              variants={fadeUp}
+              className="mt-4 flex items-center gap-2.5"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill={ORANGE}
+                aria-hidden="true"
+                className="shrink-0"
+              >
+                <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.6V6h-2v7.4l5 3 1-1.7-4-2.1z" />
+              </svg>
+              <div className="flex flex-col">
+                <span
+                  className="text-[0.58rem] font-bold uppercase tracking-[0.28em]"
+                  style={{ color: ts }}
+                >
+                  Orari
+                </span>
+                <span
+                  className="mt-0.5 text-[0.95rem] font-bold tabular-nums"
+                  style={{ color: th }}
+                >
+                  {workshop.schedule.join("  ·  ")}
+                </span>
+              </div>
+            </motion.div>
+          )}
+
           {/* Prezzo promo prominente — solo quando è attiva una promo */}
           {promoName && (
             <motion.div variants={fadeUp} className="mt-9">
