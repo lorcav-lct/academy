@@ -271,11 +271,11 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-volley": {
     domain: "S&C Pallavolo",
     hook: "Nella pallavolo di alto livello vince chi programma. Il lavoro atletico giusto, nel momento giusto della stagione.",
-    trainerHeadline: "Oscar Berti",
+    trainerHeadline: "Oscar Berti × Giuseppe Ferruccio",
     trainerPitch:
-      "Strength & Conditioning Coach di Modena Volley (SuperLega) e della Nazionale Italiana di Pallavolo. Oscar è uno dei riferimenti italiani della preparazione fisica nella pallavolo di alto livello.",
+      "Oscar Berti è Strength & Conditioning Coach di Modena Volley (SuperLega) e della Nazionale Italiana di Pallavolo, uno dei riferimenti italiani della preparazione fisica nella pallavolo di alto livello. Giuseppe Ferruccio è CEO e founder di GF4 Sport Academy, realtà dedicata alla preparazione fisica e allo sviluppo atletico nella pallavolo. Insieme portano in aula il lavoro di campo del vertice e il modello di sviluppo dell’atleta.",
     whatYouLearn:
-      "Una giornata dedicata al lavoro atletico e alla programmazione di una squadra di SuperLega: come si costruisce la forza esplosiva, come si distribuisce il carico nella stagione, come si sopravvive a un doppio impegno (club + nazionale).",
+      "Una giornata a due voci sul lavoro atletico e sulla programmazione nella pallavolo di alto livello: come si costruisce la forza esplosiva, come si distribuisce il carico nella stagione, come si sopravvive a un doppio impegno (club + nazionale) e come si sviluppa l’atleta nel lungo termine.",
     modules: [
       {
         num: "01",
@@ -320,7 +320,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha contatto con sport di salto",
     ],
     included: [
-      "1 giornata con Oscar Berti",
+      "1 giornata con Oscar Berti e Giuseppe Ferruccio",
       "Template di programmazione stagionale",
       "Slide e materiali operativi",
       "Q&A su casi reali dei partecipanti",
