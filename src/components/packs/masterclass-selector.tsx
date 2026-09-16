@@ -32,7 +32,8 @@ const CREDENTIALS: Record<string, Cred> = {
   },
   "master-volley": {
     domain: "S&C Pallavolo",
-    pitch: "Oscar Berti — S&C Coach Modena Volley + Nazionale Italiana.",
+    pitch:
+      "Oscar Berti + Giuseppe Ferruccio — S&C Modena Volley e Nazionale Italiana, GF4 Sport Academy.",
     featured: true,
   },
   "master-tennis": {

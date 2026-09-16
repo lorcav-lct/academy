@@ -84,9 +84,9 @@ const CREDENTIALS: Record<string, Credential> = {
   },
   "master-volley": {
     domain: "S&C Pallavolo",
-    headline: "Oscar Berti",
+    headline: "Oscar Berti + Giuseppe Ferruccio",
     pitch:
-      "Strength & Conditioning Coach di Modena Volley e della Nazionale Italiana di Pallavolo.",
+      "S&C Coach di Modena Volley e della Nazionale Italiana di Pallavolo, con il founder di GF4 Sport Academy.",
     promise:
       "Il lavoro atletico e la programmazione di una squadra di SuperLega: forza, salto e gestione del carico stagionale.",
     featured: true,
