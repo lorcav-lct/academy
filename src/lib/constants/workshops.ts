@@ -20,6 +20,8 @@ export interface Workshop {
    *  /masterclass, NON inclusa nei pack, offerte gestite separatamente
    *  (promo product_type = "masterclass_international"). */
   international?: boolean;
+  /** Fasce orarie della giornata, mostrate nella pagina detail sotto la sede. */
+  schedule?: string[];
 }
 
 /** Sede unica di tutte le masterclass in presenza — mostrata sotto la data. */
@@ -35,6 +37,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Sabato 19 Settembre 2026",
     teacherSlugs: ["ivan-ivanov"],
     trainerLabel: "Ivan Ivanov",
+    schedule: ["9:30 - 12:30", "14:00 - 17:30"],
     sortOrder: 1,
     adminToggleable: true,
   },
@@ -75,6 +78,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Sabato 3 Ottobre 2026",
     teacherSlugs: ["oscar-berti", "giuseppe-ferruccio"],
     trainerLabel: "Oscar Berti + Giuseppe Ferruccio",
+    schedule: ["9:30 - 12:00", "13:00 - 15:00"],
     sortOrder: 4,
     adminToggleable: true,
   },
