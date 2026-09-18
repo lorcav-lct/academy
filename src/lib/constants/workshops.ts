@@ -51,7 +51,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Sabato 23 Gennaio 2027",
     teacherSlugs: ["andrea-quarto"],
     trainerLabel: "Andrea Quarto",
-    sortOrder: 2,
+    sortOrder: 5,
     adminToggleable: true,
   },
   {
@@ -64,7 +64,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Sabato 17 Aprile 2027",
     teacherSlugs: ["luca-collino"],
     trainerLabel: "Luca Collino",
-    sortOrder: 3,
+    sortOrder: 7,
     adminToggleable: true,
   },
   {
@@ -79,7 +79,7 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["oscar-berti", "giuseppe-ferruccio"],
     trainerLabel: "Oscar Berti + Giuseppe Ferruccio",
     schedule: ["9:30 - 12:00", "13:00 - 15:00"],
-    sortOrder: 4,
+    sortOrder: 2,
     adminToggleable: true,
   },
   {
@@ -93,7 +93,7 @@ export const WORKSHOPS: Workshop[] = [
     teacherSlugs: ["leandro-mosconi", "dragoljub-kladarin"],
     trainerLabel: "Leandro Mosconi + Dragoljub Kladarin",
     schedule: ["10:00 - 17:00"],
-    sortOrder: 5,
+    sortOrder: 3,
     adminToggleable: true,
   },
   {
@@ -105,7 +105,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Da definire",
     teacherSlugs: [],
     trainerLabel: "Ospite internazionale",
-    sortOrder: 6,
+    sortOrder: 8,
     hidden: true,
     adminToggleable: true,
   },
@@ -119,7 +119,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Sabato 28 Novembre 2026",
     teacherSlugs: ["ivan-pellizzari"],
     trainerLabel: "Ivan Pelizzari",
-    sortOrder: 7,
+    sortOrder: 4,
     adminToggleable: true,
   },
   {
@@ -132,7 +132,7 @@ export const WORKSHOPS: Workshop[] = [
     date: "Sabato 27 Febbraio 2027",
     teacherSlugs: ["marco-magnani", "riccardo-aimini"],
     trainerLabel: "Marco Magnani + Riccardo Aimini",
-    sortOrder: 9,
+    sortOrder: 6,
     adminToggleable: true,
   },
   // ───────── MASTERCLASS INTERNATIONAL ─────────
