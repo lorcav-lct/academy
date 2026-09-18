@@ -259,7 +259,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 21,
+    sortOrder: 24,
   },
   {
     slug: "master-calcio",
@@ -280,7 +280,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 22,
+    sortOrder: 26,
   },
   {
     slug: "master-volley",
@@ -301,7 +301,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 23,
+    sortOrder: 21,
   },
   {
     slug: "master-tennis",
@@ -321,7 +321,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 24,
+    sortOrder: 22,
   },
   {
     slug: "master-rugby",
@@ -342,7 +342,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 25,
+    sortOrder: 27,
   },
   {
     slug: "master-running",
@@ -362,7 +362,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 26,
+    sortOrder: 23,
   },
   {
     slug: "master-nuoto",
@@ -382,7 +382,7 @@ export const PRODUCTS: AcademyProduct[] = [
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
-    sortOrder: 28,
+    sortOrder: 25,
   },
 
   // ─── Masterclass International (acquisto singolo, NON nei pack) ────────────
