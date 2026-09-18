@@ -39,7 +39,7 @@ const CREDENTIALS: Record<string, Cred> = {
   "master-tennis": {
     domain: "Performance Tennis",
     pitch:
-      "Dragoljub Kladarin + Leandro Mosconi — preparatori atletici di Davidovich Fokina e Medvedev.",
+      "Leandro Mosconi + Dragoljub Kladarin — preparatori atletici di Medvedev e Davidovich Fokina.",
   },
   "master-running": {
     domain: "Triathlon & Endurance",

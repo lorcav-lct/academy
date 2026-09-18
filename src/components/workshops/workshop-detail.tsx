@@ -350,9 +350,9 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-tennis": {
     domain: "Performance Tennis",
     hook: "Il tennis moderno si gioca al limite della performance fisica. Forza, esplosività, velocità e recupero fanno la differenza tra Top 100 e Top 10.",
-    trainerHeadline: "Dragoljub Kladarin × Leandro Mosconi",
+    trainerHeadline: "Leandro Mosconi × Dragoljub Kladarin",
     trainerPitch:
-      "Dragoljub Kladarin è il preparatore atletico di Alejandro Davidovich Fokina, Leandro Mosconi quello di Daniil Medvedev. Due professionisti che lavorano ogni settimana sul corpo di tennisti del circuito ATP, dentro la stagione vera: tornei, viaggi, recuperi compressi.",
+      "Leandro Mosconi è il preparatore atletico di Daniil Medvedev, Dragoljub Kladarin quello di Alejandro Davidovich Fokina. Due professionisti che lavorano ogni settimana sul corpo di tennisti del circuito ATP, dentro la stagione vera: tornei, viaggi, recuperi compressi.",
     whatYouLearn:
       "Una giornata dentro il modello fisico del tennista moderno: forza esplosiva, cambi di direzione, gestione del carico in una stagione che non finisce mai e prevenzione degli infortuni tipici della racchetta.",
     modules: [
@@ -399,7 +399,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha contatto con sport con racchetta",
     ],
     included: [
-      "1 giornata con Dragoljub Kladarin e Leandro Mosconi",
+      "1 giornata con Leandro Mosconi e Dragoljub Kladarin",
       "Template di programmazione stagionale per tennisti",
       "Schede di prevenzione spalla, gomito e ginocchio",
       "Slide e materiali operativi",
