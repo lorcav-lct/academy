@@ -88,12 +88,12 @@ export const WORKSHOPS: Workshop[] = [
     subtitle: "Masterclass — Performance e Preparazione Atletica nel Tennis",
     focus:
       "Preparazione fisica, performance e metodologie applicate al tennis di alto livello",
-    duration: "1-2 giornate",
-    date: "Da definire",
-    teacherSlugs: [],
-    trainerLabel: "Ospite internazionale",
+    duration: "1 giornata",
+    date: "Venerdì 27 Novembre 2026",
+    teacherSlugs: ["dragoljub-kladarin", "leandro-mosconi"],
+    trainerLabel: "Dragoljub Kladarin + Leandro Mosconi",
+    schedule: ["10:00 - 17:00"],
     sortOrder: 5,
-    hidden: true,
     adminToggleable: true,
   },
   {

@@ -314,11 +314,10 @@ export const PRODUCTS: AcademyProduct[] = [
       live: "price_1TWIDnCE95vjZKhk1psEVRqi",
     },
     workshopSlug: "master-tennis",
-    hidden: true,
     adminToggleable: true,
     includes: [
-      "1-2 giornate in presenza",
-      "Trainer da definire",
+      "1 giornata in presenza",
+      "Dragoljub Kladarin + Leandro Mosconi",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],

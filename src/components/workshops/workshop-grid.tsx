@@ -96,14 +96,14 @@ const CREDENTIALS: Record<string, Credential> = {
   },
   "master-tennis": {
     domain: "Performance Tennis",
-    headline: "Ospite internazionale",
+    headline: "Dragoljub Kladarin + Leandro Mosconi",
     pitch:
-      "Programma in costruzione con preparatori atletici di livello internazionale nel tennis.",
+      "I preparatori atletici di Alejandro Davidovich Fokina e Daniil Medvedev.",
     promise:
       "Performance e preparazione atletica nel tennis di alto livello: integrazione di tecnica, fisico e programmazione su atleti d'élite.",
-    badge: "Prossimamente",
+    badge: "Circuito ATP",
     badgeTooltip:
-      "Faculty in finalizzazione: stiamo selezionando preparatori atletici di livello internazionale nel tennis.",
+      "Due preparatori atletici che lavorano quotidianamente con tennisti del circuito ATP.",
   },
   "master-running": {
     domain: "Triathlon & Endurance",
