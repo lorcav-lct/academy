@@ -350,11 +350,11 @@ const CONTENT: Record<string, MasterclassContent> = {
   "master-tennis": {
     domain: "Performance Tennis",
     hook: "Il tennis moderno si gioca al limite della performance fisica. Forza, esplosività, velocità e recupero fanno la differenza tra Top 100 e Top 10.",
-    trainerHeadline: "Faculty in definizione",
+    trainerHeadline: "Dragoljub Kladarin × Leandro Mosconi",
     trainerPitch:
-      "Stiamo finalizzando la faculty con preparatori atletici di livello internazionale nel tennis. Annunceremo il roster appena confermato.",
+      "Dragoljub Kladarin è il preparatore atletico di Alejandro Davidovich Fokina, Leandro Mosconi quello di Daniil Medvedev. Due professionisti che lavorano ogni settimana sul corpo di tennisti del circuito ATP, dentro la stagione vera: tornei, viaggi, recuperi compressi.",
     whatYouLearn:
-      "Una o due giornate dentro il modello fisico del tennista moderno: forza esplosiva, cambi di direzione, gestione del carico in una stagione che non finisce mai e prevenzione degli infortuni tipici della racchetta.",
+      "Una giornata dentro il modello fisico del tennista moderno: forza esplosiva, cambi di direzione, gestione del carico in una stagione che non finisce mai e prevenzione degli infortuni tipici della racchetta.",
     modules: [
       {
         num: "01",
@@ -399,7 +399,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       "Chi non ha contatto con sport con racchetta",
     ],
     included: [
-      "1-2 giornate con faculty internazionale",
+      "1 giornata con Dragoljub Kladarin e Leandro Mosconi",
       "Template di programmazione stagionale per tennisti",
       "Schede di prevenzione spalla, gomito e ginocchio",
       "Slide e materiali operativi",
@@ -424,7 +424,7 @@ const CONTENT: Record<string, MasterclassContent> = {
       },
     ],
     finalHook:
-      "Una o due giornate dentro un centro che ha formato tennisti d'élite internazionali: un livello di metodo difficile da trovare altrove.",
+      "Una giornata con chi prepara fisicamente i tennisti del circuito ATP: un livello di metodo difficile da trovare altrove.",
   },
   "master-running": {
     domain: "Triathlon & Endurance",
