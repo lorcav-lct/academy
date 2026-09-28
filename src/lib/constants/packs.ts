@@ -317,7 +317,7 @@ export const PRODUCTS: AcademyProduct[] = [
     adminToggleable: true,
     includes: [
       "1 giornata in presenza",
-      "Leandro Mosconi + Dragoljub Kladarin",
+      "Dragoljub Kladarin + Leandro Mosconi",
       "Materiale didattico",
       "Attestato di partecipazione",
     ],
